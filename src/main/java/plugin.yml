@@ -1,0 +1,5 @@
+name: "ASkyBlock"
+version: "0.1.1"
+author: Empire92
+api: ["1.0.0"]
+main: larryTheCoder.ASkyBlock
