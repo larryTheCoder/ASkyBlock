@@ -1,0 +1,8 @@
+### Default Config larryTheHarry
+## Version ${version}
+---
+# Game Prefix.
+Prefix: "&c[&eSkyBlock&c]&f "
+## Max islands 
+maxhome: 10
+

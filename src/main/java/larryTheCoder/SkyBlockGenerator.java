@@ -17,11 +17,9 @@
 package larryTheCoder;
 
 import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockSapling;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.generator.Generator;
-import cn.nukkit.level.generator.object.tree.ObjectTree;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
 import java.util.Map;
@@ -39,7 +37,7 @@ public class SkyBlockGenerator extends Generator {
     public SkyBlockGenerator(Map<String, Object> options) {
         this.options = options;
     }
-    
+
     @Override
     public int getId() {
         return TYPE_SKYBLOCK;
@@ -54,44 +52,14 @@ public class SkyBlockGenerator extends Generator {
     @Override
     public void generateChunk(int chunkX, int chunkZ) {
         BaseFullChunk chunk = level.getChunk(chunkZ, chunkZ);
-        int groundHeight = 60;
-        // Bigger Islands
-        if (chunkX % 100 == 0 && chunkZ % 100 == 0) {
-            // bedrock - ensures island are not overwritten
-            for (int x = 13; x < 14; ++x) {
-                for (int z = 13; z < 14; ++z) {
-                    chunk.setBlock(x, groundHeight, z, Block.BEDROCK);
+        // making island in this section anymore is removed
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                for (int y = 0; y < Settings.sea_level; y++) {
+                    chunk.setBlock(x, y, z, Block.WATER); // Water Allows stuff 
+                    // to fall through into oblivion, thus keeping lag to a minimum
                 }
             }
-            // Add some dirt and grass
-            for (int x = 11; x < 16; ++x) {
-                for (int z = 11; z < 16; ++z) {
-                    chunk.setBlock(x, groundHeight + 1, z, Block.DIRT);
-                    chunk.setBlock(x, groundHeight + 2, z, Block.DIRT);
-                }
-            }
-            for (int x = 10; x < 17; ++x) {
-                for (int z = 10; z < 17; ++z) {
-                    chunk.setBlock(x, groundHeight + 3, z, Block.DIRT);
-                    chunk.setBlock(x, groundHeight + 4, z, Block.DIRT);
-                    chunk.setBlock(x, groundHeight + 5, z, Block.GRASS);
-                }
-            }
-            // Then cut off the corners to make it round-ish
-            for (int x = 10; x < 17; x += 2) {
-                for (int z = 10; z < 17; z += 2) {
-                    chunk.setBlockId(x, groundHeight + 1, z, Block.AIR);
-                }
-            }
-
-            for (int y = groundHeight - 1; y < groundHeight + 6; ++y) {
-                for (int x_space = 13 - 2; x_space <= 13 + 2; x_space += 4) {
-                    for (int z_space = 13 - 2; z_space <= 13 + 2; z_space += 4) {
-                        chunk.setBlockId(x_space, y, z_space, Block.AIR);
-                    }
-                }
-            }
-            ObjectTree.growTree(level, chunkX + 2, groundHeight + 6, chunkZ + 2, random, BlockSapling.OAK);
         }
     }
 

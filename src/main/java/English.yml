@@ -1,0 +1,41 @@
+###########################################################################################
+# This is a YML file. Be careful when editing. Check your edits in a YAML checker like    #
+# the one at http://yaml-online-parser.appspot.com                                        #
+# If this file is deleted, then it will be recreate at the next reload.                   #
+###########################################################################################
+---
+# Logger messages
+onLoad: "&aLoading source &eASkyBlock &aversion "
+onEnable: "&aASkyBlock has seccessfully enabled!"
+
+###################
+# Command Message #
+###################
+help: "&cUnknown &ccommand! Use: &c/is &chelp &cfor &ca &clist &cof &ccommands"
+
+########################
+# Command help Message #
+########################
+help_teleport: "&eteleport to your island."
+help_about: "&eversion of ASkyBlock!"
+help_generate: "&egeneate a new island"
+help_island: "&ecreate a new island for you"
+
+############################
+# Command help arrugements #
+############################
+generate_help: "&6Usage: &a/is generate &e[Level Name]"
+
+###########################
+# Command seccess message #
+###########################
+generate: "&aSeccessfully generated level &e[level]"
+
+#########################
+# Command Error Message #
+#########################
+permission_error: "&c&lHey!&r&7 You have no permission to use this command"
+break_error: "&c&lHey!&r&7 You have no permission to break that block here"
+place_error: "&c&lHey!&r&7 You have no permission to use that block here"
+no_island_error: "&cYou haven't a island!"
+generate_error: "&cThe level has already generated!"

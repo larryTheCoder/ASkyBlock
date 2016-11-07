@@ -1,5 +1,26 @@
 name: "ASkyBlock"
 version: "0.1.1"
-author: Empire92
+author: larryTheCoder
 api: ["1.0.0"]
 main: larryTheCoder.ASkyBlock
+
+commands:
+    is:
+     description: "SkyBlock main command"
+     permission: is.command
+
+permissions:
+    is.bypass.wait:
+     description: "bypass the reset timer"
+     default: op
+    is.command:
+     default: true
+     description: "SkyBlock main command"
+    is.command.help:
+     default: true
+     description: ""
+    is.create:
+        
+      
+        
+

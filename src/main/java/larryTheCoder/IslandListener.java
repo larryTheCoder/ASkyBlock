@@ -122,7 +122,7 @@ class IslandListener implements Listener {
     }
     
     @EventHandler(priority=EventPriority.HIGH)
-    public void onPlayerInteract(PlayerItemHeldEvent e) {
+    public void onItemHeld(PlayerItemHeldEvent e) {
         Item item = e.getItem();
         Player p = e.getPlayer();
         if (p == null) {
