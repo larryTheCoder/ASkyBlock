@@ -18,8 +18,10 @@ permissions:
      description: "SkyBlock main command"
     is.command.help:
      default: true
-     description: ""
-    is.create:
+     description: "Help for Island"
+    is.command.create:
+     default: true
+     description: "Create an Island"
         
       
         
