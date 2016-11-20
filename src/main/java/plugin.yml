@@ -19,6 +19,7 @@ permissions:
      description: "SkyBlock main command"
     is.command.help:
      default: true
+<<<<<<< HEAD
      description: "List all of ASkyBlock commands"
     is.command.kick:
      default: true
@@ -36,3 +37,13 @@ permissions:
     is.admin.kick:
      default: op
      description: "Kick a player from island world"
+=======
+     description: "Help for Island"
+    is.command.create:
+     default: true
+     description: "Create an Island"
+        
+      
+        
+
+>>>>>>> origin/master
