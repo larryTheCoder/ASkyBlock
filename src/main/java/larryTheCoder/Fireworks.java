@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package larryTheCoder.particles;
+package larryTheCoder;
 
 import cn.nukkit.Player;
 import cn.nukkit.level.Level;
@@ -24,8 +24,6 @@ import cn.nukkit.level.sound.ClickSound;
 import cn.nukkit.level.sound.FizzSound;
 import cn.nukkit.level.sound.PopSound;
 import cn.nukkit.math.MathHelper;
-import cn.nukkit.math.NukkitMath;
-import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -78,8 +76,9 @@ public class Fireworks {
                     time = 10;
                     break;
             }
-            time--;
+            
         }
+        time--;
     }
     public static void l(Player p) {
         Level level = p.getLevel();

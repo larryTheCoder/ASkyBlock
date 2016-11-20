@@ -14,36 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package larryTheCoder.command;
 
-import cn.nukkit.command.PluginCommand;
-import java.util.ArrayList;
-import larryTheCoder.ASkyBlock;
+package larryTheCoder.task;
 
 /**
  * @author larryTheCoder
  */
-public class SimpleCommandMap extends PluginCommand {
-
-    private final ASkyBlock plugin;
-   
-    @SuppressWarnings("OverridableMethodCallInConstructor")
-    public SimpleCommandMap(ASkyBlock plugin) {
-        super("island", plugin);
-        setAliases(new String[]{
-            "is",
-            "skyblock",
-            "sky"
-        });
-        setPermission("is.command");
-        setDescription("Claim and manage your islands");
-        
-         
-        this.plugin = plugin;
-    }
-
-    public void loadSubCommand(SubCommand cmd){
-        
-    }
+public class IslandClearTask {
 
 }

@@ -35,7 +35,7 @@ public class Utils {
     public static SimpleDateFormat shortDateFormat = new SimpleDateFormat("MM/dd/yyyy");
     public static String LOCALES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "locales";
     public static String DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator;
-    public static ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap();
+    public static ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap<>();
     
 
     public static void ClearPotionEffects(Player p) {
@@ -65,6 +65,16 @@ public class Utils {
         tooSoon.put(key, curMS);
         return false;
     }
+    
+    public static String getPlayerResetTime(Player p, String what, int seconds){
+                String key = String.valueOf(what) + "." + p.getName();
+        Long msBefore = tooSoon.get(key);
+        Long curMS = System.currentTimeMillis();
+                    Long msDelta = curMS - msBefore;
+            Long msWaitTime = 1000 * (long) seconds;
+        String e = Utils.TimeDeltaString_JustMinutesSecs(msWaitTime - msDelta);
+        return e;
+    }
 
     public static String ConcatArgs(String[] args, int startIdx) {
         StringBuilder sb = new StringBuilder();
@@ -90,7 +100,7 @@ public class Utils {
     }
 
     public static String GetDateStringFromLong(long dt) {
-        return shortDateFormat.format(dt).toString();
+        return shortDateFormat.format(dt);
     }
 
     public static String LocStringShort(Location loc) {
@@ -108,13 +118,13 @@ public class Utils {
     }
 
     public static String GetCommaList(ArrayList<String> arr) {
-        StringBuffer buf = new StringBuffer();
-        for (String str : arr) {
+        StringBuilder buf = new StringBuilder();
+        arr.stream().forEach((str) -> {
             if (buf.length() > 0) {
                 buf.append(", ");
             }
             buf.append(str);
-        }
+        });
         return buf.toString();
     }
 
@@ -161,10 +171,7 @@ public class Utils {
         if (pet.getId() == 2) {
             return true;
         }
-        if (pet.getId() == 7) {
-            return true;
-        }
-        return false;
+        return pet.getId() == 7;
     }
 
     public static String RainbowString(String str, String ctl) {

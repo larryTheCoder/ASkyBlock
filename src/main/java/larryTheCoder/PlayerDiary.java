@@ -25,8 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author larryTheCoder
  */
 public class PlayerDiary {
-    public static ConcurrentHashMap<String, String> playerExists = new ConcurrentHashMap();
-    public static ConcurrentHashMap<String, Long> playerLastSeen = new ConcurrentHashMap();
+    public static ConcurrentHashMap<String, String> playerExists = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, Long> playerLastSeen = new ConcurrentHashMap<>();
 
     public static String GetPlayerExactName(String name) {
         return playerExists.get(name.toLowerCase());

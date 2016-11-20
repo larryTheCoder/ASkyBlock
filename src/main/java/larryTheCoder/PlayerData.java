@@ -19,11 +19,11 @@ package larryTheCoder;
 
 import java.io.Serializable;
 import cn.nukkit.Player;
-import cn.nukkit.level.Level;
 
 /**
  * @author larryTheCoder
  */
+@SuppressWarnings("serial")
 public class PlayerData 
 implements Serializable {
     public float health;
@@ -32,8 +32,9 @@ implements Serializable {
     public int expTotal;
     public int level;
     public int toNextLevel;
-    int foodLevel;
+    public int foodLevel;
 
+    @SuppressWarnings("deprecation")
     public void SetPlayer(Player p) {
         if (this.health <= 0.0) {
             PlayerData.SetDefaults(p);
@@ -56,6 +57,7 @@ implements Serializable {
         this.level = p.getFoodData().getLevel();
     }
 
+    @SuppressWarnings("deprecation")
     public static void SetDefaults(Player p) {
         p.setHealth(p.getMaxHealth());
         p.getFoodData().setFoodSaturationLevel(20.0f);

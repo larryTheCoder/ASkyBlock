@@ -17,36 +17,41 @@
 
 package larryTheCoder.command;
 
+import cn.nukkit.Server;
+import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import larryTheCoder.ASkyBlock;
 
 /**
  * @author larryTheCoder
  */
-abstract class SubCommand {
+public abstract class SubCommand {
 
-    private ASkyBlock plugin;
+    private final ASkyBlock plugin;
 
     public SubCommand(ASkyBlock plugin){
+        if(plugin == null){
+            Server.getInstance().getLogger().error("plugin cant be null");
+        }
         this.plugin = plugin;
     }
 
     /**
-     * @return thebigsmileXD\SkyBlock
+     * @return larryTheCoder\ASkyBlock
      */
     public final ASkyBlock getPlugin(){
         return plugin;
     }
 
     /**
-     * @param CommandSender $sender
+     * @param sender CommandSender
      * @return boolean
      */
-    public abstract boolean canUse(CommandSender $sender);
+    public abstract boolean canUse(CommandSender sender);
 
     /**
      * @return string
-     */
+     */    
     public abstract String getUsage();
 
     /**
@@ -56,7 +61,7 @@ abstract class SubCommand {
 
     /**
      * @return string
-     */
+     */ 
     public abstract String getDescription();
 
     /**
@@ -65,9 +70,10 @@ abstract class SubCommand {
     public abstract String[] getAliases();
 
     /**
-     * @param CommandSender $sender
-     * @param string[] $args
-     * @return bool
+     * @param sender the sender      - CommandSender
+     * @param args The arrugements      - String[]
+     * @return true if true
      */
-    public abstract boolean execute(CommandSender $sender, String[] $args);
+    
+    public abstract boolean execute(CommandSender sender ,String[] args);
 }

@@ -30,8 +30,8 @@ import java.util.Map;
 public class SkyBlockGenerator extends Generator {
 
     public static final int TYPE_SKYBLOCK = 3;
-    public ChunkManager level;
-    public NukkitRandom random;
+	private ChunkManager level;
+	private NukkitRandom random;
     private final Map<String, Object> options;
 
     public SkyBlockGenerator(Map<String, Object> options) {
@@ -45,17 +45,17 @@ public class SkyBlockGenerator extends Generator {
 
     @Override
     public void init(ChunkManager cm, NukkitRandom nr) {
-        level = cm;
-        random = nr;
+        this.level = cm;
+        this.random = nr;
     }
 
     @Override
     public void generateChunk(int chunkX, int chunkZ) {
-        BaseFullChunk chunk = level.getChunk(chunkZ, chunkZ);
+        BaseFullChunk chunk = level.getChunk(chunkX, chunkZ);
         // making island in this section anymore is removed
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                for (int y = 0; y < Settings.sea_level; y++) {
+                for (int y = 0; y < 3; y++) {
                     chunk.setBlock(x, y, z, Block.WATER); // Water Allows stuff 
                     // to fall through into oblivion, thus keeping lag to a minimum
                 }
@@ -66,9 +66,9 @@ public class SkyBlockGenerator extends Generator {
     @Override
     public void populateChunk(int chunkX, int chunkZ) {
         for (int x = 0; x < 16; x++) {
-            for (int z = 0; z < 16; z++) {
-                level.getChunk(chunkX, chunkZ).setBiomeColor(x, z, 133, 188, 86);
-            }
+        	for (int z = 0; z < 16; z++) {
+        		level.getChunk(chunkX, chunkZ).setBiomeColor(x, z, 133, 188, 86);
+        	}
         }
     }
 

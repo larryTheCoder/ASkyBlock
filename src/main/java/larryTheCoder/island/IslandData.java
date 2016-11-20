@@ -23,6 +23,7 @@ import java.util.ArrayList;
 /**
  * @author larryTheCoder
  */
+@SuppressWarnings("serial")
 public class IslandData implements Serializable {
     public String owner;
     public ArrayList<String> members;
