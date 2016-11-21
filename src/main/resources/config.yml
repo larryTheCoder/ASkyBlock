@@ -1,0 +1,29 @@
+### Default Config larryTheHarry
+## Version ${version}
+---
+# Game Prefix.
+Prefix: "&c[&eSkyBlock&c]&f "
+## Max islands 
+maxhome: 10
+## Island companion (Island Animals)
+companion:
+  # Use PureEntity for the best performance
+  usePureEntity: false
+  # The type of companion DEFAULT: COW
+  type: "COW"
+  # The name of the companion. leave it if you
+  # Dont want to use it
+  name: ""
+## Island part
+island:
+  # Size of the island DEFAULT: 200
+  islandSize: 200
+  # Island Hieght MIN: 20
+  islandHieght: 60
+  # Restricted commands in Island / SkyBlock
+  restrictedCommands: /fly,/sell, /sg
+  # Island reset time [in seconds]
+  resetTimer: 10000
+chat:
+  # Use chat formatting such as &7 will return to §7
+  use_chat_formatting: true

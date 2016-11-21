@@ -1,0 +1,70 @@
+###########################################################################################
+# This is a YML file. Be careful when editing. Check your edits in a YAML checker like    #
+# the one at http://yaml-online-parser.appspot.com                                        #
+# If this file is deleted, then it will be recreate at the next reload.                   #
+###########################################################################################
+---
+# Logger messages
+onLoad: "&aLoading source &eASkyBlock &aversion "
+onEnable: "&aASkyBlock has seccessfully enabled!"
+
+###################
+# Command Message #
+###################
+help: "&cUnknown &ccommand! Use: &c/is &chelp &cfor &ca &clist &cof &ccommands"
+
+########################
+# Command help Message #
+########################
+help_teleport: "&eteleport to your island."
+help_about: "&eversion of ASkyBlock!"
+help_generate: "&egenerate a new island"
+help_reset: "&ereset your island. (Once every [min] minute)"
+help_island: "&ecreate a new island for you"
+help_end: "&ekick a player from island worlds"
+
+############################
+# Command help arrugements #
+############################
+generate_help: "&6Usage: &a/is generate &e[Level Name]"
+kick_help: "&6Usage: &a/is kick &e[Player Name]"
+expel_help: "&6Usage: &a/is expel &e[Player Name]"
+home_help: "&6Usage: &a/is home &e[1 - %MAX_HOME%]"
+create_help: "&6Usage: &a/is create &e[1 - %MAX_HOME%]"
+
+###########################
+# Command seccess message #
+###########################
+generate: "&aSeccessfully generated level &e[level]"
+reset: "&aYour island was deleted! &7(Once every [min] minutes)"
+restart: "&aYour island is resetting &7(Once evry [min] minutes)"
+create: "&aYou just created a new island! use (/is help) for more info"
+kick: "&aYou just kicked a player named [player]"
+
+#########################
+# Command Error Message #
+#########################
+player_error: "&cUnknown player named &c[player] &cat SkyBlock level"
+permission_error: "&c&lHey!&r&7 You have no permission to use this command"
+break_error: "&c&lHey!&r&7 You have no permission to break that block here"
+place_error: "&c&lHey!&r&7 You have no permission to use that block here"
+no_island_error: "&cYou don't have a island!"
+generate_error: "&cThe level has already generated!"
+no_claim: "&dThere is no player at this island"
+level_error: "&dYou are not in SkyBlock level!"
+database_error: "&cUnable to create Database"
+att_reset: "&c[player] &aIs attempting to dispatch reset command at [location]"
+
+################
+# Chat message #
+################
+chat_on: "Team chat is on"
+chat_off: "Team chat is off"
+no_members_around: "None of your team are online!"
+not_members: "You are not in a team!"
+
+############################
+# Island Listener Messages #
+############################
+admin: "&dAdmin override on this command."
+command_disabled: "&cThat command is disabled here"
