@@ -39,10 +39,17 @@ public abstract class SubCommand {
     /**
      * @return larryTheCoder\ASkyBlock
      */
-    public final ASkyBlock getPlugin(){
+    public ASkyBlock getPlugin(){
         return plugin;
     }
 
+    public String getMsg(String key){
+        return plugin.getMsg(key);
+    }
+    
+    public String getPrefix(){
+        return plugin.getPrefix();
+    }
     /**
      * @param sender CommandSender
      * @return boolean

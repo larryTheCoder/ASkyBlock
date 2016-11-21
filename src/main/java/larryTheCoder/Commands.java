@@ -23,8 +23,9 @@ import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import larryTheCoder.command.HelpSubCommand;
 import larryTheCoder.command.SubCommand;
+import larryTheCoder.command.kickSubCommand;
+import larryTheCoder.island.Island;
 
 /**
  * @author larryTheCoder
@@ -41,7 +42,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.setPermission("is.command");
         this.setDescription("SkyBlock main command");
 
-        this.loadSubCommand(new HelpSubCommand(getPlugin()));
+        this.loadSubCommand(new kickSubCommand(getPlugin()));
     }
 
     private void loadSubCommand(SubCommand cmd) {
@@ -54,14 +55,18 @@ public class Commands extends PluginCommand<ASkyBlock> {
     }
 
     @Override
-    public boolean execute(CommandSender sender, String commandLabel, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if (args.length == 0) {
-            getPlugin().getLogger().info("CLASS 1 RUN");
-            return this.sendHelp(sender);
+            if(sender.isPlayer() && sender.hasPermission("is.create")){
+                Player p = getPlugin().getServer().getPlayer(sender.getName());
+                Island.handleIslandCommand(p);
+            } else if (!(sender instanceof Player)){
+                sender.sendMessage(getMsg("help"));
+            }
+            return true;
         }
         String subcommand = args[0].toLowerCase();
         if (SubCommand.containsKey(subcommand)) {
-            getPlugin().getLogger().info("CLASS 2 RUN");
             SubCommand command = commands.get(SubCommand.get(subcommand));
             boolean canUse = command.canUse(sender);
             if (canUse) {
@@ -74,23 +79,46 @@ public class Commands extends PluginCommand<ASkyBlock> {
                 sender.sendMessage(TextFormat.RED + "You do not have permissions to run this command");
             }
         } else {
-            getPlugin().getLogger().info("CLASS 3 RUN");
             return this.sendHelp(sender);
         }
         getPlugin().getLogger().info("CLASS 4 RUN");
         return true;
     }
 
+    public String getMsg(String key){
+        return getPlugin().getMsg(key);
+    }
+    
     private boolean sendHelp(CommandSender sender) {
-        sender.sendMessage("===========[SkyBlock commands]===========");
-        for (SubCommand command : commands) {
-            if (command.canUse(sender)) {
-                sender.sendMessage(
-                        TextFormat.DARK_GREEN + "/is " + command.getName() + " " + command.getUsage() + ": "
-                        + TextFormat.WHITE + command.getDescription()
-                );
+        String label = "is";     
+        // Header
+        sender.sendMessage(Utils.RainbowString("SkyBlock", "b") + " " + TextFormat.RESET + TextFormat.GREEN + getPlugin().getDescription().getVersion() + " help:");
+        // This is for a Player command only
+        if (sender.isPlayer()) {
+            Player p = getPlugin().getServer().getPlayer(sender.getName());
+            // Create island functions
+            if (sender.hasPermission("is.create")) {
+                // Check if player has an island or not 
+                if (Island.checkIsland(p)) {
+                    // If the player does have an island, the help message will show teleport
+                    sender.sendMessage(TextFormat.GREEN + "/" + label + ": " + getPlugin().getMsg("help_teleport"));
+                } else {
+                    // if not help message will show how to create an island
+                    sender.sendMessage(TextFormat.GREEN + "/" + label + ": " + getPlugin().getMsg("help_island"));
+                }
             }
+            // Kick / expel functions...
+            if (sender.hasPermission("is.command.kick") && Island.checkIsland(p)) {
+                sender.sendMessage(TextFormat.GREEN + "/" + label + ": " + getPlugin().getMsg("help_kick"));
+            }
+
         }
+        // generate function
+        if (sender.hasPermission("is.command.generate")) {
+            sender.sendMessage(TextFormat.GREEN + "/" + label + " generate: " + getPlugin().getMsg("help_generate"));
+        }
+        // This will not using any permission :D
+        sender.sendMessage(TextFormat.GREEN + "/" + label + " about: " + getPlugin().getMsg("help_about"));
         return true;
     }
 
