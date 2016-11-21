@@ -30,11 +30,18 @@ import cn.nukkit.command.SimpleCommandMap;
 import cn.nukkit.level.Level;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.level.generator.Generator;
+import static cn.nukkit.level.generator.Generator.addGenerator;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.utils.Config;
+import static cn.nukkit.utils.Config.YAML;
 import cn.nukkit.utils.LogLevel;
+import static cn.nukkit.utils.LogLevel.INFO;
+import static cn.nukkit.utils.LogLevel.WARNING;
 import cn.nukkit.utils.TextFormat;
+import static cn.nukkit.utils.TextFormat.GREEN;
+import static cn.nukkit.utils.TextFormat.RED;
+import static cn.nukkit.utils.TextFormat.YELLOW;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,16 +49,29 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import static java.lang.Integer.parseInt;
+import static java.lang.Integer.parseInt;
+import static java.lang.Integer.parseInt;
+import static java.lang.String.valueOf;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import static larryTheCoder.ConfigManager.load;
+import static larryTheCoder.PlayerDiary.InitializeDiarySystem;
+import static larryTheCoder.SkyBlockGenerator.TYPE_SKYBLOCK;
+import static larryTheCoder.Utils.ConsoleMsg;
+import static larryTheCoder.Utils.DIRECTORY;
+import static larryTheCoder.Utils.EnsureDirectory;
+import static larryTheCoder.Utils.LOCALES_DIRECTORY;
 
 import larryTheCoder.chat.ChatFormatListener;
 import larryTheCoder.chat.ChatHandler;
 import larryTheCoder.command.HelpSubCommand;
 import larryTheCoder.command.SubCommand;
 import larryTheCoder.island.Island;
+import static larryTheCoder.island.Island.LoadIslands;
+import static larryTheCoder.island.Island.SaveIslands;
 import larryTheCoder.island.IslandData;
 
 /**
@@ -81,14 +101,14 @@ public class ASkyBlock extends PluginBase {
     public void onEnable() {
         initConfig();
         getServer().getLogger().info(getPrefix() + getMsg("onLoad") + getPluginVersionString());
-        getServer().getLogger().info(TextFormat.YELLOW + "------------------------------------------------------------");
+        getServer().getLogger().info(YELLOW + "------------------------------------------------------------");
         reloadLevel();
         setGenerators();
         generateLevel();
         setDefaults();
         initIslands();
         initCommand();
-        getServer().getLogger().info(TextFormat.YELLOW + "------------------------------------------------------------");
+        getServer().getLogger().info(YELLOW + "------------------------------------------------------------");
         getServer().getLogger().info(getPrefix() + getMsg("onEnable"));
     }
     
@@ -98,10 +118,10 @@ public class ASkyBlock extends PluginBase {
     
     @Override
     public void onDisable() {
-        getServer().getLogger().info(TextFormat.GREEN + "Saving islands framework");
-        Island.SaveIslands();
+        getServer().getLogger().info(GREEN + "Saving islands framework");
+        SaveIslands();
         saveLevel();
-        getServer().getLogger().info(TextFormat.RED + "ASkyBlock ~ Disabled seccessfully");
+        getServer().getLogger().info(RED + "ASkyBlock ~ Disabled seccessfully");
     }
 
      /**
@@ -115,25 +135,25 @@ public class ASkyBlock extends PluginBase {
     @SuppressWarnings("unchecked")
     public void reloadLevel() {
         try {
-            File file = new File(String.valueOf(Utils.DIRECTORY) + "Worlds.dat");
+            File file = new File(valueOf(DIRECTORY) + "Worlds.dat");
             FileInputStream f = new FileInputStream(file);
             ObjectInputStream s = new ObjectInputStream(f);
             level = (ArrayList) s.readObject();
         } catch (IOException | ClassNotFoundException ez) {
             // Welcome meesage :D
-            getServer().getLogger().log(LogLevel.INFO, "Welcome to your first ASkyBlock Plugin!");
+            getServer().getLogger().log(INFO, "Welcome to your first ASkyBlock Plugin!");
         }
     }
 
     public void saveLevel() {
         try {
-            File file = new File(String.valueOf(Utils.DIRECTORY) + "Worlds.dat");
+            File file = new File(valueOf(DIRECTORY) + "Worlds.dat");
             FileOutputStream f = new FileOutputStream(file);
             try (ObjectOutputStream s = new ObjectOutputStream(f)) {
                 s.writeObject(level);
             }
         } catch (Throwable ex) {
-            getServer().getLogger().log(LogLevel.WARNING, "Unable to save worlds...");
+            getServer().getLogger().log(WARNING, "Unable to save worlds...");
         }
     }
 
@@ -151,7 +171,7 @@ public class ASkyBlock extends PluginBase {
             ver = ver.split("-")[0];
         }
         String[] split = ver.split("\\.");
-        return new int[]{Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2])};
+        return new int[]{parseInt(split[0]), parseInt(split[1]), parseInt(split[2])};
     }
 
     /**
@@ -182,9 +202,9 @@ public class ASkyBlock extends PluginBase {
      * Load every islands Components
      */
     private void initIslands() {
-        getServer().getLogger().info(TextFormat.GREEN + "Preparing the Island Framework");
-        PlayerDiary.InitializeDiarySystem();
-        Island.LoadIslands();
+        getServer().getLogger().info(GREEN + "Preparing the Island Framework");
+        InitializeDiarySystem();
+        LoadIslands();
         PluginManager pm = getServer().getPluginManager();
 //        chatHandler = new ChatHandler(this);
 //        getServer().getPluginManager().registerEvents(chatHandler, this);
@@ -197,9 +217,9 @@ public class ASkyBlock extends PluginBase {
             public void run() {
                 iteration++;
                 if (iteration % 30 == 0) {
-                    Utils.ConsoleMsg("-------- AutoSaving Custom Data Files --------");
-                    Island.SaveIslands();
-                    Utils.ConsoleMsg("--------------------------------------------------");
+                    ConsoleMsg("-------- AutoSaving Custom Data Files --------");
+                    SaveIslands();
+                    ConsoleMsg("--------------------------------------------------");
                 }
             }
 
@@ -216,18 +236,18 @@ public class ASkyBlock extends PluginBase {
     }
 
     private void initConfig() {
-        Utils.EnsureDirectory(Utils.DIRECTORY);
-        Utils.EnsureDirectory(Utils.LOCALES_DIRECTORY);
+        EnsureDirectory(DIRECTORY);
+        EnsureDirectory(LOCALES_DIRECTORY);
         //initLocales();        
         if (this.getResource("config.yml") != null) {
             this.saveResource("config.yml");
         }
-        cfg = new Config(new File(getDataFolder(), "config.yml"), Config.YAML);
+        cfg = new Config(new File(getDataFolder(), "config.yml"), YAML);
         if (this.getResource("English.yml") != null) {
             this.saveResource("English.yml");
         }
-        msg = new Config(new File(getDataFolder(), "English.yml"), Config.YAML);
-        ConfigManager.load();
+        msg = new Config(new File(getDataFolder(), "English.yml"), YAML);
+        load();
     }
 
 //    private void initLocales() {
@@ -248,7 +268,7 @@ public class ASkyBlock extends PluginBase {
 
         if (getServer().isLevelGenerated("SkyBlock") == false) {
             getServer().generateLevel("SkyBlock", 0xe9bcdL, SkyBlockGenerator.class);
-            getServer().getLogger().info(TextFormat.GREEN + "Loading the Island Framework");
+            getServer().getLogger().info(GREEN + "Loading the Island Framework");
         }
         if (getServer().isLevelLoaded("SkyBlock") == false) {
             getServer().loadLevel("SkyBlock");
@@ -266,7 +286,7 @@ public class ASkyBlock extends PluginBase {
     }
 
     private void setGenerators() {
-        Generator.addGenerator(SkyBlockGenerator.class, "island", SkyBlockGenerator.TYPE_SKYBLOCK);
+        addGenerator(SkyBlockGenerator.class, "island", TYPE_SKYBLOCK);
     }
 
 //    @Override
