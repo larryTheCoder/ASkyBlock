@@ -31,20 +31,39 @@
             <groupId>cn.nukkit</groupId>
             <artifactId>nukkit</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <optional>true</optional>
             <scope>system</scope>
-            <systemPath>${basedir}/lib/nukkit-1.0-SNAPSHOT.jar</systemPath>
+            <systemPath>${basedir}/lib/Nukkit-1.0-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>ru.nukkit.dblib</groupId>
-            <artifactId>DbLib</artifactId>
+            <!-- This dependency doesn't seem to be available in public maven repos.
+                The jar file is included with the project under the lib dir.
+                You need to manually install it in your local maven repo.  
+                The command below should work if mvn is on your path and you are in the lib dir:
+                mvn install:install-file -Dfile=leveldb.jar -DgroupId=com.tinfoiled.mcpe.leveldb -DartifactId=leveldb -Dversion=0.8 -Dpackaging=jar 
+            -->
+            <groupId>org.sqlite.JDBC</groupId>
+            <artifactId>SQLite</artifactId>
+            <version>0.8</version>
+        </dependency>
+        <dependency>
+            <groupId>milk.pureentities.PureEntities</groupId>
+            <artifactId>PureEntity</artifactId>
             <version>1.0-SNAPSHOT</version>
             <optional>true</optional>
             <scope>system</scope>
-            <systemPath>${basedir}/lib/DbLib.jar</systemPath>
+            <systemPath>${basedir}/lib/PureEntities-1.0-SNAPSHOT.jar</systemPath>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
+        <dependency>
+            <groupId>com.boydti.fawe.nukkit.core.NukkitWorldEdit</groupId>
+            <artifactId>FastAsyncWorldEdit</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <optional>true</optional>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/FastAsyncWorldEdit.jar</systemPath>
+        </dependency>        
     </dependencies>
-    
+
     <build>
         <resources>
             <resource>
@@ -55,24 +74,96 @@
                 </includes>
             </resource>
             <resource>
-                <directory>src/main/resources/</directory>
+                <targetPath>.</targetPath>
                 <filtering>true</filtering>
+                <directory>${basedir}/src/main/resources</directory>
+                <includes>
+                    <include>*.yml</include>
+                </includes>
+            </resource>
+            <resource>
+                <targetPath>schematics</targetPath>
+                <filtering>false</filtering>
+                <directory>${basedir}/src/main/resources/schematics</directory>
+                <includes>
+                    <include>*.schematic</include>
+                </includes>
+            </resource>
+            <resource>
+                <targetPath>locale</targetPath>
+                <filtering>false</filtering>
+                <directory>${basedir}/src/main/resources/locale</directory>
+                <includes>
+                    <include>*.yml</include>
+                </includes>
             </resource>
         </resources>
         <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-shade-plugin</artifactId>
-            <version>2.4.1</version>
-            <executions>
-                <execution>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>shade</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5</version>
+                <configuration>
+                    <nonFilteredFileExtensions>
+                        <nonFilteredFileExtension>schematic</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.5.2</version>
+                <executions>
+                    <execution>
+                        <id>install-external</id>
+                        <phase>clean</phase>
+                        <configuration>
+                            <file>${basedir}/lib/sqlite-jdbc-3.15.1.jar</file>
+                            <repositoryLayout>default</repositoryLayout>
+                            <groupId>org.sqlite.JDBC</groupId>
+                            <artifactId>SQLite</artifactId>
+                            <version>0.8</version>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce</id>
+                        <configuration>
+                            <rules>
+                                <DependencyConvergence />
+                            </rules>
+                        </configuration>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

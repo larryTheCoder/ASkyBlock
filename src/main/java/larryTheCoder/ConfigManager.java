@@ -16,7 +16,10 @@
  */
 package larryTheCoder;
 
+import cn.nukkit.Server;
+import cn.nukkit.item.Item;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.TextFormat;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -24,66 +27,143 @@ import java.util.ArrayList;
  * @author larryTheCoder
  */
 public class ConfigManager {
-
+    
     public static int islandSize;
     public static ArrayList<String> whitelistedCommands;
     public static int islandDeleteSeconds;
     public static int islandHeight;
-
+    
     static {
         ConfigManager.islandSize = 50;
         ConfigManager.whitelistedCommands = new ArrayList<>();
         ConfigManager.islandDeleteSeconds = 300;
         ConfigManager.islandHeight = 50;
     }
-
-    @SuppressWarnings("deprecation")
+    
     public static void load() {
-        final Config cfg = new Config(new File(ASkyBlock.getInstance().getDataFolder(), "config.yml"), Config.YAML);
+        int error = 0;
+        Config cfg = new Config(new File(ASkyBlock.get().getDataFolder(), "config.yml"), Config.YAML);
+        String chestItems = cfg.getString("island.chestItems", "");
+
+        // Check chest items
+        if (!chestItems.isEmpty()) {
+            final String[] chestItemString = chestItems.split(" ");
+            // getLogger().info("DEBUG: chest items = " + chestItemString);
+            final Item[] tempChest = new Item[chestItemString.length];
+            for (int i = 0; i < tempChest.length; i++) {
+                String[] amountdata = chestItemString[i].split(":");
+                try {
+                    Item mat;
+                    if (isNumeric(amountdata[0])) {
+                        mat = Item.get(Integer.parseInt(amountdata[0]));
+                    } else {
+                        mat = Item.fromString(amountdata[0].toUpperCase());
+                    }
+                    if (amountdata.length == 2) {
+                        tempChest[i] = new Item(mat.getId(), Integer.parseInt(amountdata[1]));
+                    } else if (amountdata.length == 3) {
+                        tempChest[i] = new Item(mat.getId(), Integer.parseInt(amountdata[2]), Integer.parseInt(amountdata[1]));
+                    }
+                    
+                } catch (java.lang.IllegalArgumentException ex) {
+                    ex.printStackTrace();
+                    Server.getInstance().getLogger().error("Problem loading chest item from config.yml so skipping it: " + chestItemString[i]);
+                    Server.getInstance().getLogger().error("Error is : " + ex.getMessage());
+                    error += 1;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Server.getInstance().getLogger().error("Problem loading chest item from config.yml so skipping it: " + chestItemString[i]);
+                    Server.getInstance().getLogger().info("Potential material types are: ");
+                    Item.getCreativeItems().stream().forEach((c) -> {
+                        Server.getInstance().getLogger().info(c.getName());
+                    });
+                    error += 1;
+                }
+            }
+            Settings.chestItems = tempChest;
+        } else {
+            // Nothing in the chest
+            Settings.chestItems = new Item[0];
+        }
+
         // Island Size
+        int islandDistance = cfg.getInt("island.islandSize", 200);
         if (cfg.get("island.islandSize") != null) {
             try {
-                ConfigManager.islandSize = cfg.getInt("island.islandSize");
+                Settings.islandSize = islandDistance;
             } catch (Throwable exc2) {
                 Utils.ConsoleMsg("Invalid IslandSize setting");
+                error += 1;
             }
-            if (ConfigManager.islandSize <= 10) {
-                return;
+            if (Settings.islandSize < 10) {
+                Utils.ConsoleMsg("IslandSize too small. Using islandSize: 100 instead.");
+                Settings.islandSize = 100;
+                error += 1;
             }
-            Utils.ConsoleMsg("IslandSize too small. Using IslandSize=10 instead.");
-            ConfigManager.islandSize = 10;
+            
         }
-        // Island Hieght
+        // island Hieght
+        int islandHieght = cfg.getInt("island.islandHieght", 60);
         if (cfg.get("island.islandHieght") != null) {
             try {
-                ConfigManager.islandHeight = cfg.getInt("island.islandHieght");
-            } catch (Throwable exc2) {
-                Utils.ConsoleMsg("Invalid IslandStartY setting");
+                Settings.islandHieght = islandHieght;
+            } catch (Throwable ignore) {
+                Utils.ConsoleMsg("Invalid islandHieght setting");
+                error += 1;
             }
-            if (ConfigManager.islandHeight <= 8) {
-                return;
+            if (Settings.islandHieght < 10 || Settings.islandHieght > 180) {
+                Utils.ConsoleMsg("IslandSize too BIG!. Using islandHieght: 60 instead.");
+                Settings.islandHieght = 100;
+                error += 1;
             }
-            Utils.ConsoleMsg("IslandStartY too small. Using IslandStartY=8 instead.");
-            ConfigManager.islandHeight = 8;
+            
         }
-        // Resetricted commands
-        if (cfg.get("island.restrictedCommands") != null) {
-            ConfigManager.whitelistedCommands = new ArrayList<>();
+        //restriced commands
+        String cmd = cfg.getString("island.islandHieght", "");
+        if (cfg.get("island.islandHieght") != null) {
+            Settings.bannedCommands = new ArrayList<>();
             try {
-                String string = cfg.getString("island.restrictedCommands");
-                final String[] pieces = string.substring(string.length()).trim().split(",");
+                final String[] pieces = cmd.substring(cmd.length()).trim().split(",");
                 String[] array;
                 for (int length = (array = pieces).length, i = 0; i < length; ++i) {
                     final String piece = array[i];
                     if (piece != null) {
                         if (piece.length() > 0) {
-                            ConfigManager.whitelistedCommands.add(piece);
+                            Settings.bannedCommands.add(piece);
                         }
                     }
                 }
             } catch (Throwable exc2) {
-                Utils.ConsoleMsg("Invalid RestrictedCommands setting");
+                Utils.ConsoleMsg("Check your config! [Restricted Commands]");
+                error += 1;
             }
         }
+        // Reset island timer
+        int islandTimer = cfg.getInt("island.resetPerPlayer", 5);
+        if (cfg.get("island.resetPerPlayer") != null) {
+            try {
+                Settings.resetTimer = islandTimer;
+            } catch (Throwable exc2) {
+                Utils.ConsoleMsg("Check your config! [Reset Timer!]");
+                error += 1;
+            }
+        }
+        if (error > 5) {
+            Utils.ConsoleMsg(TextFormat.RED + "You might check your config.yml!");
+            Utils.ConsoleMsg(TextFormat.RED + "Make sure it is in the right format");
+        }
+        Utils.ConsoleMsg(TextFormat.YELLOW + "Seccessfully checked config.yml with " + TextFormat.RED + error + TextFormat.YELLOW + " Errors");
+    }
+    
+    public static boolean isNumeric(final String str) {
+        if (str == null) {
+            return false;
+        }
+        for (int sz = str.length(), i = 0; i < sz; ++i) {
+            if (!Character.isDigit(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -1,11 +1,15 @@
 ### Default Config larryTheHarry
 ## Version ${version}
+## [X] means - Function is available
 ---
 # Game Prefix.
-Prefix: "&c[&eSkyBlock&c]&f "
-## Max islands 
-maxhome: 10
-## Island companion (Island Animals)
+Prefix: "&8[&e&lSkyBlock&r&8]&f "
+## Max islands homes - Unvailable [DO NOT SET MROE THAN 1]
+maxhome: 1
+## Allow debugging - Remember this is for Developers only!
+debug: false
+
+## Island companion (Island Animals) - Unvailable
 companion:
   # Use PureEntity for the best performance
   usePureEntity: false
@@ -14,7 +18,8 @@ companion:
   # The name of the companion. leave it if you
   # Dont want to use it
   name: ""
-## Island part
+  
+## Island part - Available
 island:
   # Size of the island DEFAULT: 200
   islandSize: 200
@@ -22,8 +27,53 @@ island:
   islandHieght: 60
   # Restricted commands in Island / SkyBlock
   restrictedCommands: /fly,/sell, /sg
-  # Island reset time [in seconds]
-  resetTimer: 10000
+  # Island reset Per Player
+  resetPerPlayer: 5
+  # Island addMember time out
+  timeOut: 20
+  # Items that will be in the chest when the player starts an island
+  # Must be in Nukkit Item format. Format is <ID>:<Qty> or <ID>:<Data>:<Qty>
+  # Use <Data> to set the durability of a item or to select sub-items/colors.  
+  #
+  # Spawn EGGs is not available yet! do not put I warned you :P
+  #
+  # Check console for errors and guidance after reloading configuration
+  chestItems: 'ICE:2 MELON:1 TORCH:2 BONE:1 LAVA_BUCKET:1 PUMPKIN_SEEDS:1 SUGAR_CANE:1 RED_MUSHROOM:1 BROWN_MUSHROOM:1 CACTUS:1 BREAD:1 WHEAT:1 LEATHER_BOOTS:1 LEATHER_HELMET:1 LEATHER_CHESTPLATE:1 LEATHER_LEGGINGS:1'
+
+## Main lobby - Available
+lobby:
+  lobbyX: 50
+  lobbyY: 90
+  lobbyZ: 50
+  world: "world"
+
+## Database
+# Recomended to NOT change this in game
+database:
+  ## Choose the Provider that I given below
+  # DATABASE - SQLite database configured at DBLib plugin
+  # YAML - in .yaml files
+  # UNKNOWN - .dat - My Database
+  provider: DATABASE 
+  # Configuration of DATABASE Connection:
+  #  DBLIB  - default connection, defined in DbLib plugin
+  #  SQLITE - custom sqlite file
+  #  MYSQL  - custom MySql configuration
+  connection: sqlite
+  SQLite:
+    # SQlite file name.
+    # You can pick your name and
+    # you no need to put `.db` at back
+    file-name: database
+  MySQL:
+    port: 3306
+    database: YourDataBase
+    username: YourUserName
+    password: 1234IsNotAGoodPassword
+    host: localhost
+  
+    
+## Chat Formatting - BETA - Available
 chat:
   # Use chat formatting such as &7 will return to §7
   use_chat_formatting: true

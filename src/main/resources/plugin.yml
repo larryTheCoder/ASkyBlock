@@ -26,9 +26,28 @@ permissions:
     is.command.reset:
      default: true
      description: "Reset player island"
-    is.format:
+    is.command.leave:
      default: true
-     description: "Reset player island"     
+     description: "leave island"
+    is.command.delete:
+     default: true
+     description: "Delete player island"  
+    is.command.reject:
+     default: true
+     description: "Reject an invitation"   
+    is.command.accept:
+     default: true
+     description: "accept an invitation"
+    is.command.invite:
+     default: true
+     description: "Invite a player who didnt have a Team"
+    is.command.create:
+     default: true
+     description: "Create a new island"  
+
+    is.command.info:
+     default: true
+     description: "get the players island info"
     # Admin Island Command
     is.admin.generate:
      default: op
@@ -36,3 +55,7 @@ permissions:
     is.admin.kick:
      default: op
      description: "Kick a player from island world"
+    # V.I.P permissions
+    is.vip:
+     default: op
+     description: "Add a VIP full permissions of commands"

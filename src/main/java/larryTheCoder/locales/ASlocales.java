@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package larryTheCoder.locales;
 
 import cn.nukkit.utils.Config;
@@ -26,14 +25,14 @@ import java.util.Set;
 import larryTheCoder.ASkyBlock;
 
 /**
- * All the text strings in the game sent to players
- * This version enables different players to have different locales.
- * 
+ * All the text strings in the game sent to players This version enables
+ * different players to have different locales.
+ *
  * @author larryTheHarry
  */
-public class ASlocales {
-    
-    private final static Set<String> TITLE_COLORS = new HashSet<String>(Arrays.asList(
+public final class ASlocales {
+
+    private final static Set<String> TITLE_COLORS = new HashSet<>(Arrays.asList(
             "black",
             "dark_blue",
             "dark_green",
@@ -50,19 +49,20 @@ public class ASlocales {
             "light_purple",
             "yellow",
             "white"
-            ));
+    ));
     private Config locale = null;
     private File localeFile = null;
     private ASkyBlock plugin;
     private Locale localeObject;
     private String localeName;
     private int index;
-    
+
     /**
      * Creates a locale object full of localized strings for a language
+     *
      * @param plugin
      * @param localeName - name of the yml file that will be used
-     * @param index 
+     * @param index
      */
     public ASlocales(ASkyBlock plugin, String localeName, int index) {
         this.plugin = plugin;
@@ -72,10 +72,11 @@ public class ASlocales {
         loadLocale();
         if (!localeName.equalsIgnoreCase("locale")) {
             localeObject = new Locale(localeName.substring(0, 2), localeName.substring(3, 5));
-        }       
+        }
     }
 
     /**
+     * @param localeName
      * @return locale Config object
      */
     public Config getLocale(String localeName) {
@@ -84,9 +85,10 @@ public class ASlocales {
         }
         return locale;
     }
-    
+
     /**
      * Reloads the locale file
+     * @param localeName
      */
     public void reloadLocale(String localeName) {
         // Make directory if it doesn't exist
@@ -100,50 +102,48 @@ public class ASlocales {
         if (localeFile.exists()) {
             //plugin.getLogger().info("DEBUG: File exists!");
             locale = new Config(localeFile, Config.YAML);
+        } else // Look for defaults in the jar
+        if (plugin.getResource("locale/" + localeName + ".yml") != null) {
+            plugin.saveResource("locale/" + localeName + ".yml", true);
+            localeFile = new File(plugin.getDataFolder() + File.separator + "locale", localeName + ".yml");
+            locale = new Config(localeFile, Config.YAML);
+            //locale.setDefaults(defLocale);
         } else {
-            // Look for defaults in the jar
-            if (plugin.getResource("locale/" + localeName + ".yml") != null) {
-                plugin.saveResource("locale/" + localeName + ".yml", true);
-                localeFile = new File(plugin.getDataFolder() + File.separator + "locale", localeName + ".yml");
+            // Use the default file
+            localeFile = new File(plugin.getDataFolder() + File.separator + "locale", "locale.yml");
+            if (localeFile.exists()) {
                 locale = new Config(localeFile, Config.YAML);
-                //locale.setDefaults(defLocale);
-            } else {
-                // Use the default file
+            } else // Look for defaults in the jar                    
+            if (plugin.getResource("locale/locale.yml") != null) {
+                plugin.saveResource("locale/locale.yml", true);
                 localeFile = new File(plugin.getDataFolder() + File.separator + "locale", "locale.yml");
-                if (localeFile.exists()) {
-                    locale = new Config(localeFile, Config.YAML);
-                } else {
-                    // Look for defaults in the jar                    
-                    if (plugin.getResource("locale/locale.yml") != null) {
-                        plugin.saveResource("locale/locale.yml", true);
-                        localeFile = new File(plugin.getDataFolder() + File.separator + "locale", "locale.yml");
-                        locale = new Config(localeFile, Config.YAML);
-                    } else {
-                        plugin.getLogger().emergency("Could not find any locale file!");
-                    }
-                }
+                locale = new Config(localeFile, Config.YAML);
+            } else {
+                plugin.getLogger().emergency("Could not find any locale file!");
             }
         }
     }
-    
+
     private void loadLocale() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     /**
      * Checks that the color supplied is a valid color
+     *
      * @param string
      * @return color
      */
+    @SuppressWarnings("AssignmentToMethodParameter")
     private String colorCheck(String string) {
         string = string.toLowerCase();
         if (TITLE_COLORS.contains(string)) {
             return string;
         }
         plugin.getLogger().warning("Title color " + string + " is unknown. Use one from this list:");
-        for (String color : TITLE_COLORS) {
+        TITLE_COLORS.stream().forEach((color) -> {
             plugin.getLogger().warning(color);
-        }
+        });
         return "white";
     }
 
@@ -165,7 +165,7 @@ public class ASlocales {
     }
 
     public String getLocaleName() {
-        return this.localeName;        
+        return this.localeName;
     }
 
     /**

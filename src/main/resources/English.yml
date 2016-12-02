@@ -31,20 +31,23 @@ kick_help: "&6Usage: &a/is kick &e[Player Name]"
 expel_help: "&6Usage: &a/is expel &e[Player Name]"
 home_help: "&6Usage: &a/is home &e[1 - %MAX_HOME%]"
 create_help: "&6Usage: &a/is create &e[1 - %MAX_HOME%]"
+toggle_help: "&6----- Toggle SubCommand -----\n- &a/is tgg teleport <boolean>\n-----------------------------"
 
 ###########################
 # Command seccess message #
 ###########################
 generate: "&aSeccessfully generated level &e[level]"
 reset: "&aYour island was deleted! &7(Once every [min] minutes)"
-restart: "&aYour island is resetting &7(Once evry [min] minutes)"
+restart: "&aYour island is resetting &7(Once every [min] minutes)"
 create: "&aYou just created a new island! use (/is help) for more info"
 kick: "&aYou just kicked a player named [player]"
 
 #########################
 # Command Error Message #
 #########################
+no_pending: "&cYou dont have any pending invitations"
 player_error: "&cUnknown player named &c[player] &cat SkyBlock level"
+player_error2: "&cUnknown player named &e[player]"
 permission_error: "&c&lHey!&r&7 You have no permission to use this command"
 break_error: "&c&lHey!&r&7 You have no permission to break that block here"
 place_error: "&c&lHey!&r&7 You have no permission to use that block here"
@@ -53,6 +56,8 @@ generate_error: "&cThe level has already generated!"
 no_claim: "&dThere is no player at this island"
 level_error: "&dYou are not in SkyBlock level!"
 database_error: "&cUnable to create Database"
+player_has_teamed: "&c[player] has already in an other team"
+player_in_team: "&c[player] has already in your team"
 att_reset: "&c[player] &aIs attempting to dispatch reset command at [location]"
 
 ################

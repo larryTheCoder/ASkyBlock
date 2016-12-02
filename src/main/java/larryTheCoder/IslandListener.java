@@ -32,12 +32,11 @@ import cn.nukkit.level.Location;
 import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
 import larryTheCoder.island.Island;
-import larryTheCoder.island.IslandData;
 
 /**
  * @author larryTheCoder
  */
-class IslandListener implements Listener {
+public class IslandListener implements Listener {
 
     public final ASkyBlock plugin;
 
@@ -114,7 +113,7 @@ class IslandListener implements Listener {
         }
         int x = loc.getFloorX();
         int z = loc.getFloorZ();
-        if (x % Island.islandSize == 0 || z % Island.islandSize == 0) {
+        if (x % Settings.islandSize == 0 || z % Settings.islandSize == 0) {
             e.setCancelled(true);
         }
     }

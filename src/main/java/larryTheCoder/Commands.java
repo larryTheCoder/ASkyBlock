@@ -20,11 +20,25 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.PluginCommand;
 import cn.nukkit.utils.TextFormat;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+
+import larryTheCoder.command.AKickSubCommand;
+import larryTheCoder.command.CreateSubCommand;
 import larryTheCoder.command.SubCommand;
-import larryTheCoder.command.kickSubCommand;
+import larryTheCoder.command.KickSubCommand;
+import larryTheCoder.command.VGamemodeSubCommand;
+import larryTheCoder.command.leaveSubCommand;
+import larryTheCoder.command.deleteSubCommand;
+import larryTheCoder.command.ASetLobbySubCommand;
+import larryTheCoder.command.ToggleSubCommand;
+import larryTheCoder.command.acceptSubCommand;
+import larryTheCoder.command.denySubCommand;
+import larryTheCoder.command.infoSubCommand;
+import larryTheCoder.command.inviteSubCommand;
+import larryTheCoder.command.teleportSubCommand;
 import larryTheCoder.island.Island;
 
 /**
@@ -42,7 +56,20 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.setPermission("is.command");
         this.setDescription("SkyBlock main command");
 
-        this.loadSubCommand(new kickSubCommand(getPlugin()));
+        //this.loadSubCommand(new AGenerateSubCommand(getPlugin()));
+        this.loadSubCommand(new acceptSubCommand(getPlugin()));
+        this.loadSubCommand(new AKickSubCommand(getPlugin()));
+        this.loadSubCommand(new ASetLobbySubCommand(getPlugin()));
+        this.loadSubCommand(new CreateSubCommand(getPlugin()));
+        this.loadSubCommand(new denySubCommand(getPlugin()));
+        this.loadSubCommand(new deleteSubCommand(getPlugin()));
+        this.loadSubCommand(new infoSubCommand(getPlugin()));
+        this.loadSubCommand(new inviteSubCommand(getPlugin()));    
+        this.loadSubCommand(new KickSubCommand(getPlugin()));
+        this.loadSubCommand(new leaveSubCommand(getPlugin()));
+        this.loadSubCommand(new teleportSubCommand(getPlugin()));
+        this.loadSubCommand(new ToggleSubCommand(getPlugin()));
+        this.loadSubCommand(new VGamemodeSubCommand(getPlugin()));      
     }
 
     private void loadSubCommand(SubCommand cmd) {
@@ -50,18 +77,20 @@ public class Commands extends PluginCommand<ASkyBlock> {
         int commandId = (commands.size()) - 1;
         SubCommand.put(cmd.getName().toLowerCase(), commandId);
         for (String alias : cmd.getAliases()) {
-            SubCommand.put(alias, commandId);
+            SubCommand.put(alias.toLowerCase(), commandId);
         }
     }
 
     @Override
     public boolean execute(CommandSender sender, String label, String[] args) {
         if (args.length == 0) {
-            if(sender.isPlayer() && sender.hasPermission("is.create")){
+            if (sender.isPlayer() && sender.hasPermission("is.create")) {
                 Player p = getPlugin().getServer().getPlayer(sender.getName());
                 Island.handleIslandCommand(p);
-            } else if (!(sender instanceof Player)){
-                sender.sendMessage(getMsg("help"));
+            } else if (!(sender instanceof Player)) {
+                return this.sendHelp(sender, args);
+            } else {
+                return this.sendHelp(sender, args);
             }
             return true;
         }
@@ -71,7 +100,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
             boolean canUse = command.canUse(sender);
             if (canUse) {
                 if (!command.execute(sender, args)) {
-                    sender.sendMessage(TextFormat.YELLOW + "Usage: /is " + command.getName() + " " + command.getUsage());
+                    sender.sendMessage(ASkyBlock.get().getPrefix() + TextFormat.RED + "Usage:" + TextFormat.GRAY + " /is " + command.getName() + " " + command.getUsage().replace("&", "§"));
                 }
             } else if (!(sender instanceof Player)) {
                 sender.sendMessage(TextFormat.RED + "Please run this command in-game.");
@@ -79,46 +108,50 @@ public class Commands extends PluginCommand<ASkyBlock> {
                 sender.sendMessage(TextFormat.RED + "You do not have permissions to run this command");
             }
         } else {
-            return this.sendHelp(sender);
+            return this.sendHelp(sender, args);
         }
-        getPlugin().getLogger().info("CLASS 4 RUN");
         return true;
     }
 
-    public String getMsg(String key){
+    public String getMsg(String key) {
         return getPlugin().getMsg(key);
     }
-    
-    private boolean sendHelp(CommandSender sender) {
-        String label = "is";     
-        // Header
-        sender.sendMessage(Utils.RainbowString("SkyBlock", "b") + " " + TextFormat.RESET + TextFormat.GREEN + getPlugin().getDescription().getVersion() + " help:");
-        // This is for a Player command only
-        if (sender.isPlayer()) {
-            Player p = getPlugin().getServer().getPlayer(sender.getName());
-            // Create island functions
-            if (sender.hasPermission("is.create")) {
-                // Check if player has an island or not 
-                if (Island.checkIsland(p)) {
-                    // If the player does have an island, the help message will show teleport
-                    sender.sendMessage(TextFormat.GREEN + "/" + label + ": " + getPlugin().getMsg("help_teleport"));
-                } else {
-                    // if not help message will show how to create an island
-                    sender.sendMessage(TextFormat.GREEN + "/" + label + ": " + getPlugin().getMsg("help_island"));
-                }
-            }
-            // Kick / expel functions...
-            if (sender.hasPermission("is.command.kick") && Island.checkIsland(p)) {
-                sender.sendMessage(TextFormat.GREEN + "/" + label + ": " + getPlugin().getMsg("help_kick"));
-            }
 
+    private boolean sendHelp(CommandSender sender, String[] args) {
+        int pageNumber = 1;
+        int pageHeight = 5;
+        if (args.length == 2) {
+            String number = args[1];
+            switch (number) {
+                case "1":
+                    pageNumber = 1;
+                    break;
+                case "2":
+                    pageNumber = 2;
+                    break;
+                case "3":
+                    pageNumber = 3;
+                    break;
+                default:
+                    pageNumber = 1;
+            }
         }
-        // generate function
-        if (sender.hasPermission("is.command.generate")) {
-            sender.sendMessage(TextFormat.GREEN + "/" + label + " generate: " + getPlugin().getMsg("help_generate"));
+        int totalPage = commands.size() % pageHeight == 0 ? commands.size() / pageHeight : commands.size() / pageHeight + 1;
+        pageNumber = Math.min(pageNumber, totalPage);
+        if (pageNumber < 1) {
+            pageNumber = 1;
         }
-        // This will not using any permission :D
-        sender.sendMessage(TextFormat.GREEN + "/" + label + " about: " + getPlugin().getMsg("help_about"));
+        sender.sendMessage("§d--- §aASkyBlock help page §e" + pageNumber + " §aof §e" + totalPage + " §d---");
+        int i = 1;
+        for (SubCommand cmd : commands) {
+            if (i >= (pageNumber - 1) * pageHeight + 1 && i <= Math.min(commands.size(), pageNumber * pageHeight)) {
+                sender.sendMessage(TextFormat.DARK_GREEN + "/is " + cmd.getName() + ": " + TextFormat.WHITE + cmd.getDescription());
+            }
+            i++;
+        }
+        if (pageNumber != totalPage) {
+            sender.sendMessage("§aType §e/is help " + (pageNumber + 1) + "§a to see the next page.");
+        }
         return true;
     }
 

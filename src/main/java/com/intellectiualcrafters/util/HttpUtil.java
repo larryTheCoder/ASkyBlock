@@ -17,7 +17,6 @@ public class HttpUtil {
             }
             return buffer.toString();
         } catch (IOException e) {
-                e.printStackTrace();
         }
         return null;
     }

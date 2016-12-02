@@ -14,28 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package larryTheCoder.invitation;
 
 import cn.nukkit.Player;
 import cn.nukkit.utils.TextFormat;
+import larryTheCoder.ASkyBlock;
+import larryTheCoder.IslandData;
 import larryTheCoder.island.Island;
 
 /**
  * @author larryTheCoder
  */
 public class Invitation {
-    
+
     private final InvitationHandler handler;
 
     private final Player sender;
 
     private final Player receiver;
 
-    private final Island island;
+    private final IslandData island;
 
-    private final int time = 30;
-    
+    private final int time;
+
     /**
      * Invitation constructor.
      *
@@ -44,22 +45,23 @@ public class Invitation {
      * @param receiver Player
      * @param island Island
      */
-    public Invitation(InvitationHandler member,Player sender, Player receiver, Island island){
+    public Invitation(InvitationHandler member, Player sender, Player receiver, IslandData island) {
         this.handler = member;
         this.sender = sender;
         this.receiver = receiver;
         this.island = island;
+        this.time = ASkyBlock.get().cfg.getInt("island.timeOut");
     }
-    
+
     /**
      * Return invitation sender
      *
      * @return Player
      */
-    public Player getSender(){
+    public Player getSender() {
         return sender;
     }
-    
+
     /**
      * Return invitation receiver
      *
@@ -68,23 +70,23 @@ public class Invitation {
     public Player getReceiver() {
         return receiver;
     }
-    
-    public void accept(){
-        Island.addMember(sender, sender.getLocation(), receiver.getName());
+
+    public void accept() {
+        Island.addMember(sender, island, receiver.getName());
     }
-    
+
     public void deny() {
-        sender.sendMessage(TextFormat.RED + "* " + TextFormat.YELLOW + "{$this->receiver->getName()} denied your invitation!");
-        receiver.sendMessage(TextFormat.RED + "* " + TextFormat.YELLOW + "You denied {$this->sender->getName()}'s invitation!");
+        sender.sendMessage(this.handler.getPlugin().getPrefix() + TextFormat.YELLOW + this.receiver.getName() + " denied your invitation!");
+        receiver.sendMessage(this.handler.getPlugin().getPrefix() + TextFormat.YELLOW + "You denied " + this.sender.getName() + "'s invitation!");
     }
 
     public void expire() {
-        sender.sendMessage(TextFormat.RED + " * " + TextFormat.YELLOW + "The invitation to "+ sender.getName() +" expired!");
+        sender.sendMessage(this.handler.getPlugin().getPrefix() + TextFormat.YELLOW + "The invitation to " + sender.getName() + " expired!");
         handler.removeInvitation(this);
     }
-    
+
     public void tick() {
-        if(time <= 0){
+        if (time <= 0) {
             expire();
         }
     }

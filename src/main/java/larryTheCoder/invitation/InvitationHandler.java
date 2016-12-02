@@ -19,18 +19,20 @@ package larryTheCoder.invitation;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
-import java.util.Map;
+import java.util.HashMap;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.island.Island;
+import larryTheCoder.IslandData;
 
 /**
- * @author larryTheCoder
+ * This class handle all Invitations and addmember function
+ * It will tick every seconds as in config.yml 
  * 
- * WARNING: NOT SURE THIS WILL WORKS! DO NOT USE IT
+ * @api
+ * @author larryTheCoder
  */
 public class InvitationHandler {
 
-    private Map<Invitation, Player> invitation;
+    private HashMap<Player, Invitation> invitation = new HashMap<>();
     private final ASkyBlock plugin;
     
     public InvitationHandler(ASkyBlock main){
@@ -49,19 +51,21 @@ public class InvitationHandler {
     /**
      * Return all invitations
      *
-     * @return Invitation[]
+     * @return HashMap<>
      */
-    public Invitation getInvitations() {
-        return (Invitation) invitation;
+    @SuppressWarnings("ReturnOfCollectionOrArrayField")
+    public HashMap<Player, Invitation> getInvitations() {
+        return invitation;
     }
 
-    public String getInvitation(Player player) {
-        for(Player p : invitation.values()){
-            if(p.getName().equalsIgnoreCase(player.getName())){
-                return player.getName();
+    public Invitation getInvitation(Player player) {
+        Invitation inv = null;
+        for(Invitation p : invitation.values()){
+            if(p.getSender() == player){
+                inv = p;
             }
         }
-        return null;
+        return inv;
     }
     
     /**
@@ -71,13 +75,13 @@ public class InvitationHandler {
      * @param receiver
      * @param island
      */
-    public void addInvitation(Player sender, Player receiver, Island island) {
-        invitation.put(new Invitation(this, sender, receiver, island), sender);
+    public void addInvitation(Player sender, Player receiver, IslandData island) {
+        invitation.put(sender, new Invitation(this, sender, receiver, island) );
     }
     
     public void tick(){
-        invitation.keySet().stream().forEach((tick) -> {
-            tick.tick();
+        invitation.values().stream().forEach((inv) -> {
+            inv.tick();
         });
     }
 }

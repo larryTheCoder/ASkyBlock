@@ -23,127 +23,62 @@ import cn.nukkit.block.BlockSapling;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntityChest;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.generator.object.tree.ObjectTree;
 import cn.nukkit.math.NukkitRandom;
-import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.utils.TextFormat;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
+
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.PlayerData;
-import larryTheCoder.PlayerDiary;
+import larryTheCoder.IslandData;
+import larryTheCoder.Settings;
 import larryTheCoder.Utils;
+import larryTheCoder.database.ASConnection;
 
 /**
  * @author larryTheCoder
  */
 public class Island {
 
-    public static int island_y = 60;
-    public static int islandSize = 100;
-    public static int maxIslandsAlongX = 10000;
-    public static ConcurrentHashMap<Integer, IslandData> hashIslandOwner = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<String, IslandData> hashNameToIsland = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<String, PlayerData> hash_SkyBlock_PlayerData = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<String, PlayerData> hash_OtherWorld_PlayerData = new ConcurrentHashMap<>();
-
-    // #######################################################################
-    // #                      Island DB Load / Save                          #
-    // #######################################################################
-    @SuppressWarnings("unchecked")
-    public static void LoadIslands() {
-        try {
-            long msStart = System.currentTimeMillis();
-            File file = new File(String.valueOf(Utils.DIRECTORY) + "Islands.dat");
-            FileInputStream f = new FileInputStream(file);
-            try (ObjectInputStream s = new ObjectInputStream(f)) {
-                hashIslandOwner = (ConcurrentHashMap) s.readObject();
-                hash_SkyBlock_PlayerData = (ConcurrentHashMap) s.readObject();
-                hash_OtherWorld_PlayerData = (ConcurrentHashMap) s.readObject();
-                hashIslandOwner.keySet().stream().map((key) -> hashIslandOwner.get(key)).filter((pd) -> !(pd.owner == null)).forEach((pd) -> {
-                    hashNameToIsland.put(pd.owner, pd);
-                });
-            }
-            long msEnd = System.currentTimeMillis();
-            Utils.ConsoleMsg(TextFormat.YELLOW + String.format("%-20s: %5d islands.   Took %3d ms", "Island DB Load", hashNameToIsland.size(), msEnd - msStart));
-        } catch (IOException | ClassNotFoundException e) {
-            Utils.ConsoleMsg(TextFormat.GRAY + "Starting New Island Database...");
-        }
-    }
-
-    public static void SaveIslands() {
-        try {
-            long msStart = System.currentTimeMillis();
-            File file = new File(String.valueOf(Utils.DIRECTORY) + "Islands.dat");
-            FileOutputStream f = new FileOutputStream(file);
-            try (ObjectOutputStream s = new ObjectOutputStream(f)) {
-                s.writeObject(hashIslandOwner);
-                s.writeObject(hash_SkyBlock_PlayerData);
-                s.writeObject(hash_OtherWorld_PlayerData);
-            }
-            long msEnd = System.currentTimeMillis();
-            Utils.ConsoleMsg(TextFormat.YELLOW + String.format("%-20s: %5d islands.   Took %3d ms", "Island DB Save", hashIslandOwner.size(), msEnd - msStart));
-        } catch (Throwable exc) {
-            System.out.println("**********************************************");
-            System.out.println("SaveIslands: " + exc.toString());
-            System.out.println("**********************************************");
-        }
-    }
-
     // #######################################################################  
     // #                      Island Members Section                         #
     // #######################################################################  
     public static String getPlayerMembers(Player p) {
-        IslandData pd = hashNameToIsland.get(p.getName());
+        IslandData pd = ASkyBlock.get().getDatabase().getIsland(p.getName());
         for (String st : pd.members) {
             return st;
         }
         return null;
     }
 
-    public static boolean addMember(Player p, Location loc, String argName) {
-        String exactName = PlayerDiary.GetPlayerExactName(argName);
+    public static boolean addMember(Player p, IslandData pd, String argName) {
+        Player exactName = ASkyBlock.get().getServer().getPlayer(argName);
         if (exactName == null) {
             p.sendMessage(TextFormat.RED + "No player known by name: " + TextFormat.YELLOW + argName);
-            return true;
-        }
-        IslandData pd = Island.GetIslandAt(loc);
-        if (pd == null || pd.owner == null) {
-            p.sendMessage(TextFormat.RED + "There is no island here.");
             return true;
         }
         if (!pd.owner.equals(p.getName()) && !p.isOp()) {
             p.sendMessage(TextFormat.RED + "You don't own an island here.");
             return true;
         }
-        if (pd.members.contains(exactName)) {
+        if (pd.members.contains(exactName.getName())) {
             p.sendMessage(TextFormat.RED + "You already added " + TextFormat.YELLOW + exactName);
             return true;
         }
-        pd.members.add(exactName);
-        int iKey = Island.generateIslandKey(loc);
-        hashIslandOwner.put(iKey, pd);
+        pd.members.add(exactName.getName());
         p.sendMessage(TextFormat.GREEN + "You add " + TextFormat.YELLOW + exactName + TextFormat.GREEN + " as an island member.");
         return true;
     }
 
     public static boolean removeMember(Player p, Location loc, String argName) {
-        String exactName = PlayerDiary.GetPlayerExactName(argName);
+        Player exactName = ASkyBlock.get().getServer().getPlayer(argName);
         if (exactName == null) {
             p.sendMessage(TextFormat.RED + "No player known by name: " + TextFormat.YELLOW + argName);
             return true;
@@ -157,13 +92,12 @@ public class Island {
             p.sendMessage(TextFormat.RED + "You don't own a island here.");
             return true;
         }
-        if (!pd.members.contains(exactName)) {
+        if (!pd.members.contains(exactName.getName())) {
             p.sendMessage(TextFormat.RED + "No island member named " + TextFormat.YELLOW + exactName);
             return true;
         }
-        pd.members.remove(exactName);
+        pd.members.remove(exactName.getName());
         int iKey = Island.generateIslandKey(loc);
-        hashIslandOwner.put(iKey, pd);
         p.sendMessage(TextFormat.GREEN + "You removed " + TextFormat.YELLOW + exactName + TextFormat.GREEN + " as an island member.");
         return true;
     }
@@ -171,25 +105,42 @@ public class Island {
     // #######################################################################
     // #                   Island Command Executor Section                   #
     // #######################################################################
+//    TO-DO this function
+//    public static void createIslandHomes(Player p, int homes){
+//        if (p == null){
+//            return;
+//        }
+//        if(ASkyBlock.getInstance().cfg.getInt("MaxHomes") < homes){
+//            p.sendMessage("maxedHome");
+//            return;
+//        }
+//        
+//        
+//    }
     public static void handleIslandCommand(Player p) {
-        handleIslandCommand(p, 1);
+        handleIslandCommand(p, false, 0);
     }
 
-    public static void handleIslandCommand(Player p, int homes) {
-        if (!Island.checkIsland(p, homes)) {
-            Island.createIsland(p, homes);
+    public static void handleIslandCommand(Player p, boolean reset, int homes) {
+        if (!reset) {
+            p.teleport(new Location(0, 90000, 0, ASkyBlock.get().getServer().getLevelByName("SkyBlock")));
+            if (!Island.checkIsland(p)) {
+                Island.createIsland(p);
+            }
+            IslandData pd = ASkyBlock.get().getDatabase().getIsland(p.getName());
+            if (pd == null || pd.owner == null) {
+                p.sendMessage(TextFormat.RED + "No island found or could be created for you.");
+                return;
+            }
+            
+            GridManager.homeTeleport(p);
+
+            p.setGamemode(Player.SURVIVAL);
+
         } else {
-            p.sendMessage(TextFormat.GREEN + "You go to your island!");
+            Island.createIsland(p);
         }
-        IslandData pd = hashNameToIsland.get(p.getName() + homes);
-        if (pd == null || pd.owner == null) {
-            p.sendMessage(TextFormat.RED + "[SkyBlock] No island found or could be created for you.");
-            return;
-        }
-        Location loc;
-        p.teleport(loc = new Location(pd.x, pd.y, pd.z, Server.getInstance().getLevelByName("SkyBlock")));
-        Server.getInstance().getLevelByName("SkyBlock").loadChunk(pd.x, pd.z);
-        p.setGamemode(Player.SURVIVAL);
+
     }
 
     public static void kickPlayerByName(final Player pOwner, final String victimName) {
@@ -231,32 +182,29 @@ public class Island {
     // #######################################################################
     // #                  Main Island Section [Step by Step]                 #
     // #######################################################################
-    public static boolean checkIsland(Player p) {
-        return checkIsland(p, 1);
-    }
-
     // Check if player got island
-    public static boolean checkIsland(Player p, int homes) {
-        return hashNameToIsland.get(p.getName() + homes) != null;
+    public static boolean checkIsland(Player p) {
+        return ASkyBlock.get().getDatabase().getIsland(p.getName()) != null;
     }
 
     // Create an island if they dont   
-    public static void createIsland(Player p, int homes) {
+    @SuppressWarnings("deprecation")
+    public static void createIsland(Player p) {
         p.sendMessage(TextFormat.GREEN + "Creating a new island for you...");
         int i = 0;
         while (i < 1000000) {
-            int width = i * islandSize * 2;
+            int width = i * Settings.islandSize * 2;
             int wx = (int) (Math.random() * width);
             int wz = (int) (Math.random() * width);
-            Integer key = Island.generateIslandKey(wx = wx - wx % islandSize + islandSize / 2, wz = wz - wz % islandSize + islandSize / 2);
-            IslandData pd = hashIslandOwner.get(key);
-            if (pd == null || pd.owner == null) {
+            IslandData pd = new IslandData("SkyBlock", wx, wz);
+            if (pd.owner == null) {
                 Location locIsland;
-                int wy = island_y;
+                int wy = Settings.islandHieght;
                 Level world = Server.getInstance().getLevelByName("SkyBlock");
                 locIsland = new Location(wx, wy, wz, 0, 0, world);
-                Island.create(world, wx - 13, wy, wz - 13);
-                Island.claim(p, locIsland, homes);
+                //Island.create(world, wx - 13, wy, wz - 13);
+                ASkyBlock.get().getSchematic("default").pasteSchematic(locIsland, p);
+                Island.claim(p, locIsland, pd);                
                 return;
             }
             ++i;
@@ -267,11 +215,12 @@ public class Island {
     public static int generateIslandKey(Location loc) {
         int x = loc.getFloorX();
         int z = loc.getFloorZ();
+        // 2512.75
         return Island.generateIslandKey(x, z);
     }
 
     public static int generateIslandKey(int x, int z) {
-        return x / islandSize + z / islandSize * maxIslandsAlongX;
+        return x / Settings.islandSize + z / Settings.islandSize * 10000;
     }
 
     // Create an island
@@ -330,50 +279,52 @@ public class Island {
     }
 
     // Claim island after creating island
-    public static boolean claim(Player p, Location loc, int homes) {
+    public static boolean claim(Player p, Location loc, IslandData pd) {
         int x = loc.getFloorX();
-        x = x - x % islandSize + islandSize / 2;
+        x = x - x % Settings.islandSize + Settings.islandSize / 2;
         int z = loc.getFloorZ();
-        z = z - z % islandSize + islandSize / 2;
+        z = z - z % Settings.islandSize + Settings.islandSize / 2;
         if (!Island.checkIslandAt(loc)) {
             return false;
         }
         int iKey = Island.generateIslandKey(loc);
-        IslandData pd = new IslandData();
+        pd.id = iKey;
         pd.owner = p.getName();
-        pd.msClaimed = System.currentTimeMillis();
+        pd.name = "My Island";
         pd.members = new ArrayList<>();
-        pd.x = x;
-        pd.y = (loc.getFloorY() + 8);
-        pd.z = z;
-        hashIslandOwner.put(iKey, pd);
-        hashNameToIsland.put(p.getName() + homes, pd);
-        Island.initChest(loc.getLevel(), pd.x, pd.y, pd.z, p);
+        pd.X = x;
+        pd.floor_y = loc.getFloorY();
+        pd.Z = z;
+        pd.biome = "PLAINS";
+        pd.locked = "false";
+        pd.team = "";
+        pd.levelName = loc.getLevel().getName();
         p.sendMessage(getMsg("create"));
+        ASkyBlock.get().getDatabase().saveIsland(pd);
         return true;
     }
 
     // #######################################################################
     // #                         Island reset                                #
     // #######################################################################
-    public static void reset(Player p, boolean reset) {
-        IslandData pd = hashNameToIsland.get(p.getName());
+    public static void reset(Player p, boolean reset, int homes) {
+        IslandData pd = ASkyBlock.get().getDatabase().getIsland(p.getName());
         if (pd == null || pd.owner == null) {
             p.sendMessage(getMsg("no_island_error"));
             return;
         }
         Level world = Server.getInstance().getLevelByName("SkyBlock");
-        Location loc = new Location(pd.x, pd.y, pd.z, world);
+        Location loc = new Location(pd.X, pd.floor_y, pd.Z, 0, 0, world);
         Utils.ConsoleMsg(getMsg("att_reset").replace("[location]", Utils.LocStringShort(loc)).replace("[player]", p.getName()));
         int sx = loc.getFloorX();
-        sx -= sx % islandSize;
+        sx -= sx % Settings.islandSize;
         int sz = loc.getFloorX();
-        sz -= sz % islandSize;
+        sz -= sz % Settings.islandSize;
         if (sx < 0 || sz < 0) {
             return;
         }
-        int ex = sx + islandSize - 1;
-        int ez = sz + islandSize - 1;
+        int ex = sx + Settings.islandSize - 1;
+        int ez = sz + Settings.islandSize - 1;
         int y = 0;
         while (y < 128) {
             int x = sx;
@@ -387,26 +338,27 @@ public class Island {
             }
             ++y;
         }
-        hashNameToIsland.remove(p.getName());
-        Integer key = Island.generateIslandKey(loc);
-        if (hashIslandOwner.containsKey(key)) {
-            hashIslandOwner.remove(key);
-        }
-        ArrayList<Entity> entRemove = new ArrayList<>();
-        for (Entity ent : world.getEntities()) {
-            if (ent == null || !Objects.equals(Island.generateIslandKey(ent.getLocation()), key)) {
-                continue;
-            }
-            entRemove.add(ent);
-        }
-        int i = entRemove.size() - 1;
-        while (i >= 0) {
-            Entity ent2 = entRemove.get(i);
-            ent2.kill();
-            --i;
-        }
+//        //hashNameToIsland.remove(p.getName());
+//        //Integer key = Island.generateIslandKey(loc);
+//        //if (hashIslandOwner.containsKey(key)) {
+//        //    hashIslandOwner.remove(key);
+//       // }
+//        ArrayList<Entity> entRemove = new ArrayList<>();
+//        for (Entity ent : world.getEntities()) {
+//     //       if (ent == null || !Objects.equals(Island.generateIslandKey(ent.getLocation()), key)) {
+//    //            continue;
+//   //         }
+//      //      entRemove.add(ent);
+//        }
+//        int i = entRemove.size() - 1;
+//        while (i >= 0) {
+//            Entity ent2 = entRemove.get(i);
+//            ent2.kill();
+//            --i;
+//        }
         if (reset) {
             p.sendMessage(getPrefix() + getMsg("reset").replace("[min]", "30"));
+            Island.handleIslandCommand(p, true, homes);
         } else {
             p.sendMessage(getPrefix() + getMsg("restart").replace("[min]", "30"));
         }
@@ -429,10 +381,10 @@ public class Island {
         }
         IslandData pd = Island.GetIslandAt(loc);
         if (pd == null) {
-            return true;
+            return false;
         }
         if (pd.owner == null) {
-            return true;
+            return false;
         }
         if (pd.owner.equals(pName)) {
             return true;
@@ -451,7 +403,7 @@ public class Island {
             return null;
         }
         int iKey = Island.generateIslandKey(loc);
-        IslandData res = hashIslandOwner.get(iKey);
+        IslandData res = ASkyBlock.get().getDatabase().getIslandById(iKey);
         if (res == null) {
             return null;
         }
@@ -470,7 +422,7 @@ public class Island {
         }
         final IslandData pd = GetIslandAt(loc);
         if (pd == null) {
-            p.sendMessage(TextFormat.LIGHT_PURPLE + "no_claim");
+            p.sendMessage(TextFormat.LIGHT_PURPLE + getMsg("no_claim"));
             return;
         }
         p.sendMessage(TextFormat.LIGHT_PURPLE + "- Island Owner: " + TextFormat.YELLOW + pd.owner);
@@ -479,18 +431,19 @@ public class Island {
             strMembers = "none";
         }
         p.sendMessage(TextFormat.LIGHT_PURPLE + "- Members: " + TextFormat.AQUA + strMembers);
-        p.sendMessage(TextFormat.LIGHT_PURPLE + "- Claimed: " + TextFormat.GREEN + Utils.GetDateStringFromLong(pd.msClaimed));
-        p.sendMessage(TextFormat.LIGHT_PURPLE + "- Flags: " + TextFormat.GOLD + "Allow Teleport: " + GetFlagString(pd.allowTeleportIn));
+
+        p.sendMessage(TextFormat.LIGHT_PURPLE + "- Flags: " + TextFormat.GOLD + "Allow Teleport: " + pd.locked);
     }
 
     public static String GetFlagString(final boolean b) {
         if (b) {
-            return TextFormat.GREEN + "true";
+            return TextFormat.RED + "false";
         }
-        return TextFormat.RED + "false";
+        return TextFormat.GREEN + "true";
     }
 
     private static void initChest(Level lvl, int x, int y, int z, Player p) {
+        // It works!
         lvl.setBlockIdAt(x, y, z, Block.CHEST);
         CompoundTag nbt = new CompoundTag()
                 .putList(new ListTag<>("Items"))
@@ -498,6 +451,7 @@ public class Island {
                 .putInt("x", x)
                 .putInt("y", y)
                 .putInt("z", z);
+
         BlockEntity.createBlockEntity(BlockEntity.CHEST, p.chunk, nbt);
         BlockEntityChest e = new BlockEntityChest(p.chunk, nbt);
         // Items
@@ -532,7 +486,7 @@ public class Island {
             return;
         }
         Location locVict = p.getLocation();
-        for (String lvl : ASkyBlock.getInstance().level) {
+        for (String lvl : ASkyBlock.get().level) {
             if (!locVict.getLevel().getName().equalsIgnoreCase(lvl)) {
                 sender.sendMessage(getMsg("player_error").replace("[player]", arg));
                 return;
@@ -543,10 +497,28 @@ public class Island {
     }
 
     private static String getMsg(String key) {
-        return ASkyBlock.getInstance().getMsg(key);
+        return ASkyBlock.get().getMsg(key);
     }
 
     private static String getPrefix() {
-        return ASkyBlock.getInstance().getPrefix();
+        return ASkyBlock.get().getPrefix();
     }
+
+    public static void teleportPlayer(Player p, String arg) {
+        IslandData pd = ASkyBlock.get().getDatabase().getIsland(arg);
+        if (pd.owner != null) {
+            p.sendMessage(getMsg("player_error").replace("[player]", arg));
+            return;
+        }
+        // TO-DO support homes!
+        Level lvl = ASkyBlock.get().getServer().getLevelByName(pd.levelName);
+        p.teleport(new Location(pd.X, pd.floor_y, pd.Z, lvl));
+    }
+
+    public static void setHomeLocation(Player p, Location lPlusOne, int number) {
+        ASConnection db = ASkyBlock.get().getDatabase();
+        Location loc = lPlusOne;
+        db.setPosition(loc, number);
+    }
+
 }

@@ -18,9 +18,11 @@ package larryTheCoder;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.potion.Potion;
+import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -47,6 +49,38 @@ public class Utils {
 
     }
 
+    public static Config loadYamlFile(String file) {
+        File dataFolder = ASkyBlock.get().getDataFolder();
+        File yamlFile = new File(dataFolder, file);
+
+        Config config = null;
+        if (yamlFile.exists()) {
+            try {
+                config = new Config();
+                config.load(file);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            // Create the missing file
+            config = new Config();
+            Utils.ConsoleMsg("No " + file + " found. Creating it...");
+            try {
+                if (ASkyBlock.get().getResource(file) != null) {
+                    ConsoleMsg("Using default found in jar file.");
+                    ASkyBlock.get().saveResource(file, false);
+                    config = new Config();
+                    config.load(file);
+                } else {
+                    config.save(yamlFile);
+                }
+            } catch (Exception e) {
+                ConsoleMsg("Could not create the " + file + " file!");
+            }
+        }
+        return config;
+    }
+        
     public static boolean TooSoon(Player p, String what, int seconds) {
         if (p.hasPermission("is.bypass.wait")) {
             return false;
@@ -109,7 +143,57 @@ public class Utils {
         }
         return String.valueOf(loc.getLevel().getName()) + "(" + loc.getFloorX() + "," + loc.getFloorY() + "," + loc.getFloorZ() + ")";
     }
+    
+    /**
+     * Converts a serialized location to a Location. Returns null if string is
+     * empty
+     * 
+     * @param s
+     *            - serialized location in format "world:x:y:z"
+     * @return Location
+     */
+    public static Location getLocationString(final String s){
+                if (s == null || s.trim() == "") {
+            return null;
+        }
+        final String[] parts = s.split(":");
+        if (parts.length == 4) {
+            final Level w = Server.getInstance().getLevelByName(parts[0]);
+            if (w == null) {
+                return null;
+            }
+            final int x = Integer.parseInt(parts[1]);
+            final int y = Integer.parseInt(parts[2]);
+            final int z = Integer.parseInt(parts[3]);
+            return new Location(x, y, z, 0, 0, w);
+        } else if (parts.length == 6) {
+            final Level w = Server.getInstance().getLevelByName(parts[0]);
+            if (w == null) {
+                return null;
+            }
+            final int x = Integer.parseInt(parts[1]);
+            final int y = Integer.parseInt(parts[2]);
+            final int z = Integer.parseInt(parts[3]);
+            final float yaw = Float.intBitsToFloat(Integer.parseInt(parts[4]));
+            final float pitch = Float.intBitsToFloat(Integer.parseInt(parts[5]));
+            return new Location(x, y, z, yaw, pitch, w);
+        }
+        return null;
+    }
 
+    /**
+     * Converts a location to a simple string representation
+     * If location is null, returns empty string
+     * 
+     * @param l
+     * @return String of location
+     */
+    static public String getStringLocation(final Location location) {
+        if (location == null || location.getLevel() == null) {
+            return "";
+        }
+        return  location.getFloorX() + ":" + location.getFloorY() + ":" + location.getFloorZ() + ":" + Float.floatToRawIntBits((float)location.getYaw()) + ":" + Float.floatToIntBits((float) location.getPitch()) + ":" + location.getLevel().getName();
+    }
     public static String LocStringShortNoWorld(Location loc) {
         if (loc == null) {
             return "NULL";
@@ -143,7 +227,7 @@ public class Utils {
 
     public static void ConsoleMsg(String msg) {
         try {
-            Server.getInstance().getLogger().info(ASkyBlock.object.getPrefix() + TextFormat.WHITE + msg);
+            Server.getInstance().getLogger().info(ASkyBlock.get().getPrefix() + TextFormat.WHITE + msg.replace("&", "§"));
         } catch (Throwable exc) {
             System.out.println("SkyBlock: Failed to Write ConsoleMsg: " + msg);
         }
@@ -229,5 +313,46 @@ public class Utils {
         int secs = (int) (ms / 1000 % 60);
         int mins = (int) (ms / 1000 / 60 % 60);
         return String.format("%02dm %02ds", mins, secs);
+    }
+    
+    public static int getInt(String in){
+        int l = 0;
+        switch(in){
+            case "1":
+                l = 1;
+                break;
+            case "2":
+                l = 2;
+                break;
+            case "3":
+                l = 3;
+                break;
+            case "4":
+                l = 4;
+                break;
+            case "5":
+                l = 5;
+                break;
+            case "6":
+                l = 6;
+                break;
+            case "7":
+                l = 7;
+                break;
+            case "8":
+                l = 8;
+                break;
+            case "9":
+                l = 9;
+                break;
+            case "10":
+                l = 10;
+                break;
+                                    
+        }
+        if(l == 0){
+            return -1;
+        }
+        return l;
     }
 }

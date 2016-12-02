@@ -25,9 +25,9 @@ import larryTheCoder.island.Island;
 /**
  * @author larryTheCoder
  */
-public class kickSubCommand extends SubCommand{
+public class KickSubCommand extends SubCommand{
 
-    public kickSubCommand(ASkyBlock plugin) {
+    public KickSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
@@ -38,7 +38,7 @@ public class kickSubCommand extends SubCommand{
 
     @Override
     public String getUsage() {
-        return "[String: Player]";
+        return "<player>";
     }
 
     @Override

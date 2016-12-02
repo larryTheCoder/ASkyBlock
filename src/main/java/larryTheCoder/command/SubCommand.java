@@ -23,6 +23,10 @@ import cn.nukkit.command.CommandSender;
 import larryTheCoder.ASkyBlock;
 
 /**
+ * Info: if class starts with `A`, thats mean the class is
+ * for `admin override this command only`and if the class starts with
+ * `V`, that mean the class is for `V.I.P override this command only`
+ * 
  * @author larryTheCoder
  */
 public abstract class SubCommand {

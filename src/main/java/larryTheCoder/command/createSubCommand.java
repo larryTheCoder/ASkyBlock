@@ -18,14 +18,15 @@
 package larryTheCoder.command;
 
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.utils.TextFormat;
 import larryTheCoder.ASkyBlock;
 
 /**
  * @author larryTheCoder
  */
-public class createSubCommand extends SubCommand{
+public class CreateSubCommand extends SubCommand{
 
-    public createSubCommand(ASkyBlock plugin) {
+    public CreateSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
@@ -60,7 +61,8 @@ public class createSubCommand extends SubCommand{
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        sender.sendMessage(TextFormat.GRAY + "This command isnt available yet");
+        return true;
     }
 
 }
