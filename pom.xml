@@ -35,15 +35,11 @@
             <systemPath>${basedir}/lib/Nukkit-1.0-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
-            <!-- This dependency doesn't seem to be available in public maven repos.
-                The jar file is included with the project under the lib dir.
-                You need to manually install it in your local maven repo.  
-                The command below should work if mvn is on your path and you are in the lib dir:
-                mvn install:install-file -Dfile=leveldb.jar -DgroupId=com.tinfoiled.mcpe.leveldb -DartifactId=leveldb -Dversion=0.8 -Dpackaging=jar 
-            -->
             <groupId>org.sqlite.JDBC</groupId>
             <artifactId>SQLite</artifactId>
             <version>0.8</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/sqlite-jdbc-3.15.1.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>milk.pureentities.PureEntities</groupId>
