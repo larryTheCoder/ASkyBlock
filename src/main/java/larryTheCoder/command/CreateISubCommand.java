@@ -27,9 +27,9 @@ import larryTheCoder.IslandData;
 /**
  * @author larryTheCoder
  */
-public class CreateSubCommand extends SubCommand{
+public class CreateISubCommand extends SubCommand{
 
-    public CreateSubCommand(ASkyBlock plugin) {
+    public CreateISubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 

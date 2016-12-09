@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import larryTheCoder.command.AKickSubCommand;
-import larryTheCoder.command.CreateSubCommand;
+import larryTheCoder.command.CreateISubCommand;
 import larryTheCoder.command.SubCommand;
-import larryTheCoder.command.KickSubCommand;
+import larryTheCoder.command.kickSubCommand;
 import larryTheCoder.command.VGamemodeSubCommand;
 import larryTheCoder.command.leaveSubCommand;
 import larryTheCoder.command.deleteSubCommand;
@@ -62,12 +62,12 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.loadSubCommand(new acceptSubCommand(getPlugin()));
         this.loadSubCommand(new AKickSubCommand(getPlugin()));
         this.loadSubCommand(new ASetLobbySubCommand(getPlugin()));
-        this.loadSubCommand(new CreateSubCommand(getPlugin()));
+        this.loadSubCommand(new CreateISubCommand(getPlugin()));
         this.loadSubCommand(new denySubCommand(getPlugin()));
         this.loadSubCommand(new deleteSubCommand(getPlugin()));
         this.loadSubCommand(new infoSubCommand(getPlugin()));
         this.loadSubCommand(new inviteSubCommand(getPlugin()));
-        this.loadSubCommand(new KickSubCommand(getPlugin()));
+        this.loadSubCommand(new kickSubCommand(getPlugin()));
         this.loadSubCommand(new leaveSubCommand(getPlugin()));
         this.loadSubCommand(new teleportSubCommand(getPlugin()));
         this.loadSubCommand(new ToggleSubCommand(getPlugin()));

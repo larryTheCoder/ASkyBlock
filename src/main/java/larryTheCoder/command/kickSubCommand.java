@@ -24,9 +24,9 @@ import larryTheCoder.ASkyBlock;
 /**
  * @author larryTheCoder
  */
-public class KickSubCommand extends SubCommand{
+public class kickSubCommand extends SubCommand{
 
-    public KickSubCommand(ASkyBlock plugin) {
+    public kickSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
