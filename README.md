@@ -22,3 +22,6 @@ __A Basic SkyBlock Manager by tastybento For Nukkit Minecraft: PE__
 - Added **SafeISpawning** so you no need to worry about spawning into void
 - More commands and subcommand
 - Best for servers [0.16.0]
+
+## Download
+**Circle CI**: ![Download link](https://circleci.com/gh/larryTheCoder/ASkyBlock-Nukkit/target)
