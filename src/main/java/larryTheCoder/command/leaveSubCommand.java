@@ -70,6 +70,7 @@ public class leaveSubCommand extends SubCommand {
                 pt.setGamemode(0);
             }
         }
+        getPlugin().getInventory().loadPlayerInventory(pt);
         int x = getPlugin().cfg.getInt("lobby.lobbyX");
         int y = getPlugin().cfg.getInt("lobby.lobbyY");
         int z = getPlugin().cfg.getInt("lobby.lobbyZ");

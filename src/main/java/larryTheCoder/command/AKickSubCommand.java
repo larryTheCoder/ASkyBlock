@@ -19,7 +19,6 @@ package larryTheCoder.command;
 
 import cn.nukkit.command.CommandSender;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.island.Island;
 
 /**
  * @author larryTheCoder
@@ -63,7 +62,7 @@ public class AKickSubCommand extends SubCommand{
             sender.sendMessage(getMsg("no_permission"));
             return true;
         }
-        Island.kickPlayerByAdmin(sender, args[1]);     
+        getPlugin().getIsland().kickPlayerByAdmin(sender, args[1]);     
         return true;
     }
 

@@ -20,7 +20,6 @@ package larryTheCoder.command;
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.island.Island;
 
 /**
  * @author larryTheCoder
@@ -62,7 +61,7 @@ public class teleportSubCommand extends SubCommand{
             return false;
         }
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        Island.teleportPlayer(p, args[1]);
+        getPlugin().getIsland().teleportPlayer(p, args[1]);
         return true;
     }
 

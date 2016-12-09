@@ -27,24 +27,13 @@ import java.util.ArrayList;
  * @author larryTheCoder
  */
 public class ConfigManager {
-    
-    public static int islandSize;
-    public static ArrayList<String> whitelistedCommands;
-    public static int islandDeleteSeconds;
-    public static int islandHeight;
-    
-    static {
-        ConfigManager.islandSize = 50;
-        ConfigManager.whitelistedCommands = new ArrayList<>();
-        ConfigManager.islandDeleteSeconds = 300;
-        ConfigManager.islandHeight = 50;
-    }
-    
+
     public static void load() {
         int error = 0;
         Config cfg = new Config(new File(ASkyBlock.get().getDataFolder(), "config.yml"), Config.YAML);
+        
+        //Chest Items
         String chestItems = cfg.getString("island.chestItems", "");
-
         // Check chest items
         if (!chestItems.isEmpty()) {
             final String[] chestItemString = chestItems.split(" ");
@@ -54,7 +43,7 @@ public class ConfigManager {
                 String[] amountdata = chestItemString[i].split(":");
                 try {
                     Item mat;
-                    if (isNumeric(amountdata[0])) {
+                    if (Utils.isNumeric(amountdata[0])) {
                         mat = Item.get(Integer.parseInt(amountdata[0]));
                     } else {
                         mat = Item.fromString(amountdata[0].toUpperCase());
@@ -64,14 +53,18 @@ public class ConfigManager {
                     } else if (amountdata.length == 3) {
                         tempChest[i] = new Item(mat.getId(), Integer.parseInt(amountdata[2]), Integer.parseInt(amountdata[1]));
                     }
-                    
+
                 } catch (java.lang.IllegalArgumentException ex) {
-                    ex.printStackTrace();
+                    if (ASkyBlock.get().isDebug()) {
+                        ex.printStackTrace();
+                    }
                     Server.getInstance().getLogger().error("Problem loading chest item from config.yml so skipping it: " + chestItemString[i]);
                     Server.getInstance().getLogger().error("Error is : " + ex.getMessage());
                     error += 1;
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    if (ASkyBlock.get().isDebug()) {
+                        e.printStackTrace();
+                    }
                     Server.getInstance().getLogger().error("Problem loading chest item from config.yml so skipping it: " + chestItemString[i]);
                     Server.getInstance().getLogger().info("Potential material types are: ");
                     Item.getCreativeItems().stream().forEach((c) -> {
@@ -100,8 +93,9 @@ public class ConfigManager {
                 Settings.islandSize = 100;
                 error += 1;
             }
-            
+
         }
+        
         // island Hieght
         int islandHieght = cfg.getInt("island.islandHieght", 60);
         if (cfg.get("island.islandHieght") != null) {
@@ -116,8 +110,9 @@ public class ConfigManager {
                 Settings.islandHieght = 100;
                 error += 1;
             }
-            
+
         }
+        
         //restriced commands
         String cmd = cfg.getString("island.islandHieght", "");
         if (cfg.get("island.islandHieght") != null) {
@@ -138,13 +133,40 @@ public class ConfigManager {
                 error += 1;
             }
         }
-        // Reset island timer
+        
+        // Reset for players
         int islandTimer = cfg.getInt("island.resetPerPlayer", 5);
         if (cfg.get("island.resetPerPlayer") != null) {
             try {
-                Settings.resetTimer = islandTimer;
+                Settings.reset = islandTimer;
             } catch (Throwable exc2) {
-                Utils.ConsoleMsg("Check your config! [Reset Timer!]");
+                Utils.ConsoleMsg("Check your config! [Reset PerPlayer!]");
+                error += 1;
+            }
+        }        
+        
+        // Island timeout
+        int members = cfg.getInt("island.timeOut", 10);
+        if(cfg.get("island.timeOut") != null){
+            try{
+                Settings.memberTimeOut = members;
+            } catch(Throwable exc){
+                Utils.ConsoleMsg("Check your config! [IslandTimeOut]");
+                error += 1;
+            }
+        }
+        
+        // Companion Names
+        String names = cfg.getString("island.companionNames", "&aFood?");
+        if(cfg.get("island.companionNames") != null){
+            try{
+                final String[] name = names.split(", ");
+                for (String name1 : name) {
+                    Settings.companionNames.add(name1.replace("&", "§"));
+                }
+                
+            } catch(Throwable exc){
+                Utils.ConsoleMsg("Check your config! [IslandTimeOut]");
                 error += 1;
             }
         }
@@ -153,17 +175,5 @@ public class ConfigManager {
             Utils.ConsoleMsg(TextFormat.RED + "Make sure it is in the right format");
         }
         Utils.ConsoleMsg(TextFormat.YELLOW + "Seccessfully checked config.yml with " + TextFormat.RED + error + TextFormat.YELLOW + " Errors");
-    }
-    
-    public static boolean isNumeric(final String str) {
-        if (str == null) {
-            return false;
-        }
-        for (int sz = str.length(), i = 0; i < sz; ++i) {
-            if (!Character.isDigit(str.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
     }
 }

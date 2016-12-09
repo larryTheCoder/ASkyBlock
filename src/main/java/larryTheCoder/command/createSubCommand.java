@@ -17,9 +17,12 @@
 
 package larryTheCoder.command;
 
+import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.TextFormat;
+import java.util.ArrayList;
 import larryTheCoder.ASkyBlock;
+import larryTheCoder.IslandData;
 
 /**
  * @author larryTheCoder
@@ -61,7 +64,16 @@ public class CreateSubCommand extends SubCommand{
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        sender.sendMessage(TextFormat.GRAY + "This command isnt available yet");
+        Player p =  sender.getServer().getPlayer(sender.getName());
+        if(args.length > 2){
+            return false;
+        }
+        int maxIslands = getPlugin().cfg.getInt("maxhome");
+        ArrayList<IslandData> maxPlotsOfPlayers = getPlugin().getDatabase().getIslands(p.getName());
+        if (maxIslands >= 0 && maxPlotsOfPlayers.size() >= maxIslands) {
+            sender.sendMessage(getPlugin().getMsg("max_islands"));
+            return true;
+        }
         return true;
     }
 

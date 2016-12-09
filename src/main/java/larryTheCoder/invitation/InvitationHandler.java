@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package larryTheCoder.invitation;
 
 import cn.nukkit.Player;
@@ -24,9 +23,9 @@ import larryTheCoder.ASkyBlock;
 import larryTheCoder.IslandData;
 
 /**
- * This class handle all Invitations and addmember function
- * It will tick every seconds as in config.yml 
- * 
+ * This class handle all Invitations and addmember function It will tick every
+ * seconds as in config.yml
+ *
  * @api
  * @author larryTheCoder
  */
@@ -34,20 +33,20 @@ public class InvitationHandler {
 
     private HashMap<Player, Invitation> invitation = new HashMap<>();
     private final ASkyBlock plugin;
-    
-    public InvitationHandler(ASkyBlock main){
+
+    public InvitationHandler(ASkyBlock main) {
         plugin = main;
     }
-    
+
     public void removeInvitation(Invitation player) {
         Player p = Server.getInstance().getPlayer(player.getReceiver().getName());
         invitation.remove(player, p);
     }
-    
-    public ASkyBlock getPlugin(){
+
+    public ASkyBlock getPlugin() {
         return plugin;
     }
-    
+
     /**
      * Return all invitations
      *
@@ -60,28 +59,31 @@ public class InvitationHandler {
 
     public Invitation getInvitation(Player player) {
         Invitation inv = null;
-        for(Invitation p : invitation.values()){
-            if(p.getSender() == player){
+        for (Invitation p : invitation.values()) {
+            if (p.getSender() == player) {
                 inv = p;
             }
         }
         return inv;
     }
-    
+
     /**
      * Create a new invitation
-     * 
+     *
      * @param sender
      * @param receiver
      * @param island
      */
     public void addInvitation(Player sender, Player receiver, IslandData island) {
-        invitation.put(sender, new Invitation(this, sender, receiver, island) );
+        invitation.put(sender, new Invitation(this, sender, receiver, island));
     }
-    
-    public void tick(){
-        invitation.values().stream().forEach((inv) -> {
-            inv.tick();
-        });
+
+    public void tick() {
+        if (plugin.cfg.getInt("island.timeOut") != -1) {
+            invitation.values().stream().forEach((inv) -> {
+                inv.tick();
+            });
+        }
+
     }
 }

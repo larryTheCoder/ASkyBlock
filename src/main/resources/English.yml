@@ -45,6 +45,7 @@ kick: "&aYou just kicked a player named [player]"
 #########################
 # Command Error Message #
 #########################
+max_islands: "&cYou reached the limit of [maxplot] plots per player"
 no_pending: "&cYou dont have any pending invitations"
 player_error: "&cUnknown player named &c[player] &cat SkyBlock level"
 player_error2: "&cUnknown player named &e[player]"

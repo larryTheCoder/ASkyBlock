@@ -19,6 +19,9 @@ package larryTheCoder.schematic;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.blockentity.BlockEntitySign;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.item.EntityPainting.Motive; // Art
 import static cn.nukkit.entity.item.EntityPainting.motives;
 import cn.nukkit.item.Item;
@@ -27,9 +30,7 @@ import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.math.Vector3;
-import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.utils.TextFormat;
-import com.boydti.fawe.nukkit.core.NukkitWorld;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,16 +39,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.world.DataException;
-import java.util.HashSet;
-import java.util.Set;
+import com.boydti.fawe.nukkit.core.NukkitWorld;
+import com.intellectiualcrafters.TaskManager;
+import com.sk89q.worldedit.entity.metadata.EntityType;
+import java.util.Random;
+
 import larryTheCoder.ASkyBlock;
 import larryTheCoder.Settings;
+import larryTheCoder.Utils;
 
 import org.jnbt.ByteArrayTag;
 import org.jnbt.CompoundTag;
@@ -61,7 +67,7 @@ import org.jnbt.Tag;
  * @author larryTheCoder
  */
 public class Schematic {
-    
+
     private File schematicFolder;
     private ASkyBlock plugin;
     public boolean running = false;
@@ -80,7 +86,9 @@ public class Schematic {
     private Vector3 playerSpawn;
     private int durability;
     private int levelHandicap;
-
+    private List<IslandBlock> islandBlocks;
+    private List<String> companionNames;
+    
     private String heading;
     private String name;
     private String perm;
@@ -94,6 +102,8 @@ public class Schematic {
     private int order;
     // Name of a schematic this one is paired with
     private String partnerName = "";
+    private List<String> islandCompanion;
+    private Item[] defaultChestItems;
 
     public Schematic(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -125,9 +135,29 @@ public class Schematic {
         }
         this.plugin = plugin;
         this.schematicFolder = folder;
+        name = folder.getName();
+        heading = "";
+        description = "";
+        perm = "";
+        rating = 50;
+        useDefaultChest = true;
+        biome = Settings.defaultBiome;
+        usePhysics = Settings.usePhysics;
+        islandCompanion = Settings.companionNames;
+        companionNames = Settings.companionNames;
+        defaultChestItems = Settings.chestItems;
+        pasteEntities = false;
+        visible = true;
+        order = 0;
+        bedrock = null;
+        chest = null;
+        welcomeSign = null;
+        topGrass = null;
+        playerSpawn = null;
+        //playerSpawnBlock = null;
+        partnerName = "";
         this.init();
         this.initAttachable();
-        // Painting list, useful to check if painting exsits or nor
         this.initArt();
     }
 
@@ -183,14 +213,10 @@ public class Schematic {
         short[] blocks;
         byte[] data;
         try {
-            FileInputStream stream = new FileInputStream(schematicFolder);
-            // InputStream is = new DataInputStream(new
-            // GZIPInputStream(stream));
-            NBTInputStream nbtStream = new NBTInputStream(stream);
-
-            CompoundTag schematicTag = (CompoundTag) nbtStream.readTag();
-            nbtStream.close();
-            stream.close();
+            CompoundTag schematicTag;
+            try (FileInputStream stream = new FileInputStream(schematicFolder); NBTInputStream nbtStream = new NBTInputStream(stream)) {
+                schematicTag = (CompoundTag) nbtStream.readTag();
+            }
             if (!schematicTag.getName().equals("Schematic")) {
                 throw new IllegalArgumentException("Tag \"Schematic\" does not exist or is not first");
             }
@@ -328,7 +354,7 @@ public class Schematic {
         }
         if (bedrock == null) {
             Server.getInstance().getLogger().error("Schematic must have at least one bedrock in it!");
-            //throw new IOException();
+            //throw new IOException("Schematic must have at least one bedrock in it!");
         }
         // Find other key blocks
         if (!grassBlocks.isEmpty()) {
@@ -354,37 +380,174 @@ public class Schematic {
         } else {
             topGrass = null;
         }
+
         facingList.put((byte) 0, Vector3.getOppositeSide(Vector3.SIDE_SOUTH));
         facingList.put((byte) 1, Vector3.getOppositeSide(Vector3.SIDE_WEST));
         facingList.put((byte) 2, Vector3.getOppositeSide(Vector3.SIDE_NORTH));
         facingList.put((byte) 3, Vector3.getOppositeSide(Vector3.SIDE_EAST));
-        this.prePasteSchematic(blocks, data);
+        prePasteSchematic(blocks, data);
     }
     
     /**
-     * Paste the schematic to current Players(s) island!
-     * TO-DO: add a schematic loader WITHOUT using WorldEdit!
-     * Warning: Might be slow!
-     * 
-     * @param loc       - The location need to paste
-     * @param player    - the player island
-     * @param teleport  - Teleport?
+     * This method prepares to pastes a schematic.
+     *
+     * @param blocks
+     * @param data
      */
-    @Deprecated
+    public void prePasteSchematic(short[] blocks, byte[] data) {
+        islandBlocks = new ArrayList<>();
+        Map<BlockVector, Map<String, Tag>> tileEntity = this.getTileEntitiesMap();
+        for (int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                for (int z = 0; z < length; ++z) {
+                    int index = y * width * length + z * width + x;
+                    // Only bother if this block is above ground zero and 
+                    // only bother with air if it is below sea level
+                    // TODO: need to check max world height too?
+                    int h = Settings.islandHieght + y - bedrock.getFloorY();
+                    if (h >= 0 && h < 255 && (blocks[index] != 0 || h < Settings.islandHieght)) {
+                        // Only bother if the schematic blocks are within the range that y can be
+                        //plugin.getLogger().info("DEBUG: height " + (count++) + ":" +h);
+                        IslandBlock block = new IslandBlock(x, y, z);
+                        if (!attachable.contains((int) blocks[index]) || blocks[index] == 179) {
+                            if (blocks[index] == 179) {
+                                // Red sandstone - use red sand instead
+                                block.setBlock(12, (byte) 1);
+                            } else {
+                                block.setBlock(blocks[index], data[index]);
+                            }
+                            // Tile Entities
+                            if (tileEntity.containsKey(new BlockVector(x, y, z))) {
+                                if (block.getTypeId() == Item.FLOWER_POT) {
+                                    block.setFlowerPot(tileEntity.get(new BlockVector(x, y, z)));
+                                }
+                            }
+                            islandBlocks.add(block);
+                        }
+                    }
+                }
+            }
+        }
+        for (int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                for (int z = 0; z < length; ++z) {
+                    int h = Settings.islandLevel + y - bedrock.getFloorY();
+                    if (h >= 0 && h < 255) {
+                        int index = y * width * length + z * width + x;
+                        IslandBlock block = new IslandBlock(x, y, z);
+                        if (attachable.contains((int) blocks[index])) {
+                            block.setBlock(blocks[index], data[index]);
+                            // Tile Entities
+                            if (tileEntitiesMap.containsKey(new BlockVector(x, y, z))) {
+                                // Wall Sign
+                                if (block.getTypeId() == Item.WALL_SIGN) {
+                                    block.setSign(tileEntitiesMap.get(new BlockVector(x, y, z)));
+                                }
+                            }
+                            islandBlocks.add(block);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Paste the schematic to current Players(s) island! TO-DO: add a schematic
+     * loader WITHOUT using WorldEdit! Warning: Might be slow!
+     *
+     * @param loc - The location need to paste
+     * @param player - the player island
+     * @param teleport - Teleports?
+     */
     @SuppressWarnings("deprecation")
-    public void pasteSchematic(final Location loc, final Player player)  {
-	plugin.getLogger().info("WE Pasting");
-	com.sk89q.worldedit.Vector WEorigin = new com.sk89q.worldedit.Vector(loc.getFloorX() - 3,loc.getFloorY(),loc.getFloorZ() - 3);
+    public void pasteWESchematic(final Position loc, final Player player, boolean teleport) {
+        Utils.ConsoleMsg("WorldEdit is Pasting");
+        com.sk89q.worldedit.Vector WEorigin = new com.sk89q.worldedit.Vector(loc.getFloorX() - 3, loc.getFloorY(), loc.getFloorZ() - 3);
         EditSession es = new EditSession(new NukkitWorld(loc.getLevel()), 999999999);
         try {
-        
-        CuboidClipboard cc = CuboidClipboard.loadSchematic(schematicFolder);
-        cc.paste(es, WEorigin, false);
-        cc.pasteEntities(WEorigin);
+            com.sk89q.worldedit.CuboidClipboard cc =  com.sk89q.worldedit.CuboidClipboard.loadSchematic(schematicFolder);
+            cc.paste(es, WEorigin, false);
         } catch (DataException | IOException | MaxChangedBlocksException e) {
-            e.printStackTrace();
+            if (plugin.isDebug()) {
+                e.printStackTrace();
+            }
         }
-    }   
+
+        if (teleport) {
+            Level world = loc.getLevel();
+
+            player.teleport(world.getSpawnLocation());
+            TaskManager.runTaskLater(() -> {
+                plugin.getGrid().homeTeleport(player);
+            }, 10);
+
+        }
+    }
+
+    /**
+     * This method pastes a schematic Without reading schematic
+     *
+     * @param loc
+     * @param player
+     * @param teleport
+     */
+    public void pasteSchematic(final Location loc, final Player player, boolean teleport) {
+        // If this is not a file schematic, paste the default island
+        if (this.schematicFolder == null) {
+            plugin.getFallback().createIsland(loc.getLevel(), loc.getFloorX(), loc.getFloorY(), loc.getFloorZ(), player);
+            Utils.ConsoleMsg(TextFormat.RED + "Missing schematic - using default block only");
+            return;
+        }
+        Level world = loc.getLevel();
+        Location blockLoc = new Location(loc.getX(), loc.getY(), loc.getZ(), world);
+        //Location blockLoc = new Location(world, loc.getX(), Settings.island_level, loc.getZ());
+        blockLoc.subtract(bedrock);
+        //plugin.getLogger().info("DEBUG: blockloc = " + blockLoc);
+        // Paste the island blocks
+        //plugin.getLogger().info("DEBUG: islandBlock size (paste) = " + islandBlocks.size());
+        islandBlocks.stream().forEach((b) -> {
+            b.paste(blockLoc, this.usePhysics);
+        });
+        // Find the grass spot
+        final Location grass;
+        if (topGrass != null) {
+            Vector3 gr = topGrass.clone().subtract(bedrock);
+            gr.add(loc);
+            gr.add(new Vector3(0.5D, 1.1D, 0.5D)); // Center of block and a bit up so the animal drops a bit
+            grass = new Location(gr.getX(), gr.getY(), gr.getZ(), world);
+        } else {
+            grass = null;
+        }
+        Block blockToChange = null;
+        // Place a helpful sign in front of player
+        if (welcomeSign != null) {
+            // Prepare the location
+            Vector3 ws = welcomeSign.clone().subtract(bedrock);
+            ws.add(loc);
+            // After that the NBT
+            blockToChange = new Location(ws.getX(), ws.getY(), ws.getZ(), world).getLevelBlock();
+            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                .putString("id", BlockEntity.SIGN)
+                .putString("Text1", "Welcome to your")
+                .putString("Text2", "Island")
+                .putString("Text3", player.getName())
+                .putString("Text4", "")
+                .putInt("x", ws.getFloorX())
+                .putInt("y", ws.getFloorY())
+                .putInt("z", ws.getFloorZ());
+            BlockEntity.createBlockEntity(BlockEntity.SIGN, player.chunk, nbt);
+            BlockEntitySign sign = new BlockEntitySign(player.chunk, nbt);
+            // Set spawn to ALL players
+            sign.spawnToAll();
+        }
+        if (teleport) {
+            player.teleport(world.getSpawnLocation());
+            TaskManager.runTaskLater(() -> {
+                plugin.getGrid().homeTeleport(player);
+            }, 10);
+        }
+    }
 
     /**
      * Get child tag of a NBT structure.
@@ -405,58 +568,105 @@ public class Schematic {
         return expected.cast(tag);
     }
 
-    private void prePasteSchematic(short[] blocks, byte[] data) {
-        //islandBlocks = new ArrayList<IslandBlock>();
-        Map<BlockVector, Map<String, Tag>> tileEntitiesMap = this.getTileEntitiesMap();
-//                for (int x = 0; x < width; ++x) {
-//            for (int y = 0; y < height; ++y) {
-//                for (int z = 0; z < length; ++z) {
-//                    int index = y * width * length + z * width + x;
-//                    // Only bother if this block is above ground zero and 
-//                    // only bother with air if it is below sea level
-//                    // TODO: need to check max world height too?
-//                    int h = Settings.islandHieght + y - bedrock.getFloorY();
-//                    if (h >= 0 && h < 255 && (blocks[index] != 0 || h < Settings.islandHieght)){
-//                        // Only bother if the schematic blocks are within the range that y can be
-//                        //plugin.getLogger().info("DEBUG: height " + (count++) + ":" +h);
-//                        IslandBlock block = new IslandBlock(x, y, z);
-//                        if (!attachable.contains((int)blocks[index]) || blocks[index] == 179) {
-//                            if (Bukkit.getServer().getVersion().contains("(MC: 1.7") && blocks[index] == 179) {
-//                                // Red sandstone - use red sand instead
-//                                block.setBlock(12, (byte)1);
-//                            } else {
-//                                block.setBlock(blocks[index], data[index]);
-//                            }
-//                            // Tile Entities
-//                            if (tileEntitiesMap.containsKey(new BlockVector(x, y, z))) {
-//                                if (plugin.isOnePointEight()) {
-//                                    if (block.getTypeId() == Material.STANDING_BANNER.getId()) {
-//                                        block.setBanner(tileEntitiesMap.get(new BlockVector(x, y, z)));
-//                                    }
-//                                    else if (block.getTypeId() == Material.SKULL.getId()) {
-//                                        block.setSkull(tileEntitiesMap.get(new BlockVector(x, y, z)), block.getData());
-//                                    }
-//                                    else if (block.getTypeId() == Material.FLOWER_POT.getId()) {
-//                                        block.setFlowerPot(tileEntitiesMap.get(new BlockVector(x, y, z)));
-//                                    }
-//                                }
-//                                // Monster spawner blocks
-//                                if (block.getTypeId() == Material.MOB_SPAWNER.getId()) {
-//                                    block.setSpawnerType(tileEntitiesMap.get(new BlockVector(x, y, z)));
-//                                } else if ((block.getTypeId() == Material.SIGN_POST.getId())) {
-//                                    block.setSign(tileEntitiesMap.get(new BlockVector(x, y, z)));
-//                                } else if (block.getTypeId() == Material.CHEST.getId()) {
-//                                    block.setChest(nms, tileEntitiesMap.get(new BlockVector(x, y, z)));
-//                                }
-//                            }
-//                            //islandBlocks.add(block);
-//                        }
-//                    }
-//                }
-//            }
-//        }
+    /**
+     * @return the biome
+     */
+    public Biome getBiome() {
+        return biome;
     }
 
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @return the file
+     */
+    public File getFile() {
+        return schematicFolder;
+    }
+
+    /**
+     * @return the heading
+     */
+    public String getHeading() {
+        return heading;
+    }
+
+    /**
+     * @return the height
+     */
+    public short getHeight() {
+        return height;
+    }
+
+    /**
+     * @return the durability of the icon
+     */
+    public int getDurability() {
+        return durability;
+    }
+
+    /**
+     * @return the length
+     */
+    public short getLength() {
+        return length;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @return the perm
+     */
+    public String getPerm() {
+        return perm;
+    }
+
+    /**
+     * @return the rating
+     */
+    public int getRating() {
+        return rating;
+    }
+
+    /**
+     * @return the tileEntitiesMap
+     */
+    @SuppressWarnings("ReturnOfCollectionOrArrayField")
+    public Map<BlockVector, Map<String, Tag>> getTileEntitiesMap() {
+        return tileEntitiesMap;
+    }
+
+    /**
+     * @return the width
+     */
+    public short getWidth() {
+        return width;
+    }
+
+    /**
+     * @return the useDefaultChest
+     */
+    public boolean isUseDefaultChest() {
+        return useDefaultChest;
+    }
+
+    /**
+     * @return the usePhysics
+     */
+    public boolean isUsePhysics() {
+        return usePhysics;
+    }
+    
     /**
      * @return true if player spawn exists in this schematic
      */
@@ -473,13 +683,6 @@ public class Schematic {
     }
 
     /**
-     * @return the tileEntitiesMap
-     */
-    public Map<BlockVector, Map<String, Tag>> getTileEntitiesMap() {
-        return tileEntitiesMap;
-    }
-
-    /**
      * @param playerSpawnBlock the playerSpawnBlock to set
      * @return true if block is found otherwise false
      */
@@ -490,14 +693,14 @@ public class Schematic {
         }
         playerSpawn = null;
         // Run through the schematic and try and find the spawnBlock
-//        for (IslandBlock islandBlock : islandBlocks) {
-//            if (islandBlock.getTypeId() == playerSpawnBlock.getId()) {
-//                playerSpawn = islandBlock.getVector().subtract(bedrock).add(new Vector(0.5D,0D,0.5D));
-//                // Set the block to air
-//                islandBlock.setTypeId((short)0);
-//                return true;
-//            }
-//        }
+        for (IslandBlock islandBlock : islandBlocks) {
+            if (islandBlock.getTypeId() == playerSpawnBlock.getId()) {
+                playerSpawn = islandBlock.getVector().subtract(bedrock).add(new Vector3(0.5D, 0D, 0.5D));
+                // Set the block to air
+                islandBlock.setTypeId((short) 0);
+                return true;
+            }
+        }
         return false;
     }
 
@@ -515,4 +718,111 @@ public class Schematic {
         this.levelHandicap = levelHandicap;
     }
 
+    /**
+     * Spawns a random companion for the player with a random name at the location given
+     * @param player
+     * @param location
+     */
+    protected void spawnCompanion(Player player, Location location) {
+        // Older versions of the server require custom names to only apply to Living Entities
+        //Bukkit.getLogger().info("DEBUG: spawning compantion at " + location);
+        if (!islandCompanion.isEmpty() && location != null) {
+            Random rand = new Random();
+            int randomNum = rand.nextInt(islandCompanion.size());
+            String type = islandCompanion.get(randomNum);
+            if (type != null) {
+                //EntityLiving companion = Entity.createEntity(name, chunk, nbt, motives).spawnEntity(location, type);
+                if (!companionNames.isEmpty()) {
+                    randomNum = rand.nextInt(companionNames.size());
+                    String var = companionNames.get(randomNum).replace("[player]", player.getDisplayName());
+                    //plugin.getLogger().info("DEBUG: name is " + name);
+                    //companion.setCustomName(name);
+                    //companion.setCustomNameVisible(true);
+                } 
+            }
+        }
+    }
+
+    /**
+     * @param islandCompanion the islandCompanion to set
+     */
+    @SuppressWarnings("AssignmentToCollectionOrArrayFieldFromParameter")
+    public void setIslandCompanion(List<String> islandCompanion) {
+        this.islandCompanion = islandCompanion;
+    }
+
+    /**
+     * @param companionNames the companionNames to set
+     */    
+    @SuppressWarnings("AssignmentToCollectionOrArrayFieldFromParameter")
+    public void setCompanionNames(List<String> companionNames) {
+        this.companionNames = companionNames;
+    }
+    
+    /**
+     * @param defaultChestItems the defaultChestItems to set
+     */
+    @SuppressWarnings("AssignmentToCollectionOrArrayFieldFromParameter")
+    public void setDefaultChestItems(Item[] defaultChestItems) {
+        this.defaultChestItems = defaultChestItems;
+    }
+    
+    /**
+     * @return the partnerName
+     */
+    @SuppressWarnings("AssignmentToCollectionOrArrayFieldFromParameter")
+    public String getPartnerName() {
+        return partnerName;
+    }
+
+    /**
+     * @param partnerName the partnerName to set
+     */
+    public void setPartnerName(String partnerName) {
+        this.partnerName = partnerName;
+    }
+
+    /**
+     * @return the pasteEntities
+     */
+    public boolean isPasteEntities() {
+        return pasteEntities;
+    }
+
+    /**
+     * @param pasteEntities the pasteEntities to set
+     */
+    public void setPasteEntities(boolean pasteEntities) {
+        this.pasteEntities = pasteEntities;
+    }
+
+    /**
+     * Whether the schematic is visible or not
+     * @return the visible
+     */
+    public boolean isVisible() {
+        return visible;
+    }
+
+    /**
+     * Sets if the schematic can be seen in the schematics GUI or not by the player
+     * @param visible the visible to set
+     */
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
+    /**
+     * @return the order
+     */
+    public int getOrder() {
+        return order;
+    }
+
+    /**
+     * @param order the order to set
+     */
+    public void setOrder(int order) {
+        this.order = order;
+    }
 }

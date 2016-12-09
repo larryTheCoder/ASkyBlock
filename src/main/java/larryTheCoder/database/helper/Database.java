@@ -26,7 +26,7 @@ import java.sql.SQLException;
  */
 public interface Database {
 
-public abstract Connection forceConnection() throws SQLException, ClassNotFoundException;
+    public abstract Connection forceConnection() throws SQLException, ClassNotFoundException;
     
     /**
      * Opens a connection with the database.

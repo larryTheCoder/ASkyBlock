@@ -79,7 +79,7 @@ public class IslandCreateEvent extends Event implements Cancellable {
      * @return the isLocked
      */
     public boolean isLocked() {
-        return island.locked.equalsIgnoreCase("true");
+        return island.locked == 0;
     }
 
     /**

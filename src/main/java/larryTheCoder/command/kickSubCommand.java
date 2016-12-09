@@ -20,7 +20,6 @@ package larryTheCoder.command;
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.island.Island;
 
 /**
  * @author larryTheCoder
@@ -59,7 +58,7 @@ public class KickSubCommand extends SubCommand{
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if(Island.checkIsland(p)){
+        if(getPlugin().getIsland().checkIsland(p)){
             sender.sendMessage(getMsg("no_island_error"));
             return true;
         } else if(args.length != 1){
@@ -69,7 +68,7 @@ public class KickSubCommand extends SubCommand{
             sender.sendMessage(getMsg("player_error").replace("[player]", args[1]));
             return true;
         }
-        Island.kickPlayerByName(p, args[1]);
+        getPlugin().getIsland().kickPlayerByName(p, args[1]);
         return true;
     }
 

@@ -27,11 +27,11 @@ import cn.nukkit.event.block.BlockPlaceEvent;
 import cn.nukkit.event.entity.EntityExplodeEvent;
 import cn.nukkit.event.player.PlayerCommandPreprocessEvent;
 import cn.nukkit.event.player.PlayerItemHeldEvent;
+import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
-import larryTheCoder.island.Island;
 
 /**
  * @author larryTheCoder
@@ -47,12 +47,24 @@ public class IslandListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onCommand(PlayerCommandPreprocessEvent event) {
         Player p = event.getPlayer();
-        if (!Island.checkIslandAt(p.getLocation())) {
+        if (p == null) {
+            return;
+        }
+        if (!p.isOnGround()
+                && !plugin.getIsland().isTeleport(p)
+                && event.getMessage().equalsIgnoreCase("/is")
+                && p.level.getName().equalsIgnoreCase("SkyBlock")
+                || !(p.isCreative())
+                && p.level.getName().equalsIgnoreCase("SkyBlock")) {
+            p.sendMessage(plugin.getPrefix() + TextFormat.RED + " You cant teleport back to your island!");
+            return;
+        }
+        if (!plugin.getIsland().checkIslandAt(p.getLocation())) {
             return;
         }
         String msg = event.getMessage();
         String umsg = msg.toUpperCase();
-        for (final String restrictedCmd : ConfigManager.whitelistedCommands) {
+        for (final String restrictedCmd : Settings.bannedCommands) {
             if (umsg.startsWith(restrictedCmd.toUpperCase())) {
                 if (!p.isOp()) {
                     p.sendMessage(plugin.getPrefix() + plugin.getMsg("command_disabled"));
@@ -70,17 +82,17 @@ public class IslandListener implements Listener {
         Block blk = e.getBlock();
         Location breakLoc = blk.getLocation();
         Player p = e.getPlayer();
-        if (!Island.CanPlayerAccess(p, breakLoc, TextFormat.RED + " You can't break there!")) {
+        if (!plugin.getIsland().CanPlayerAccess(p, breakLoc)) {
+            p.sendMessage(plugin.getMsg("break_error"));
             e.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onBlockPlace(BlockPlaceEvent e) {
-        Location placeLoc;
-        Block blk;
         Player p = e.getPlayer();
-        if (!Island.CanPlayerAccess(p, placeLoc = (blk = e.getBlock()).getLocation(), TextFormat.RED + "[SkyBlock] You can't place blocks there!")) {
+        if (!plugin.getIsland().CanPlayerAccess(p, e.getBlock().getLocation())) {
+            p.sendMessage(plugin.getMsg("place_error"));
             e.setCancelled(true);
         }
     }
@@ -89,12 +101,12 @@ public class IslandListener implements Listener {
     public void onEntityExplode(EntityExplodeEvent ev) {
         ArrayList<Block> blocksToSkip = new ArrayList<>();
         Location rootLoc = (Location) ev.getPosition();
-        if (!Island.checkIslandAt(rootLoc)) {
+        if (!plugin.getIsland().checkIslandAt(rootLoc)) {
             return;
         }
         ev.getBlockList().stream().forEach((b2) -> {
             Location loc = b2.getLocation();
-            IslandData data = Island.GetIslandAt(loc);
+            IslandData data = plugin.getIsland().GetIslandAt(loc);
             if (!(data == null || data.owner == null)) {
                 blocksToSkip.add(b2);
             }
@@ -108,12 +120,10 @@ public class IslandListener implements Listener {
     public void onBlockFromTo(BlockFromToEvent e) {
         Block b = e.getTo();
         Location loc = b.getLocation();
-        if (!Island.checkIslandAt(loc)) {
+        if (!plugin.getIsland().checkIslandAt(loc)) {
             return;
         }
-        int x = loc.getFloorX();
-        int z = loc.getFloorZ();
-        if (x % Settings.islandSize == 0 || z % Settings.islandSize == 0) {
+        if (plugin.getGrid().onGrid(loc)) {
             e.setCancelled(true);
         }
     }
@@ -126,13 +136,19 @@ public class IslandListener implements Listener {
             return;
         }
         Location loc = p.getLocation();
-        if (Island.checkIslandAt(loc)) {
+        if (plugin.getIsland().checkIslandAt(loc)) {
             if ((item.getId()) == Item.BLAZE_ROD) {
-                Island.islandInfo(p, loc);
+                plugin.getIsland().islandInfo(p, loc);
             }
-            if (!Island.CanPlayerAccess(p, loc, TextFormat.RED + "[SkyBlock] No permission here.")) {
+            if (!plugin.getIsland().CanPlayerAccess(p, loc)) {
                 e.setCancelled(true);
             }
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerJoin(PlayerJoinEvent ex) {
+        // load player inventory if exsits
+        plugin.getInventory().loadPlayerInventory(ex.getPlayer());
     }
 }

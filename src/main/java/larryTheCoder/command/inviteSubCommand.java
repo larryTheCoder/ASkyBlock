@@ -21,7 +21,6 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import larryTheCoder.ASkyBlock;
 import larryTheCoder.IslandData;
-import larryTheCoder.island.Island;
 
 /**
  * @author larryTheCoder
@@ -63,7 +62,7 @@ public class inviteSubCommand extends SubCommand {
             return false;
         }
         Player p = sender.getServer().getPlayer(sender.getName());    
-        if(!Island.checkIsland(p)){
+        if(!getPlugin().getIsland().checkIsland(p)){
             sender.sendMessage(getMsg("no_island_error"));
             return true;
         }

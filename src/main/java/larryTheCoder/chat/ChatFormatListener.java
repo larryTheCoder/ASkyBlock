@@ -18,6 +18,8 @@
 package larryTheCoder.chat;
 
 import cn.nukkit.Player;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.utils.TextFormat;
@@ -26,7 +28,7 @@ import larryTheCoder.ASkyBlock;
 /** 
  * @author larryTheCoder
  */
-public class ChatFormatListener implements Listener{
+public class ChatFormatListener implements Listener {
 
     public final ASkyBlock plugin;
 
@@ -34,6 +36,7 @@ public class ChatFormatListener implements Listener{
         this.plugin = plugin;
     }
 
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(PlayerChatEvent e){
         Player p = e.getPlayer();
         if(!p.hasPermission("is.format") && e.getMessage().contains("&")){

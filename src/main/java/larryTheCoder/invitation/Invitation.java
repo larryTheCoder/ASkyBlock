@@ -20,7 +20,6 @@ import cn.nukkit.Player;
 import cn.nukkit.utils.TextFormat;
 import larryTheCoder.ASkyBlock;
 import larryTheCoder.IslandData;
-import larryTheCoder.island.Island;
 
 /**
  * @author larryTheCoder
@@ -72,7 +71,7 @@ public class Invitation {
     }
 
     public void accept() {
-        Island.addMember(sender, island, receiver.getName());
+        handler.getPlugin().getIsland().addMember(sender, island, receiver.getName());
     }
 
     public void deny() {

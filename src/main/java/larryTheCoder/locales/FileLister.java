@@ -34,14 +34,15 @@ import larryTheCoder.ASkyBlock;
 public final class FileLister {
 
     private final ASkyBlock plugin;
-    private final static String FOLDERPATH = "locale";
+    private final String FOLDERPATH;
 
-    public FileLister(ASkyBlock plugin) {
+    public FileLister(ASkyBlock plugin, String folderPath) {
         this.plugin = plugin;
+        FOLDERPATH = folderPath;
     }
 
     public List<String> list() throws IOException {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
 
         // Check if the locale folder exists
         File localeDir = new File(plugin.getDataFolder(), FOLDERPATH);

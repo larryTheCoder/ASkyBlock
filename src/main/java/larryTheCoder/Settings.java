@@ -18,16 +18,25 @@
 package larryTheCoder;
 
 import cn.nukkit.item.Item;
+import cn.nukkit.level.generator.biome.Biome;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author larryTheCoder
  */
 public class Settings {  
     
-    public static Item[] chestItems;
-    public static int islandSize;
-    public static int islandHieght;
-    public static ArrayList<String> bannedCommands;
-    public static int resetTimer;
+    public static Item[] chestItems = new Item[0];
+    public static int islandSize = 200;
+    public static int islandHieght = 60;
+    public static ArrayList<String> bannedCommands = new ArrayList<>();
+    public static int islandLevel = 0;
+    public static int reset = 3;
+    public static int memberTimeOut;
+    
+    public static Biome defaultBiome = Biome.getBiome(Biome.PLAINS);
+    public static boolean usePhysics = false;
+    public static String islandCompanion = "COW";
+    public static List<String> companionNames = new ArrayList<>();    
 }

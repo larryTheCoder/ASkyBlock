@@ -38,7 +38,6 @@ public class Utils {
     public static String LOCALES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "locales";
     public static String DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator;
     public static ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap<>();
-    
 
     public static void ClearPotionEffects(Player p) {
         try {
@@ -59,7 +58,9 @@ public class Utils {
                 config = new Config();
                 config.load(file);
             } catch (Exception e) {
-                e.printStackTrace();
+                if (ASkyBlock.get().isDebug()) {
+                    e.printStackTrace();
+                }
             }
         } else {
             // Create the missing file
@@ -80,7 +81,7 @@ public class Utils {
         }
         return config;
     }
-        
+
     public static boolean TooSoon(Player p, String what, int seconds) {
         if (p.hasPermission("is.bypass.wait")) {
             return false;
@@ -99,13 +100,13 @@ public class Utils {
         tooSoon.put(key, curMS);
         return false;
     }
-    
-    public static String getPlayerResetTime(Player p, String what, int seconds){
-                String key = String.valueOf(what) + "." + p.getName();
+
+    public static String getPlayerResetTime(Player p, String what, int seconds) {
+        String key = String.valueOf(what) + "." + p.getName();
         Long msBefore = tooSoon.get(key);
         Long curMS = System.currentTimeMillis();
-                    Long msDelta = curMS - msBefore;
-            Long msWaitTime = 1000 * (long) seconds;
+        Long msDelta = curMS - msBefore;
+        Long msWaitTime = 1000 * (long) seconds;
         String e = Utils.TimeDeltaString_JustMinutesSecs(msWaitTime - msDelta);
         return e;
     }
@@ -143,17 +144,16 @@ public class Utils {
         }
         return String.valueOf(loc.getLevel().getName()) + "(" + loc.getFloorX() + "," + loc.getFloorY() + "," + loc.getFloorZ() + ")";
     }
-    
+
     /**
      * Converts a serialized location to a Location. Returns null if string is
      * empty
-     * 
-     * @param s
-     *            - serialized location in format "world:x:y:z"
+     *
+     * @param s - serialized location in format "world:x:y:z"
      * @return Location
      */
-    public static Location getLocationString(final String s){
-                if (s == null || s.trim() == "") {
+    public static Location getLocationString(final String s) {
+        if (s == null || s.trim() == "") {
             return null;
         }
         final String[] parts = s.split(":");
@@ -182,9 +182,9 @@ public class Utils {
     }
 
     /**
-     * Converts a location to a simple string representation
-     * If location is null, returns empty string
-     * 
+     * Converts a location to a simple string representation If location is
+     * null, returns empty string
+     *
      * @param l
      * @return String of location
      */
@@ -192,8 +192,9 @@ public class Utils {
         if (location == null || location.getLevel() == null) {
             return "";
         }
-        return  location.getFloorX() + ":" + location.getFloorY() + ":" + location.getFloorZ() + ":" + Float.floatToRawIntBits((float)location.getYaw()) + ":" + Float.floatToIntBits((float) location.getPitch()) + ":" + location.getLevel().getName();
+        return location.getFloorX() + ":" + location.getFloorY() + ":" + location.getFloorZ() + ":" + Float.floatToRawIntBits((float) location.getYaw()) + ":" + Float.floatToIntBits((float) location.getPitch()) + ":" + location.getLevel().getName();
     }
+
     public static String LocStringShortNoWorld(Location loc) {
         if (loc == null) {
             return "NULL";
@@ -212,10 +213,22 @@ public class Utils {
         return buf.toString();
     }
 
-    public static void EnsureDirectory(String dirName) {
+    public static boolean isNumeric(final String str) {
+        if (str == null) {
+            return false;
+        }
+        for (int sz = str.length(), i = 0; i < sz; ++i) {
+            if (!Character.isDigit(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean EnsureDirectory(String dirName) {
         File pDir = new File(dirName);
         if (pDir.isDirectory()) {
-            return;
+            return false;
         }
         try {
             Server.getInstance().getLogger().info("Creating directory: " + dirName);
@@ -223,6 +236,7 @@ public class Utils {
         } catch (Throwable exc) {
             Server.getInstance().getLogger().error("EnsureDirectory " + dirName + ": " + exc.toString());
         }
+        return true;
     }
 
     public static void ConsoleMsg(String msg) {
@@ -314,45 +328,8 @@ public class Utils {
         int mins = (int) (ms / 1000 / 60 % 60);
         return String.format("%02dm %02ds", mins, secs);
     }
-    
-    public static int getInt(String in){
-        int l = 0;
-        switch(in){
-            case "1":
-                l = 1;
-                break;
-            case "2":
-                l = 2;
-                break;
-            case "3":
-                l = 3;
-                break;
-            case "4":
-                l = 4;
-                break;
-            case "5":
-                l = 5;
-                break;
-            case "6":
-                l = 6;
-                break;
-            case "7":
-                l = 7;
-                break;
-            case "8":
-                l = 8;
-                break;
-            case "9":
-                l = 9;
-                break;
-            case "10":
-                l = 10;
-                break;
-                                    
-        }
-        if(l == 0){
-            return -1;
-        }
-        return l;
+
+    public static int getInt(String in) {
+        return Integer.parseInt(in);
     }
 }

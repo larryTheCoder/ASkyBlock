@@ -33,7 +33,9 @@ public class TaskManager {
                 } catch (RuntimeException e) {
                     this.value = e;
                 } catch (Throwable neverHappens) {
-                    neverHappens.printStackTrace();
+                    if (ASkyBlock.get().isDebug()) {
+                        neverHappens.printStackTrace();
+                    }
                 } finally {
                     running.set(false);
                 }
@@ -50,7 +52,9 @@ public class TaskManager {
                 }
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            if (ASkyBlock.get().isDebug()) {
+                e.printStackTrace();
+            }
         }
         if (run.value != null) {
             throw run.value;
@@ -100,6 +104,7 @@ public class TaskManager {
 
     /**
      * Run task later.
+     *
      * @param runnable The task
      * @param delay The delay in ticks
      */
@@ -124,7 +129,9 @@ public class TaskManager {
     }
 
     /**
-     * Break up a series of tasks so that they can run without lagging the server.
+     * Break up a series of tasks so that they can run without lagging the
+     * server.
+     *
      * @param objects
      * @param task
      * @param whenDone
@@ -174,7 +181,6 @@ public class TaskManager {
         ASkyBlock.get().getServer().getScheduler().scheduleTask(r, false);
     }
 
-    
     public void taskLater(Runnable r, int delay) {
         if (r == null) {
             return;
@@ -192,4 +198,3 @@ public class TaskManager {
         }
     }
 }
-

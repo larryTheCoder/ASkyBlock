@@ -36,10 +36,10 @@ import larryTheCoder.command.ASetLobbySubCommand;
 import larryTheCoder.command.ToggleSubCommand;
 import larryTheCoder.command.acceptSubCommand;
 import larryTheCoder.command.denySubCommand;
+import larryTheCoder.command.homeSubCommand;
 import larryTheCoder.command.infoSubCommand;
 import larryTheCoder.command.inviteSubCommand;
 import larryTheCoder.command.teleportSubCommand;
-import larryTheCoder.island.Island;
 
 /**
  * @author larryTheCoder
@@ -48,6 +48,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
 
     private final List<SubCommand> commands = new ArrayList<>();
     private final ConcurrentHashMap<String, Integer> SubCommand = new ConcurrentHashMap<>();
+    private final ASkyBlock plugin;
 
     @SuppressWarnings({"unchecked", "OverridableMethodCallInConstructor"})
     public Commands(ASkyBlock plugin) {
@@ -55,6 +56,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.setAliases(new String[]{"sky", "island", "skyblock"});
         this.setPermission("is.command");
         this.setDescription("SkyBlock main command");
+        this.plugin = plugin;
 
         //this.loadSubCommand(new AGenerateSubCommand(getPlugin()));
         this.loadSubCommand(new acceptSubCommand(getPlugin()));
@@ -64,12 +66,13 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.loadSubCommand(new denySubCommand(getPlugin()));
         this.loadSubCommand(new deleteSubCommand(getPlugin()));
         this.loadSubCommand(new infoSubCommand(getPlugin()));
-        this.loadSubCommand(new inviteSubCommand(getPlugin()));    
+        this.loadSubCommand(new inviteSubCommand(getPlugin()));
         this.loadSubCommand(new KickSubCommand(getPlugin()));
         this.loadSubCommand(new leaveSubCommand(getPlugin()));
         this.loadSubCommand(new teleportSubCommand(getPlugin()));
         this.loadSubCommand(new ToggleSubCommand(getPlugin()));
-        this.loadSubCommand(new VGamemodeSubCommand(getPlugin()));      
+        this.loadSubCommand(new VGamemodeSubCommand(getPlugin()));
+        this.loadSubCommand(new homeSubCommand(getPlugin()));
     }
 
     private void loadSubCommand(SubCommand cmd) {
@@ -86,7 +89,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
         if (args.length == 0) {
             if (sender.isPlayer() && sender.hasPermission("is.create")) {
                 Player p = getPlugin().getServer().getPlayer(sender.getName());
-                Island.handleIslandCommand(p);
+                plugin.getIsland().handleIslandCommand(p);
             } else if (!(sender instanceof Player)) {
                 return this.sendHelp(sender, args);
             } else {
@@ -120,21 +123,8 @@ public class Commands extends PluginCommand<ASkyBlock> {
     private boolean sendHelp(CommandSender sender, String[] args) {
         int pageNumber = 1;
         int pageHeight = 5;
-        if (args.length == 2) {
-            String number = args[1];
-            switch (number) {
-                case "1":
-                    pageNumber = 1;
-                    break;
-                case "2":
-                    pageNumber = 2;
-                    break;
-                case "3":
-                    pageNumber = 3;
-                    break;
-                default:
-                    pageNumber = 1;
-            }
+        if (args.length == 2 && Utils.isNumeric(args[1])) {
+            pageNumber = Integer.parseInt(args[1]);
         }
         int totalPage = commands.size() % pageHeight == 0 ? commands.size() / pageHeight : commands.size() / pageHeight + 1;
         pageNumber = Math.min(pageNumber, totalPage);

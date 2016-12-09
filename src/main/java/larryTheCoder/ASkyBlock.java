@@ -28,17 +28,11 @@ import cn.nukkit.level.generator.Generator;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.utils.Config;
-import cn.nukkit.utils.LogLevel;
 import cn.nukkit.utils.TextFormat;
-import com.intellectiualcrafters.TaskManager;
 import com.intellectiualcrafters.updater.Updater;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +41,11 @@ import larryTheCoder.chat.ChatFormatListener;
 import larryTheCoder.chat.ChatHandler;
 import larryTheCoder.database.ASConnection;
 import larryTheCoder.database.helper.SQLiteDatabase;
+import larryTheCoder.entity.BaseEntity;
 import larryTheCoder.invitation.InvitationHandler;
+import larryTheCoder.island.GridManager;
+import larryTheCoder.island.IslandFallback;
+import larryTheCoder.island.IslandManager;
 import larryTheCoder.schematic.Schematic;
 
 /**
@@ -65,6 +63,11 @@ public class ASkyBlock extends PluginBase {
     private ChatHandler chatHandler;
     private static ASkyBlock object;
     private InvitationHandler invitationHandler;
+    private IslandManager manager;
+    private GridManager grid;
+    private IslandFallback backup;
+    private InventorySave inventory;
+    private BaseEntity entity;
 
     /**
      * Try to register a schematic manually
@@ -196,6 +199,56 @@ public class ASkyBlock extends PluginBase {
         return invitationHandler;
     }
 
+    /**
+     * Get the island Manager section
+     *
+     * @api
+     * @return IslandManager
+     */
+    public IslandManager getIsland() {
+        return manager;
+    }
+
+    /**
+     * Get the GridManager Manager section
+     *
+     * @api
+     * @return GridManager
+     */
+    public GridManager getGrid() {
+        return grid;
+    }
+    
+    /**
+     * Get the GridManager Manager section
+     *
+     * @api
+     * @return InventorySave
+     */
+    public InventorySave getInventory(){
+        return inventory;
+    }
+    
+    /**
+     * Get the Island backup section
+     *
+     * @api
+     * @return GridManager
+     */
+    public IslandFallback getFallback(){
+        return backup;
+    }
+    
+    /**
+     * Get the BaseEntity section
+     *
+     * @api
+     * @return BaseEntity
+     */
+    public BaseEntity getEManager(){
+        return entity;
+    }
+
 //  #################################### NON-API ####################################
     @Override
     public void onLoad() {
@@ -219,6 +272,7 @@ public class ASkyBlock extends PluginBase {
     public void onDisable() {
         Utils.ConsoleMsg(TextFormat.GREEN + "Saving islands framework");
         saveLevel();
+        getDatabase().close();
         Utils.ConsoleMsg(TextFormat.RED + "ASkyBlock ~ Disabled seccessfully");
     }
 
@@ -254,7 +308,7 @@ public class ASkyBlock extends PluginBase {
      * TO-DO: Support Multi-World
      */
     private void saveLevel() {
-        
+
     }
 
     private void registerObject() {
@@ -264,17 +318,27 @@ public class ASkyBlock extends PluginBase {
         if (cfg.getBoolean("updater")) {
             Updater.getUpdate();
         }
+        this.manager = new IslandManager(this);
+        this.grid = new GridManager(this);
+        
+        this.entity = new BaseEntity(this);
+        inventory = new InventorySave(this);
+        backup = new IslandFallback(this);
+        backup.init();        
         this.getServer().getCommandMap().register("SkyBlock", new Commands(this));
+        
         try {
             this.db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), "null", false);
         } catch (SQLException | ClassNotFoundException ex) {
-            ex.printStackTrace();
+            if (ASkyBlock.get().isDebug()) {
+                ex.printStackTrace();
+            }
         }
         reloadLevel();
         Level world = getServer().getLevelByName("SkyBlock");
         world.setTime(1600);
         world.stopTime();
-        if (cfg.getBoolean("chat.use_chat_formatting") == true) {
+        if (cfg.getBoolean("chat.UCFormatting") == true) {
             getServer().getPluginManager().registerEvents(new ChatFormatListener(this), this);
         }
         // Register TaskManager
@@ -282,15 +346,15 @@ public class ASkyBlock extends PluginBase {
     }
 
     public String getPrefix() {
-        return cfg.getString("Prefix").replaceAll("&", "§");
+        return cfg.getString("Prefix").replace("&", "§");
     }
 
     public String getMsg(String key) {
-        String mssg = msg.getString(key).replaceAll("&", "§");
+        String mssg = msg.getString(key).replace("&", "§");
         return mssg;
     }
 
-    private void initConfig() {
+    public final void initConfig() {
         Utils.EnsureDirectory(Utils.DIRECTORY);
         Utils.EnsureDirectory(Utils.LOCALES_DIRECTORY);
         //initLocales();        
@@ -352,7 +416,9 @@ public class ASkyBlock extends PluginBase {
                     schematics.put("default", new Schematic(this, schematicFile));
                 } catch (IOException e) {
                     getServer().getLogger().info("Could not load default schematic!");
-                    e.printStackTrace();
+                    if (ASkyBlock.get().isDebug()) {
+                        e.printStackTrace();
+                    }
                 }
                 // If this is repeated later due to the schematic config, fine, it will only add info
             } else {
@@ -366,14 +432,15 @@ public class ASkyBlock extends PluginBase {
                 schematics.put("default", new Schematic(this, schematicFile));
             } catch (IOException e) {
                 getServer().getLogger().error("Could not load default schematic!");
-                e.printStackTrace();
+                if (ASkyBlock.get().isDebug()) {
+                    e.printStackTrace();
+                }
             }
         }
         // Add the nether default too
         if (!netherFile.exists()) {
             if (getResource("schematics/nether.schematic") != null) {
                 saveResource("schematics/nether.schematic", false);
-
                 // Add it to schematics
                 try {
                     Schematic netherIsland = new Schematic(this, netherFile);
@@ -381,7 +448,9 @@ public class ASkyBlock extends PluginBase {
                     schematics.put("nether", netherIsland);
                 } catch (IOException e) {
                     getServer().getLogger().error("Could not load default nether schematic!");
-                    e.printStackTrace();
+                    if (ASkyBlock.get().isDebug()) {
+                        e.printStackTrace();
+                    }
                 }
             } else {
                 getServer().getLogger().error("Could not find default nether schematic!");
@@ -394,27 +463,12 @@ public class ASkyBlock extends PluginBase {
                 schematics.put("nether", netherIsland);
             } catch (IOException e) {
                 getServer().getLogger().error("Could not load default nether schematic!");
-                e.printStackTrace();
+                if (ASkyBlock.get().isDebug()) {
+                    e.printStackTrace();
+                }
             }
         }
-        getLogger(getPrefix() + TextFormat.GREEN + "Seccessfully loaded island Schematic", "info");
+        Utils.ConsoleMsg(TextFormat.GREEN + "Seccessfully loaded island Schematic");
     }
 
-    public void getLogger(String key, String logger) {
-        switch (logger.toLowerCase()) {
-            case "info":
-                getServer().getLogger().info(key);
-                break;
-            case "error":
-                getServer().getLogger().error(key);
-                break;
-            case "alert":
-                getServer().getLogger().alert(key);
-                break;
-            default:
-                getServer().getLogger().info(key);
-                break;
-        }
-
-    }
 }

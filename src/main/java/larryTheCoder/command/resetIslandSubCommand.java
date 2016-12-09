@@ -21,7 +21,6 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.TextFormat;
 import larryTheCoder.ASkyBlock;
 import larryTheCoder.Utils;
-import larryTheCoder.island.Island;
 
 /**
  * @author larryTheCoder
@@ -63,7 +62,7 @@ public class resetIslandSubCommand extends SubCommand {
             return false;
         }
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if (Island.checkIsland(p)) {
+        if (getPlugin().getIsland().checkIsland(p)) {
             sender.sendMessage(getPrefix() + getMsg("no_island_error"));
             return true;
         }
@@ -71,7 +70,7 @@ public class resetIslandSubCommand extends SubCommand {
             sender.sendMessage(getPrefix() + TextFormat.RED + "You dont have homes that LOT!");
             return true;
         }
-        Island.reset(p, true, Utils.getInt(args[1]));
+        getPlugin().getIsland().reset(p, true, Utils.getInt(args[1]));
         return true;
     }
 

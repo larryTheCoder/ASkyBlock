@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package larryTheCoder.database.helper;
 
 import java.io.File;
@@ -24,22 +23,21 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import larryTheCoder.ASkyBlock;
 import larryTheCoder.Utils;
 import org.sqlite.JDBC;
 
 /**
  * @author larryTheCoder
  */
-public class SQLiteDatabase implements Database{
+public class SQLiteDatabase implements Database {
 
     private Connection connection;
     private String dbLocation;
 
-    public SQLiteDatabase(File data){
+    public SQLiteDatabase(File data) {
         this.dbLocation = data.getAbsolutePath();
     }
-    
+
     @Override
     public Connection openConnection() throws SQLException, ClassNotFoundException {
         if (checkConnection()) {
@@ -53,8 +51,12 @@ public class SQLiteDatabase implements Database{
                 Utils.ConsoleMsg("&cUnable to create database!");
             }
         }
-        java.util.Properties info = new java.util.Properties();
-        this.connection = JDBC.createConnection("jdbc:sqlite:" + this.dbLocation, info);// DriverManager.getConnection("jdbc:sqlite:" + this.dbLocation);
+        try {
+            java.util.Properties info = new java.util.Properties();
+            this.connection = JDBC.createConnection("jdbc:sqlite:" + this.dbLocation, info);// DriverManager.getConnection("jdbc:sqlite:" + this.dbLocation);
+        } catch (SQLException ex) {
+            forceConnection();
+        }
         return this.connection;
     }
 

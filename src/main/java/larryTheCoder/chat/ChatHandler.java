@@ -25,7 +25,6 @@ import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.utils.TextFormat;
 import java.util.concurrent.ConcurrentHashMap;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.island.Island;
 
 /**
  * @author larryTheCoder
@@ -67,8 +66,8 @@ public class ChatHandler implements Listener {
         // Is team chat on for this player
         // Find out if this player is in a team (should be if team chat is on)
         // TODO: remove when player resets or leaves team
-        if ((Island.getPlayerMembers(player).isEmpty()) == false) {
-            String teamMembers = Island.getPlayerMembers(player);
+        if ((plugin.getIsland().getPlayerMembers(player).isEmpty()) == false) {
+            String teamMembers = plugin.getIsland().getPlayerMembers(player);
             // Tell only the team members if they are online
             boolean online = false;
             Player teamPlayer = plugin.getServer().getPlayer(teamMembers);

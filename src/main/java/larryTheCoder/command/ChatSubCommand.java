@@ -19,9 +19,7 @@ package larryTheCoder.command;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
-import java.util.UUID;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.island.Island;
 
 /**
  * @author larryTheCoder
@@ -60,11 +58,11 @@ public class ChatSubCommand extends SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = Server.getInstance().getPlayer(sender.getName());
-        if (Island.checkIsland(p)) {
+        if (getPlugin().getIsland().checkIsland(p)) {
             sender.sendMessage(getMsg("no_island_error"));
             return true;
         }
-//        if (plugin.getPlayers().inTeam(playerUUID)) {
+//        if (plugin.ggetDa.inTeam(playerUUID)) {
 //            // Check if team members are online
 //            boolean online = false;
 //            for (UUID teamMember : plugin.getPlayers().getMembers(playerUUID)) {

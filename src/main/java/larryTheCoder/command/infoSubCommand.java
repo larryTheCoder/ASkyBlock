@@ -21,7 +21,6 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import java.util.ArrayList;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.island.Island;
 
 /**
  * @author larryTheCoder
@@ -66,7 +65,7 @@ public class infoSubCommand extends SubCommand{
                 return true;
             }
         }
-        Island.islandInfo(p, p.getLocation());
+        getPlugin().getIsland().islandInfo(p, p.getLocation());
         return true;
     }
 

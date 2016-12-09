@@ -61,7 +61,7 @@ public class ToggleSubCommand extends SubCommand{
     public boolean execute(CommandSender sender, String[] args) {
         Player p = sender.getServer().getPlayer(sender.getName());
         if(args.length == 2){
-            sender.sendMessage(TextFormat.GRAY + "Too few parameters Use: /is tgg help");
+            sender.sendMessage(TextFormat.GRAY + "Too few parameters Usage: /is tgg help");
             return true;
         }
         switch(args[2]){
@@ -70,7 +70,7 @@ public class ToggleSubCommand extends SubCommand{
                 break;
             case "teleport":
                 if(args.length != 3){
-                    sender.sendMessage(TextFormat.GRAY + "Too few parameters Usesae: /is tgg teleport <boolean>");
+                    sender.sendMessage(TextFormat.GRAY + "Too few parameters Usage: /is tgg teleport <true | false>");
                     break;
                 }
                 if(!args[3].equalsIgnoreCase("true") || !args[3].equalsIgnoreCase("false")){
@@ -78,7 +78,16 @@ public class ToggleSubCommand extends SubCommand{
                     break;
                 }
                 IslandData pd = getPlugin().getDatabase().getIsland(sender.getName());
-                pd.locked = args[3].toLowerCase();
+                switch(args[3]){
+                    case "true":
+                        pd.locked = 0;
+                        break;
+                    case "false":
+                        pd.locked = 1;
+                        break;
+                    default:
+                        sender.sendMessage(TextFormat.GRAY + "Invilad parameters Usage: /is tgg teleport <true | false>");
+                }
         }
         return true;
     }

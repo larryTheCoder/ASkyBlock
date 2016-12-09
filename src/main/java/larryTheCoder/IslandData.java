@@ -16,16 +16,17 @@
  */
 package larryTheCoder;
 
-import cn.nukkit.level.generator.biome.Biome;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Taken from PlotMe
  *
  * @author larryTheCoder
  */
-public class IslandData {
+public class IslandData implements Cloneable{
 
+    public int islandId;
     public int id;
     public String levelName;
     public int X;
@@ -34,7 +35,8 @@ public class IslandData {
     public String owner;
     public ArrayList<String> members;
     public String biome;
-    public String locked;    
+    // 0 = UNLOCKED, 1 = LOCKED
+    public int locked;    
     public String team;
     public int floor_y;
 
@@ -46,7 +48,7 @@ public class IslandData {
     }
 
     @SuppressWarnings("AssignmentToMethodParameter")
-    public IslandData(String levelName, int X, int Y, int Z, String name, String owner, String team, ArrayList<String> helpers, String biome, int id, String locked) {
+    public IslandData(String levelName, int X, int Y, int Z, String name, String owner, String team, HashMap<Integer, String> helpers, String biome, int id, int islandId, int locked) {
         if (biome.isEmpty()) {
             biome = "PLAINS";
         }
@@ -57,13 +59,32 @@ public class IslandData {
         this.Z = Z;
         this.name = name;
         this.owner = owner;
-        this.members = helpers;
+        ArrayList<String> set = new ArrayList<>();
+        helpers.keySet().stream().filter((isid) -> (isid == islandId)).forEach((isid) -> {
+            set.add(helpers.get(isid));
+        });
+        this.members = set;
         this.biome = biome;
         this.id = id;
+        this.islandId = islandId;
         this.locked = locked;
     }
     
     public boolean isMember(String p){
         return members.contains(p);
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        try {
+            return super.clone();
+        }
+        catch (CloneNotSupportedException e) {
+            // This should never happen
+            throw new InternalError(e.toString());
+        }
     }
 }

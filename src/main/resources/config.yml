@@ -1,36 +1,63 @@
-### Default Config larryTheHarry
-## Version ${version}
-## [X] means - Function is available
+## Default Config for ASkyBlock
 ---
-# Game Prefix.
-Prefix: "&8[&e&lSkyBlock&r&8]&f "
-## Max islands homes - Unvailable [DO NOT SET MROE THAN 1]
+## Game Prefix.
+Prefix: "&c[&r&6Sky&bBlock&c]&r"
+## Max islands homes
+# You will have to set this as digit and will be used
+# On island!
 maxhome: 1
 ## Allow debugging - Remember this is for Developers only!
 debug: false
+## Allow to get Updates 
+updater: false
 
-## Island companion (Island Animals) - Unvailable
-companion:
-  # Use PureEntity for the best performance
-  usePureEntity: false
-  # The type of companion DEFAULT: COW
-  type: "COW"
-  # The name of the companion. leave it if you
-  # Dont want to use it
-  name: ""
-  
-## Island part - Available
+## Chat Formattin
+chat:
+  # Use chat formatting such as &7 will return to §7
+  UCFormatting: true
+
+## Island Schematic 
+schematic:
+  # Use schematic for the best result
+  # It still in development
+  enabled: false
+  # The loaded schematic, no need .schematic
+  # You must put schematic files to `schematic/`
+  # folder to load it.
+  loaded: "harder, double, island, nether"
+  # Main schematic, your choice
+  # If loaded schematic doest exsits
+  # It will using default schematic `island`
+  main: "island"
+
+## Island part
 island:
-  # Size of the island DEFAULT: 200
+  # Size of the island, You will have to set this
+  #   if islandSize = 200, the size of island will be 100
+  #   More easy if you use calculator `200 / 2` == 100
+  #   Minimum: 50
   islandSize: 200
-  # Island Hieght MIN: 20
+  # Island Hieght
+  #   You can use this as island High
+  #   Minimum: 20
   islandHieght: 60
   # Restricted commands in Island / SkyBlock
-  restrictedCommands: /fly,/sell, /sg
-  # Island reset Per Player
-  resetPerPlayer: 5
+  #   level. You must respect the command format
+  #   Such as `/example1, /example2`
+  restrictedCommands: "/fly, /sell, /sg"
+  # Island reset
+  # You can use -1 for unlimited island reset
+  resetPerPlayer: 3
   # Island addMember time out
+  #   You can use -1 for unlimited time but 
+  #   Recommeded 20 seconds
   timeOut: 20
+  # Island companion names
+  #   Your passion to add this or nor
+  #   Syantax: "&aFood?, &eEmergency Food?, &cYour Pet!"
+  companionNames: "&aFood?, &eEmergency Food?, &cYour Pet!"
+  # Island Biome
+  #   Your choice to 
   # Items that will be in the chest when the player starts an island
   # Must be in Nukkit Item format. Format is <ID>:<Qty> or <ID>:<Data>:<Qty>
   # Use <Data> to set the durability of a item or to select sub-items/colors.  
@@ -40,8 +67,9 @@ island:
   # Check console for errors and guidance after reloading configuration
   chestItems: 'ICE:2 MELON:1 TORCH:2 BONE:1 LAVA_BUCKET:1 PUMPKIN_SEEDS:1 SUGAR_CANE:1 RED_MUSHROOM:1 BROWN_MUSHROOM:1 CACTUS:1 BREAD:1 WHEAT:1 LEATHER_BOOTS:1 LEATHER_HELMET:1 LEATHER_CHESTPLATE:1 LEATHER_LEGGINGS:1'
 
-## Main lobby - Available
+## Main lobby
 lobby:
+  # The location of lobby 
   lobbyX: 50
   lobbyY: 90
   lobbyZ: 50
@@ -71,9 +99,3 @@ database:
     username: YourUserName
     password: 1234IsNotAGoodPassword
     host: localhost
-  
-    
-## Chat Formatting - BETA - Available
-chat:
-  # Use chat formatting such as &7 will return to §7
-  use_chat_formatting: true
