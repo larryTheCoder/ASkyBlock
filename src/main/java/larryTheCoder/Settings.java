@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package larryTheCoder;
 
 import cn.nukkit.item.Item;
@@ -25,8 +24,9 @@ import java.util.List;
 /**
  * @author larryTheCoder
  */
-public class Settings {  
-    
+public class Settings {
+
+    public static GameType GAMETYPE = GameType.SKYBLOCK;
     public static Item[] chestItems = new Item[0];
     public static int islandSize = 200;
     public static int islandHieght = 60;
@@ -34,9 +34,20 @@ public class Settings {
     public static int islandLevel = 0;
     public static int reset = 3;
     public static int memberTimeOut;
-    
+    public static List<String> challengeLevels = new ArrayList<>();
+
     public static Biome defaultBiome = Biome.getBiome(Biome.PLAINS);
     public static boolean usePhysics = false;
     public static String islandCompanion = "COW";
-    public static List<String> companionNames = new ArrayList<>();    
+    public static List<String> companionNames = new ArrayList<>();
+    public static int gamemode;
+
+    public static class enabled {
+
+        public static boolean DATABASE = true;
+        public static boolean EVENTS = false;
+        public static boolean TEAM = false;
+        public static boolean UPDATER = true;
+        public static boolean ANTIHACK = false; // A day will come for a long time ago
+    }
 }

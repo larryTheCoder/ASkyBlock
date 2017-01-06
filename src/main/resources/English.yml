@@ -31,11 +31,11 @@ kick_help: "&6Usage: &a/is kick &e[Player Name]"
 expel_help: "&6Usage: &a/is expel &e[Player Name]"
 home_help: "&6Usage: &a/is home &e[1 - %MAX_HOME%]"
 create_help: "&6Usage: &a/is create &e[1 - %MAX_HOME%]"
-toggle_help: "&6----- Toggle SubCommand -----\n- &a/is tgg teleport <boolean>\n-----------------------------"
 
 ###########################
 # Command seccess message #
 ###########################
+team: "&aSeccessfully created you a team"
 generate: "&aSeccessfully generated level &e[level]"
 reset: "&aYour island was deleted! &7(Once every [min] minutes)"
 restart: "&aYour island is resetting &7(Once every [min] minutes)"
@@ -45,6 +45,9 @@ kick: "&aYou just kicked a player named [player]"
 #########################
 # Command Error Message #
 #########################
+schematics_list: "&cUnkwnown schematic. Use /tgg listsc for more schematics."
+error_have_team: "&cYou already created a team!"
+error_in_team: "&cYou already have a team!"
 max_islands: "&cYou reached the limit of [maxplot] plots per player"
 no_pending: "&cYou dont have any pending invitations"
 player_error: "&cUnknown player named &c[player] &cat SkyBlock level"

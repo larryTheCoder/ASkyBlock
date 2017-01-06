@@ -48,6 +48,21 @@ island:
   # Island reset
   # You can use -1 for unlimited island reset
   resetPerPlayer: 3
+  # Island gamemode, you can decide what gamemode will needed
+  gamemode:
+    # Enabling this will teleport player in 'GAMEMODE'
+    enable: true
+    # What is the gamemode in island?
+    # Integer needed '1 FOR CREATIVE; 0 FOR SURVIVAL; 2 FOR NOTHING :P'
+    mode: 1
+  # ISafeSpawning config
+  ISafeSpawning:
+    # Enabling ISafeSpawning might be lagging your server
+    # Your choice to decide this
+    enable: true
+    # Force SafeSpawning if there is no SafeSpot where found
+    # THIS STILL IN DEVELOPMENT! IT WILL IGNORE YOU IF U DO TRUE!
+    forceSpot: false
   # Island addMember time out
   #   You can use -1 for unlimited time but 
   #   Recommeded 20 seconds

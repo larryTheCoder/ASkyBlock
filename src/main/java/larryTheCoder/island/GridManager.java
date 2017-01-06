@@ -17,8 +17,10 @@
 package larryTheCoder.island;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockTrapdoor;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
@@ -26,8 +28,11 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import java.util.UUID;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.IslandData;
+import larryTheCoder.database.purger.IslandData;
+import larryTheCoder.SafeSpotTeleport;
 import larryTheCoder.Settings;
+import larryTheCoder.Utils;
+import larryTheCoder.schematic.Schematic;
 
 /**
  * @author larryTheCoder
@@ -36,18 +41,18 @@ public class GridManager {
 
     private ASkyBlock plugin;
 
-    public GridManager(ASkyBlock plugin){
+    public GridManager(ASkyBlock plugin) {
         this.plugin = plugin;
     }
-    
-    public boolean onGrid(Location pos){
+
+    public boolean onGrid(Location pos) {
         return onGrid(pos.getFloorX(), pos.getFloorZ());
     }
-    
-    public boolean onGrid(int x, int z){
+
+    public boolean onGrid(int x, int z) {
         return x % Settings.islandSize == 0 || z % Settings.islandSize == 0;
     }
-    
+
     /**
      * Checks if this location is safe for a player to teleport to. Used by
      * warps and boat exits Unsafe is any liquid or air and also if there's no
@@ -56,7 +61,7 @@ public class GridManager {
      * @param l - Location to be checked
      * @return true if safe, otherwise false
      */
-    public boolean isSafeLocation(final Position l) {
+    public boolean isSafeLocation(Position l) {
         if (l == null) {
             return false;
         }
@@ -108,6 +113,8 @@ public class GridManager {
      *
      * @param p UUID of player
      * @param number - starting home location e.g., 1
+     * @param type
+     * @param firstTime
      * @return Location of a safe teleport spot or null if one cannot be found
      */
     public Position getSafeHomeLocation(Player p, int number) {
@@ -135,7 +142,7 @@ public class GridManager {
         }
 
         if (pd.owner == null) {
-            plugin.getLogger().warning(p.getName() + " player has no island! : NULL");
+            plugin.getLogger().warning(p.getName() + " player has no island!");
             return null;
         }
         // If these island locations are not safe, then we need to get creative
@@ -162,35 +169,64 @@ public class GridManager {
         // Unsuccessful
         return null;
     }
-    
+
     /**
      * This teleports player to their island. If not safe place can be found
      * then the player is sent to spawn via /spawn command
-     * 
+     *
      * @param player
+     * @param type
+     * @param typeo
      * @return true if the home teleport is successful
      */
     public boolean homeTeleport(final Player player) {
         return homeTeleport(player, 1);
     }
-    
+
+    public Position forceSafeSpawn(Player p, int number) {
+        Position loc = null;
+        IslandData pd = ASkyBlock.get().getDatabase().getIslandAndId(p.getName(), number);
+        for (int x = pd.getMinProtectedX() / 16; x <= (pd.getMinProtectedX() + Settings.islandSize - 1) / 16; x++) {
+            for (int z = pd.getMinProtectedZ() / 16; z <= (pd.getMinProtectedZ() + Settings.islandSize - 1) / 16; z++) {
+                for (int y = 0; y < 127; y++) {
+                    if (isSafeLocation(new Position(x, y, z, Server.getInstance().getLevelByName("SkyBlock")))) {
+                        loc = new Position(x, y, z, Server.getInstance().getLevelByName("SkyBlock"));
+                        break;
+                    }
+                }
+            }
+        }
+        return loc;
+    }
+
     /**
-     * Teleport player to a home location. If one cannot be found a search is done to
-     * find a safe place.
+     * Teleport player to a home location. If one cannot be found a search is
+     * done to find a safe place.
+     *
      * @param player
-     * @param number - home location to do to
+     * @param number home location to do to
      * @return true if successful, false if not
      */
-    public boolean homeTeleport(final Player player, int number) {
+    public boolean homeTeleport(Player player, int number) {
         Position home;
         home = getSafeHomeLocation(player, number);
         if (home == null) {
-            // No Solution for this
-            return false;
+            // Try the numbered home location first
+            IslandData pd = plugin.getDatabase().getIslandAndId(player.getName(), number);
+            Location l = new Location(pd.X, pd.floor_y, pd.Z, 0, 0, ASkyBlock.get().getServer().getLevelByName(pd.levelName));
+            new SafeSpotTeleport(plugin, player, l, number);
+            //My solution is this
+//            home = forceSafeSpawn(player, number);
+            return true;
         }
-        home.getLevel().loadChunk(home.getFloorX(), home.getFloorZ());
+        //if the home null
+        if (home == null) {
+            player.sendMessage(TextFormat.RED + "Your island could not be found! Error?");
+
+        }
+        player.teleport(ASkyBlock.get().getServer().getLevelByName("SkyBlock").getSafeSpawn());
         player.teleport(home);
-        if (number ==1 ) {
+        if (number == 1) {
             player.sendMessage(TextFormat.GREEN + "Teleported to your island");
         } else {
             player.sendMessage(TextFormat.GREEN + "Teleported to your island #" + number);
@@ -198,4 +234,5 @@ public class GridManager {
         return true;
 
     }
+
 }

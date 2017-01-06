@@ -17,11 +17,12 @@
 /**
  * IMPOVEMENTS:
  *  - Add /is home [1 - %MAX_HOME%]
- *  - Add Schematic - will took a loooooong time to build
+ *  - Add Schematic - will took a long time to build
  *  - Player locales - /is locales [String:#]
  */
 package larryTheCoder;
 
+import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.level.generator.Generator;
@@ -37,15 +38,18 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import larryTheCoder.chat.ChatFormatListener;
-import larryTheCoder.chat.ChatHandler;
+import larryTheCoder.database.purger.InventorySave;
+import larryTheCoder.listener.IslandListener;
+import larryTheCoder.listener.chat.ChatFormatListener;
+import larryTheCoder.listener.chat.ChatHandler;
 import larryTheCoder.database.ASConnection;
 import larryTheCoder.database.helper.SQLiteDatabase;
 import larryTheCoder.entity.BaseEntity;
-import larryTheCoder.invitation.InvitationHandler;
+import larryTheCoder.listener.invitation.InvitationHandler;
 import larryTheCoder.island.GridManager;
 import larryTheCoder.island.IslandFallback;
 import larryTheCoder.island.IslandManager;
+import larryTheCoder.island.TeamManager;
 import larryTheCoder.schematic.Schematic;
 
 /**
@@ -58,6 +62,7 @@ public class ASkyBlock extends PluginBase {
     public ArrayList<String> level = new ArrayList<>();
     public static HashMap<String, Schematic> schematics = new HashMap<>();
 
+    // Managers
     private Config msg;
     private ASConnection db = null;
     private ChatHandler chatHandler;
@@ -68,6 +73,7 @@ public class ASkyBlock extends PluginBase {
     private IslandFallback backup;
     private InventorySave inventory;
     private BaseEntity entity;
+    private TeamManager managers;
 
     /**
      * Try to register a schematic manually
@@ -218,43 +224,57 @@ public class ASkyBlock extends PluginBase {
     public GridManager getGrid() {
         return grid;
     }
-    
+
     /**
      * Get the GridManager Manager section
      *
      * @api
      * @return InventorySave
      */
-    public InventorySave getInventory(){
+    public InventorySave getInventory() {
         return inventory;
     }
-    
+
     /**
      * Get the Island backup section
      *
      * @api
      * @return GridManager
      */
-    public IslandFallback getFallback(){
+    public IslandFallback getFallback() {
         return backup;
     }
-    
+
     /**
      * Get the BaseEntity section
      *
      * @api
      * @return BaseEntity
      */
-    public BaseEntity getEManager(){
+    public BaseEntity getEManager() {
         return entity;
     }
 
+    /**
+     * Get the TeamManager section
+     *
+     * @api
+     * @return BaseEntity
+     */
+    public TeamManager getTManager() {
+        return managers;
+    }
 //  #################################### NON-API ####################################
+
     @Override
     public void onLoad() {
         if (!(object instanceof ASkyBlock)) {
             object = this;
         }
+        // Register generator
+        Generator.addGenerator(SkyBlockGenerator.class, "island", SkyBlockGenerator.TYPE_SKYBLOCK);
+        // Register TaskManager        
+        com.intellectiualcrafters.TaskManager.IMP = new com.intellectiualcrafters.TaskManager();
     }
 
     @Override
@@ -280,7 +300,6 @@ public class ASkyBlock extends PluginBase {
      * Load every islands Components
      */
     private void initIslands() {
-        getServer().getLogger().info(TextFormat.GREEN + "Preparing the Island Framework");
         PluginManager pm = getServer().getPluginManager();
         chatHandler = new ChatHandler(this);
         invitationHandler = new InvitationHandler(this);
@@ -313,20 +332,18 @@ public class ASkyBlock extends PluginBase {
 
     private void registerObject() {
         loadSchematic();
-        setGenerators();
         generateLevel();
         if (cfg.getBoolean("updater")) {
             Updater.getUpdate();
         }
-        this.manager = new IslandManager(this);
-        this.grid = new GridManager(this);
-        
-        this.entity = new BaseEntity(this);
+        manager = new IslandManager(this);
+        grid = new GridManager(this);
+        managers = new TeamManager(this);
+        entity = new BaseEntity(this);
         inventory = new InventorySave(this);
         backup = new IslandFallback(this);
-        backup.init();        
+        backup.init();
         this.getServer().getCommandMap().register("SkyBlock", new Commands(this));
-        
         try {
             this.db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), "null", false);
         } catch (SQLException | ClassNotFoundException ex) {
@@ -334,15 +351,13 @@ public class ASkyBlock extends PluginBase {
                 ex.printStackTrace();
             }
         }
-        reloadLevel();
+        //reloadLevel();
         Level world = getServer().getLevelByName("SkyBlock");
         world.setTime(1600);
         world.stopTime();
         if (cfg.getBoolean("chat.UCFormatting") == true) {
             getServer().getPluginManager().registerEvents(new ChatFormatListener(this), this);
         }
-        // Register TaskManager
-        com.intellectiualcrafters.TaskManager.IMP = new com.intellectiualcrafters.TaskManager();
     }
 
     public String getPrefix() {
@@ -370,27 +385,22 @@ public class ASkyBlock extends PluginBase {
     }
 
     private void generateLevel() {
-        if (getServer().isLevelGenerated("SkyBlock") == false) {
-            getServer().generateLevel("SkyBlock", 0xe9bcdL, SkyBlockGenerator.class);
-            Utils.ConsoleMsg(TextFormat.GREEN + "Loading the Island Framework");
+        Utils.ConsoleMsg(TextFormat.GREEN + "Loading the Island Framework");
+        if (!Server.getInstance().isLevelGenerated("SkyBlock")) {
+            Server.getInstance().generateLevel("SkyBlock", 0, SkyBlockGenerator.class);
         }
-        if (getServer().isLevelLoaded("SkyBlock") == false) {
-            getServer().loadLevel("SkyBlock");
-
+        if (!Server.getInstance().isLevelLoaded("SkyBlock")) {
+            Server.getInstance().loadLevel("SkyBlock");
         }
-        level.stream().map((world) -> {
-            if (getServer().isLevelGenerated(world) == false) {
-                getServer().generateLevel(world, 0xe9bcdL, SkyBlockGenerator.class);
-            }
-            return world;
-        }).filter((world) -> (getServer().isLevelLoaded(world) == false)).forEach((world) -> {
-            getServer().loadLevel(world);
-        });
+//        level.stream().map((world) -> {
+//            if (getServer().isLevelGenerated(world) == false) {
+//                getServer().generateLevel(world, 0xe9bcdL, SkyBlockGenerator.class);
+//            }
+//            return world;
+//        }).filter((world) -> (getServer().isLevelLoaded(world) == false)).forEach((world) -> {
+//            getServer().loadLevel(world);
+//        });
         level.add("SkyBlock");
-    }
-
-    private void setGenerators() {
-        Generator.addGenerator(SkyBlockGenerator.class, "island", SkyBlockGenerator.TYPE_SKYBLOCK);
     }
 
     private void loadSchematic() {
@@ -399,6 +409,7 @@ public class ASkyBlock extends PluginBase {
         if (!schematicFolder.exists()) {
             schematicFolder.mkdir();
         }
+        getServer().getLogger().info("§7<§cSMC§7> §eSchematic Post:");
         // Clear the schematic list that is kept in memory
         schematics.clear();
         // Load the default schematic if it exists
@@ -468,7 +479,28 @@ public class ASkyBlock extends PluginBase {
                 }
             }
         }
-        Utils.ConsoleMsg(TextFormat.GREEN + "Seccessfully loaded island Schematic");
+        String[] sting = cfg.getString("schematic.loaded").split(", ");
+        for (String island : sting) {
+            File random = new File(schematicFolder, island + ".schematic");
+            try {
+                if (!schematics.containsKey(island)) {
+                    if (!island.equalsIgnoreCase("island")) {
+                        Schematic netherIsland = new Schematic(this, random);
+                        //netherIsland.setVisible(false);
+                        schematics.put(island, netherIsland);
+                    }
+
+                }
+
+            } catch (IOException e) {
+                getServer().getLogger().error("Could not load " + island + " schematic!");
+                if (ASkyBlock.get().isDebug()) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        getServer().getLogger().info("§7<§cSMC§7> §aSeccessfully loaded island Schematic");
     }
 
 }

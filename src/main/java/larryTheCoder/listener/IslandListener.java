@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package larryTheCoder;
+package larryTheCoder.listener;
 
 import cn.nukkit.Player;
 import cn.nukkit.block.Block;
@@ -22,7 +22,7 @@ import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
-import cn.nukkit.event.block.BlockFromToEvent;
+//import cn.nukkit.event.block.BlockFromToEvent;
 import cn.nukkit.event.block.BlockPlaceEvent;
 import cn.nukkit.event.entity.EntityExplodeEvent;
 import cn.nukkit.event.player.PlayerCommandPreprocessEvent;
@@ -30,8 +30,11 @@ import cn.nukkit.event.player.PlayerItemHeldEvent;
 import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
-import cn.nukkit.utils.TextFormat;
+//import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
+import larryTheCoder.ASkyBlock;
+import larryTheCoder.database.purger.IslandData;
+import larryTheCoder.Settings;
 
 /**
  * @author larryTheCoder
@@ -48,15 +51,6 @@ public class IslandListener implements Listener {
     public void onCommand(PlayerCommandPreprocessEvent event) {
         Player p = event.getPlayer();
         if (p == null) {
-            return;
-        }
-        if (!p.isOnGround()
-                && !plugin.getIsland().isTeleport(p)
-                && event.getMessage().equalsIgnoreCase("/is")
-                && p.level.getName().equalsIgnoreCase("SkyBlock")
-                || !(p.isCreative())
-                && p.level.getName().equalsIgnoreCase("SkyBlock")) {
-            p.sendMessage(plugin.getPrefix() + TextFormat.RED + " You cant teleport back to your island!");
             return;
         }
         if (!plugin.getIsland().checkIslandAt(p.getLocation())) {
@@ -116,17 +110,17 @@ public class IslandListener implements Listener {
         });
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onBlockFromTo(BlockFromToEvent e) {
-        Block b = e.getTo();
-        Location loc = b.getLocation();
-        if (!plugin.getIsland().checkIslandAt(loc)) {
-            return;
-        }
-        if (plugin.getGrid().onGrid(loc)) {
-            e.setCancelled(true);
-        }
-    }
+//    @EventHandler(priority = EventPriority.HIGHEST)
+//    public void onBlockFromTo(BlockFromToEvent e) {
+//        Block b = e.getTo();
+//        Location loc = b.getLocation();
+//        if (!plugin.getIsland().checkIslandAt(loc)) {
+//            return;
+//        }
+//        if (plugin.getGrid().onGrid(loc)) {
+//            e.setCancelled(true);
+//        }
+//    }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onItemHeld(PlayerItemHeldEvent e) {

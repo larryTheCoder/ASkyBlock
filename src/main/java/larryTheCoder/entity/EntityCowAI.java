@@ -130,11 +130,11 @@ public class EntityCowAI {
                                 } else {
                                     zom.putDouble("jump", 0);
                                 }
-                                SetEntityMotionPacket pk3 = new SetEntityMotionPacket();
-                                pk3.eid = zo.getId();
-                                pk3.motionX = zom.getFloat("xxx");
-                                pk3.motionY = ((float) (zom.getDouble("jump") - (downly ? 0.04 : 0)));
-                                pk3.motionZ = (float) zom.getDouble("zzz");
+//                                SetEntityMotionPacket pk3 = new SetEntityMotionPacket();
+//                                pk3.entities = zo.getId();
+//                                pk3.motionX = zom.getFloat("xxx");
+//                                pk3.motionY = ((float) (zom.getDouble("jump") - (downly ? 0.04 : 0)));
+//                                pk3.motionZ = (float) zom.getDouble("zzz");
                             }
                         }
                     }

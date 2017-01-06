@@ -16,15 +16,10 @@
  */
 package larryTheCoder.schematic;
 
+import cn.nukkit.Server;
 import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockChest;
-import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.blockentity.BlockEntityChest;
-import cn.nukkit.blockentity.BlockEntitySign;
-import cn.nukkit.inventory.InventoryHolder;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
-import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
@@ -84,7 +79,7 @@ public class IslandBlock {
         WEtoM.put("COBBLESTONE_WALL", Item.COBBLE_WALL);
         WEtoM.put("COMPARATOR", Item.COMPARATOR);
         WEtoM.put("COOKED_PORKCHOP", Item.COOKED_PORKCHOP);
-        WEtoM.put("DIAMOND_HORSE_ARMOR", Item.DIAMOND_HORSE_ARMOR);
+//        WEtoM.put("DIAMOND_HORSE_ARMOR", Item.DIAMOND_HORSE_ARMOR);
         WEtoM.put("DIAMOND_SHOVEL", Item.DIAMOND_SHOVEL);
         WEtoM.put("DYE", Item.DYE);
         WEtoM.put("END_PORTAL_FRAME", Item.END_PORTAL_FRAME);
@@ -96,7 +91,7 @@ public class IslandBlock {
         WEtoM.put("FLOWER_POT", Item.FLOWER_POT);
         WEtoM.put("GLASS_PANE", Item.GLASS_PANE);
         WEtoM.put("GOLDEN_CHESTPLATE", Item.GOLD_CHESTPLATE);
-        WEtoM.put("GOLDEN_HORSE_ARMOR", Item.GOLD_HORSE_ARMOR);
+//        WEtoM.put("GOLDEN_HORSE_ARMOR", Item.GOLD_HORSE_ARMOR);
         WEtoM.put("GOLDEN_LEGGINGS", Item.GOLD_LEGGINGS);
         WEtoM.put("GOLDEN_PICKAXE", Item.GOLD_PICKAXE);
         WEtoM.put("GOLDEN_RAIL", Item.POWERED_RAIL);
@@ -109,7 +104,7 @@ public class IslandBlock {
         WEtoM.put("HARDENED_CLAY", Item.HARDENED_CLAY);
         WEtoM.put("HEAVY_WEIGHTED_PRESSURE_PLATE", Item.HEAVY_WEIGHTED_PRESSURE_PLATE);
         WEtoM.put("IRON_BARS", Item.IRON_BARS);
-        WEtoM.put("IRON_HORSE_ARMOR", Item.IRON_HORSE_ARMOR);
+//        WEtoM.put("IRON_HORSE_ARMOR", Item.IRON_HORSE_ARMOR);
         WEtoM.put("IRON_SHOVEL", Item.IRON_SHOVEL);
         WEtoM.put("LEAD", Item.AIR);
         WEtoM.put("LEAVES2", Item.LEAVES2);
@@ -302,32 +297,36 @@ public class IslandBlock {
                                         String value = entry.getValue().toString();
                                         if (key.equalsIgnoreCase("color")) {
                                             try {
-                                                lineText += TextFormat.valueOf(value.toUpperCase());
+//                                                lineText += TextFormat.valueOf(value.toUpperCase());
                                             } catch (Exception noColor) {
                                                 Utils.ConsoleMsg("Unknown color " + value + " in sign when pasting schematic, skipping...");
                                             }
                                         } else if (key.equalsIgnoreCase("text")) {
                                             lineText += value;
                                         } else // Formatting - usually the value is always true, but check just in case
-                                        if (key.equalsIgnoreCase("obfuscated") && value.equalsIgnoreCase("true")) {
-                                            lineText += TextFormat.OBFUSCATED;
-                                        } else if (key.equalsIgnoreCase("underlined") && value.equalsIgnoreCase("true")) {
-                                            lineText += TextFormat.UNDERLINE;
-                                        } else {
-                                            // The rest of the formats
-                                            try {
-                                                lineText += TextFormat.valueOf(key.toUpperCase());
-                                            } catch (Exception noFormat) {
-                                                // Ignore
-                                                //System.out.println("DEBUG3:" + key + "=>" + value);
-                                                Utils.ConsoleMsg("Unknown format " + value + " in sign when pasting schematic, skipping...");
+                                        {
+                                            if (key.equalsIgnoreCase("obfuscated") && value.equalsIgnoreCase("true")) {
+                                                lineText += TextFormat.OBFUSCATED;
+                                            } else if (key.equalsIgnoreCase("underlined") && value.equalsIgnoreCase("true")) {
+                                                lineText += TextFormat.UNDERLINE;
+                                            } else {
+                                                // The rest of the formats
+                                                try {
+//                                                lineText += TextFormat.valueOf(key.toUpperCase());
+                                                } catch (Exception noFormat) {
+                                                    // Ignore
+                                                    //System.out.println("DEBUG3:" + key + "=>" + value);
+                                                    Utils.ConsoleMsg("Unknown format " + value + " in sign when pasting schematic, skipping...");
+                                                }
                                             }
                                         }
                                     }
                                 } else // This is unformatted text. It is included in "". A reset is required to clear
                                 // any previous formatting
-                                if (format.length() > 1) {
-                                    lineText += TextFormat.RESET + format.substring(format.indexOf('"') + 1, format.lastIndexOf('"'));
+                                {
+                                    if (format.length() > 1) {
+                                        lineText += TextFormat.RESET + format.substring(format.indexOf('"') + 1, format.lastIndexOf('"'));
+                                    }
                                 }
                             }
                         } else {
@@ -342,16 +341,18 @@ public class IslandBlock {
                         e.printStackTrace();
                     }
                 } else // This is unformatted text (not JSON). It is included in "".
-                if (text.get(line).length() > 1) {
-                    try {
-                        lineText = text.get(line).substring(text.get(line).indexOf('"') + 1, text.get(line).lastIndexOf('"'));
-                    } catch (Exception e) {
-                        //There may not be those "'s, so just use the raw line
+                {
+                    if (text.get(line).length() > 1) {
+                        try {
+                            lineText = text.get(line).substring(text.get(line).indexOf('"') + 1, text.get(line).lastIndexOf('"'));
+                        } catch (Exception e) {
+                            //There may not be those "'s, so just use the raw line
+                            lineText = text.get(line);
+                        }
+                    } else {
+                        // just in case it isn't - show the raw line
                         lineText = text.get(line);
                     }
-                } else {
-                    // just in case it isn't - show the raw line
-                    lineText = text.get(line);
                 }
                 //Bukkit.getLogger().info("Line " + line + " is " + lineText);
             }
@@ -441,12 +442,13 @@ public class IslandBlock {
      * Paste this block at blockLoc
      *
      * @param nms
+     * @param usePhysics
      * @param blockLoc
      */
     public void paste(Location blockLoc, boolean usePhysics) {
         // Only paste air if it is below the sea level and in the overworld
-        Block block = new Location(x, y, z, blockLoc.getLevel()).add(blockLoc).getLevelBlock();
-        block.getLevel().setBlock(blockLoc, Block.get(typeId, (int) data), usePhysics);
+        Block block = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc).getLevelBlock();
+        Server.getInstance().getLevelByName("SkyBlock").setBlock(blockLoc, block, usePhysics, true);
 //        if (signText != null) {
 //            BlockEntity.createBlockEntity(BlockEntity.CHEST, blockLoc.getLevel().getChunks(), nbt);
 //            // Sign
@@ -459,7 +461,7 @@ public class IslandBlock {
 //            banner.set(block);
 //        } else if (skull != null){
 //            skull.set(block);
-        if (pot != null){
+        if (pot != null) {
             pot.set(blockLoc, block);
 //        } else if (spawnerBlockType != null) {
 //            CreatureSpawner cs = (CreatureSpawner)block.getState();

@@ -14,32 +14,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package larryTheCoder.database.purger;
 
-package larryTheCoder;
-
-import com.intellectiualcrafters.updater.Updater;
-
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * @author larryTheCoder
  */
-public class PluginTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock>{
+public class TeamData implements Cloneable {
 
-    private int nextUpdate = 0;
+    public String name;
+    public String leader;
+    public ArrayList<String> members = new ArrayList<>();
     
-    public PluginTask(ASkyBlock plugin) {
-        super(plugin);
-    }
+    public TeamData(String name, String leader, String member){
+        this.name = name;
 
+        this.leader = leader;
+        String[] hMem = member.split(",");
+        this.members.addAll(Arrays.asList(hMem));
+    }
+    
     @Override
-    public void onRun(int currentTick) {
-        nextUpdate++; 
-        owner.getInvitationHandler().tick();
-        owner.getDatabase().tick();
-        // Get updates in 4 hours
-        if(nextUpdate == 0x3840){
-            nextUpdate = 0;
-            Updater.getUpdate();
+    public Object clone() throws CloneNotSupportedException {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException ex) {
+            // This should never happends
+            throw new CloneNotSupportedException();
         }
     }
 

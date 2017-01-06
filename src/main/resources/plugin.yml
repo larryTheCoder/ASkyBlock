@@ -6,7 +6,7 @@ main: larryTheCoder.ASkyBlock
 load: POSTWORLD
 website: http://github.com/larryTheCoder/ASkyBlock-Nukkit
 author: "larryTheHarry"
-
+depends: ["DbLib"]
 permissions:
     is.bypass.wait:
      description: "bypass the reset timer"

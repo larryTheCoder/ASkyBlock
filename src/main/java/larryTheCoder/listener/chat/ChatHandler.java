@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package larryTheCoder.chat;
+package larryTheCoder.listener.chat;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
@@ -23,6 +23,7 @@ import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.utils.TextFormat;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import larryTheCoder.ASkyBlock;
 
@@ -66,15 +67,17 @@ public class ChatHandler implements Listener {
         // Is team chat on for this player
         // Find out if this player is in a team (should be if team chat is on)
         // TODO: remove when player resets or leaves team
-        if ((plugin.getIsland().getPlayerMembers(player).isEmpty()) == false) {
-            String teamMembers = plugin.getIsland().getPlayerMembers(player);
+        if ((plugin.getTManager().getPlayerMembers(player).isEmpty()) == false) {
+            ArrayList<String> teams = plugin.getTManager().getPlayerMembers(player);
             // Tell only the team members if they are online
             boolean online = false;
-            Player teamPlayer = plugin.getServer().getPlayer(teamMembers);
-            if (teamPlayer != null) {
-                teamPlayer.sendMessage(message);
-                if (!teamMembers.equals(playerUUID)) {
-                    online = true;
+            for (String teamMembers : teams) {
+                Player teamPlayer = plugin.getServer().getPlayer(teamMembers);
+                if (teamPlayer != null) {
+                    teamPlayer.sendMessage(message);
+                    if (!teamMembers.equals(playerUUID)) {
+                        online = true;
+                    }
                 }
             }
             // todo spy function

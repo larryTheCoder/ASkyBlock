@@ -1,0 +1,119 @@
+##########################################################################################
+# Challenges
+# Rewards and required items have to be described using Bukkit Materials
+# and be exactly correct
+# Do not use Type Id's - they will not work
+# Challenges can be one of three types - inventory, island or level.
+# inventory - means the player must have the items on them
+# island - means the items have to be on the island and within 10 blocks of the player
+#
+# level - means the island level has to be equal or over this amount.
+#         If level is set as nothing '', then the challenge is a free challenge and can be
+#         done at any time.
+# Challenges can be repeatable only if they are inventory challenges
+# permissions can be given as a reward
+#
+# You can use color code;
+#
+# Reward Commands - commands can be run when a challenge is completed and repeated
+# Commands are:
+#    rewardcommands:
+#      - command1
+#      - command2
+#    repeatrewardcommands:
+#      - command1
+#      - command2      
+# The commands are listed and run in order. Do not put a / in front of the command.
+# The token [player] will be replaced with the player's name.
+# Example:
+#    rewardcommands:
+#      - pex promote [player]
+#      - heal [player]
+#      - warp winner_circle [player]
+# If a command fails, it will be noted in the console.
+#
+# The format for POTIONS is as follows:
+#
+# Format POTION:NAME:<LEVEL>:<EXTENDED>:<SPLASH/LINGER>:QTY
+# LEVEL, EXTENDED, SPLASH, LINGER are optional.
+# LEVEL is a number, 1 or 2
+# Examples:
+# POTION:STRENGTH:1:EXTENDED:SPLASH:1
+# POTION:INSTANT_DAMAGE:2::LINGER:2
+# POTION:JUMP:2:NOTEXTENDED:NOSPLASH:1
+# POTION:WEAKNESS::::1   -  any weakness potion
+# 
+# Valid potion names are:
+# WATER, REGEN, SPEED, FIRE_RESISTANCE, POISON, INSTANT_HEAL, NIGHT_VISION, WEAKNESS,
+# STRENGTH, SLOWNESS, JUMP, INSTANT_DAMAGE, WATER_BREATHING, INVISIBILITY
+# LUCK, MUNDANE, THICK, AWKWARD
+##########################################################################################
+---
+challenges:
+  # Challenge levels - list as many as you like. If a challenge's level is '' it can
+  # be done anytime. You cannot name a challenge the same as a level.
+  levels: 'Novice Competent Expert Advanced Elite'
+  
+  # The number of undone tasks that can be left on a level before unlocking next level
+  waiveramount: 1
+  
+  # Free levels - which levels above should be auto done when reached, therefore unlocking next level.
+  # Example:
+  # freelevels: 'Novice' will immediately put player onto Competent level challenges 
+  # freelevels: 'Novice Competent' will make all Novice, Competent and Expert challenges available immediately.
+  # freelevels: 'Competent' will open Competent and Expert levels once Novice is complete
+  freelevels: ''
+  
+  # This section determines what happens when a player unlocks a new level
+  # The subname should correspond to the levels listed above
+  # Note that there is no section for the first level as it is automatically unlocked
+  levelUnlock:
+    Competent:
+      # What additional message to send player
+      message: 'Congratulations - you unlocked the &9Competent level!'
+      rewardDesc: 'A diamond!'
+      itemReward: 'DIAMOND:1'
+      moneyReward: 100
+      expReward: 100
+      # List permissions separated by spaces
+      permissionReward: ''
+      # Commands to run on this player. Use [player] for their name.
+      commands:
+      #- kit tools [player]
+      #- some other command
+    Expert:
+      # What additional message to send player
+      message: 'Congratulations - you unlocked the &aExpert level!'
+      rewardDesc: '3 diamonds!'
+      itemReward: 'DIAMOND:3'
+      moneyReward: 100
+      expReward: 100
+      permissionReward: ''
+      # Commands to run on this player. Use [player] for their name.
+      commands:
+      #- kit tools [player]
+      #- some other command
+    Advanced:
+      # What additional message to send player
+      message: 'Congratulations - you unlocked the &bAdvanced level!'
+      rewardDesc: '5 diamonds!'
+      itemReward: 'DIAMOND:5'
+      moneyReward: 100
+      expReward: 100
+      permissionReward: ''
+      # Commands to run on this player. Use [player] for their name.
+      commands:
+      #- kit tools [player]
+      #- some other command
+    Elite:
+      # What additional message to send player
+      message: 'Congratulations - you unlocked the &dElite level!'
+      rewardDesc: '7 diamonds!'
+      itemReward: 'DIAMOND:7'
+      moneyReward: 100
+      expReward: 100
+      permissionReward: ''
+      # Commands to run on this player. Use [player] for their name.
+      commands:
+      #- kit tools [player]
+      #- some other command

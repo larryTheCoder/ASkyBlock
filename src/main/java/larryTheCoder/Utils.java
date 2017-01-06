@@ -18,8 +18,10 @@ package larryTheCoder;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.block.Block;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
+import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.potion.Potion;
 import cn.nukkit.utils.Config;
@@ -46,6 +48,11 @@ public class Utils {
             Utils.ConsoleMsg(TextFormat.RED + "Error removing potion effect from " + TextFormat.YELLOW + p.getName() + TextFormat.RED + ": " + exc.getMessage());
         }
 
+    }
+
+    public static void setBlockSuperFast(Block b, int blockId) {
+        BaseFullChunk chunk = b.getLevel().getChunk(b.getFloorX() >> 4, b.getFloorZ() >> 4);
+        chunk.setBlock(b.getFloorX(), b.getFloorY(), b.getFloorZ(), blockId);
     }
 
     public static Config loadYamlFile(String file) {
@@ -331,5 +338,23 @@ public class Utils {
 
     public static int getInt(String in) {
         return Integer.parseInt(in);
+    }
+
+    /**
+     * Saves a YAML file
+     *
+     * @param yamlFile
+     * @param fileLocation
+     */
+    public static void saveYamlFile(Config yamlFile, String fileLocation) {
+        File dataFolder = ASkyBlock.get().getDataFolder();
+        File file = new File(dataFolder, fileLocation);
+        
+        try {
+            yamlFile.save(file);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

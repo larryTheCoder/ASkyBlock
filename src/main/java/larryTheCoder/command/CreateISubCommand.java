@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package larryTheCoder.command;
 
 import cn.nukkit.Player;
@@ -22,12 +21,13 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.IslandData;
+import larryTheCoder.database.purger.IslandData;
+import larryTheCoder.Utils;
 
 /**
  * @author larryTheCoder
  */
-public class CreateISubCommand extends SubCommand{
+public class CreateISubCommand extends SubCommand {
 
     public CreateISubCommand(ASkyBlock plugin) {
         super(plugin);
@@ -40,11 +40,7 @@ public class CreateISubCommand extends SubCommand{
 
     @Override
     public String getUsage() {
-        String concat = "";
-        if(getPlugin().cfg.getInt("maxHomes") != 0){
-            concat = "[1 - " + getPlugin().cfg.getInt("maxHomes") + "]";
-        }
-        return concat;
+        return "<schematic name> <island name>";
     }
 
     @Override
@@ -54,26 +50,31 @@ public class CreateISubCommand extends SubCommand{
 
     @Override
     public String getDescription() {
-        return "Create a new Fresh island!";
+        return "Create a new island!";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{};
+        return new String[]{"c", "crte"};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        Player p =  sender.getServer().getPlayer(sender.getName());
-        if(args.length > 2){
+        Player p = sender.getServer().getPlayer(sender.getName());
+        if (args.length > 2) {
             return false;
+        }
+        if (getPlugin().getSchematic(args[1]) != null) {
+            p.sendMessage(getMsg("schematics_list"));
+            return true;
         }
         int maxIslands = getPlugin().cfg.getInt("maxhome");
         ArrayList<IslandData> maxPlotsOfPlayers = getPlugin().getDatabase().getIslands(p.getName());
         if (maxIslands >= 0 && maxPlotsOfPlayers.size() >= maxIslands) {
-            sender.sendMessage(getPlugin().getMsg("max_islands"));
+            sender.sendMessage(getPlugin().getMsg("max_islands").replace("[maxplot]", "" + maxIslands));
             return true;
         }
+        getPlugin().getIsland().createIsland(p);
         return true;
     }
 

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package larryTheCoder;
+package larryTheCoder.database.purger;
 
 import cn.nukkit.item.Item;
 import java.util.ArrayList;

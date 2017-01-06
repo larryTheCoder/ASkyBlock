@@ -23,7 +23,7 @@ import cn.nukkit.event.Event;
 import cn.nukkit.event.HandlerList;
 import cn.nukkit.level.Location;
 import java.util.UUID;
-import larryTheCoder.IslandData;
+import larryTheCoder.database.purger.IslandData;
 import larryTheCoder.Settings;
 
 /**

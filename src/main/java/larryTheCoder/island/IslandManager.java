@@ -14,20 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package larryTheCoder.island;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.event.player.PlayerTeleportEvent;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.utils.TextFormat;
 
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.IslandData;
+import larryTheCoder.database.purger.IslandData;
 import larryTheCoder.Settings;
 import larryTheCoder.Utils;
 import larryTheCoder.database.ASConnection;
@@ -40,98 +40,58 @@ import java.util.UUID;
  * @author larryTheCoder
  */
 public class IslandManager {
-
+    
     public ASkyBlock plugin;
     public HashMap<UUID, Boolean> teleports = new HashMap<>();
-
-    public IslandManager(ASkyBlock plugin){
+    
+    public IslandManager(ASkyBlock plugin) {
         this.plugin = plugin;
         this.teleports.clear();
     }
     
-    public boolean setTeleport(Player p, boolean type){
+    public boolean setTeleport(Player p, boolean type) {
         this.teleports.put(p.getUniqueId(), type);
         return true;
     }
     
-    public boolean isTeleport(Player p){
+    public boolean isTeleport(Player p) {
         return this.teleports.containsKey(p.getUniqueId());
     }
     
-    public String getPlayerMembers(Player p) {
-        IslandData pd = plugin.getDatabase().getIsland(p.getName());
-        for (String st : pd.members) {
-            return st;
-        }
-        return null;
+    public void handleIslandCommand(Player p) {
+        handleIslandCommand(p, false, 1);
     }
     
-    public boolean addMember(Player p, IslandData pd, String argName) {
-        Player exactName = plugin.getServer().getPlayer(argName);
-        if (exactName == null) {
-            p.sendMessage(TextFormat.RED + "No player known by name: " + TextFormat.YELLOW + argName);
-            return true;
-        }
-        if (!pd.owner.equals(p.getName()) && !p.isOp()) {
-            p.sendMessage(TextFormat.RED + "You don't own an island here.");
-            return true;
-        }
-        if (pd.members.contains(exactName.getName())) {
-            p.sendMessage(TextFormat.RED + "You already added " + TextFormat.YELLOW + exactName);
-            return true;
-        }
-        pd.members.add(exactName.getName());
-        p.sendMessage(TextFormat.GREEN + "You add " + TextFormat.YELLOW + exactName + TextFormat.GREEN + " as an island member.");
-        return true;
+    public void handleIslandCommand(Player p, int homes) {
+        handleIslandCommand(p, false, homes);
     }
     
-    public boolean removeMember(Player p, Location loc, String argName) {
-        Player exactName = plugin.getServer().getPlayer(argName);
-        if (exactName == null) {
-            p.sendMessage(TextFormat.RED + "No player known by name: " + TextFormat.YELLOW + argName);
-            return true;
-        }
-        IslandData pd = GetIslandAt(loc);
-        if (pd == null || pd.owner == null) {
-            p.sendMessage(TextFormat.RED + "There is no island here.");
-            return true;
-        }
-        if (!pd.owner.equals(p.getName()) && !p.isOp()) {
-            p.sendMessage(TextFormat.RED + "You don't own a island here.");
-            return true;
-        }
-        if (!pd.members.contains(exactName.getName())) {
-            p.sendMessage(TextFormat.RED + "No island member named " + TextFormat.YELLOW + exactName);
-            return true;
-        }
-        pd.members.remove(exactName.getName());
-        p.sendMessage(TextFormat.GREEN + "You removed " + TextFormat.YELLOW + exactName + TextFormat.GREEN + " as an island member.");
-        return true;
-    }
-     
-    public void handleIslandCommand(Player p){
-        handleIslandCommand(p, false, 0);
-    }
-
     public void handleIslandCommand(Player p, boolean reset, int homes) {
         if (!reset) {
-            if (!checkIsland(p)) {
+            if (!checkIsland(p, homes)) {
                 createIsland(p);
             }
-            IslandData pd = ASkyBlock.get().getDatabase().getIsland(p.getName());
+            IslandData pd = ASkyBlock.get().getDatabase().getIslandAndId(p.getName(), homes);
             if (pd == null || pd.owner == null) {
                 p.sendMessage(TextFormat.RED + "No island found or could be created for you.");
                 return;
             }
-            if(plugin.cfg.getBoolean("island.saveInventory")){
+            if (plugin.cfg.getBoolean("island.saveInventory")) {
                 plugin.getInventory().savePlayerInventory(p);
             }
-            p.setGamemode(Player.SURVIVAL);
-
+            Utils.ConsoleMsg("BIOME: " + pd.biome);
+            Utils.ConsoleMsg("Location: x: " + pd.X + " y: " + pd.floor_y + " z: " + pd.Z + " levelname: " + pd.levelName);
+            Utils.ConsoleMsg("IslandName: " + pd.owner);
+            // try to 
+            
+            p.teleport(new Location(pd.X, pd.floor_y, pd.Z, 0, 0, plugin.getServer().getLevelByName(pd.levelName)));
+            p.getLevel().loadChunk(pd.X, pd.Z);
+            plugin.getGrid().homeTeleport(p, homes);
+            //p.setGamemode(Settings.gamemode);
         } else {
             createIsland(p);
         }
-
+        
     }
     
     public void kickPlayerByName(final Player pOwner, final String victimName) {
@@ -188,23 +148,29 @@ public class IslandManager {
     }
     
     public boolean checkIsland(Player p) {
-        return plugin.getDatabase().getIsland(p.getName()) != null;
+        return checkIsland(p, 1);
+    }
+    
+    public boolean checkIsland(Player p, int homes) {
+        return plugin.getDatabase().getIslandAndId(p.getName(), homes) != null;
     }
     
     @SuppressWarnings("deprecation")
-    public void createIsland(Player p){
+    public void createIsland(Player p) {
         p.sendMessage(TextFormat.GREEN + "Creating a new island for you...");
+        Utils.ConsoleMsg("COMMAND: /is DECTECTED");
         int i = 0;
-        while (i < 1000000) {
+        while (i < Integer.MAX_VALUE) {
             int width = i * Settings.islandSize * 2;
             int wx = (int) (Math.random() * width);
             int wz = (int) (Math.random() * width);
-            IslandData pd = new IslandData("SkyBlock", wx, wz);
-            if (pd.owner == null) {
+            IslandData pd = plugin.getDatabase().getIslandById(generateIslandKey(wx, wz));
+            if (pd == null) {
                 Location locIsland;
                 int wy = Settings.islandHieght;
                 Level world = Server.getInstance().getLevelByName("SkyBlock");
-                locIsland = new Location(wx, wy, wz, world);
+                locIsland = new Location(wx, wy, wz, 0, 0, world);
+                // Pasting without reading file is not ready
                 plugin.getSchematic("default").pasteSchematic(locIsland, p, true);
                 claim(p, locIsland);
                 return;
@@ -218,7 +184,7 @@ public class IslandManager {
         int z = loc.getFloorZ();
         return generateIslandKey(x, z);
     }
-
+    
     public int generateIslandKey(int x, int z) {
         return x / Settings.islandSize + z / Settings.islandSize * 10000;
     }
@@ -234,20 +200,21 @@ public class IslandManager {
         
         int iKey = generateIslandKey(loc);
         IslandData pd = plugin.getDatabase().getIslandLocation(loc.getLevel().getName(), x, z);
+        ArrayList<IslandData> number = plugin.getDatabase().getIslands(p.getName());
+        pd.id = number.size() + 1;
         pd.biome = "PLAINS";
         pd.name = "My Island";
         pd.team = "";
         pd.islandId = iKey;
         pd.owner = p.getName();
-        pd.members = new ArrayList<>();
         pd.X = x;
         pd.floor_y = loc.getFloorY();
         pd.Z = z;
-        pd.levelName = loc.getLevel().getName();
+        pd.levelName = "SkyBlock";
         pd.locked = 0;
         
         boolean result = plugin.getDatabase().saveIsland(pd);
-        if(result){
+        if (result) {
             p.sendMessage(plugin.getMsg("create"));
         } else {
             p.sendMessage("Unable to save your island SQL Error");
@@ -262,7 +229,7 @@ public class IslandManager {
             return;
         }
         Level world = Server.getInstance().getLevelByName("SkyBlock");
-        Location loc = new Location(pd.X, pd.floor_y, pd.Z, world);
+        Location loc = new Location(pd.X, pd.floor_y, pd.Z, 0, 0, world);
         Utils.ConsoleMsg(plugin.getMsg("att_reset").replace("[location]", Utils.LocStringShort(loc)).replace("[player]", p.getName()));
         int sx = loc.getFloorX();
         sx -= sx % Settings.islandSize;
@@ -297,7 +264,7 @@ public class IslandManager {
     public boolean checkIslandAt(Location loc) {
         return loc.getLevel().getName().equalsIgnoreCase("skyblock");
     }
-
+    
     public boolean CanPlayerAccess(Player p, Location loc) {
         String pName = p.getName();
         if (p.isOp()) {
@@ -316,12 +283,9 @@ public class IslandManager {
         if (pd.owner.equals(pName)) {
             return true;
         }
-        if (pd.members.contains(pName)) {
-            return true;
-        }
-        return false;
+        return pd.members.members.contains(pName);
     }
-
+    
     public IslandData GetIslandAt(Location loc) {
         if (!checkIslandAt(loc)) {
             return null;
@@ -336,7 +300,7 @@ public class IslandManager {
         }
         return res;
     }
-
+    
     public void islandInfo(Player p, Location loc) {
         int x = loc.getFloorX();
         int z = loc.getFloorZ();
@@ -350,36 +314,35 @@ public class IslandManager {
             return;
         }
         p.sendMessage(TextFormat.LIGHT_PURPLE + "- Island Owner: " + TextFormat.YELLOW + pd.owner);
-        String strMembers = Utils.GetCommaList(pd.members);
-        if (pd.members.size() <= 0) {
+        String strMembers = Utils.GetCommaList(pd.members.members);
+        if (pd.members.members.size() <= 0) {
             strMembers = "none";
         }
         p.sendMessage(TextFormat.LIGHT_PURPLE + "- Members: " + TextFormat.AQUA + strMembers);
-
+        
         p.sendMessage(TextFormat.LIGHT_PURPLE + "- Flags: " + TextFormat.GOLD + "Allow Teleport: " + pd.locked);
     }
-
+    
     public String GetFlagString(final boolean b) {
         if (b) {
             return TextFormat.RED + "false";
         }
         return TextFormat.GREEN + "true";
     }
-
+    
     public void teleportPlayer(Player p, String arg) {
         IslandData pd = ASkyBlock.get().getDatabase().getIsland(arg);
         if (pd.owner != null) {
             p.sendMessage(plugin.getMsg("player_error").replace("[player]", arg));
             return;
         }
-        // TO-DO support homes!
         Level lvl = ASkyBlock.get().getServer().getLevelByName(pd.levelName);
-        p.teleport(new Location(pd.X, pd.floor_y, pd.Z, lvl));
+        p.teleport(new Location(pd.X, pd.floor_y, pd.Z, 0, 0, lvl));
     }
-
+    
     public void setHomeLocation(Player p, Position lPlusOne, int number) {
         ASConnection db = ASkyBlock.get().getDatabase();
         Position loc = lPlusOne;
-        db.setPosition(loc, number);
+        db.setPosition(loc, number, p.getName());
     }
 }

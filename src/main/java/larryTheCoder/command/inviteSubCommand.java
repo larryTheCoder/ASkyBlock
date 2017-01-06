@@ -20,7 +20,7 @@ package larryTheCoder.command;
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.IslandData;
+import larryTheCoder.database.purger.IslandData;
 
 /**
  * @author larryTheCoder

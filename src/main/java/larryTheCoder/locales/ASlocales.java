@@ -31,6 +31,8 @@ import larryTheCoder.ASkyBlock;
  * @author larryTheHarry
  */
 public final class ASlocales {
+    
+    
 
     private final static Set<String> TITLE_COLORS = new HashSet<>(Arrays.asList(
             "black",
@@ -125,7 +127,7 @@ public final class ASlocales {
     }
 
     private void loadLocale() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     /**

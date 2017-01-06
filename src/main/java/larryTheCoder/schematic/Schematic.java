@@ -21,7 +21,6 @@ import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntitySign;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.item.EntityPainting.Motive; // Art
 import static cn.nukkit.entity.item.EntityPainting.motives;
 import cn.nukkit.item.Item;
@@ -41,15 +40,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Random;
 
-import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.world.DataException;
 import com.boydti.fawe.nukkit.core.NukkitWorld;
 import com.intellectiualcrafters.TaskManager;
-import com.sk89q.worldedit.entity.metadata.EntityType;
-import java.util.Random;
+import com.sk89q.worldedit.CuboidClipboard;
+import java.util.logging.Logger;
 
 import larryTheCoder.ASkyBlock;
 import larryTheCoder.Settings;
@@ -69,16 +68,17 @@ import org.jnbt.Tag;
 public class Schematic {
 
     private File schematicFolder;
-    private ASkyBlock plugin;
+    public ASkyBlock plugin;
     public boolean running = false;
     //Utils
     private short width;
     private short length;
     private short height;
-    private Map<BlockVector, Map<String, Tag>> tileEntitiesMap = new HashMap<>();
+    private Map<Vector3, Map<String, Tag>> tileEntitiesMap = new HashMap<>();
     private Map<String, Motive> paintingList = new HashMap<>();
     private Set<Integer> attachable = new HashSet<>();
     private Map<Byte, Integer> facingList = new HashMap<>();
+    public HashMap<Integer, Position> spot = new HashMap<>();
     private Vector3 bedrock;
     private Vector3 chest;
     private Vector3 welcomeSign;
@@ -88,7 +88,7 @@ public class Schematic {
     private int levelHandicap;
     private List<IslandBlock> islandBlocks;
     private List<String> companionNames;
-    
+
     private String heading;
     private String name;
     private String perm;
@@ -104,6 +104,9 @@ public class Schematic {
     private String partnerName = "";
     private List<String> islandCompanion;
     private Item[] defaultChestItems;
+    public int count = 0;
+    @SuppressWarnings("deprecation")
+    private CuboidClipboard cc;
 
     public Schematic(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -164,7 +167,7 @@ public class Schematic {
     protected final void initAttachable() {
         attachable.add(Item.STONE_BUTTON);
         attachable.add(Item.WOODEN_BUTTON);
-        attachable.add(Item.COCOA);
+//        attachable.add(Item);
         attachable.add(Item.LADDER);
         attachable.add(Item.LEVER);
         attachable.add(Item.REDSTONE_TORCH);
@@ -208,186 +211,211 @@ public class Schematic {
         paintingList.put("BurningSkull", motives[24]);
     }
 
+    @SuppressWarnings("deprecation")
     protected final void init() throws IOException {
-        // Initialize
-        short[] blocks;
-        byte[] data;
         try {
-            CompoundTag schematicTag;
-            try (FileInputStream stream = new FileInputStream(schematicFolder); NBTInputStream nbtStream = new NBTInputStream(stream)) {
-                schematicTag = (CompoundTag) nbtStream.readTag();
-            }
-            if (!schematicTag.getName().equals("Schematic")) {
-                throw new IllegalArgumentException("Tag \"Schematic\" does not exist or is not first");
-            }
-            Map<String, Tag> schematic = schematicTag.getValue();
-            Vector3 origin = null;
+            // Initialize
+            short[] blocks;
+            byte[] data;
             try {
-                int originX = getChildTag(schematic, "WEOriginX", IntTag.class).getValue();
-                int originY = getChildTag(schematic, "WEOriginY", IntTag.class).getValue();
-                int originZ = getChildTag(schematic, "WEOriginZ", IntTag.class).getValue();
-                Vector3 min = new Vector3(originX, originY, originZ);
-                origin = min.clone();
-            } catch (Exception ignored) {
-            }
-            if (!schematic.containsKey("Blocks")) {
-                throw new IllegalArgumentException("Schematic file is missing a \"Blocks\" tag");
-            }
-            width = getChildTag(schematic, "Width", ShortTag.class).getValue();
-            length = getChildTag(schematic, "Length", ShortTag.class).getValue();
-            height = getChildTag(schematic, "Height", ShortTag.class).getValue();
-            byte[] blockId = getChildTag(schematic, "Blocks", ByteArrayTag.class).getValue();
-            data = getChildTag(schematic, "Data", ByteArrayTag.class).getValue();
-            byte[] addId = new byte[0];
-            blocks = new short[blockId.length]; // Have to later combine IDs
-            // We support 4096 block IDs using the same method as vanilla
-            // Minecraft, where
-            // the highest 4 bits are stored in a separate byte array.
-            if (schematic.containsKey("AddBlocks")) {
-                addId = getChildTag(schematic, "AddBlocks", ByteArrayTag.class).getValue();
-            }
-
-            // Combine the AddBlocks data with the first 8-bit block ID
-            for (int index = 0; index < blockId.length; index++) {
-                if ((index >> 1) >= addId.length) { // No corresponding
-                    // AddBlocks index
-                    blocks[index] = (short) (blockId[index] & 0xFF);
-                } else if ((index & 1) == 0) {
-                    blocks[index] = (short) (((addId[index >> 1] & 0x0F) << 8) + (blockId[index] & 0xFF));
-                } else {
-                    blocks[index] = (short) (((addId[index >> 1] & 0xF0) << 4) + (blockId[index] & 0xFF));
+                CompoundTag schematicTag;
+                try (FileInputStream stream = new FileInputStream(schematicFolder); NBTInputStream nbtStream = new NBTInputStream(stream)) {
+                    schematicTag = (CompoundTag) nbtStream.readTag();
                 }
-            }
-            // to-do An animal
-            List<Tag> tileEntities = getChildTag(schematic, "TileEntities", ListTag.class).getValue();
-            for (Tag tag : tileEntities) {
-                if (!(tag instanceof CompoundTag)) {
-                    continue;
+                if (!schematicTag.getName().equals("Schematic")) {
+                    throw new IllegalArgumentException("Tag \"Schematic\" does not exist or is not first");
                 }
-                CompoundTag t = (CompoundTag) tag;
-
-                int x = 0;
-                int y = 0;
-                int z = 0;
-
-                Map<String, Tag> values = new HashMap<>();
-
-                for (Map.Entry<String, Tag> entry : t.getValue().entrySet()) {
-                    switch (entry.getKey()) {
-                        case "x":
-                            if (entry.getValue() instanceof IntTag) {
-                                x = ((IntTag) entry.getValue()).getValue();
-                            }
-                            break;
-                        case "y":
-                            if (entry.getValue() instanceof IntTag) {
-                                y = ((IntTag) entry.getValue()).getValue();
-                            }
-                            break;
-                        case "z":
-                            if (entry.getValue() instanceof IntTag) {
-                                z = ((IntTag) entry.getValue()).getValue();
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-
-                    values.put(entry.getKey(), entry.getValue());
+                Map<String, Tag> schematic = schematicTag.getValue();
+                Vector3 origin = null;
+                try {
+                    int originX = getChildTag(schematic, "WEOriginX", IntTag.class).getValue();
+                    int originY = getChildTag(schematic, "WEOriginY", IntTag.class).getValue();
+                    int originZ = getChildTag(schematic, "WEOriginZ", IntTag.class).getValue();
+                    Vector3 min = new Vector3(originX, originY, originZ);
+                    origin = min.clone();
+                } catch (Exception ignored) {
+                }
+                if (!schematic.containsKey("Blocks")) {
+                    throw new IllegalArgumentException("Schematic file is missing a \"Blocks\" tag");
+                }
+                width = getChildTag(schematic, "Width", ShortTag.class).getValue();
+                length = getChildTag(schematic, "Length", ShortTag.class).getValue();
+                height = getChildTag(schematic, "Height", ShortTag.class).getValue();
+                byte[] blockId = getChildTag(schematic, "Blocks", ByteArrayTag.class).getValue();
+                data = getChildTag(schematic, "Data", ByteArrayTag.class).getValue();
+                byte[] addId = new byte[0];
+                blocks = new short[blockId.length]; // Have to later combine IDs
+                // We support 4096 block IDs using the same method as vanilla
+                // Minecraft, where
+                // the highest 4 bits are stored in a separate byte array.
+                if (schematic.containsKey("AddBlocks")) {
+                    addId = getChildTag(schematic, "AddBlocks", ByteArrayTag.class).getValue();
                 }
 
-                BlockVector vec = new BlockVector(x, y, z);
-                tileEntitiesMap.put(vec, values);
-            }
-
-        } catch (IOException e) {
-            Server.getInstance().getLogger().info(TextFormat.RED + "An error occured while attemping to load Schematic File!");
-            throw new IOException();
-        }
-        // Check for key blocks
-        // Find top most bedrock - this is the key stone
-        // Find top most chest
-        // Find top most grass
-        List<Vector3> grassBlocks = new ArrayList<>();
-        for (int x = 0; x < width; ++x) {
-            for (int y = 0; y < height; ++y) {
-                for (int z = 0; z < length; ++z) {
-                    int index = y * width * length + z * width + x;
-                    // Bukkit.getLogger().info("DEBUG " + index +
-                    // " changing to ID:"+blocks[index] + " data = " +
-                    // blockData[index]);
-                    switch (blocks[index]) {
-                        case 7:
-                            // Last bedrock
-                            if (bedrock == null || bedrock.getY() < y) {
-                                bedrock = new Vector3(x, y, z);
-                                //Bukkit.getLogger().info("DEBUG higher bedrock found:" + bedrock.toString());
-                            }
-                            break;
-                        case 54:
-                            // Last chest
-                            if (chest == null || chest.getY() < y) {
-                                chest = new Vector3(x, y, z);
-                                // Bukkit.getLogger().info("Island loc:" +
-                                // loc.toString());
-                                // Bukkit.getLogger().info("Chest relative location is "
-                                // + chest.toString());
-                            }
-                            break;
-                        case 63:
-                            // Sign
-                            if (welcomeSign == null || welcomeSign.getY() < y) {
-                                welcomeSign = new Vector3(x, y, z);
-                                // Bukkit.getLogger().info("DEBUG higher sign found:"
-                                // + welcomeSign.toString());
-                            }
-                            break;
-                        case 2:
-                            // Grass
-                            grassBlocks.add(new Vector3(x, y, z));
-                            break;
-                        default:
-                            break;
+                // Combine the AddBlocks data with the first 8-bit block ID
+                for (int index = 0; index < blockId.length; index++) {
+                    if ((index >> 1) >= addId.length) { // No corresponding
+                        // AddBlocks index
+                        blocks[index] = (short) (blockId[index] & 0xFF);
+                    } else if ((index & 1) == 0) {
+                        blocks[index] = (short) (((addId[index >> 1] & 0x0F) << 8) + (blockId[index] & 0xFF));
+                    } else {
+                        blocks[index] = (short) (((addId[index >> 1] & 0xF0) << 4) + (blockId[index] & 0xFF));
                     }
                 }
+                // to-do An animal
+                List<Tag> tileEntities = getChildTag(schematic, "TileEntities", ListTag.class).getValue();
+                for (Tag tag : tileEntities) {
+                    if (!(tag instanceof CompoundTag)) {
+                        continue;
+                    }
+                    CompoundTag t = (CompoundTag) tag;
+
+                    int x = 0;
+                    int y = 0;
+                    int z = 0;
+
+                    Map<String, Tag> values = new HashMap<>();
+
+                    for (Map.Entry<String, Tag> entry : t.getValue().entrySet()) {
+                        switch (entry.getKey()) {
+                            case "x":
+                                if (entry.getValue() instanceof IntTag) {
+                                    x = ((IntTag) entry.getValue()).getValue();
+                                }
+                                break;
+                            case "y":
+                                if (entry.getValue() instanceof IntTag) {
+                                    y = ((IntTag) entry.getValue()).getValue();
+                                }
+                                break;
+                            case "z":
+                                if (entry.getValue() instanceof IntTag) {
+                                    z = ((IntTag) entry.getValue()).getValue();
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+
+                        values.put(entry.getKey(), entry.getValue());
+                    }
+
+                    Vector3 vec = new Vector3(x, y, z);
+                    tileEntitiesMap.put(vec, values);
+                }
+
+            } catch (IOException e) {
+                Server.getInstance().getLogger().info(TextFormat.RED + "An error occured while attemping to load Schematic File!");
+                throw new IOException();
             }
-        }
-        if (bedrock == null) {
-            Server.getInstance().getLogger().error("Schematic must have at least one bedrock in it!");
-            //throw new IOException("Schematic must have at least one bedrock in it!");
-        }
-        // Find other key blocks
-        if (!grassBlocks.isEmpty()) {
-            // Sort by height
-            List<Vector3> sorted = new ArrayList<>();
-            for (Vector3 v : grassBlocks) {
-                //if (GridManager.isSafeLocation(v.toLocation(world))) {
-                // Add to sorted list
-                boolean inserted = false;
-                for (int i = 0; i < sorted.size(); i++) {
-                    if (v.getY() > sorted.get(i).getY()) {
-                        sorted.add(i, v);
-                        inserted = true;
-                        break;
+            this.cc = com.sk89q.worldedit.CuboidClipboard.loadSchematic(schematicFolder);
+            // Check for key blocks
+            // Find top most bedrock - this is the key stone
+            // Find top most chest
+            // Find top most grass
+            List<Vector3> grassBlocks = new ArrayList<>();
+            boolean loop = true;
+            int countBlocks = 0;
+            for (int x = 0; x < width; ++x) {
+                for (int y = 0; y < height; ++y) {
+                    for (int z = 0; z < length; ++z) {
+                        int index = y * width * length + z * width + x;
+                        // Bukkit.getLogger().info("DEBUG " + index +
+                        // " changing to ID:"+blocks[index] + " data = " +
+                        // blockData[index]);
+                        switch (blocks[index]) {
+                            case 7:
+                                // Last bedrock
+                                if (bedrock == null || bedrock.getY() < y) {
+                                    bedrock = new Vector3(x, y, z);
+                                    //Bukkit.getLogger().info("DEBUG higher bedrock found:" + bedrock.toString());
+                                }
+                                break;
+                            case 54:
+                                // Last chest
+                                if (chest == null || chest.getY() < y) {
+                                    chest = new Vector3(x, y, z);
+                                    // Bukkit.getLogger().info("Island loc:" +
+                                    // loc.toString());
+                                    // Bukkit.getLogger().info("Chest relative location is "
+                                    // + chest.toString());
+                                }
+                                break;
+                            case 63:
+                                // Sign
+                                if (welcomeSign == null || welcomeSign.getY() < y) {
+                                    welcomeSign = new Vector3(x, y, z);
+                                    // Bukkit.getLogger().info("DEBUG higher sign found:"
+                                    // + welcomeSign.toString());
+                                }
+                                break;
+                            case 2:
+                                // Grass
+                                grassBlocks.add(new Vector3(x, y, z));
+                                break;
+
+                            default:
+                                break;
+                        }
+                        if (blocks[index] != 0) {
+                            countBlocks += 1;
+                        }
+                        if (loop) {
+                            if (plugin.cfg.getBoolean("island.ISafeSpawning.enable")) {
+                                new ISafeSpawning(this, blocks[index], x, y, z, "SkyBlock");
+                            } else if (!plugin.cfg.getBoolean("island.ISafeSpawning.enable")) {
+                                loop = false;
+                            }
+                        }
                     }
                 }
-                if (!inserted) {
-                    // just add to the end of the list
-                    sorted.add(v);
-                }
             }
-            topGrass = sorted.get(0);
-        } else {
-            topGrass = null;
-        }
 
-        facingList.put((byte) 0, Vector3.getOppositeSide(Vector3.SIDE_SOUTH));
-        facingList.put((byte) 1, Vector3.getOppositeSide(Vector3.SIDE_WEST));
-        facingList.put((byte) 2, Vector3.getOppositeSide(Vector3.SIDE_NORTH));
-        facingList.put((byte) 3, Vector3.getOppositeSide(Vector3.SIDE_EAST));
-        prePasteSchematic(blocks, data);
+            if (bedrock == null) {
+                Server.getInstance().getLogger().error("Schematic must have at least one bedrock in it!");
+                throw new IOException();
+            }
+
+            // Find other key blocks
+            if (!grassBlocks.isEmpty()) {
+                // Sort by height
+                List<Vector3> sorted = new ArrayList<>();
+                for (Vector3 v : grassBlocks) {
+                    //if (GridManager.isSafeLocation(v.toLocation(world))) {
+                    // Add to sorted list
+                    boolean inserted = false;
+                    for (int i = 0; i < sorted.size(); i++) {
+                        if (v.getY() > sorted.get(i).getY()) {
+                            sorted.add(i, v);
+                            inserted = true;
+                            break;
+                        }
+                    }
+                    if (!inserted) {
+                        // just add to the end of the list
+                        sorted.add(v);
+                    }
+                }
+                topGrass = sorted.get(0);
+            } else {
+                topGrass = null;
+            }
+            if (countBlocks != 0) {
+                Server.getInstance().getLogger().info(TextFormat.YELLOW + " - " + schematicFolder.getName().toUpperCase().replace(".SCHEMATIC", "") + " Info:");
+                Server.getInstance().getLogger().info(TextFormat.GRAY + "   - Blocks: " + TextFormat.GREEN + countBlocks + " ");
+                Server.getInstance().getLogger().info(TextFormat.GRAY + "   - SafeSpot: " + TextFormat.GREEN + spot.size() + " SafeSpot found");
+            }
+            facingList.put((byte) 0, Vector3.getOppositeSide(Vector3.SIDE_SOUTH));
+            facingList.put((byte) 1, Vector3.getOppositeSide(Vector3.SIDE_WEST));
+            facingList.put((byte) 2, Vector3.getOppositeSide(Vector3.SIDE_NORTH));
+            facingList.put((byte) 3, Vector3.getOppositeSide(Vector3.SIDE_EAST));
+            prePasteSchematic(blocks, data);
+        } catch (DataException ex) {
+            Logger.getLogger(Schematic.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
     }
-    
+
     /**
      * This method prepares to pastes a schematic.
      *
@@ -396,7 +424,7 @@ public class Schematic {
      */
     public void prePasteSchematic(short[] blocks, byte[] data) {
         islandBlocks = new ArrayList<>();
-        Map<BlockVector, Map<String, Tag>> tileEntity = this.getTileEntitiesMap();
+        Map<Vector3, Map<String, Tag>> tileEntity = this.getTileEntitiesMap();
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; ++y) {
                 for (int z = 0; z < length; ++z) {
@@ -417,11 +445,11 @@ public class Schematic {
                                 block.setBlock(blocks[index], data[index]);
                             }
                             // Tile Entities
-                            if (tileEntity.containsKey(new BlockVector(x, y, z))) {
-                                if (block.getTypeId() == Item.FLOWER_POT) {
-                                    block.setFlowerPot(tileEntity.get(new BlockVector(x, y, z)));
-                                }
-                            }
+//                            if (tileEntity.containsKey(new BlockVector3(x, y, z))) {
+//                                if (block.getTypeId() == Item.FLOWER_POT) {
+//                                    block.setFlowerPot(tileEntity.get(new BlockVector3(x, y, z)));
+//                                }
+//                            }
                             islandBlocks.add(block);
                         }
                     }
@@ -438,12 +466,12 @@ public class Schematic {
                         if (attachable.contains((int) blocks[index])) {
                             block.setBlock(blocks[index], data[index]);
                             // Tile Entities
-                            if (tileEntitiesMap.containsKey(new BlockVector(x, y, z))) {
-                                // Wall Sign
-                                if (block.getTypeId() == Item.WALL_SIGN) {
-                                    block.setSign(tileEntitiesMap.get(new BlockVector(x, y, z)));
-                                }
-                            }
+//                            if (tileEntitiesMap.containsKey(new BlockVector3(x, y, z))) {
+//                                // Wall Sign
+//                                if (block.getTypeId() == Item.WALL_SIGN) {
+//                                    block.setSign(tileEntitiesMap.get(new BlockVector3(x, y, z)));
+//                                }
+//                            }
                             islandBlocks.add(block);
                         }
                     }
@@ -457,32 +485,30 @@ public class Schematic {
      * loader WITHOUT using WorldEdit! Warning: Might be slow!
      *
      * @param loc - The location need to paste
-     * @param player - the player island
+     * @param p - the player island
      * @param teleport - Teleports?
      */
     @SuppressWarnings("deprecation")
-    public void pasteWESchematic(final Position loc, final Player player, boolean teleport) {
+    public void pasteWESchematic(final Position loc, Player p, boolean teleport) {
         Utils.ConsoleMsg("WorldEdit is Pasting");
-        com.sk89q.worldedit.Vector WEorigin = new com.sk89q.worldedit.Vector(loc.getFloorX() - 3, loc.getFloorY(), loc.getFloorZ() - 3);
+        //try to recalculate the bedrock position
+        int posX = bedrock.getFloorX() - loc.getFloorX();
+        int posZ = bedrock.getFloorZ() - loc.getFloorZ();
+        com.sk89q.worldedit.Vector WEorigin = new com.sk89q.worldedit.Vector(loc.getFloorX() - posX, loc.getFloorY(), loc.getFloorZ() - posZ);
         EditSession es = new EditSession(new NukkitWorld(loc.getLevel()), 999999999);
         try {
-            com.sk89q.worldedit.CuboidClipboard cc =  com.sk89q.worldedit.CuboidClipboard.loadSchematic(schematicFolder);
-            cc.paste(es, WEorigin, false);
-        } catch (DataException | IOException | MaxChangedBlocksException e) {
-            if (plugin.isDebug()) {
-                e.printStackTrace();
-            }
+            cc.paste(es, WEorigin, false, false);
+        } catch (MaxChangedBlocksException e) {
+            e.printStackTrace();
         }
+    }
 
-        if (teleport) {
-            Level world = loc.getLevel();
-
-            player.teleport(world.getSpawnLocation());
-            TaskManager.runTaskLater(() -> {
-                plugin.getGrid().homeTeleport(player);
-            }, 10);
-
-        }
+    public ArrayList<Position> getSafeSpots() {
+        ArrayList<Position> list = new ArrayList<>();
+        spot.values().stream().forEach((pos) -> {
+            list.add(pos);
+        });
+        return list;
     }
 
     /**
@@ -492,15 +518,15 @@ public class Schematic {
      * @param player
      * @param teleport
      */
-    public void pasteSchematic(final Location loc, final Player player, boolean teleport) {
+    public void pasteSchematic(final Location loc, Player player, boolean teleport) {
         // If this is not a file schematic, paste the default island
         if (this.schematicFolder == null) {
-            plugin.getFallback().createIsland(loc.getLevel(), loc.getFloorX(), loc.getFloorY(), loc.getFloorZ(), player);
+            //plugin.getFallback().createIsland(loc.getLevel(), loc.getFloorX(), loc.getFloorY(), loc.getFloorZ(), player);
             Utils.ConsoleMsg(TextFormat.RED + "Missing schematic - using default block only");
             return;
         }
         Level world = loc.getLevel();
-        Location blockLoc = new Location(loc.getX(), loc.getY(), loc.getZ(), world);
+        Location blockLoc = new Location(loc.getX(), loc.getY(), loc.getZ(), 0, 0, world);
         //Location blockLoc = new Location(world, loc.getX(), Settings.island_level, loc.getZ());
         blockLoc.subtract(bedrock);
         //plugin.getLogger().info("DEBUG: blockloc = " + blockLoc);
@@ -515,7 +541,7 @@ public class Schematic {
             Vector3 gr = topGrass.clone().subtract(bedrock);
             gr.add(loc);
             gr.add(new Vector3(0.5D, 1.1D, 0.5D)); // Center of block and a bit up so the animal drops a bit
-            grass = new Location(gr.getX(), gr.getY(), gr.getZ(), world);
+            grass = new Location(gr.getX(), gr.getY(), gr.getZ(), 0, 0, world);
         } else {
             grass = null;
         }
@@ -526,27 +552,22 @@ public class Schematic {
             Vector3 ws = welcomeSign.clone().subtract(bedrock);
             ws.add(loc);
             // After that the NBT
-            blockToChange = new Location(ws.getX(), ws.getY(), ws.getZ(), world).getLevelBlock();
+            blockToChange = new Location(ws.getX(), ws.getY(), ws.getZ(), 0, 0, world).getLevelBlock();
             cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                .putString("id", BlockEntity.SIGN)
-                .putString("Text1", "Welcome to your")
-                .putString("Text2", "Island")
-                .putString("Text3", player.getName())
-                .putString("Text4", "")
-                .putInt("x", ws.getFloorX())
-                .putInt("y", ws.getFloorY())
-                .putInt("z", ws.getFloorZ());
+                    .putString("id", BlockEntity.SIGN)
+                    .putString("Text1", "Welcome to your")
+                    .putString("Text2", "Island")
+                    .putString("Text3", "ISAL")
+                    .putString("Text4", "")
+                    .putInt("x", ws.getFloorX())
+                    .putInt("y", ws.getFloorY())
+                    .putInt("z", ws.getFloorZ());
             BlockEntity.createBlockEntity(BlockEntity.SIGN, player.chunk, nbt);
             BlockEntitySign sign = new BlockEntitySign(player.chunk, nbt);
             // Set spawn to ALL players
             sign.spawnToAll();
         }
-        if (teleport) {
-            player.teleport(world.getSpawnLocation());
-            TaskManager.runTaskLater(() -> {
-                plugin.getGrid().homeTeleport(player);
-            }, 10);
-        }
+
     }
 
     /**
@@ -642,7 +663,7 @@ public class Schematic {
      * @return the tileEntitiesMap
      */
     @SuppressWarnings("ReturnOfCollectionOrArrayField")
-    public Map<BlockVector, Map<String, Tag>> getTileEntitiesMap() {
+    public Map<Vector3, Map<String, Tag>> getTileEntitiesMap() {
         return tileEntitiesMap;
     }
 
@@ -666,7 +687,7 @@ public class Schematic {
     public boolean isUsePhysics() {
         return usePhysics;
     }
-    
+
     /**
      * @return true if player spawn exists in this schematic
      */
@@ -719,7 +740,9 @@ public class Schematic {
     }
 
     /**
-     * Spawns a random companion for the player with a random name at the location given
+     * Spawns a random companion for the player with a random name at the
+     * location given
+     *
      * @param player
      * @param location
      */
@@ -738,7 +761,7 @@ public class Schematic {
                     //plugin.getLogger().info("DEBUG: name is " + name);
                     //companion.setCustomName(name);
                     //companion.setCustomNameVisible(true);
-                } 
+                }
             }
         }
     }
@@ -753,12 +776,12 @@ public class Schematic {
 
     /**
      * @param companionNames the companionNames to set
-     */    
+     */
     @SuppressWarnings("AssignmentToCollectionOrArrayFieldFromParameter")
     public void setCompanionNames(List<String> companionNames) {
         this.companionNames = companionNames;
     }
-    
+
     /**
      * @param defaultChestItems the defaultChestItems to set
      */
@@ -766,7 +789,7 @@ public class Schematic {
     public void setDefaultChestItems(Item[] defaultChestItems) {
         this.defaultChestItems = defaultChestItems;
     }
-    
+
     /**
      * @return the partnerName
      */
@@ -798,6 +821,7 @@ public class Schematic {
 
     /**
      * Whether the schematic is visible or not
+     *
      * @return the visible
      */
     public boolean isVisible() {
@@ -805,7 +829,9 @@ public class Schematic {
     }
 
     /**
-     * Sets if the schematic can be seen in the schematics GUI or not by the player
+     * Sets if the schematic can be seen in the schematics GUI or not by the
+     * player
+     *
      * @param visible the visible to set
      */
     public void setVisible(boolean visible) {

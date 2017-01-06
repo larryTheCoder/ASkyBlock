@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package larryTheCoder.invitation;
+package larryTheCoder.listener.invitation;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import java.util.HashMap;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.IslandData;
+import larryTheCoder.database.purger.IslandData;
 
 /**
  * This class handle all Invitations and addmember function It will tick every

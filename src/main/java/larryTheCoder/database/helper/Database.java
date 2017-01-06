@@ -20,6 +20,8 @@ package larryTheCoder.database.helper;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+import larryTheCoder.database.purger.IslandData;
 
 /**
  * @author larryTheCoder
@@ -89,4 +91,5 @@ public interface Database {
      * @throws ClassNotFoundException If the driver cannot be found; see {@link #openConnection()}
      */
     public abstract int updateSQL(String query) throws SQLException, ClassNotFoundException;
+    
 }

@@ -14,57 +14,63 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package larryTheCoder.command;
 
-import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.listener.invitation.InvitationHandler;
+import larryTheCoder.database.purger.IslandData;
+import larryTheCoder.database.purger.TeamData;
 
 /**
  * @author larryTheCoder
  */
-public class acceptSubCommand extends SubCommand{
+public class createTeamSubCommand extends SubCommand {
 
-    public acceptSubCommand(ASkyBlock plugin) {
+    public createTeamSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.command.accept") && sender.isPlayer();
+        return sender.hasPermission("is.command.create") && sender.isPlayer();
     }
 
     @Override
     public String getUsage() {
-        return "";
+        return "<homeID> <name> OR <name>";
     }
 
     @Override
     public String getName() {
-        return "accept";
+        return "tcreate";
     }
 
     @Override
     public String getDescription() {
-        return "Accept an invitation";
+        return "Create your team";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{"accpt"};
+        return new String[]{"createTeam", "tc", "ct", "tcre"};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        Player p = sender.getServer().getPlayer(sender.getName());
-        InvitationHandler pd = ASkyBlock.get().getInvitationHandler();
-        if(pd.getInvitation(p) == null){
-            sender.sendMessage(getMsg("no_pending"));
+        if (args.length != 1) {
             return false;
         }
-        pd.getInvitation(p).accept();
+        IslandData pd = getPlugin().getDatabase().getIsland(sender.getName());
+        if (pd.members != null) {
+            sender.sendMessage(getMsg("error_have_team"));
+            return true;
+        }
+        if (!pd.team.isEmpty()) {
+            sender.sendMessage(getMsg("error_in_team"));
+            return true;
+        }
+        pd.members = new TeamData(args[1], pd.owner, "");
+        sender.sendMessage(getPrefix() + getMsg("seccess_team"));
         return true;
     }
 

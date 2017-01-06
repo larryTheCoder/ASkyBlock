@@ -14,21 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package larryTheCoder.database;
 
-package larryTheCoder.events;
-
-import cn.nukkit.Player;
 import larryTheCoder.database.purger.IslandData;
 
 /**
  * @author larryTheCoder
  */
-public class IslandJoinEvent extends ASkyBlockEvent{
-    /**
-     * @param player
-     * @param island
-     */
-    public IslandJoinEvent(Player player, IslandData island) {
-        super(player,island);
+public class YamlDatabase {
+
+    public YamlDatabase(boolean UseUUID) {
+
+    }
+
+    // Deserialize
+    // Format:
+    // x:height:z:protection range:island distance:owner UUID: locked: protected
+    public IslandData getIslandLocation(String levelName, int X, int Z) {
+        IslandData database = new IslandData(levelName, X, Z);
+
+        return database;
     }
 }

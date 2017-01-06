@@ -14,10 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package larryTheCoder;
+package larryTheCoder.database.purger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import larryTheCoder.Settings;
 
 /**
  * Taken from PlotMe
@@ -33,7 +35,7 @@ public class IslandData implements Cloneable{
     public int Z;
     public String name;
     public String owner;
-    public ArrayList<String> members;
+    public TeamData members;
     public String biome;
     // 0 = UNLOCKED, 1 = LOCKED
     public int locked;    
@@ -48,7 +50,7 @@ public class IslandData implements Cloneable{
     }
 
     @SuppressWarnings("AssignmentToMethodParameter")
-    public IslandData(String levelName, int X, int Y, int Z, String name, String owner, String team, HashMap<Integer, String> helpers, String biome, int id, int islandId, int locked) {
+    public IslandData(String levelName, int X, int Y, int Z, String name, String owner, String team, TeamData helpers, String biome, int id, int islandId, int locked) {
         if (biome.isEmpty()) {
             biome = "PLAINS";
         }
@@ -59,11 +61,7 @@ public class IslandData implements Cloneable{
         this.Z = Z;
         this.name = name;
         this.owner = owner;
-        ArrayList<String> set = new ArrayList<>();
-        helpers.keySet().stream().filter((isid) -> (isid == islandId)).forEach((isid) -> {
-            set.add(helpers.get(isid));
-        });
-        this.members = set;
+        this.members = helpers;       
         this.biome = biome;
         this.id = id;
         this.islandId = islandId;
@@ -71,7 +69,7 @@ public class IslandData implements Cloneable{
     }
     
     public boolean isMember(String p){
-        return members.contains(p);
+        return members.members.contains(p);
     }
     
     /* (non-Javadoc)
@@ -86,5 +84,13 @@ public class IslandData implements Cloneable{
             // This should never happen
             throw new InternalError(e.toString());
         }
+    }
+
+    public int getMinProtectedZ() {
+        return (Z - Settings.islandSize / 2);
+    }
+
+    public int getMinProtectedX() {
+        return (X - Settings.islandSize / 2);
     }
 }

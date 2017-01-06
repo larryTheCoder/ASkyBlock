@@ -22,7 +22,7 @@ import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.HandlerList;
 import cn.nukkit.level.Location;
-import larryTheCoder.IslandData;
+import larryTheCoder.database.purger.IslandData;
 import larryTheCoder.Settings;
 import larryTheCoder.schematic.Schematic;
 

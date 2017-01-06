@@ -25,26 +25,29 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.IslandData;
+import larryTheCoder.database.purger.IslandData;
 import larryTheCoder.Utils;
 import larryTheCoder.database.helper.Database;
+import larryTheCoder.database.purger.TeamData;
 
 /**
  * The class of Database Supported Database is SQLite to-do: MySQL, homes
  *
  * @author larryTheCoder
  */
-public final class ASConnection {
+public class ASConnection {
 
-    private Database db;
-    private Connection connection;
-    private String prefix;
-    private boolean closed;
+    private final Database db;
+    private final Connection connection;
+    private final String prefix;
+    private boolean closed = true;
 
+    @SuppressWarnings("OverridableMethodCallInConstructor")
     public ASConnection(final Database database, String prefix, boolean debug) throws SQLException, ClassNotFoundException {
         this.db = database;
         this.connection = database.openConnection();
@@ -58,46 +61,63 @@ public final class ASConnection {
      * @throws SQLException
      */
     public void createTables() throws SQLException {
-        String[] tables = new String[]{"island", "worlds", "helpers"};
-        DatabaseMetaData meta = this.connection.getMetaData();
-        int create = 0;
-        for (String s : tables) {
-            try (ResultSet set = meta.getTables(null, null, this.prefix + s, new String[]{"TABLE"})) {
-                if (!set.next()) {
-                    create++;
+        if (closed) {
+            String[] tables = new String[]{"island", "worlds", "teams"};
+            DatabaseMetaData meta = this.connection.getMetaData();
+            int create = 0;
+            for (String s : tables) {
+                try (ResultSet set = meta.getTables(null, null, s, new String[]{"TABLE"})) {
+                    if (!set.next()) {
+                        create++;
+                    }
                 }
             }
-        }
-        if (create == 0) {
-            return;
-        }
-        try (Statement stmt = this.connection.createStatement()) {
-            stmt.addBatch("CREATE TABLE IF NOT EXISTS "
-                    + "`island` ("
-                    + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + "`islandId` INT(11) NOT NULL,"
-                    + "`x` INT(11) NOT NULL,"
-                    + "`y` INT(11) NOT NULL,"
-                    + "`z` INT(11) NOT NULL,"
-                    + "`owner` VARCHAR(45) NOT NULL,"
-                    + "`name` VARCHAR(45) NOT NULL,"
-                    + "`world` VARCHAR(45) NOT NULL,"
-                    + "`biome` VARCHAR(45) NOT NULL,"
-                    + "`team` VARCHAR(45),"
-                    + "`locked` INTEGER NOT NULL)");
-            stmt.addBatch("CREATE TABLE IF NOT EXISTS "
-                    + "`worlds` ("
-                    + "`world` VARCHAR(45))");
-            stmt.addBatch("CREATE TABLE IF NOT EXISTS "
-                    + "`helpers` ("
-                    + "`islandId` INT(11) NOT NULL,"
-                    + "`user` VARCHAR(45))");
-            stmt.executeBatch();
-            stmt.clearBatch();
+            if (create == 0) {
+                return;
+            }
+            try (Statement stmt = this.connection.createStatement()) {
+                //  CREATE TABLE IF NOT EXISTS plots
+                //(id INTEGER PRIMARY KEY AUTOINCREMENT, level TEXT, X INTEGER, Z INTEGER, name TEXT,
+                //owner TEXT, helpers TEXT, biome TEXT)
+                stmt.addBatch("CREATE TABLE IF NOT EXISTS "
+                        + "`island` ("
+                        + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + "`islandId` INTEGER,"
+                        + "`x` INT(11) NOT NULL,"
+                        + "`y` INT(11) NOT NULL,"
+                        + "`z` INT(11) NOT NULL,"
+                        + "`owner` VARCHAR(45) NOT NULL,"
+                        + "`name` VARCHAR(45) NOT NULL,"
+                        + "`world` VARCHAR(45) NOT NULL,"
+                        + "`biome` VARCHAR(45) NOT NULL,"
+                        + "`team` VARCHAR(45) NOT NULL,"
+                        + "`helpers` VARCHAR(45),"
+                        + "`locked` INT(11) NOT NULL)");
+                stmt.addBatch("CREATE TABLE IF NOT EXISTS "
+                        + "`worlds` ("
+                        + "`world` VARCHAR(45))");
+                // TODO Ranks
+                stmt.addBatch("CREATE TABLE IF NOT EXISTS"
+                        + "`teams` ("
+                        + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + "`name` VARCHAR(45) NOT NULL,"
+                        + "`leader` VARCHAR(45) NOT NULL,"
+                        + "`teams` VARCHAR(45))");
+                stmt.executeBatch();
+                stmt.clearBatch();
+            }
+            closed = false;
+        } else if (closed == true && db != null) {
+            Utils.ConsoleMsg("§cThis a problem. The SQLManager is closed but the Database is not...");
+            Utils.ConsoleMsg("§cYou might to stop server for this kind of problem to fix this error");
+            Utils.ConsoleMsg("&cError Code: 0x3f");
+        } else if (closed == false && db == null) {
+            Utils.ConsoleMsg("§cThis a problem. The SQLManager is open but the Database is not...");
+            Utils.ConsoleMsg("§cYou might to stop server for this kind of problem to fix this error");
+            Utils.ConsoleMsg("&cError Code: 0x4f");
         }
     }
 
-    
     /**
      * Get the player island by Location
      *
@@ -108,25 +128,17 @@ public final class ASConnection {
      */
     public IslandData getIslandLocation(String levelName, int X, int Z) {
         IslandData database = new IslandData(levelName, X, Z);
-        try (Statement kt = connection.createStatement()) {
-            // Get helpers
-            ResultSet resultSet = kt.executeQuery("SELECT `user`, `islandId` FROM `helpers`");
-            HashMap<Integer, String> helpers = new HashMap<>();
-            while (resultSet.next()) {
-                int id = resultSet.getInt("islandId");
-                String helper = resultSet.getString("user");
-                helpers.put(id, helper);
+        try (PreparedStatement rt = connection.prepareStatement("SELECT * FROM `island` WHERE(`world` = ? AND `islandId` = ?)")) {
+            rt.setString(1, levelName);
+            rt.setInt(2, ASkyBlock.get().getIsland().generateIslandKey(X, Z));
+            ResultSet stmt = rt.executeQuery();
+            if (stmt == null) {
+                return null;
             }
-            try (ResultSet stmt = kt.executeQuery("SELECT  `id`, `islandId`, `x`, `y`, `z`, `owner`, `name`, `world`, `biome`, `team`,`locked` FROM `island`")) {
-                while (stmt.next()) {
-                    int x = stmt.getInt("x");
-                    int z = stmt.getInt("z");
-                    if (ASkyBlock.get().getIsland().generateIslandKey(x, z) == stmt.getInt("islandId")) {
-                        continue;
-                    }
-                    database = new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("team"), helpers, stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getInt("locked"));
-                }
+            while (stmt.next()) {
+                database = new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("team"), getTeamMetaData(stmt.getString("owner")), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getInt("locked"));
             }
+
         } catch (SQLException ex) {
             Utils.ConsoleMsg(TextFormat.RED + "An error occured while fecthing SQLite: #location #X" + X + "#Z" + Z);
             if (ASkyBlock.get().isDebug()) {
@@ -138,20 +150,14 @@ public final class ASConnection {
 
     public ArrayList<IslandData> getIslands(String owner) {
         ArrayList<IslandData> pd = new ArrayList<>();
-        try (PreparedStatement rt = connection.prepareStatement("SELECT * FROM `island` WHERE `owner` = ?")) {   // 
+        try (PreparedStatement rt = connection.prepareStatement("SELECT * FROM `island` WHERE `owner` = ?")) {
             rt.setString(1, owner);
-            try (ResultSet stmt = rt.executeQuery()) {
-                // Get helpers
-                ResultSet resultSet = rt.executeQuery("SELECT `user`, `islandId` FROM `helpers`");
-                HashMap<Integer, String> helpers = new HashMap<>();
-                while (resultSet.next()) {
-                    int id = resultSet.getInt("islandId");
-                    String helper = resultSet.getString("user");
-                    helpers.put(id, helper);
-                }
-                while (stmt.next()) {
-                    pd.add(new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("team"), helpers, stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getInt("locked")));
-                }
+            ResultSet stmt = rt.executeQuery();
+            if (stmt == null) {
+                return null;
+            }
+            while (stmt.next()) {
+                pd.add(new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("team"), getTeamMetaData(stmt.getString("owner")), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getInt("locked")));
             }
         } catch (SQLException ex) {
             Utils.ConsoleMsg(TextFormat.RED + "An error occured while fecthing SQLite: #Player " + owner);
@@ -162,10 +168,10 @@ public final class ASConnection {
         return pd;
     }
 
-    public IslandData getIsland(String name){
+    public IslandData getIsland(String name) {
         return getIslandAndId(name, 1);
     }
-    
+
     /**
      * Get the player island by name and its ID
      *
@@ -175,30 +181,21 @@ public final class ASConnection {
      */
     public IslandData getIslandAndId(String name, int homes) {
         IslandData database = null;
-        try (Statement kt = connection.createStatement()) {
-            try (ResultSet stmt = kt.executeQuery("SELECT  `id`,`islandId`, `x`, `y`,`z`, `owner`, `name`, `world`, `biome`, `team`,`locked` FROM `island`")) {
-                // Get helpers
-                ResultSet resultSet = kt.executeQuery("SELECT `user`, `islandId` FROM `helpers`");
-                HashMap<Integer, String> helpers = new HashMap<>();
-                while (resultSet.next()) {
-                    int id = resultSet.getInt("islandId");
-                    String helper = resultSet.getString("user");
-                    helpers.put(id, helper);
-                }
-                
-                while (stmt.next()) {
-                    if (stmt.getString("owner").equals(name) && stmt.getInt("id") == homes) {
-                        continue;
-                    }
-                    database = new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("team"), helpers, stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getInt("locked"));
-                    // Stop the loop so there wont be an error while teleporting
-                    break;
-                }
+        try (PreparedStatement rt = connection.prepareStatement("SELECT * FROM `island` WHERE `owner` = ? AND `id` = ?")) {
+            rt.setString(1, name);
+            rt.setInt(2, homes);
+            ResultSet stmt = rt.executeQuery();
+            if (stmt == null) {
+                return null;
+            }
+            while (stmt.next()) {
+                database = new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("team"), getTeamMetaData(stmt.getString("owner")), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getInt("locked"));
             }
         } catch (SQLException ex) {
-            Logger.getLogger(ASConnection.class.getName()).log(Level.SEVERE, null, ex);
+            if (ASkyBlock.get().isDebug()) {
+                ex.printStackTrace();
+            }
         }
-
         return database;
     }
 
@@ -213,8 +210,9 @@ public final class ASConnection {
         try {
             PreparedStatement stmt;
             if (pd.id >= 0) {
-                stmt = connection.prepareStatement("DELETE FROM `island` WHERE `id` = ?");
+                stmt = connection.prepareStatement("DELETE FROM `island` WHERE `id` = ? AND `owner` = ?");
                 stmt.setInt(1, pd.id);
+                stmt.setString(2, pd.owner);
             } else {
                 stmt = connection.prepareStatement("DELETE FROM `island` WHERE `world` = ? AND `x` = ? AND `z` = ?");
                 stmt.setString(1, pd.levelName);
@@ -222,11 +220,47 @@ public final class ASConnection {
                 stmt.setInt(3, pd.Z);
             }
             result = stmt.execute();
-
         } catch (SQLException ex) {
-
+            if (ASkyBlock.get().isDebug()) {
+                ex.printStackTrace();
+            }
         }
-        return result != false;
+        return result;
+    }
+
+    public boolean deleteTeam(TeamData pd) {
+        boolean result = false;
+        try {
+            PreparedStatement stmt;
+            stmt = connection.prepareStatement("DELETE FROM `teams` WHERE`leader` = ?");
+            stmt.setString(1, pd.leader);
+            result = stmt.execute();
+        } catch (SQLException ex) {
+            if (ASkyBlock.get().isDebug()) {
+                ex.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+    public void tick() {
+//        try (PreparedStatement kt = connection.prepareStatement("UPDATE `island` SET `team` = ?")) {
+//            ResultSet stmt = kt.executeQuery();
+//            if(stmt == null){
+//                return;
+//            }
+//            while(stmt.next()) {
+//                if (getTeamMetaDataByName(stmt.getString("team")) == null && !stmt.getString("team").isEmpty()) {
+//                    // try Remove them from Database
+//                    kt.setString(1, "");
+//                    kt.executeUpdate();
+//                }
+//            }
+//        } catch (SQLException ex) {
+//            if (ASkyBlock.get().isDebug()) {
+//                ex.printStackTrace();
+//            }
+//        }
     }
 
     /**
@@ -237,29 +271,14 @@ public final class ASConnection {
      */
     public IslandData getIslandById(int id) {
         IslandData database = null;
-
-        try (Statement kt = connection.createStatement()) {
-            try (ResultSet stmt = kt.executeQuery("SELECT  `id`, `islandId`, `x`, `y`, `z`, `owner`, `name`, `world`, `biome`, `team`,`locked` FROM `island`")) {
-                // Get helpers
-                ResultSet resultSet = kt.executeQuery("SELECT `user`, `islandId` FROM `helpers`");
-                HashMap<Integer, String> helpers = new HashMap<>();
-                while (resultSet.next()) {
-                    int ide = resultSet.getInt("islandId");
-                    String helper = resultSet.getString("user");
-                    helpers.put(ide, helper);
-                }
-                while (stmt.next()) {
-                    if (stmt.getInt("islandId") == id) {
-                        continue;
-                    }
-                    database = new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("team"), helpers, stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getInt("locked"));
-                    break;
-                }
-            } catch (SQLException ex) {
-                Utils.ConsoleMsg(TextFormat.RED + "An error occured while fecthing SQLite: #id " + id);
-                if (ASkyBlock.get().isDebug()) {
-                    ex.printStackTrace();
-                }
+        try (PreparedStatement kt = connection.prepareStatement("SELECT * FROM `island` WHERE `islandId` = ?")) {
+            kt.setInt(1, id);
+            ResultSet stmt = kt.executeQuery();
+            if (stmt == null) {
+                return null;
+            }
+            while (stmt.next()) {
+                database = new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("team"), getTeamMetaData(stmt.getString("owner")), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getInt("locked"));
             }
         } catch (SQLException ex) {
             Utils.ConsoleMsg(TextFormat.RED + "An error occured while fecthing SQLite: #id " + id);
@@ -270,10 +289,46 @@ public final class ASConnection {
         return database;
     }
 
+    public TeamData getTeamMetaData(String leader) {
+        TeamData pd = null;
+        try (PreparedStatement kt = connection.prepareStatement("SELECT * FROM `teams` WHERE `id` = ? AND `leader` = ?")) {
+            kt.setString(1, leader);
+            ResultSet stmt = kt.executeQuery();
+            if (stmt == null) {
+                return null;
+            }
+            while (stmt.next()) {
+                pd = new TeamData(stmt.getString("name"), stmt.getString("leader"), stmt.getString("members"));
+            }
+        } catch (SQLException ex) {
+
+        }
+
+        return pd;
+    }
+
+    public TeamData getTeamMetaDataByName(String name) {
+        TeamData pd = null;
+        try (PreparedStatement kt = connection.prepareStatement("SELECT * FROM `teams` WHERE `id` = ? AND `name` = ?")) {
+            kt.setString(1, name);
+            ResultSet stmt = kt.executeQuery();
+            if (stmt == null) {
+                return null;
+            }
+            while (stmt.next()) {
+                pd = new TeamData(stmt.getString("name"), stmt.getString("leader"), stmt.getString("members"));
+            }
+        } catch (SQLException ex) {
+
+        }
+
+        return pd;
+    }
+
     /**
      * Close the database. Generally not recommended to be used by add-ons.
      */
-    public void close(){
+    public void close() {
         try {
             this.closed = true;
             this.connection.close();
@@ -281,19 +336,20 @@ public final class ASConnection {
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Save player Island
      *
      * @param pd - IslandData that contains every actions
      * @return boolean - If it running correctly
      */
+    @SuppressWarnings("AssignmentToForLoopParameter")
     public boolean saveIsland(IslandData pd) {
         boolean result = false;
         boolean result2 = false;
-        try (PreparedStatement stmt = connection.prepareStatement("INSERT INTO "
+        try (PreparedStatement stmt = connection.prepareStatement("INSERT OR REPLACE INTO "
                 + "`island`"
-                + "(`id`,`islandId`, `x`, `y`, `z`, `owner`, `name`, `world`, `biome`, `team`,`locked`) VALUES"
+                + "(`id`, `islandId`, `x`, `y`, `z`, `owner`, `name`, `world`, `biome`, `team`,`locked`) VALUES"
                 + "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
             stmt.setInt(1, pd.id);
             stmt.setInt(2, pd.islandId);
@@ -307,38 +363,40 @@ public final class ASConnection {
             stmt.setString(10, pd.team);
             stmt.setInt(11, pd.locked);
             stmt.executeUpdate();
-            result = stmt.execute();
+            stmt.close();
+            result = true;
         } catch (SQLException ex) {
-            Utils.ConsoleMsg(TextFormat.RED + "An error occured while saving SQLite: #id ?");
+            Utils.ConsoleMsg(TextFormat.RED + "An error occured while saving SQLite: #id " + pd.id + "#Text 1 Cause of: " + ex.getErrorCode() + "AND " + ex.getSQLState());
             if (ASkyBlock.get().isDebug()) {
                 ex.printStackTrace();
             }
         }
-        try (PreparedStatement stmt = connection.prepareStatement("INSERT INTO `helpers` (`islandId`, `user`) VALUES (?, ?);")) {
-            stmt.setInt(1, pd.islandId);
-            for (String member : pd.members) {
-                stmt.setString(2, member);
-            }
-            stmt.executeUpdate();
-            result2 = stmt.execute();
-        } catch (SQLException ex) {
-            Utils.ConsoleMsg(TextFormat.RED + "An error occured while saving SQLite: #id ?");
-            if (ASkyBlock.get().isDebug()) {
-                ex.printStackTrace();
-            }
+        if (pd.members == null) {
+            result2 = true;
+        } else {
+
         }
         return result && result2;
     }
 
+    @SuppressWarnings("IncompatibleEquals")
     public ArrayList<String> getWorlds() {
         ArrayList<String> world = null;
-        try (Statement kt = connection.createStatement()) {
-            try (ResultSet stmt = kt.executeQuery("SELECT `world` FROM `worlds`")) {
-                world = new ArrayList<>();
-                while (stmt.next()) {
-                    world.add(stmt.getString(1));
-                }
+        try (PreparedStatement kt = connection.prepareStatement("SELECT * FROM `worlds`")) {
+            ResultSet stmt = kt.executeQuery();
+            if (stmt == null) {
+                return null;
             }
+            world = new ArrayList<>();
+            String weirdo = "";
+            while (stmt.next()) {
+                if (!world.equals("")) {
+                    weirdo += " ";
+                }
+                weirdo += stmt.getString("world");
+            }
+            String[] array = weirdo.split(" ");
+            world.addAll(Arrays.asList(array));
         } catch (SQLException ex) {
             if (ASkyBlock.get().isDebug()) {
                 ex.printStackTrace();
@@ -349,9 +407,14 @@ public final class ASConnection {
 
     public boolean saveWorlds(ArrayList<String> pd) {
         try (PreparedStatement stmt = connection.prepareStatement("INSERT OR REPLACE INTO `worlds` (`world`) VALUES (?);")) {
-            for (String pd1 : pd) {
-                stmt.setString(1, pd1);
+            String world = "";
+            for (String arg : pd) {
+                if (!world.equals("")) {
+                    world += " ";
+                }
+                world += arg;
             }
+            stmt.setString(1, world);
         } catch (SQLException ex) {
             if (ASkyBlock.get().isDebug()) {
                 ex.printStackTrace();
@@ -365,19 +428,21 @@ public final class ASConnection {
      *
      * @param pos - Position of the target location
      * @param id - Island id
+     * @param owner
      * @return boolean - If it running correctly
      */
-    public boolean setPosition(Position pos, int id) {
+    public boolean setPosition(Position pos, int id, String owner) {
         int x = pos.getFloorX();
         int fy = pos.getFloorY();
         int z = pos.getFloorZ();
         String level = pos.getLevel().getName();
-        try (PreparedStatement stmt = connection.prepareStatement("UPDATE `island` SET `x` = ?, `y` = ?, `z` = ?, `world` = ? WHERE `id` = ?")) {
+        try (PreparedStatement stmt = connection.prepareStatement("UPDATE `island` SET `x` = ?, `y` = ?, `z` = ?, `world` = ? WHERE `id` = ? AND `owner` = ?")) {
             stmt.setInt(1, x);
             stmt.setInt(2, fy);
             stmt.setInt(3, z);
             stmt.setString(4, level);
             stmt.setInt(5, id);
+            stmt.setString(6, owner);
             stmt.executeUpdate();
             stmt.close();
             return true;
@@ -389,9 +454,4 @@ public final class ASConnection {
         }
         return false;
     }
-
-    public boolean setOwner(String oldOwner, String newOwner, int id) {
-        return false;
-    }
-
 }

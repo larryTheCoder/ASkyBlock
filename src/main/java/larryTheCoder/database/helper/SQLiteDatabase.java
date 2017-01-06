@@ -23,8 +23,10 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import larryTheCoder.database.purger.IslandData;
 import larryTheCoder.Utils;
-import org.sqlite.JDBC;
 
 /**
  * @author larryTheCoder
@@ -53,7 +55,7 @@ public class SQLiteDatabase implements Database {
         }
         try {
             java.util.Properties info = new java.util.Properties();
-            this.connection = JDBC.createConnection("jdbc:sqlite:" + this.dbLocation, info);// DriverManager.getConnection("jdbc:sqlite:" + this.dbLocation);
+            this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.dbLocation);
         } catch (SQLException ex) {
             forceConnection();
         }
@@ -89,7 +91,7 @@ public class SQLiteDatabase implements Database {
             return statement.executeQuery(query);
         }
     }
-
+    
     @Override
     public int updateSQL(String query) throws SQLException, ClassNotFoundException {
         if (checkConnection()) {

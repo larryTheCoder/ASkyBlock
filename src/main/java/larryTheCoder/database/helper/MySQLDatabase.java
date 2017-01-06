@@ -22,7 +22,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import larryTheCoder.ASkyBlock;
+import larryTheCoder.database.purger.IslandData;
 import larryTheCoder.Utils;
 
 /**
@@ -114,6 +116,10 @@ public class MySQLDatabase implements Database{
         try (Statement statement = this.connection.createStatement()) {
             return statement.executeUpdate(query);
         }
+    }
+
+    public List<IslandData> executeSelect(String query) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

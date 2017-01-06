@@ -31,7 +31,7 @@ public class ConfigManager {
     public static void load() {
         int error = 0;
         Config cfg = new Config(new File(ASkyBlock.get().getDataFolder(), "config.yml"), Config.YAML);
-        
+
         //Chest Items
         String chestItems = cfg.getString("island.chestItems", "");
         // Check chest items
@@ -95,7 +95,7 @@ public class ConfigManager {
             }
 
         }
-        
+
         // island Hieght
         int islandHieght = cfg.getInt("island.islandHieght", 60);
         if (cfg.get("island.islandHieght") != null) {
@@ -112,7 +112,7 @@ public class ConfigManager {
             }
 
         }
-        
+
         //restriced commands
         String cmd = cfg.getString("island.islandHieght", "");
         if (cfg.get("island.islandHieght") != null) {
@@ -133,7 +133,7 @@ public class ConfigManager {
                 error += 1;
             }
         }
-        
+
         // Reset for players
         int islandTimer = cfg.getInt("island.resetPerPlayer", 5);
         if (cfg.get("island.resetPerPlayer") != null) {
@@ -143,37 +143,52 @@ public class ConfigManager {
                 Utils.ConsoleMsg("Check your config! [Reset PerPlayer!]");
                 error += 1;
             }
-        }        
-        
+        }
+
         // Island timeout
         int members = cfg.getInt("island.timeOut", 10);
-        if(cfg.get("island.timeOut") != null){
-            try{
+        if (cfg.get("island.timeOut") != null) {
+            try {
                 Settings.memberTimeOut = members;
-            } catch(Throwable exc){
+            } catch (Throwable exc) {
                 Utils.ConsoleMsg("Check your config! [IslandTimeOut]");
                 error += 1;
             }
         }
-        
+
         // Companion Names
         String names = cfg.getString("island.companionNames", "&aFood?");
-        if(cfg.get("island.companionNames") != null){
-            try{
+        if (cfg.get("island.companionNames") != null) {
+            try {
                 final String[] name = names.split(", ");
                 for (String name1 : name) {
                     Settings.companionNames.add(name1.replace("&", "§"));
                 }
-                
-            } catch(Throwable exc){
-                Utils.ConsoleMsg("Check your config! [IslandTimeOut]");
+
+            } catch (Throwable exc) {
+                Utils.ConsoleMsg("Check your config! [companionNames]");
+                error += 1;
+            }
+        }
+        if (cfg.get("island.gamemode") != null) {
+            try {
+                boolean enabled = cfg.getBoolean("island.gamemode.enable");
+                if (enabled) {
+                    int mode = cfg.getInt("island.gamemode.mode");
+                    Settings.gamemode = mode;
+                } else {
+                    Settings.gamemode = 0;
+                }
+            } catch (Throwable ex) {
+                Utils.ConsoleMsg("Check your config! [gamemode]");
                 error += 1;
             }
         }
         if (error > 5) {
             Utils.ConsoleMsg(TextFormat.RED + "You might check your config.yml!");
             Utils.ConsoleMsg(TextFormat.RED + "Make sure it is in the right format");
+        } else {
+            Utils.ConsoleMsg(TextFormat.YELLOW + "Seccessfully checked config.yml with " + TextFormat.RED + error + TextFormat.YELLOW + " Errors");
         }
-        Utils.ConsoleMsg(TextFormat.YELLOW + "Seccessfully checked config.yml with " + TextFormat.RED + error + TextFormat.YELLOW + " Errors");
     }
 }

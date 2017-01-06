@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 larryTheHarry 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package larryTheCoder.panels;
-
-import cn.nukkit.event.Listener;
+package larryTheCoder;
 
 /**
+ *
  * @author larryTheCoder
  */
-public class SchematicPanel implements Listener {
-    //todo
+public enum GameType {
+    SKYBLOCK,
+    ACIDISLAND
 }

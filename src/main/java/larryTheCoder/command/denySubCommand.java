@@ -20,7 +20,7 @@ package larryTheCoder.command;
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.invitation.InvitationHandler;
+import larryTheCoder.listener.invitation.InvitationHandler;
 
 /**
  * @author larryTheCoder

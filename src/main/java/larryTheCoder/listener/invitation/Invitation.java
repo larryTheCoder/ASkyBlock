@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package larryTheCoder.invitation;
+package larryTheCoder.listener.invitation;
 
 import cn.nukkit.Player;
 import cn.nukkit.utils.TextFormat;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.IslandData;
+import larryTheCoder.database.purger.IslandData;
 
 /**
  * @author larryTheCoder
@@ -71,7 +71,7 @@ public class Invitation {
     }
 
     public void accept() {
-        handler.getPlugin().getIsland().addMember(sender, island, receiver.getName());
+        handler.getPlugin().getTManager().addTeam(sender, receiver);
     }
 
     public void deny() {

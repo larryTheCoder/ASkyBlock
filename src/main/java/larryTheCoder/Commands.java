@@ -17,7 +17,9 @@
 package larryTheCoder;
 
 import cn.nukkit.Player;
+import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.command.PluginCommand;
 import cn.nukkit.utils.TextFormat;
 
@@ -33,6 +35,7 @@ import larryTheCoder.command.VGamemodeSubCommand;
 import larryTheCoder.command.leaveSubCommand;
 import larryTheCoder.command.deleteSubCommand;
 import larryTheCoder.command.ASetLobbySubCommand;
+import larryTheCoder.command.ChallengesCommand;
 import larryTheCoder.command.ToggleSubCommand;
 import larryTheCoder.command.acceptSubCommand;
 import larryTheCoder.command.denySubCommand;
@@ -42,6 +45,8 @@ import larryTheCoder.command.inviteSubCommand;
 import larryTheCoder.command.teleportSubCommand;
 
 /**
+ * Commands v1.2 [MyPlot]
+ * 
  * @author larryTheCoder
  */
 public class Commands extends PluginCommand<ASkyBlock> {
@@ -58,6 +63,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.setDescription("SkyBlock main command");
         this.plugin = plugin;
 
+        plugin.getServer().getCommandMap().register("ASkyBlock", new ChallengesCommand(plugin));
         //this.loadSubCommand(new AGenerateSubCommand(getPlugin()));
         this.loadSubCommand(new acceptSubCommand(getPlugin()));
         this.loadSubCommand(new AKickSubCommand(getPlugin()));
@@ -121,26 +127,61 @@ public class Commands extends PluginCommand<ASkyBlock> {
     }
 
     private boolean sendHelp(CommandSender sender, String[] args) {
-        int pageNumber = 1;
-        int pageHeight = 5;
-        if (args.length == 2 && Utils.isNumeric(args[1])) {
-            pageNumber = Integer.parseInt(args[1]);
-        }
-        int totalPage = commands.size() % pageHeight == 0 ? commands.size() / pageHeight : commands.size() / pageHeight + 1;
-        pageNumber = Math.min(pageNumber, totalPage);
-        if (pageNumber < 1) {
-            pageNumber = 1;
-        }
-        sender.sendMessage("§d--- §aASkyBlock help page §e" + pageNumber + " §aof §e" + totalPage + " §d---");
-        int i = 1;
-        for (SubCommand cmd : commands) {
-            if (i >= (pageNumber - 1) * pageHeight + 1 && i <= Math.min(commands.size(), pageNumber * pageHeight)) {
-                sender.sendMessage(TextFormat.DARK_GREEN + "/is " + cmd.getName() + ": " + TextFormat.WHITE + cmd.getDescription());
+        if (args.length != 0) {
+            if (args.length == 2 && !Utils.isNumeric(args[1])) {
+                if (SubCommand.containsKey(args[1].toLowerCase())) {
+                    // Show help for #IRC
+                    SubCommand sub = commands.get(SubCommand.get(args[1].toLowerCase()));
+                    String command = "";
+                    for (String arg : sub.getAliases()) {
+                        if (!command.equals("")) {
+                            command += " ";
+                        }
+                        command += arg;
+                    }
+                    if (command.isEmpty()) {
+                        command = "none";
+                    }
+                    sender.sendMessage("§aHelp for §e/is " + sub.getName() + "§a:");
+                    sender.sendMessage(" §d- §aAliases: §e" + command);
+                    sender.sendMessage(" §d- §aDescription: §e" + sub.getDescription());
+                    return true;
+                } else {
+                    sender.sendMessage("§cNo help for §e" + args[1] + "");
+                    return true;
+                }
             }
-            i++;
-        }
-        if (pageNumber != totalPage) {
-            sender.sendMessage("§aType §e/is help " + (pageNumber + 1) + "§a to see the next page.");
+            int pageNumber = 1;
+
+            if (args.length == 2 && Utils.isNumeric(args[1])) {
+                pageNumber = Integer.parseInt(args[1]);
+            }
+            int pageHeight;
+            if (sender instanceof ConsoleCommandSender) {
+                pageHeight = Integer.MAX_VALUE;
+            } else {
+                pageHeight = 5;
+            }
+            int totalPage = commands.size() % pageHeight == 0 ? commands.size() / pageHeight : commands.size() / pageHeight + 1;
+            pageNumber = Math.min(pageNumber, totalPage);
+            if (pageNumber < 1) {
+                pageNumber = 1;
+            }
+            sender.sendMessage("§d--- §aASkyBlock help page §e" + pageNumber + " §aof §e" + totalPage + " §d---");
+            int i = 1;
+            for (SubCommand cmd : commands) {
+                if (i >= (pageNumber - 1) * pageHeight + 1 && i <= Math.min(commands.size(), pageNumber * pageHeight)) {
+                    sender.sendMessage(TextFormat.DARK_GREEN + "/is " + cmd.getName() + ": §e" + TextFormat.WHITE + cmd.getDescription());
+                }
+                i++;
+            }
+            if (pageNumber != totalPage) {
+                sender.sendMessage("§aType §e/is help " + (pageNumber + 1) + "§a to see the next page.");
+            } else {
+                sender.sendMessage("§aUse /is help §e<#IRC> §afor a list of Aliases");
+            }
+        } else {
+            sender.sendMessage("§cUnknown command use /is help for a list of commands");
         }
         return true;
     }

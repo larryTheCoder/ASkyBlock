@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package larryTheCoder.chat;
+package larryTheCoder.listener.chat;
 
 import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;

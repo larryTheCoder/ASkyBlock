@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package larryTheCoder.command;
 
 import cn.nukkit.Player;
@@ -22,13 +21,13 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.IslandData;
+import larryTheCoder.database.purger.IslandData;
 import larryTheCoder.Utils;
 
 /**
  * @author larryTheCoder
  */
-public class homeSubCommand extends SubCommand{
+public class homeSubCommand extends SubCommand {
 
     public homeSubCommand(ASkyBlock plugin) {
         super(plugin);
@@ -60,21 +59,21 @@ public class homeSubCommand extends SubCommand{
     }
 
     @Override
-    public boolean execute(CommandSender sender, String[] args) {        
+    public boolean execute(CommandSender sender, String[] args) {
         int islandNumber;
-        if(args.length != 2){
+        if (args.length != 2) {
             islandNumber = 1;
-        } else if(Utils.isNumeric(args[1]) && Integer.getInteger(args[1]) == 1){
+        } else if (Utils.isNumeric(args[1]) && Integer.getInteger(args[1]) == 1) {
             islandNumber = Integer.getInteger(args[1]);
         } else {
             return false;
         }
         ArrayList<IslandData> island = getPlugin().getDatabase().getIslands(sender.getName());
-        if(island == null){
+        if (island == null) {
             sender.sendMessage(getPrefix() + getMsg("no_island_error"));
             return true;
         }
-        if(island.size() != islandNumber){
+        if (island.size() != islandNumber) {
             sender.sendMessage(TextFormat.RED + "You don't have an island with home number " + islandNumber);
             return true;
         }

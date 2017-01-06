@@ -15,20 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package larryTheCoder.events;
+package larryTheCoder.listener.panels;
 
-import cn.nukkit.Player;
-import larryTheCoder.database.purger.IslandData;
+import cn.nukkit.event.Listener;
 
 /**
  * @author larryTheCoder
  */
-public class IslandJoinEvent extends ASkyBlockEvent{
-    /**
-     * @param player
-     * @param island
-     */
-    public IslandJoinEvent(Player player, IslandData island) {
-        super(player,island);
-    }
+public class SchematicPanel implements Listener {
+    //todo
 }

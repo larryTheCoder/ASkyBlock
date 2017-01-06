@@ -21,7 +21,7 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.TextFormat;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.IslandData;
+import larryTheCoder.database.purger.IslandData;
 
 /**
  * @author larryTheCoder
@@ -39,7 +39,7 @@ public class ToggleSubCommand extends SubCommand{
 
     @Override
     public String getUsage() {
-        return "<help>";
+        return "<homes>";
     }
 
     @Override
@@ -60,14 +60,17 @@ public class ToggleSubCommand extends SubCommand{
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = sender.getServer().getPlayer(sender.getName());
-        if(args.length == 2){
+        if(args.length < 2){
             sender.sendMessage(TextFormat.GRAY + "Too few parameters Usage: /is tgg help");
             return true;
         }
         switch(args[2]){
+            case "?":
             case "help":
-                sender.sendMessage(getMsg("toggle_help"));
+                sender.sendMessage("§d--- §aToggle SubCommand §d---");
+                sender.sendMessage("§5- §a/is tgg tp §7<boolean>§e: §eEnable teleport to your island");  
                 break;
+            case "tp":
             case "teleport":
                 if(args.length != 3){
                     sender.sendMessage(TextFormat.GRAY + "Too few parameters Usage: /is tgg teleport <true | false>");
@@ -77,8 +80,8 @@ public class ToggleSubCommand extends SubCommand{
                     sender.sendMessage(TextFormat.GRAY + "Your parameters is not a boolean");
                     break;
                 }
-                IslandData pd = getPlugin().getDatabase().getIsland(sender.getName());
-                switch(args[3]){
+                IslandData pd = getPlugin().getDatabase().getIsland(p.getName());
+                switch(args[3].toLowerCase()){
                     case "true":
                         pd.locked = 0;
                         break;
@@ -86,8 +89,11 @@ public class ToggleSubCommand extends SubCommand{
                         pd.locked = 1;
                         break;
                     default:
-                        sender.sendMessage(TextFormat.GRAY + "Invilad parameters Usage: /is tgg teleport <true | false>");
+                        sender.sendMessage(getPrefix() + TextFormat.GRAY + "Usage: /is tgg teleport <true | false>");
                 }
+                break;
+            case "name":
+                
         }
         return true;
     }
