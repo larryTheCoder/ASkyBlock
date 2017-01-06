@@ -24,4 +24,4 @@ __A Basic SkyBlock Manager by tastybento For Nukkit Minecraft: PE__
 - Best for servers [0.16.0]
 
 ## Download
-**Circle CI**: ![Download link](https://circleci.com/gh/larryTheCoder/ASkyBlock-Nukkit)
+**Circle CI**: [Download link](https://circleci.com/gh/larryTheCoder/ASkyBlock-Nukkit)
