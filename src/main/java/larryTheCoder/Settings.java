@@ -32,6 +32,7 @@ public class Settings {
     public static int islandHieght = 60;
     public static ArrayList<String> bannedCommands = new ArrayList<>();
     public static int islandLevel = 0;
+    public static int seaLevel = 0;
     public static int reset = 3;
     public static int memberTimeOut;
     public static List<String> challengeLevels = new ArrayList<>();

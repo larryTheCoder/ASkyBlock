@@ -62,7 +62,7 @@ public class SkyBlockGenerator extends Generator {
         }
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                for (int y = 0; y < 3; y++) {
+                for (int y = 0; y < Settings.seaLevel; y++) {
                     chunk.setBlock(x, y, z, Block.WATER); // Water Allows stuff 
                     // to fall through into oblivion, thus keeping lag to a minimum
                 }

@@ -20,7 +20,7 @@ chat:
 schematic:
   # Use schematic for the best result
   # It still in development
-  enabled: false
+  enabled: true
   # The loaded schematic, no need .schematic
   # You must put schematic files to `schematic/`
   # folder to load it.
@@ -41,6 +41,11 @@ island:
   #   You can use this as island High
   #   Minimum: 20
   islandHieght: 60
+  # Island sea level
+  #   You can use this to keeping the
+  #   lag to a minimum
+  #   You may use this at maximum: 5
+  seaLevel: 3
   # Restricted commands in Island / SkyBlock
   #   level. You must respect the command format
   #   Such as `/example1, /example2`

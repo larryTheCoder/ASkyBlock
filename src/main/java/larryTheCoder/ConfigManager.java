@@ -114,8 +114,8 @@ public class ConfigManager {
         }
 
         //restriced commands
-        String cmd = cfg.getString("island.islandHieght", "");
-        if (cfg.get("island.islandHieght") != null) {
+        String cmd = cfg.getString("island.restrictedCommands", "");
+        if (cfg.get("island.restrictedCommands") != null) {
             Settings.bannedCommands = new ArrayList<>();
             try {
                 final String[] pieces = cmd.substring(cmd.length()).trim().split(",");
@@ -134,6 +134,16 @@ public class ConfigManager {
             }
         }
 
+        // Island Sea level
+        int sealevel = cfg.getInt("island.seaLevel", 5);
+        if (cfg.get("island.seaLevel") != null) {
+            try {
+                Settings.seaLevel = sealevel;
+            } catch (Throwable exc2) {
+                Utils.ConsoleMsg("Check your config! [SeaLevel]");
+                error += 1;
+            }
+        }
         // Reset for players
         int islandTimer = cfg.getInt("island.resetPerPlayer", 5);
         if (cfg.get("island.resetPerPlayer") != null) {
