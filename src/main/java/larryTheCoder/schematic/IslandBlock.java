@@ -18,6 +18,10 @@ package larryTheCoder.schematic;
 
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockChest;
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.blockentity.BlockEntityChest;
+import cn.nukkit.blockentity.BlockEntitySign;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
@@ -49,14 +53,14 @@ import org.json.simple.parser.ParseException;
 public class IslandBlock {
 
     private short typeId;
-    private byte data;
+    private int data;
     private int x;
     private int y;
     private int z;
     private List<String> signText;
     private PotBlock pot;
     // Chest contents
-    private HashMap<Byte, Item> chestContents = new HashMap<>();
+    private HashMap<Integer, Item> chestContents = new HashMap<>();
     public static final HashMap<String, Integer> WEtoM = new HashMap<>();
     public static final HashMap<String, Integer> WEtoME = new HashMap<>();
 
@@ -104,7 +108,7 @@ public class IslandBlock {
         WEtoM.put("HARDENED_CLAY", Item.HARDENED_CLAY);
         WEtoM.put("HEAVY_WEIGHTED_PRESSURE_PLATE", Item.HEAVY_WEIGHTED_PRESSURE_PLATE);
         WEtoM.put("IRON_BARS", Item.IRON_BARS);
-//        WEtoM.put("IRON_HORSE_ARMOR", Item.IRON_HORSE_ARMOR);
+        WEtoM.put("IRON_HORSE_ARMOR", Item.IRON_HORSE_ARMOR);
         WEtoM.put("IRON_SHOVEL", Item.IRON_SHOVEL);
         WEtoM.put("LEAD", Item.AIR);
         WEtoM.put("LEAVES2", Item.LEAVES2);
@@ -304,8 +308,7 @@ public class IslandBlock {
                                         } else if (key.equalsIgnoreCase("text")) {
                                             lineText += value;
                                         } else // Formatting - usually the value is always true, but check just in case
-                                        {
-                                            if (key.equalsIgnoreCase("obfuscated") && value.equalsIgnoreCase("true")) {
+                                         if (key.equalsIgnoreCase("obfuscated") && value.equalsIgnoreCase("true")) {
                                                 lineText += TextFormat.OBFUSCATED;
                                             } else if (key.equalsIgnoreCase("underlined") && value.equalsIgnoreCase("true")) {
                                                 lineText += TextFormat.UNDERLINE;
@@ -319,15 +322,12 @@ public class IslandBlock {
                                                     Utils.ConsoleMsg("Unknown format " + value + " in sign when pasting schematic, skipping...");
                                                 }
                                             }
-                                        }
                                     }
                                 } else // This is unformatted text. It is included in "". A reset is required to clear
                                 // any previous formatting
-                                {
-                                    if (format.length() > 1) {
+                                 if (format.length() > 1) {
                                         lineText += TextFormat.RESET + format.substring(format.indexOf('"') + 1, format.lastIndexOf('"'));
                                     }
-                                }
                             }
                         } else {
                             // No extra tag
@@ -341,8 +341,7 @@ public class IslandBlock {
                         e.printStackTrace();
                     }
                 } else // This is unformatted text (not JSON). It is included in "".
-                {
-                    if (text.get(line).length() > 1) {
+                 if (text.get(line).length() > 1) {
                         try {
                             lineText = text.get(line).substring(text.get(line).indexOf('"') + 1, text.get(line).lastIndexOf('"'));
                         } catch (Exception e) {
@@ -353,7 +352,6 @@ public class IslandBlock {
                         // just in case it isn't - show the raw line
                         lineText = text.get(line);
                     }
-                }
                 //Bukkit.getLogger().info("Line " + line + " is " + lineText);
             }
             signText.add(lineText);
@@ -383,11 +381,11 @@ public class IslandBlock {
                         try {
                             // Id is a number
                             short itemType = (Short) ((CompoundTag) item).getValue().get("id").getValue();
-                            int itemDamage = (Integer) ((CompoundTag) item).getValue().get("Damage").getValue();
+                            short itemDamage = (short) ((CompoundTag) item).getValue().get("Damage").getValue();
                             byte itemAmount = (Byte) ((CompoundTag) item).getValue().get("Count").getValue();
-                            byte itemSlot = (Byte) ((CompoundTag) item).getValue().get("Slot").getValue();
-                            Item chestItem = new Item(itemType, itemDamage, itemAmount);
-                            chestContents.put(itemSlot, chestItem);
+                            byte itemSlot = (byte) ((CompoundTag) item).getValue().get("Slot").getValue();
+                            Item chestItem = new Item(itemType, (int) itemDamage, itemAmount);
+                            chestContents.put((int) itemSlot, chestItem);
                         } catch (ClassCastException ex) {
                             // Id is a material
                             String itemType = (String) ((CompoundTag) item).getValue().get("id").getValue();
@@ -396,7 +394,7 @@ public class IslandBlock {
                                 if (itemType.startsWith("minecraft:")) {
                                     String material = itemType.substring(10).toUpperCase();
                                     // Special case for non-standard material names
-                                    Integer itemMaterial;
+                                    int itemMaterial;
 
                                     //Bukkit.getLogger().info("DEBUG: " + material);
                                     if (WEtoM.containsKey(material)) {
@@ -404,13 +402,13 @@ public class IslandBlock {
                                         itemMaterial = WEtoM.get(material);
                                     } else {
                                         //Bukkit.getLogger().info("DEBUG: Not in hashmap");
-                                        itemMaterial = 0;
+                                        itemMaterial = Item.fromString(material).getId();
                                     }
-                                    short itemDamage = (Short) ((CompoundTag) item).getValue().get("Damage").getValue();
-                                    int itemAmount = (Integer) ((CompoundTag) item).getValue().get("Count").getValue();
-                                    byte itemSlot = (Byte) ((CompoundTag) item).getValue().get("Slot").getValue();
-                                    Item chestItem = new Item(itemMaterial, itemAmount, itemDamage);
-                                    chestContents.put(itemSlot, chestItem);
+                                    byte itemAmount = (byte) ((CompoundTag) item).getValue().get("Count").getValue();
+                                    short itemDamage = (short) ((CompoundTag) item).getValue().get("Damage").getValue();
+                                    byte itemSlot = (byte) ((CompoundTag) item).getValue().get("Slot").getValue();
+                                    Item chestItem = new Item(itemMaterial, (int) itemDamage, itemAmount);
+                                    chestContents.put((int) itemSlot, chestItem);
                                 }
                             } catch (Exception exx) {
                                 // Bukkit.getLogger().info(item.toString());
@@ -441,33 +439,39 @@ public class IslandBlock {
     /**
      * Paste this block at blockLoc
      *
-     * @param nms
      * @param usePhysics
      * @param blockLoc
      */
     public void paste(Location blockLoc, boolean usePhysics) {
         // Only paste air if it is below the sea level and in the overworld
         Block block = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc).getLevelBlock();
-        Server.getInstance().getLevelByName("SkyBlock").setBlock(blockLoc, block, usePhysics, true);
-//        if (signText != null) {
-//            BlockEntity.createBlockEntity(BlockEntity.CHEST, blockLoc.getLevel().getChunks(), nbt);
-//            // Sign
-//            int index = 0;
-//            for (String line : signText) {
-//                sign.setLine(index++, line);
-//            }
-//            sign.update();
-//        } else if (banner != null) {
-//            banner.set(block);
-//        } else if (skull != null){
-//            skull.set(block);
-        if (pot != null) {
+        // found the problem why blocks didnt shows up
+        blockLoc.getLevel().setBlock(block, Block.get(typeId, data), usePhysics, true);
+        if (signText != null) {
+            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                    .putString("id", BlockEntity.SIGN)
+                    .putInt("x", (int) block.x)
+                    .putInt("y", (int) block.y)
+                    .putInt("z", (int) block.z)
+                    .putString("Text1", signText.get(0))
+                    .putString("Text2", signText.get(1))
+                    .putString("Text3", signText.get(2))
+                    .putString("Text4", signText.get(3));
+            BlockEntity.createBlockEntity(BlockEntity.SIGN, blockLoc.getLevel().getChunk((int) block.x >> 4, (int) block.z >> 4), nbt);
+            new BlockEntitySign(blockLoc.getLevel().getChunk((int) block.x >> 4, (int) block.z >> 4), nbt);
+        } else if (pot != null) {
             pot.set(blockLoc, block);
-//        } else if (spawnerBlockType != null) {
-//            CreatureSpawner cs = (CreatureSpawner)block.getState();
-//            cs.setSpawnedType(spawnerBlockType);
         } else if (!chestContents.isEmpty()) {
-            // todo
+            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                    .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
+                    .putString("id", BlockEntity.CHEST)
+                    .putInt("x", x)
+                    .putInt("y", y)
+                    .putInt("z", z);
+
+            BlockEntity.createBlockEntity(BlockEntity.CHEST, blockLoc.getLevel().getChunk((int) block.x >> 4, (int) block.z >> 4), nbt);
+            BlockEntityChest e = new BlockEntityChest(blockLoc.getLevel().getChunk((int) block.x >> 4, (int) block.z >> 4), nbt);
+            e.getInventory().setContents(chestContents);
         }
     }
 

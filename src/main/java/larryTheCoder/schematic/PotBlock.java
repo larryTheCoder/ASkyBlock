@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package larryTheCoder.schematic;
 
 import cn.nukkit.block.Block;
@@ -28,12 +27,13 @@ import org.jnbt.Tag;
 
 /**
  * This class describes pots and is used in schematic importing
- * 
+ *
  * @author SpyL1nk
- * 
+ *
  */
 public class PotBlock {
-    private Item potItem;
+
+    private Block potItem;
     private int potItemData;
 
     private static final HashMap<String, Integer> potItemList;
@@ -52,66 +52,66 @@ public class PotBlock {
     }
 
     public boolean set(Position pos, Block block) {
-        if(potItem != Item.get(Item.AIR)){
-            pos.getLevel().setBlock(pos, block);
+        if (potItem != Block.get(Item.AIR)) {
+            pos.getLevel().setBlock(block, Block.get(potItem.getId(), potItemData));
         }
         return true;
     }
 
     public boolean prep(Map<String, Tag> tileData) {
         // Initialize as default
-        potItem = Item.get(Item.AIR);
+        potItem = Block.get(Item.AIR);
         potItemData = 0;
         try {
-            if(tileData.containsKey("Item")){
+            if (tileData.containsKey("Item")) {
 
                 // Get the item in the pot
                 if (tileData.get("Item") instanceof IntTag) {
                     // Item is a number, not a material
                     int id = ((IntTag) tileData.get("Item")).getValue();
-                    potItem = Item.get(id);
+                    potItem = Block.get(id);
                     // Check it's a viable pot item
                     if (!potItemList.containsValue(id)) {
                         // No, so reset to AIR
-                        potItem = Item.get(Item.AIR);
+                        potItem = Block.get(Item.AIR);
                     }
                 } else if (tileData.get("Item") instanceof StringTag) {
                     // Item is a material
                     String itemName = ((StringTag) tileData.get("Item")).getValue();
-                    if (potItemList.containsKey(itemName)){
+                    if (potItemList.containsKey(itemName)) {
                         // Check it's a viable pot item
                         if (potItemList.containsKey(itemName)) {
-                            potItem = Item.get(potItemList.get(itemName));
+                            potItem = Block.get(potItemList.get(itemName));
                         }
                     }
                 }
 
-                if(tileData.containsKey("Data")){
+                if (tileData.containsKey("Data")) {
                     int dataTag = ((IntTag) tileData.get("Data")).getValue();
                     // We should check data for each type of potItem 
-                    if(potItem == Item.get(Item.ROSE)){
-                        if(dataTag >= 0 && dataTag <= 8){
+                    if (potItem == Block.get(Item.ROSE)) {
+                        if (dataTag >= 0 && dataTag <= 8) {
                             potItemData = dataTag;
                         } else {
                             // Prevent hacks
                             potItemData = 0;
                         }
-                    } else if(potItem == Item.get(Item.FLOWER) ||
-                            potItem == Item.get(Item.RED_MUSHROOM) ||
-                            potItem == Item.get(Item.BROWN_MUSHROOM) ||
-                            potItem == Item.get(Item.CACTUS)){
+                    } else if (potItem == Block.get(Item.FLOWER)
+                            || potItem == Block.get(Item.RED_MUSHROOM)
+                            || potItem == Block.get(Item.BROWN_MUSHROOM)
+                            || potItem == Block.get(Item.CACTUS)) {
                         // Set to 0 anyway
                         potItemData = 0;
-                    } else if(potItem == Item.get(Item.SAPLING)){
-                        if(dataTag >= 0 && dataTag <= 4){
+                    } else if (potItem == Block.get(Item.SAPLING)) {
+                        if (dataTag >= 0 && dataTag <= 4) {
                             potItemData = dataTag;
                         } else {
                             // Prevent hacks
                             potItemData = 0;
                         }
-                    } else if(potItem == Item.get(Item.TALL_GRASS)){
+                    } else if (potItem == Block.get(Item.TALL_GRASS)) {
                         // Only 0 or 2
-                        if(dataTag == 0 || dataTag == 2){
+                        if (dataTag == 0 || dataTag == 2) {
                             potItemData = dataTag;
                         } else {
                             potItemData = 0;
@@ -120,8 +120,7 @@ public class PotBlock {
                         // ERROR ?
                         potItemData = 0;
                     }
-                }
-                else {
+                } else {
                     potItemData = 0;
                 }
             }
