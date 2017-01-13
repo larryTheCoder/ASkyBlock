@@ -14,11 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package larryTheCoder.island;
+package larryTheCoder.player;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
-import cn.nukkit.event.player.PlayerTeleportEvent;
 import cn.nukkit.level.Location;
 import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
@@ -92,7 +90,7 @@ public class TeamManager {
 
     public ArrayList<String> getPlayerMembers(Player p) {
         IslandData pd = plugin.getDatabase().getIsland(p.getName());
-        if (!pd.members.members.isEmpty()) {
+        if (pd.members != null && !pd.members.members.isEmpty()) {
             return pd.members.members;
         }
         return null;

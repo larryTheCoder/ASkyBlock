@@ -25,7 +25,7 @@ import java.sql.Statement;
 import java.util.List;
 import larryTheCoder.ASkyBlock;
 import larryTheCoder.database.purger.IslandData;
-import larryTheCoder.Utils;
+import larryTheCoder.utils.Utils;
 
 /**
  * @author larryTheCoder

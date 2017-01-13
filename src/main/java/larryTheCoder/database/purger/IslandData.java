@@ -19,7 +19,7 @@ package larryTheCoder.database.purger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import larryTheCoder.Settings;
+import larryTheCoder.utils.Settings;
 
 /**
  * Taken from PlotMe

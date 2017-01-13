@@ -16,10 +16,12 @@
  */
 package larryTheCoder;
 
+import larryTheCoder.utils.Settings;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.generator.Generator;
+import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
 import java.util.Map;
@@ -52,18 +54,17 @@ public class SkyBlockGenerator extends Generator {
     @Override
     public void generateChunk(int chunkX, int chunkZ) {
         BaseFullChunk chunk = level.getChunk(chunkX, chunkZ);
-        // making island in this section anymore is removed
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                for (int y = 0; y < 100; y++) {
-                    chunk.setBlockId(x, y, z, Block.AIR);
-                }
+                chunk.setBiomeId(x, z, Biome.PLAINS);
             }
         }
+        // making island in this section has been removed
+        // reason why blocks not appear BECAUSE OF THIS @#*~+ AIR!!
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 for (int y = 0; y < Settings.seaLevel; y++) {
-                    chunk.setBlock(x, y, z, Block.WATER); // Water Allows stuff 
+                    chunk.setBlock(x, y, z, Block.STILL_WATER); // Water Allows stuff 
                     // to fall through into oblivion, thus keeping lag to a minimum
                 }
             }
@@ -72,11 +73,7 @@ public class SkyBlockGenerator extends Generator {
 
     @Override
     public void populateChunk(int chunkX, int chunkZ) {
-        for (int x = 0; x < 16; x++) {
-            for (int z = 0; z < 16; z++) {
-                level.getChunk(chunkX, chunkZ).setBiomeColor(x, z, 133, 188, 86);
-            }
-        }
+        // ??? do wut Xd
     }
 
     @Override

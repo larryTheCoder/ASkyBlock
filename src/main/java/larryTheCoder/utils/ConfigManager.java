@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package larryTheCoder;
+package larryTheCoder.utils;
 
 import cn.nukkit.Server;
 import cn.nukkit.item.Item;
@@ -22,6 +22,7 @@ import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import java.io.File;
 import java.util.ArrayList;
+import larryTheCoder.ASkyBlock;
 
 /**
  * @author larryTheCoder

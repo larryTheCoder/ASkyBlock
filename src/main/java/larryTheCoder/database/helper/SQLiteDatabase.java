@@ -26,7 +26,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import larryTheCoder.database.purger.IslandData;
-import larryTheCoder.Utils;
+import larryTheCoder.utils.Utils;
 
 /**
  * @author larryTheCoder

@@ -24,7 +24,7 @@ import cn.nukkit.event.HandlerList;
 import cn.nukkit.level.Location;
 import java.util.UUID;
 import larryTheCoder.database.purger.IslandData;
-import larryTheCoder.Settings;
+import larryTheCoder.utils.Settings;
 
 /**
  * @author larryTheCoder

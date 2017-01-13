@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package larryTheCoder;
+package larryTheCoder.utils;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
@@ -30,6 +30,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import larryTheCoder.ASkyBlock;
 
 /**
  * @author larryTheCoder
@@ -48,11 +49,6 @@ public class Utils {
             Utils.ConsoleMsg(TextFormat.RED + "Error removing potion effect from " + TextFormat.YELLOW + p.getName() + TextFormat.RED + ": " + exc.getMessage());
         }
 
-    }
-
-    public static void setBlockSuperFast(Block b, int blockId) {
-        BaseFullChunk chunk = b.getLevel().getChunk(b.getFloorX() >> 4, b.getFloorZ() >> 4);
-        chunk.setBlock(b.getFloorX(), b.getFloorY(), b.getFloorZ(), blockId);
     }
 
     public static Config loadYamlFile(String file) {
@@ -209,7 +205,7 @@ public class Utils {
         return "(" + loc.getFloorX() + "," + loc.getFloorY() + "," + loc.getFloorZ() + ")";
     }
 
-    public static String GetCommaList(ArrayList<String> arr) {
+    public static String arrayToString(ArrayList<String> arr) {
         StringBuilder buf = new StringBuilder();
         arr.stream().forEach((str) -> {
             if (buf.length() > 0) {
@@ -335,6 +331,11 @@ public class Utils {
         int mins = (int) (ms / 1000 / 60 % 60);
         return String.format("%02dm %02ds", mins, secs);
     }
+    
+   public static long secondsAsMillis(long sec){
+       long ms = (sec * 60);
+       return ms;
+   }
 
     public static int getInt(String in) {
         return Integer.parseInt(in);

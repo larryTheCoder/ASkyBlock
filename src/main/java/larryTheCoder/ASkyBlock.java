@@ -19,9 +19,13 @@
  *  - Add /is home [1 - %MAX_HOME%]
  *  - Add Schematic - will took a long time to build
  *  - Player locales - /is locales [String:#]
+ * SECURITY FIX:
+ *  - Change the player name into UUID
  */
 package larryTheCoder;
 
+import larryTheCoder.utils.Utils;
+import larryTheCoder.utils.ConfigManager;
 import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import cn.nukkit.plugin.PluginBase;
@@ -44,12 +48,12 @@ import larryTheCoder.listener.chat.ChatFormatListener;
 import larryTheCoder.listener.chat.ChatHandler;
 import larryTheCoder.database.ASConnection;
 import larryTheCoder.database.helper.SQLiteDatabase;
-import larryTheCoder.entity.BaseEntity;
 import larryTheCoder.listener.invitation.InvitationHandler;
 import larryTheCoder.island.GridManager;
 import larryTheCoder.island.IslandFallback;
 import larryTheCoder.island.IslandManager;
-import larryTheCoder.island.TeamManager;
+import larryTheCoder.player.TeamManager;
+import larryTheCoder.player.TeleportLogic;
 import larryTheCoder.schematic.Schematic;
 
 /**
@@ -72,8 +76,8 @@ public class ASkyBlock extends PluginBase {
     private GridManager grid;
     private IslandFallback backup;
     private InventorySave inventory;
-    private BaseEntity entity;
     private TeamManager managers;
+    private TeleportLogic teleportLogic;
 
     /**
      * Try to register a schematic manually
@@ -101,11 +105,14 @@ public class ASkyBlock extends PluginBase {
      * @return Schematic
      */
     public Schematic getSchematic(String key) {
-        Schematic file = null;
         if (ASkyBlock.schematics.containsKey(key)) {
-            file = ASkyBlock.schematics.get(key);
+            return ASkyBlock.schematics.get(key);
         }
-        return file;
+        return null;
+    }
+
+    public TeleportLogic getTeleportLogic() {
+        return teleportLogic;
     }
 
     /**
@@ -246,16 +253,6 @@ public class ASkyBlock extends PluginBase {
     }
 
     /**
-     * Get the BaseEntity section
-     *
-     * @api
-     * @return BaseEntity
-     */
-    public BaseEntity getEManager() {
-        return entity;
-    }
-
-    /**
      * Get the TeamManager section
      *
      * @api
@@ -302,6 +299,7 @@ public class ASkyBlock extends PluginBase {
     private void initIslands() {
         PluginManager pm = getServer().getPluginManager();
         chatHandler = new ChatHandler(this);
+        this.teleportLogic = new TeleportLogic(this);
         invitationHandler = new InvitationHandler(this);
         getServer().getPluginManager().registerEvents(chatHandler, this);
         pm.registerEvents(new IslandListener(this), this);
@@ -339,7 +337,6 @@ public class ASkyBlock extends PluginBase {
         manager = new IslandManager(this);
         grid = new GridManager(this);
         managers = new TeamManager(this);
-        entity = new BaseEntity(this);
         inventory = new InventorySave(this);
         backup = new IslandFallback(this);
         backup.init();

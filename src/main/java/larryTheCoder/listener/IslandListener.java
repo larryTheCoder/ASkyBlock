@@ -34,7 +34,7 @@ import cn.nukkit.level.Location;
 import java.util.ArrayList;
 import larryTheCoder.ASkyBlock;
 import larryTheCoder.database.purger.IslandData;
-import larryTheCoder.Settings;
+import larryTheCoder.utils.Settings;
 
 /**
  * @author larryTheCoder

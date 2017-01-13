@@ -1,7 +1,7 @@
 ## Default Config for ASkyBlock
 ---
 ## Game Prefix.
-Prefix: "&c[&r&6Sky&bBlock&c]&r"
+Prefix: "&8[&eSkyBlock&8]&r "
 ## Max islands homes
 # You will have to set this as digit and will be used
 # On island!
@@ -20,7 +20,9 @@ chat:
 schematic:
   # Use schematic for the best result
   # It still in development
-  enabled: true
+  # 7.1.2017 - Schematic wont generate blocks 
+  #            this will be disabled for some reason
+  enabled: false
   # The loaded schematic, no need .schematic
   # You must put schematic files to `schematic/`
   # folder to load it.

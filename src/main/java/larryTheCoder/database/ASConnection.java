@@ -31,7 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import larryTheCoder.ASkyBlock;
 import larryTheCoder.database.purger.IslandData;
-import larryTheCoder.Utils;
+import larryTheCoder.utils.Utils;
 import larryTheCoder.database.helper.Database;
 import larryTheCoder.database.purger.TeamData;
 

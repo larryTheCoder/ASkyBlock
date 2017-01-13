@@ -16,6 +16,8 @@
  */
 package larryTheCoder;
 
+import larryTheCoder.utils.Utils;
+import larryTheCoder.utils.Settings;
 import larryTheCoder.database.purger.IslandData;
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
@@ -127,7 +129,6 @@ public class SafeSpotTeleport {
             }
             Utils.ConsoleMsg("SPOT: " + chunkSnapshot.size());
             final List<BaseFullChunk> finalChunk = chunkSnapshot;
-            int worldHeight = 127;
             plugin.getServer().getScheduler().scheduleAsyncTask(new AsyncTask() {
                 @Override
                 public void onRun() {
@@ -137,12 +138,13 @@ public class SafeSpotTeleport {
                     boolean safeSpotFound = false;
                     Vector3 safeSpotInChunk = null;
                     Vector3 portalPart = null;
+                    int worldHeight = 257;
                     double distance = 0D;
                     double safeDistance = 0D;
                     for (BaseFullChunk chunk : finalChunk) {
                         for (int x = 0; x < 16; x++) {
                             for (int z = 0; z < 16; z++) {
-                                for (int y = Math.min(chunk.getHighestBlockAt(x, z), worldHeight); y >= 0; y--) {
+                                for (int y = worldHeight; y >= 0; y--) {
                                     // Check for portal - only if this is not a safe home search
                                     if (!setHome && chunk.getBlockId(x, y, z) == Item.END_PORTAL || chunk.getBlockId(x, y, z) == Item.NETHER_PORTAL) {
                                         if (portalPart == null || (distance > landLoc.normalize().distanceSquared(new Vector3(x, y, z)))) {

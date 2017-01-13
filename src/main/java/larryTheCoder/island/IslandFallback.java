@@ -123,7 +123,6 @@ public class IslandFallback {
                 .putInt("x", x)
                 .putInt("y", y)
                 .putInt("z", z);
-
         BlockEntity.createBlockEntity(BlockEntity.CHEST, p.chunk, nbt);
         BlockEntityChest e = new BlockEntityChest(p.chunk, nbt);
         // Items

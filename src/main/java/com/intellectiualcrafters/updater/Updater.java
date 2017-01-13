@@ -26,7 +26,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.Utils;
+import larryTheCoder.utils.Utils;
 
 /**
  * @author larryTheCoder

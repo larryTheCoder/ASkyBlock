@@ -20,7 +20,7 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.TextFormat;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.Utils;
+import larryTheCoder.utils.Utils;
 
 /**
  * @author larryTheCoder

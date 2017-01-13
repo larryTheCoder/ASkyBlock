@@ -18,6 +18,10 @@ package larryTheCoder.schematic;
 
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockChest;
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.blockentity.BlockEntityChest;
+import cn.nukkit.blockentity.BlockEntitySign;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
@@ -30,7 +34,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import larryTheCoder.ASkyBlock;
-import larryTheCoder.Utils;
+import larryTheCoder.utils.Utils;
 import org.jnbt.CompoundTag;
 import org.jnbt.ListTag;
 import org.jnbt.StringTag;
@@ -49,14 +53,14 @@ import org.json.simple.parser.ParseException;
 public class IslandBlock {
 
     private short typeId;
-    private byte data;
+    private int data;
     private int x;
     private int y;
     private int z;
     private List<String> signText;
     private PotBlock pot;
     // Chest contents
-    private HashMap<Byte, Item> chestContents = new HashMap<>();
+    private HashMap<Integer, Item> chestContents = new HashMap<>();
     public static final HashMap<String, Integer> WEtoM = new HashMap<>();
     public static final HashMap<String, Integer> WEtoME = new HashMap<>();
 
@@ -104,7 +108,7 @@ public class IslandBlock {
         WEtoM.put("HARDENED_CLAY", Item.HARDENED_CLAY);
         WEtoM.put("HEAVY_WEIGHTED_PRESSURE_PLATE", Item.HEAVY_WEIGHTED_PRESSURE_PLATE);
         WEtoM.put("IRON_BARS", Item.IRON_BARS);
-//        WEtoM.put("IRON_HORSE_ARMOR", Item.IRON_HORSE_ARMOR);
+        WEtoM.put("IRON_HORSE_ARMOR", Item.IRON_HORSE_ARMOR);
         WEtoM.put("IRON_SHOVEL", Item.IRON_SHOVEL);
         WEtoM.put("LEAD", Item.AIR);
         WEtoM.put("LEAVES2", Item.LEAVES2);
@@ -383,11 +387,11 @@ public class IslandBlock {
                         try {
                             // Id is a number
                             short itemType = (Short) ((CompoundTag) item).getValue().get("id").getValue();
-                            int itemDamage = (Integer) ((CompoundTag) item).getValue().get("Damage").getValue();
+                            short itemDamage = (short) ((CompoundTag) item).getValue().get("Damage").getValue();
                             byte itemAmount = (Byte) ((CompoundTag) item).getValue().get("Count").getValue();
-                            byte itemSlot = (Byte) ((CompoundTag) item).getValue().get("Slot").getValue();
-                            Item chestItem = new Item(itemType, itemDamage, itemAmount);
-                            chestContents.put(itemSlot, chestItem);
+                            byte itemSlot = (byte) ((CompoundTag) item).getValue().get("Slot").getValue();
+                            Item chestItem = new Item(itemType, (int) itemDamage, itemAmount);
+                            chestContents.put((int) itemSlot, chestItem);
                         } catch (ClassCastException ex) {
                             // Id is a material
                             String itemType = (String) ((CompoundTag) item).getValue().get("id").getValue();
@@ -396,39 +400,28 @@ public class IslandBlock {
                                 if (itemType.startsWith("minecraft:")) {
                                     String material = itemType.substring(10).toUpperCase();
                                     // Special case for non-standard material names
-                                    Integer itemMaterial;
+                                    int itemMaterial;
 
                                     //Bukkit.getLogger().info("DEBUG: " + material);
                                     if (WEtoM.containsKey(material)) {
-                                        //Bukkit.getLogger().info("DEBUG: Found in hashmap");
                                         itemMaterial = WEtoM.get(material);
                                     } else {
-                                        //Bukkit.getLogger().info("DEBUG: Not in hashmap");
-                                        itemMaterial = 0;
+                                        itemMaterial = Item.fromString(material).getId();
                                     }
-                                    short itemDamage = (Short) ((CompoundTag) item).getValue().get("Damage").getValue();
-                                    int itemAmount = (Integer) ((CompoundTag) item).getValue().get("Count").getValue();
-                                    byte itemSlot = (Byte) ((CompoundTag) item).getValue().get("Slot").getValue();
-                                    Item chestItem = new Item(itemMaterial, itemAmount, itemDamage);
-                                    chestContents.put(itemSlot, chestItem);
+                                    byte itemAmount = (byte) ((CompoundTag) item).getValue().get("Count").getValue();
+                                    short itemDamage = (short) ((CompoundTag) item).getValue().get("Damage").getValue();
+                                    byte itemSlot = (byte) ((CompoundTag) item).getValue().get("Slot").getValue();
+                                    Item chestItem = new Item(itemMaterial, (int) itemDamage, itemAmount);
+                                    chestContents.put((int) itemSlot, chestItem);
                                 }
                             } catch (Exception exx) {
-                                // Bukkit.getLogger().info(item.toString());
-                                // Bukkit.getLogger().info(((CompoundTag)item).getValue().get("id").getName());
-                                Utils.ConsoleMsg(
-                                        "Could not parse item [" + itemType.substring(10).toUpperCase() + "] in schematic - skipping!");
-                                // Bukkit.getLogger().severe(item.toString());
+                                Utils.ConsoleMsg("Could not parse item [" + itemType.substring(10).toUpperCase() + "] in schematic");
                                 exx.printStackTrace();
                             }
 
                         }
-
-                        // Bukkit.getLogger().info("Set chest inventory slot "
-                        // + itemSlot + " to " +
-                        // chestItem.toString());
                     }
                 }
-                //Bukkit.getLogger().info("Added " + number + " items to chest");
             }
         } catch (Exception e) {
             Utils.ConsoleMsg("Could not parse schematic file item, skipping!");
@@ -441,33 +434,38 @@ public class IslandBlock {
     /**
      * Paste this block at blockLoc
      *
-     * @param nms
      * @param usePhysics
      * @param blockLoc
      */
     public void paste(Location blockLoc, boolean usePhysics) {
         // Only paste air if it is below the sea level and in the overworld
         Block block = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc).getLevelBlock();
-        Server.getInstance().getLevelByName("SkyBlock").setBlock(blockLoc, block, usePhysics, true);
-//        if (signText != null) {
-//            BlockEntity.createBlockEntity(BlockEntity.CHEST, blockLoc.getLevel().getChunks(), nbt);
-//            // Sign
-//            int index = 0;
-//            for (String line : signText) {
-//                sign.setLine(index++, line);
-//            }
-//            sign.update();
-//        } else if (banner != null) {
-//            banner.set(block);
-//        } else if (skull != null){
-//            skull.set(block);
-        if (pot != null) {
+        // found the problem why blocks didnt shows up
+        blockLoc.getLevel().setBlock(block, Block.get(typeId, data), usePhysics, true);
+        if (signText != null) {
+            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                    .putString("id", BlockEntity.SIGN)
+                    .putInt("x", (int) block.x)
+                    .putInt("y", (int) block.y)
+                    .putInt("z", (int) block.z)
+                    .putString("Text1", signText.get(0))
+                    .putString("Text2", signText.get(1))
+                    .putString("Text3", signText.get(2))
+                    .putString("Text4", signText.get(3));
+            BlockEntity.createBlockEntity(BlockEntity.SIGN, blockLoc.getLevel().getChunk((int) block.x >> 4, (int) block.z >> 4), nbt);
+            new BlockEntitySign(blockLoc.getLevel().getChunk((int) block.x >> 4, (int) block.z >> 4), nbt);
+        } else if (pot != null) {
             pot.set(blockLoc, block);
-//        } else if (spawnerBlockType != null) {
-//            CreatureSpawner cs = (CreatureSpawner)block.getState();
-//            cs.setSpawnedType(spawnerBlockType);
         } else if (!chestContents.isEmpty()) {
-            // todo
+            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                    .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
+                    .putString("id", BlockEntity.CHEST)
+                    .putInt("x", x)
+                    .putInt("y", y)
+                    .putInt("z", z);
+            BlockEntity.createBlockEntity(BlockEntity.CHEST, blockLoc.getLevel().getChunk(x >> 4, z >> 4), nbt);
+            BlockEntityChest e = new BlockEntityChest(blockLoc.getLevel().getChunk(x >> 4, z >> 4), nbt);
+            e.getInventory().setContents(chestContents);
         }
     }
 

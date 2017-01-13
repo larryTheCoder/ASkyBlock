@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package larryTheCoder;
+package larryTheCoder.utils;
 
+import larryTheCoder.utils.GameType;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.generator.biome.Biome;
 import java.util.ArrayList;
