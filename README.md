@@ -1,5 +1,5 @@
 # ASkyBlock-Nukkit
-===
+---
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Lesser General Public License as published by
@@ -15,6 +15,11 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
   
 __A Basic SkyBlock Manager by tastybento For Nukkit Minecraft: PE__
+
+
+### Depends
+- [FastAsyncWorldEdit](https://forums.nukkit.io/resources/worldedit.105)
+- [DbLib](https://forums.nukkit.io/resources/dblib.5)
 
 ### Features
 - Basic island with **schematic file**
