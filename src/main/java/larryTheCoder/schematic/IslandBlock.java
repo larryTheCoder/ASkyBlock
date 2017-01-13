@@ -308,7 +308,8 @@ public class IslandBlock {
                                         } else if (key.equalsIgnoreCase("text")) {
                                             lineText += value;
                                         } else // Formatting - usually the value is always true, but check just in case
-                                         if (key.equalsIgnoreCase("obfuscated") && value.equalsIgnoreCase("true")) {
+                                        {
+                                            if (key.equalsIgnoreCase("obfuscated") && value.equalsIgnoreCase("true")) {
                                                 lineText += TextFormat.OBFUSCATED;
                                             } else if (key.equalsIgnoreCase("underlined") && value.equalsIgnoreCase("true")) {
                                                 lineText += TextFormat.UNDERLINE;
@@ -322,12 +323,15 @@ public class IslandBlock {
                                                     Utils.ConsoleMsg("Unknown format " + value + " in sign when pasting schematic, skipping...");
                                                 }
                                             }
+                                        }
                                     }
                                 } else // This is unformatted text. It is included in "". A reset is required to clear
                                 // any previous formatting
-                                 if (format.length() > 1) {
+                                {
+                                    if (format.length() > 1) {
                                         lineText += TextFormat.RESET + format.substring(format.indexOf('"') + 1, format.lastIndexOf('"'));
                                     }
+                                }
                             }
                         } else {
                             // No extra tag
@@ -341,7 +345,8 @@ public class IslandBlock {
                         e.printStackTrace();
                     }
                 } else // This is unformatted text (not JSON). It is included in "".
-                 if (text.get(line).length() > 1) {
+                {
+                    if (text.get(line).length() > 1) {
                         try {
                             lineText = text.get(line).substring(text.get(line).indexOf('"') + 1, text.get(line).lastIndexOf('"'));
                         } catch (Exception e) {
@@ -352,6 +357,7 @@ public class IslandBlock {
                         // just in case it isn't - show the raw line
                         lineText = text.get(line);
                     }
+                }
                 //Bukkit.getLogger().info("Line " + line + " is " + lineText);
             }
             signText.add(lineText);
@@ -400,10 +406,6 @@ public class IslandBlock {
                                     if (WEtoM.containsKey(material)) {
                                         itemMaterial = WEtoM.get(material);
                                     } else {
-<<<<<<< HEAD
-=======
-                                        //Bukkit.getLogger().info("DEBUG: Not in hashmap");
->>>>>>> origin/master
                                         itemMaterial = Item.fromString(material).getId();
                                     }
                                     byte itemAmount = (byte) ((CompoundTag) item).getValue().get("Count").getValue();
@@ -461,14 +463,8 @@ public class IslandBlock {
                     .putInt("x", x)
                     .putInt("y", y)
                     .putInt("z", z);
-<<<<<<< HEAD
             BlockEntity.createBlockEntity(BlockEntity.CHEST, blockLoc.getLevel().getChunk(x >> 4, z >> 4), nbt);
             BlockEntityChest e = new BlockEntityChest(blockLoc.getLevel().getChunk(x >> 4, z >> 4), nbt);
-=======
-
-            BlockEntity.createBlockEntity(BlockEntity.CHEST, blockLoc.getLevel().getChunk((int) block.x >> 4, (int) block.z >> 4), nbt);
-            BlockEntityChest e = new BlockEntityChest(blockLoc.getLevel().getChunk((int) block.x >> 4, (int) block.z >> 4), nbt);
->>>>>>> origin/master
             e.getInventory().setContents(chestContents);
         }
     }

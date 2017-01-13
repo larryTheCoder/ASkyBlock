@@ -523,11 +523,7 @@ public class Schematic {
     public void pasteSchematic(Location loc, Player player, boolean teleport) {
         // If this is not a file schematic, paste the default island
         if (this.schematicFolder == null) {
-<<<<<<< HEAD
             plugin.getFallback().createIsland(loc.getLevel(), loc.getFloorX() - 13, loc.getFloorY(), loc.getFloorZ() - 14, player);
-=======
-            plugin.getFallback().createIsland(loc.getLevel(), loc.getFloorX(), loc.getFloorY(), loc.getFloorZ(), player);
->>>>>>> origin/master
             Utils.ConsoleMsg(TextFormat.RED + "Missing schematic - using default block only");
             return;
         }
