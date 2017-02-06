@@ -1,4 +1,5 @@
 name: "ASkyBlock"
+version: "0.2.6"
 author: larryTheCoder
 api: ["1.0.0"]
 main: com.larryTheCoder.ASkyBlock
