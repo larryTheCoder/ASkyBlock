@@ -1,15 +1,14 @@
 name: "ASkyBlock"
-version: "v0.1.1"
 author: larryTheCoder
 api: ["1.0.0"]
-main: larryTheCoder.ASkyBlock
+main: com.larryTheCoder.ASkyBlock
 load: POSTWORLD
 website: http://github.com/larryTheCoder/ASkyBlock-Nukkit
 author: "larryTheHarry"
 depends: ["DbLib", "FastAsyncWorldEdit"]
 permissions:
     is.bypass.wait:
-     description: "bypass the reset timer"
+     description: "bypass the reset timer / teleports"
      default: false    
     is.create:
      default: true

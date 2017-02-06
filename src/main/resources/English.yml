@@ -41,11 +41,12 @@ reset: "&aYour island was deleted! &7(Once every [min] minutes)"
 restart: "&aYour island is resetting &7(Once every [min] minutes)"
 create: "&aYou just created a new island! use (/is help) for more info"
 kick: "&aYou just kicked a player named [player]"
+teleport: "&aYou will be teleported in {0} seconds."
 
 #########################
 # Command Error Message #
 #########################
-schematics_list: "&cUnkwnown schematic. Use /tgg listsc for more schematics."
+schematics_list: "&cUnkwnown schematic. &eThe schematic names are: \n&a[SCEM]"
 error_have_team: "&cYou already created a team!"
 error_in_team: "&cYou already have a team!"
 max_islands: "&cYou reached the limit of [maxplot] plots per player"
@@ -63,6 +64,7 @@ database_error: "&cUnable to create Database"
 player_has_teamed: "&c[player] has already in an other team"
 player_in_team: "&c[player] has already in your team"
 att_reset: "&c[player] &aIs attempting to dispatch reset command at [location]"
+teleport_failed: "Teleport cancelled"
 
 ################
 # Chat message #

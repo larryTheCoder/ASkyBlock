@@ -16,22 +16,6 @@ chat:
   # Use chat formatting such as &7 will return to §7
   UCFormatting: true
 
-## Island Schematic 
-schematic:
-  # Use schematic for the best result
-  # It still in development
-  # 7.1.2017 - Schematic wont generate blocks 
-  #            this will be disabled for some reason
-  enabled: false
-  # The loaded schematic, no need .schematic
-  # You must put schematic files to `schematic/`
-  # folder to load it.
-  loaded: "harder, double, island, nether"
-  # Main schematic, your choice
-  # If loaded schematic doest exsits
-  # It will using default schematic `island`
-  main: "island"
-
 ## Island part
 island:
   # Size of the island, You will have to set this
@@ -43,6 +27,12 @@ island:
   #   You can use this as island High
   #   Minimum: 20
   islandHieght: 60
+  # Island reset
+  #   Here you can control the 
+  #   Blocks when players reset their island
+  #   NOTE: more higher you made, more lag your server
+  #         depends on your schematic blocks
+  chunkResetPerBlocks: 256
   # Island sea level
   #   You can use this to keeping the
   #   lag to a minimum
@@ -60,7 +50,7 @@ island:
     # Enabling this will teleport player in 'GAMEMODE'
     enable: true
     # What is the gamemode in island?
-    # Integer needed '1 FOR CREATIVE; 0 FOR SURVIVAL; 2 FOR NOTHING :P'
+    # Integer: '1 FOR CREATIVE; 0 FOR SURVIVAL; 2 FOR NOTHING :P'
     mode: 1
   # ISafeSpawning config
   ISafeSpawning:
@@ -68,7 +58,7 @@ island:
     # Your choice to decide this
     enable: true
     # Force SafeSpawning if there is no SafeSpot where found
-    # THIS STILL IN DEVELOPMENT! IT WILL IGNORE YOU IF U DO TRUE!
+    # THIS STILL IN DEVELOPMENT! IT WILL TROW DUMP FILE ON YOUR CONSOLE
     forceSpot: false
   # Island addMember time out
   #   You can use -1 for unlimited time but 
@@ -96,15 +86,25 @@ lobby:
   lobbyY: 90
   lobbyZ: 50
   world: "world"
-
+# General section
+general:
+  # The time for teleports 
+  # Must be in integer
+  # Put 0 if you dont want to enable this
+  islandTeleportDelay: 2
+  # Teleport cancel distance
+  # How far players can go to cancel
+  # Teleports
+  teleportCancelDistance: 0.2
 ## Database
 # Recomended to NOT change this in game
 database:
   ## Choose the Provider that I given below
-  # DATABASE - SQLite database configured at DBLib plugin
+  # ORMLITE - Easy Sqlite, MySql database.
+  # JDBC - SQLite database configured at DBLib plugin
   # YAML - in .yaml files
   # UNKNOWN - .dat - My Database
-  provider: DATABASE 
+  provider: JDBC
   # Configuration of DATABASE Connection:
   #  DBLIB  - default connection, defined in DbLib plugin
   #  SQLITE - custom sqlite file
@@ -121,3 +121,150 @@ database:
     username: YourUserName
     password: 1234IsNotAGoodPassword
     host: localhost
+
+schematicsection:
+   # All schematics should be put in the schematics folder
+
+   # Schematic panel - if more than one schematic is available to the player
+   # Show a panel to choose. If this is false, no panel is shown and the starter 
+   # island is picked by permission. If a player has more than one permission
+   # the island selected is undefined - the plugin will pick one.
+   # Permissions are taken from the below schematics section even if the GUI is
+   # not used.
+  useschematicspanel: true
+
+   # Random island, only apply when useschematicspanel is false - if set to false
+   # the plugin will choose the first island it found with the user permissions
+   # to generate a new island. If set to true, the plugin will generate an island
+   # randomly from the list of all islands available to the player.
+  chooseislandrandomly: false
+
+  # This section lists all the schematics available
+  # Settings are:
+  # show - whether this island will show in the GUI or not. Typically used for partner
+  #        schematics, but can be used to temporarily hide schematics.
+  # icon - the icon to show in the GUI. It must be a known Material
+  # order - the priority for showing in the GUI. Lower numbers are shown first.
+  # name - a friendly short name for the schematic. Color codes okay.
+  # description - a longer description. Use | to split lines. Color codes okay.
+  # filename - the filename of the schematic in the schematic folder
+  # useDefaultChest - fill a chest on the island with the items in this config. If false
+  #                   the contents will come from the schematic.
+  # partnerSchematic - the island that will be pasted in the Nether.
+  # biome - the biome this island should have. All pasted blocks will have this biome.
+  # These next settings may cause lag if true. Default is false. Use judiciously.
+  # pasteentities - if the schematic has entities in it (mobs) this will paste them.
+  # usephysics - if true, causes lava or water to flow after being pasted.
+  # pasteair - Only set to true if you need to paste below sea level.
+  # permission - the permission required to use this schematic. It can be anything you like
+  # You can add or remove from this list. If this section is missing, only the default
+  # island works.
+  schematics:
+    # default heading is required
+    default:
+      # Icon - if this is missing or wrong, it will be a MAP
+      icon: DIRT
+      # Order of preference in listing
+      order: 1
+      # Short name - color codes with & okay
+      name: "The Original"
+      # Longer description. Use | for new lines. Color codes okay.
+      description: "Challenging|starter|island!"
+      # Filename of the schematic in the schematic folder
+      filename: island.schematic
+      # Use default chest if true, or use schematic chest contents if false
+      useDefaultChest: true
+      # Which schematic will be used in the opposite world if newnether:true
+      # If there is no partner, this island will be used
+      partnerSchematic: nether
+      #Level handicap zeros the initial island level. 
+      levelHandicap: 3
+
+    # This is the default nether island - do not remove this section!
+    nether:
+      # Hide or show this schematic to players in the GUI
+      show: false
+      icon: NETHERRACK
+      # If the biome is HELL it is assumed this island goes in the Nether
+      biome: HELL
+      name: "NetherBlock Island"
+      description: "An island in the nether|overlooked by a mob tower"
+      filename: nether.schematic
+      # Nether schematics should generally use the schematic chest contents
+      useDefaultChest: false
+      # The partner to this schematic is the default island
+      partnerSchematic: default
+      # Schematics can include entities (mobs) in them and if pasteentities is true,
+      # mobs will be pasted. 
+      pasteentities: true
+      # Usephysics causes lava or water to flow after being pasted. Change to false
+      # if it lags
+      usephysics: true
+      #Level handicap zeros the initial island level. 
+      levelHandicap: 93
+  
+    # Additional heading names can be anything you like, but must be unique
+    island1:
+      # Credit to Antal1609 for this schematic!
+      icon: RED_ROSE
+      order: 2
+      name: "Island Duo"
+      description: "Two close islands!|Double the fun,|but a little easier.|&a[Credit] Antal1609"
+      filename: double.schematic
+      # Schematics can have biomes set when they are created
+      biome: FOREST
+      # If useDefaultChest is false, the items in the schematic will be used
+      # If false, the default chest items will be used, or the list below
+      useDefaultChest: true
+      # Chest items defined here will override the default chest items.
+      # You can set the chest items here in this list
+      # Material:Qty, or Material:Data:Qty
+      #chestItems:
+      #- MELON:1
+      #- ICE:1
+      # Your island companion. Overrides the default setting. If more than one is
+      # listed, one will be chosen at random.
+      # Options are: COW, PIG, SHEEP, CHICKEN, VILLAGER, HORSE, IRON_GOLEM, OCELOT,
+      # RABBIT, WOLF or NOTHING. Default is COW.
+      companion:
+      - CHICKEN 
+      # This is a list of names, picked at random that will apply to the companion
+      # You can add more if you like. If none are listed, the companion will not be
+      # named.
+      companionnames:
+      - "&9[player]'s chicken"
+      - "&dFree-Range Eggs"
+      partnerSchematic: nether
+      #permission: any.perm.you.like
+      #Level handicap zeros the initial island level. 
+      levelHandicap: 9
+
+    # New snowy schematic
+    extrahard:
+      icon: OBSIDIAN
+      order: 3
+      # Ski theme - a black diamond run is hard.
+      name: "&lBlack &bDiamonds"
+      description: "Experts only!|&aMinimal resources|&awith a few diamonds."
+      filename: harder.schematic
+      biome: COLD_BEACH
+      useDefaultChest: false
+      # Chest items defined here will override the default chest items.
+      # You can set the chest items here in this list
+      # Material:Qty, or Material:Data:Qty
+      #chestItems:
+      #- MELON:1
+      #- ICE:1
+      # Schematics that require water or lava to hover can prevent physics when pasting
+      usephysics: false
+      # Schematics may include entities (mobs) in them and if pasteentities is true,
+      # mobs will be pasted.
+      # Example: Setting this to true for this schematic will give a wolf.
+      pasteentities: false
+      partnerSchematic: nether
+      #permission: any.perm.you.like
+      # This optional block determines where the player will spawn. It must be unique in
+      # the schematic and will be replaced by air when pasted.
+      #spawnblock: SPONGE
+      #Level handicap zeros the initial island level. 
+      levelHandicap: 1

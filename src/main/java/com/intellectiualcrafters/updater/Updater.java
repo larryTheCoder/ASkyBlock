@@ -25,8 +25,8 @@ import com.intellectiualcrafters.json.JSONException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-import larryTheCoder.ASkyBlock;
-import larryTheCoder.utils.Utils;
+import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.utils.Utils;
 
 /**
  * @author larryTheCoder
