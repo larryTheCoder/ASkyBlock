@@ -1,5 +1,5 @@
 # ASkyBlock-Nukkit
----
+===
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Lesser General Public License as published by
@@ -14,19 +14,29 @@
 	You should have received a copy of the GNU Lesser General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
   
-__A Basic SkyBlock Manager by tastybento For Nukkit Minecraft: PE__
+__Welcome developers to this Magic SkyBlock plugin builded by me! 
+Its still in development but I really need your help to complete this plugin.
+Build specially for Nukkit__
 
+# API
+Comming soon!
 
-### Depends
-- [FastAsyncWorldEdit](https://forums.nukkit.io/resources/worldedit.105)
-- [DbLib](https://forums.nukkit.io/resources/dblib.5)
+# Installation
 
-### Features
-- Basic island with **schematic file**
-- Support Sqlite and JDBC, **MySQL** is not working now 
-- Added **SafeISpawning** so you no need to worry about spawning into void
-- More commands and subcommand
-- Best for servers [0.16.0]
+This version depends on the following plugins:
 
-## Download
-**Circle CI**: [Download link](https://circleci.com/gh/larryTheCoder/ASkyBlock-Nukkit)
+* Nukkit 1.0 or greater 
+* DbLib 0.2.x
+
+### Releases
+Pre-releases are considered **unsafe** for production servers.
+
+Releases have a clean version number, has been tested, and should be safe for production servers.
+
+**Circle CI**: [Download link](https://circleci.com/gh/larryTheCoder/ASkyBlock-Nukkit/target)
+
+## Config-files
+
+*Note*: Config files might change quite a bit, and upon activation, the plugin will NOT try to merge the existing ones with the new ones. No backup will be saved into folder.
+
+Please make sure, that the config files are as you expect them to be, before using the plugin or releasing it to "the public".
