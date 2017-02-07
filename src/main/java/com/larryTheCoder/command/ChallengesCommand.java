@@ -112,11 +112,8 @@ public class ChallengesCommand extends Command {
                     }
                     sender.sendMessage(TextFormat.WHITE + rewardText);
                     if (Settings.useEconomy && moneyReward > 0) {
-                        //sender.sendMessage(TextFormat.GOLD + plugin.myLocale(player.getUniqueId()).challengesmoneyReward + ": " + TextFormat.WHITE + VaultHelper.econ.format(moneyReward));
                     }
-                    //sender.sendMessage(TextFormat.GOLD + plugin.myLocale(player.getUniqueId()).challengestoCompleteUse + TextFormat.WHITE + " /" + label + " c " + challenge);
                 } else {
-                    //sender.sendMessage(TextFormat.RED + plugin.myLocale(player.getUniqueId()).challengesinvalidChallengeName);
                 }
                 break;
             case 1:

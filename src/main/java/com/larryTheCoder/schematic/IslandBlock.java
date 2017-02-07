@@ -36,6 +36,7 @@ import java.util.Map;
 
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.task.ChestPopulateTask;
+import com.larryTheCoder.task.SignPopulateTask;
 import com.larryTheCoder.utils.Utils;
 import static com.larryTheCoder.utils.Utils.loadChunkAt;
 
@@ -310,8 +311,7 @@ public class IslandBlock {
                                         } else if (key.equalsIgnoreCase("text")) {
                                             lineText += value;
                                         } else // Formatting - usually the value is always true, but check just in case
-                                        {
-                                            if (key.equalsIgnoreCase("obfuscated") && value.equalsIgnoreCase("true")) {
+                                         if (key.equalsIgnoreCase("obfuscated") && value.equalsIgnoreCase("true")) {
                                                 lineText += TextFormat.OBFUSCATED;
                                             } else if (key.equalsIgnoreCase("underlined") && value.equalsIgnoreCase("true")) {
                                                 lineText += TextFormat.UNDERLINE;
@@ -325,13 +325,14 @@ public class IslandBlock {
                                                     Utils.ConsoleMsg("Unknown format " + value + " in sign when pasting schematic, skipping...");
                                                 }
                                             }
-                                        }
                                     }
                                 } else// This is unformatted text. It is included in "". A reset is required to clear
                                 // any previous formatting
-                                 if (format.length() > 1) {
+                                {
+                                    if (format.length() > 1) {
                                         lineText += TextFormat.RESET + format.substring(format.indexOf('"') + 1, format.lastIndexOf('"'));
                                     }
+                                }
                             }
                         } else {
                             // No extra tag
@@ -345,8 +346,7 @@ public class IslandBlock {
                         e.printStackTrace();
                     }
                 } else // This is unformatted text (not JSON). It is included in "".
-                {
-                    if (text.get(line).length() > 1) {
+                 if (text.get(line).length() > 1) {
                         try {
                             lineText = text.get(line).substring(text.get(line).indexOf('"') + 1, text.get(line).lastIndexOf('"'));
                         } catch (Exception e) {
@@ -357,7 +357,6 @@ public class IslandBlock {
                         // just in case it isn't - show the raw line
                         lineText = text.get(line);
                     }
-                }
                 //Bukkit.getLogger().info("Line " + line + " is " + lineText);
             }
             signText.add(lineText);
@@ -439,18 +438,8 @@ public class IslandBlock {
         // found the problem why blocks didnt shows up
         blockLoc.getLevel().setBlock(block, Block.get(typeId, data), usePhysics, true);
 
-        if (signText != null) {
-            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                    .putString("id", BlockEntity.SIGN)
-                    .putInt("x", (int) block.x)
-                    .putInt("y", (int) block.y)
-                    .putInt("z", (int) block.z)
-                    .putString("Text1", signText.get(0))
-                    .putString("Text2", signText.get(1))
-                    .putString("Text3", signText.get(2))
-                    .putString("Text4", signText.get(3));
-            BlockEntity.createBlockEntity(BlockEntity.SIGN, blockLoc.getLevel().getChunk((int) block.x >> 4, (int) block.z >> 4), nbt);
-            new BlockEntitySign(blockLoc.getLevel().getChunk((int) block.x >> 4, (int) block.z >> 4), nbt);
+        if (Block.get(typeId, data).getId() == Block.SIGN_POST || Block.get(typeId, data).getId() == Block.WALL_SIGN) {
+            TaskManager.runTaskLater(new SignPopulateTask(loc, signText), 10);
         } else if (pot != null) {
             pot.set(blockLoc, block);
         } else if (Block.get(typeId, data).getId() == Block.CHEST) {

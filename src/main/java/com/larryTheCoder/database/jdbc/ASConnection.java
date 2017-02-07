@@ -33,6 +33,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * The class of Database Supported Database is SQLite to-do: MySQL, homes
@@ -306,7 +307,7 @@ public final class ASConnection implements Database {
             if (stmt == null) {
                 return null;
             }
-            return new PlayerData(stmt.getString("player"), stmt.getInt("homes"), Utils.stringToArray(stmt.getString("members"), ", "), stmt.getBoolean("inTeam"), stmt.getString("teamLeader"), stmt.getString("teamIslandLocation"), stmt.getInt("resetleft"), Utils.stringToArray(stmt.getString("banList"), ", "));
+            return new PlayerData(stmt.getString("player"), stmt.getInt("homes"), Utils.stringToArray(stmt.getString("members"), ", "),(HashMap<String, Boolean>) Utils.stringToMap(stmt.getString("challengelist")), (HashMap<String, Integer>) Utils.stringToMap(stmt.getString("challengelisttimes")),  stmt.getBoolean("inTeam"), stmt.getString("teamLeader"), stmt.getString("teamIslandLocation"), stmt.getInt("resetleft"), Utils.stringToArray(stmt.getString("banList"), ", "));
         } catch (SQLException ex) {
             if (ASkyBlock.get().isDebug()) {
                 ex.printStackTrace();

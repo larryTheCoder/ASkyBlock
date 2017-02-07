@@ -16,10 +16,7 @@
  */
 package com.larryTheCoder.player;
 
-import cn.nukkit.Player;
 import java.util.ArrayList;
-import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.utils.Settings;
 import java.util.HashMap;
 
 /**
@@ -31,7 +28,8 @@ public class PlayerData implements Cloneable {
     public int homes;
     public int resetleft;
     public String playerName;
-    private HashMap<String, Boolean> challengeList = new HashMap<>();
+    public HashMap<String, Boolean> challengeList = new HashMap<>();
+    public HashMap<String, Integer> challengeListTimes = new HashMap<>();
     public ArrayList<String> banList = new ArrayList<>();
     // Team Data
     public String teamLeader;
@@ -47,7 +45,7 @@ public class PlayerData implements Cloneable {
         this.resetleft = resetleft;
     }
 
-    public PlayerData(String playerName, int homes, ArrayList<String> members, boolean inTeam, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList) {
+    public PlayerData(String playerName, int homes, ArrayList<String> members, HashMap<String, Boolean> list, HashMap<String, Integer> times, boolean inTeam, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList) {
         this.homes = homes;
         this.members = members;
         this.inTeam = inTeam;
@@ -58,8 +56,71 @@ public class PlayerData implements Cloneable {
         this.banList = banList;
     }
 
-    public boolean checkChallenge(String challenge) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    /**
+     * Checks if a challenge exists in the player's challenge list
+     *
+     * @param challenge
+     * @return true if challenge is listed in the player's challenge list,
+     * otherwise false
+     */
+    public boolean challengeExists(final String challenge) {
+        return challengeList.containsKey(challenge.toLowerCase());
+    }
+
+    /**
+     * Checks if a challenge is recorded as completed in the player's challenge
+     * list or not
+     *
+     * @param challenge
+     * @return true if the challenge is listed as complete, false if not
+     */
+    public boolean checkChallenge(final String challenge) {
+        if (challengeList.containsKey(challenge.toLowerCase())) {
+            // plugin.getLogger().info("DEBUG: " + challenge + ":" +
+            // challengeList.get(challenge.toLowerCase()).booleanValue() );
+            return challengeList.get(challenge.toLowerCase());
+        }
+        return false;
+    }
+
+    /**
+     * Checks how many times a challenge has been done
+     *
+     * @param challenge
+     * @return number of times
+     */
+    public int checkChallengeTimes(final String challenge) {
+        if (challengeListTimes.containsKey(challenge.toLowerCase())) {
+            // plugin.getLogger().info("DEBUG: check " + challenge + ":" +
+            // challengeListTimes.get(challenge.toLowerCase()).intValue() );
+            return challengeListTimes.get(challenge.toLowerCase());
+        }
+        return 0;
+    }
+
+    public HashMap<String, Boolean> getChallengeStatus() {
+        return challengeList;
+    }
+
+    /**
+     * Records the challenge as being complete in the player's list. If the
+     * challenge is not listed in the player's challenge list already, then it
+     * will be added.
+     *
+     * @param challenge
+     */
+    public void completeChallenge(final String challenge) {
+        // plugin.getLogger().info("DEBUG: Complete challenge");
+        challengeList.put(challenge.toLowerCase(), true);
+        // Count how many times the challenge has been done
+        int times = 0;
+        if (challengeListTimes.containsKey(challenge.toLowerCase())) {
+            times = challengeListTimes.get(challenge.toLowerCase());
+        }
+        times++;
+        challengeListTimes.put(challenge.toLowerCase(), times);
+        // plugin.getLogger().info("DEBUG: complete " + challenge + ":" +
+        // challengeListTimes.get(challenge.toLowerCase()).intValue() );
     }
 
 }

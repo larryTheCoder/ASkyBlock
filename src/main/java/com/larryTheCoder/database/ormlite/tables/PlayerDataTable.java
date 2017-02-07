@@ -20,6 +20,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.utils.Utils;
+import java.util.HashMap;
 
 /**
  *
@@ -47,6 +48,10 @@ public class PlayerDataTable {
     String members;
     @DatabaseField(canBeNull = true, columnName = "name")
     String name;
+    @DatabaseField(canBeNull = true, columnName = "challengelist")
+    String challengeList;
+    @DatabaseField(canBeNull = true, columnName = "challengelisttimes")
+    String challengelistTimes;
 
     PlayerDataTable() {
     }
@@ -64,7 +69,7 @@ public class PlayerDataTable {
     }
 
     public PlayerData toData() {
-        return new PlayerData(player, homes, Utils.stringToArray(members, ", "), inTeam, teamLeader, teamIslandLocation, resetleft, Utils.stringToArray(banList, ", "));
+        return new PlayerData(player, homes, Utils.stringToArray(members, ", "), (HashMap<String, Boolean>) Utils.stringToMap(challengeList), (HashMap<String, Integer>) Utils.stringToMap(challengelistTimes), inTeam, teamLeader, teamIslandLocation, resetleft, Utils.stringToArray(banList, ", "));
     }
 
     public void save(PlayerData pd) {

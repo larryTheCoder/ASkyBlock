@@ -69,6 +69,7 @@ import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -381,6 +382,11 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         Level world = getServer().getLevelByName("SkyBlock");
         world.setTime(1600);
         world.stopTime();
+        Utils.ConsoleMsg(Utils.hashToString(schematics));
+        Map free;
+        String ex = Utils.hashToString(schematics);
+        free = Utils.stringToMap(ex);
+        Utils.ConsoleMsg(Utils.hashToString(free));
     }
 
     public String getPrefix() {

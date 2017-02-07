@@ -31,6 +31,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import com.larryTheCoder.ASkyBlock;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author larryTheCoder
@@ -147,7 +149,7 @@ public class Utils {
         }
         return String.valueOf(loc.getLevel().getName()) + "(" + loc.getFloorX() + "," + loc.getFloorY() + "," + loc.getFloorZ() + ")";
     }
-    
+
     public static void loadChunkAt(Location loc) {
         if (loc != null && !loc.getLevel().isChunkLoaded(loc.getFloorX() >> 4, loc.getFloorZ() >> 4)) {
             loc.getLevel().loadChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
@@ -211,8 +213,33 @@ public class Utils {
         return "(" + loc.getFloorX() + "," + loc.getFloorY() + "," + loc.getFloorZ() + ")";
     }
 
-    public static String arrayToString(List<String> arr) {
-        if(arr == null || arr.isEmpty()){
+    public static Map stringToMap(String append) {
+        HashMap errs = new HashMap<>();
+        String[] at = append.split(", ");
+        for (String string : at) {
+            String[] at2 = string.split(":");
+            ArrayList<String> atd = new ArrayList<>();
+            atd.addAll(Arrays.asList(at2));
+            errs.put(atd.get(0), atd.get(1));
+        }
+        return errs;
+    }
+
+    public static String hashToString(Map err) {
+        StringBuilder buf = new StringBuilder();
+
+        HashMap<Object, Object> errs = (HashMap<Object, Object>) err;
+        errs.entrySet().stream().forEach((fer) -> {
+            if (buf.length() > 0) {
+                buf.append(", ");
+            }
+            buf.append(fer.getKey()).append(":").append(String.valueOf(fer.getValue()));
+        });
+        return buf.toString();
+    }
+
+    public static String arrayToString(List arr) {
+        if (arr == null || arr.isEmpty()) {
             return "";
         }
         StringBuilder buf = new StringBuilder();
