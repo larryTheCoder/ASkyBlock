@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2016 larryTheHarry
  *
  * This program is free software: you can redistribute it and/or modify
@@ -13,8 +13,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-/**
+ *
+ *
  * IMPOVEMENTS:
  *  - Add /is home [1 - %MAX_HOME%]
  *  - Add Schematic - will took a long time to build
@@ -70,7 +70,6 @@ import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * @author larryTheCoder
@@ -300,15 +299,9 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     }
 
     /**
-     * Reload every level that had generated
-     *
-     * TO-DO: Support Multi-World
+     * Find all database that had generated
      */
-    @SuppressWarnings("unchecked")
     private void reloadLevel() {
-        if (getDatabase().getWorlds() == null) {
-            return;
-        }
         this.getDatabase().getWorlds().stream().forEach((leveln) -> {
             level.add(leveln);
         });
@@ -361,7 +354,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
                 break;
             case "yaml":
             case "unknown":
-                Utils.ConsoleMsg("YAML and Unknown Database not available. Sorry. Using default: JDBC");
+                Utils.ConsoleMsg("&cYAML and Unknown Database not available. Sorry. Using default: JDBC");
                 try {
                     this.db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
                 } catch (SQLException | ClassNotFoundException ex) {
@@ -369,24 +362,18 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
                 }
                 break;
             default:
-                Utils.ConsoleMsg(cfg.getString("database.provider") + " is not available. Sorry. Using default: JDBC");
+                Utils.ConsoleMsg("&c" + cfg.getString("database.provider") + " is not available. Sorry. Using default: JDBC");
                 try {
                     this.db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
                 } catch (SQLException | ClassNotFoundException ex) {
-                    Utils.ConsoleMsg("Unable to create Sqlite database");
+                    Utils.ConsoleMsg("&cUnable to create Sqlite database");
                 }
                 break;
         }
-
         reloadLevel();
         Level world = getServer().getLevelByName("SkyBlock");
         world.setTime(1600);
         world.stopTime();
-        Utils.ConsoleMsg(Utils.hashToString(schematics));
-        Map free;
-        String ex = Utils.hashToString(schematics);
-        free = Utils.stringToMap(ex);
-        Utils.ConsoleMsg(Utils.hashToString(free));
     }
 
     public String getPrefix() {
@@ -469,94 +456,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         schematics.clear();
         // Load the default schematic if it exists
         // Set up the default schematic
-        File schematicFile = new File(schematicFolder, "island.schematic");
-        File netherFile = new File(schematicFolder, "nether.schematic");
-        if (!schematicFile.exists()) {
-            //plugin.getLogger().info("Default schematic does not exist...");
-            // Only copy if the default exists
-            if (getResource("schematics/island.schematic") != null) {
-                getServer().getLogger().info("§aDefault schematic does not exist, saving it...");
-                saveResource("schematics/island.schematic", false);
-                // Add it to schematics
-                try {
-                    schematics.put("default", new Schematic(this, schematicFile));
-                } catch (IOException e) {
-                    getServer().getLogger().info("Could not load default schematic!");
-                    if (ASkyBlock.get().isDebug()) {
-                        e.printStackTrace();
-                    }
-                }
-                // If this is repeated later due to the schematic config, fine, it will only add info
-            } else {
-                // No islands.schematic in the jar, so just make the default using 
-                // built-in island generation
-                schematics.put("default", new Schematic(this));
-            }
-        } else {
-            // It exists, so load it
-            try {
-                schematics.put("default", new Schematic(this, schematicFile));
-            } catch (IOException e) {
-                getServer().getLogger().error("Could not load default schematic!");
-                if (ASkyBlock.get().isDebug()) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        // Add the nether default too
-        if (!netherFile.exists()) {
-            if (getResource("schematics/nether.schematic") != null) {
-                saveResource("schematics/nether.schematic", false);
-                // Add it to schematics
-                try {
-                    Schematic netherIsland = new Schematic(this, netherFile);
-                    //netherIsland.setVisible(false);
-                    schematics.put("nether", netherIsland);
-                } catch (IOException e) {
-                    getServer().getLogger().error("Could not load default nether schematic!");
-                    if (ASkyBlock.get().isDebug()) {
-                        e.printStackTrace();
-                    }
-                }
-            } else {
-                getServer().getLogger().error("Could not find default nether schematic!");
-            }
-        } else {
-            // It exists, so load it
-            try {
-                Schematic netherIsland = new Schematic(this, netherFile);
-                //netherIsland.setVisible(false);
-                schematics.put("nether", netherIsland);
-            } catch (IOException e) {
-                getServer().getLogger().error("Could not load default nether schematic!");
-                if (ASkyBlock.get().isDebug()) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        // Set up some basic settings just in case the schematics section is missing
-        if (schematics.containsKey("default")) {
-            schematics.get("default").setName("Island");
-            schematics.get("default").setDescription("");
-            schematics.get("default").setPartnerName("nether");
-            schematics.get("default").setBiome(Settings.defaultBiome);
-            schematics.get("default").setIcon(Item.GRASS);
-            if (Settings.chestItems.length == 0) {
-                schematics.get("default").setUseDefaultChest(false);
-            }
-            schematics.get("default").setOrder(0);
-        }
-        if (schematics.containsKey("nether")) {
-            schematics.get("nether").setName("NetherBlock Island");
-            schematics.get("nether").setDescription("Nether Island");
-            schematics.get("nether").setPartnerName("default");
-            schematics.get("nether").setBiome(Biome.HELL);
-            schematics.get("nether").setIcon(Item.NETHERRACK);
-            schematics.get("nether").setVisible(false);
-            if (Settings.chestItems.length == 0) {
-                schematics.get("nether").setUseDefaultChest(false);
-            }
-        }
+        File schematicFile;
         // This part loads the schematic section
         ConfigSection schemSection = cfg.getSection("schematicsection");
         Settings.useSchematicPanel = schemSection.getBoolean("useschematicspanel", false);
@@ -576,7 +476,6 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
                         saveResource("schematics/" + filename, false);
                         newSchem = new Schematic(this, schematicFile);
                     }
-                    getServer().getLogger().info(TextFormat.YELLOW + " - " + schematicFile.getName().toUpperCase().replace(".SCHEMATIC", "") + " Info:");
                 } else if (key.equalsIgnoreCase("default")) {
                     newSchem = schematics.get("default");
                 } else {
@@ -715,6 +614,101 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
                 }
             } catch (Exception ex) {
                 getServer().getLogger().info(TextFormat.YELLOW + "   - Error loading schematic in section " + key + ". Skipping...");
+            }
+        }
+        // Try to load schematic the default schematic
+        if (schematics.isEmpty()) {
+            // Load the default schematic if it exists
+            // Set up the default schematic
+            schematicFile = new File(schematicFolder, "island.schematic");
+            File netherFile = new File(schematicFolder, "nether.schematic");
+            getServer().getLogger().info(TextFormat.YELLOW + " - " + schematicFile.getName().toUpperCase().replace(".SCHEMATIC", "") + " Info:");
+            if (!schematicFile.exists()) {
+                //plugin.getLogger().info("Default schematic does not exist...");
+                // Only copy if the default exists
+                if (getResource("schematics/island.schematic") != null) {
+                    getServer().getLogger().info("§aDefault schematic does not exist, saving it...");
+                    saveResource("schematics/island.schematic", false);
+                    // Add it to schematics
+                    try {
+                        schematics.put("default", new Schematic(this, schematicFile));
+                    } catch (IOException e) {
+                        getServer().getLogger().info("Could not load default schematic!");
+                        if (ASkyBlock.get().isDebug()) {
+                            e.printStackTrace();
+                        }
+                    }
+                    // If this is repeated later due to the schematic config, fine, it will only add info
+                } else {
+                    // No islands.schematic in the jar, so just make the default using 
+                    // built-in island generation
+                    schematics.put("default", new Schematic(this));
+                }
+            } else {
+                // It exists, so load it
+                try {
+                    schematics.put("default", new Schematic(this, schematicFile));
+                } catch (IOException e) {
+                    getServer().getLogger().error("Could not load default schematic!");
+                    if (ASkyBlock.get().isDebug()) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            getServer().getLogger().info(TextFormat.YELLOW + " - " + netherFile.getName().toUpperCase().replace(".SCHEMATIC", "") + " Info:");
+            // Add the nether default too
+            if (!netherFile.exists()) {
+                if (getResource("schematics/nether.schematic") != null) {
+                    saveResource("schematics/nether.schematic", false);
+                    // Add it to schematics
+                    try {
+                        Schematic netherIsland = new Schematic(this, netherFile);
+                        //netherIsland.setVisible(false);
+                        schematics.put("nether", netherIsland);
+                    } catch (IOException e) {
+                        getServer().getLogger().error("Could not load default nether schematic!");
+                        if (ASkyBlock.get().isDebug()) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else {
+                    getServer().getLogger().error("Could not find default nether schematic!");
+                }
+            } else {
+                // It exists, so load it
+                try {
+                    Schematic netherIsland = new Schematic(this, netherFile);
+                    //netherIsland.setVisible(false);
+                    schematics.put("nether", netherIsland);
+                } catch (IOException e) {
+                    getServer().getLogger().error("Could not load default nether schematic!");
+                    if (ASkyBlock.get().isDebug()) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            // Set up some basic settings just in case the schematics section is missing
+            if (schematics.containsKey("default")) {
+                schematics.get("default").setName("Island");
+                schematics.get("default").setDescription("");
+                schematics.get("default").setPartnerName("nether");
+                schematics.get("default").setBiome(Settings.defaultBiome);
+                schematics.get("default").setIcon(Item.GRASS);
+                if (Settings.chestItems.length == 0) {
+                    schematics.get("default").setUseDefaultChest(false);
+                }
+                schematics.get("default").setOrder(0);
+            }
+            if (schematics.containsKey("nether")) {
+                schematics.get("nether").setName("NetherBlock Island");
+                schematics.get("nether").setDescription("Nether Island");
+                schematics.get("nether").setPartnerName("default");
+                schematics.get("nether").setBiome(Biome.HELL);
+                schematics.get("nether").setIcon(Item.NETHERRACK);
+                schematics.get("nether").setVisible(false);
+                if (Settings.chestItems.length == 0) {
+                    schematics.get("nether").setUseDefaultChest(false);
+                }
             }
         }
         getServer().getLogger().info("§7<§cSMC§7> §aSeccessfully loaded island Schematic");

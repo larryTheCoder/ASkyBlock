@@ -15,23 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.larryTheCoder.command;
+package com.larryTheCoder.command.island;
 
+import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.command.SubCommand;
 
 /**
  * @author larryTheCoder
  */
-public class AKickSubCommand extends SubCommand{
+public class teleportSubCommand extends SubCommand{
 
-    public AKickSubCommand(ASkyBlock plugin) {
+    public teleportSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.admin");
+        return sender.hasPermission("is.command.teleport") && sender.isPlayer();
     }
 
     @Override
@@ -41,28 +43,26 @@ public class AKickSubCommand extends SubCommand{
 
     @Override
     public String getName() {
-        return "kick";
+        return "teleport";
     }
 
     @Override
     public String getDescription() {
-        return "Kick the player inside from island level";
+        return "teleport to others player Island";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{};
+        return new String[]{"tp"};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if(args.length != 2){
             return false;
-        } else if(!sender.hasPermission("is.admin")){
-            sender.sendMessage(getMsg("no_permission"));
-            return true;
         }
-        getPlugin().getIsland().kickPlayerByAdmin(sender, args[1]);     
+        Player p = getPlugin().getServer().getPlayer(sender.getName());
+        getPlugin().getIsland().teleportPlayer(p, args[1]);
         return true;
     }
 

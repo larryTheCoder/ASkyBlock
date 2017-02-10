@@ -14,13 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.larryTheCoder.command;
+package com.larryTheCoder.command.island;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import java.util.ArrayList;
 import java.util.List;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.utils.Utils;

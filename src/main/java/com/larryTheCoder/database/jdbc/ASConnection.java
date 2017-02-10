@@ -261,9 +261,9 @@ public final class ASConnection implements Database {
     }
 
     @Override
-    public boolean saveWorlds(ArrayList<String> pd) {
+    public boolean saveWorlds(ArrayList pd) {
         try (PreparedStatement stmt = connection.prepareStatement("INSERT OR REPLACE INTO `worlds` (`world`) VALUES (?);")) {
-            for (String world : pd) {
+            for (String world : (ArrayList<String>) pd) {
                 stmt.setString(1, world);
             }
             return true;
@@ -307,7 +307,7 @@ public final class ASConnection implements Database {
             if (stmt == null) {
                 return null;
             }
-            return new PlayerData(stmt.getString("player"), stmt.getInt("homes"), Utils.stringToArray(stmt.getString("members"), ", "),(HashMap<String, Boolean>) Utils.stringToMap(stmt.getString("challengelist")), (HashMap<String, Integer>) Utils.stringToMap(stmt.getString("challengelisttimes")),  stmt.getBoolean("inTeam"), stmt.getString("teamLeader"), stmt.getString("teamIslandLocation"), stmt.getInt("resetleft"), Utils.stringToArray(stmt.getString("banList"), ", "));
+            return new PlayerData(stmt.getString("player"), stmt.getInt("homes"), Utils.stringToArray(stmt.getString("members"), ", "), (HashMap<String, Boolean>) Utils.stringToMap(stmt.getString("challengelist")), (HashMap<String, Integer>) Utils.stringToMap(stmt.getString("challengelisttimes")), stmt.getBoolean("inTeam"), stmt.getString("teamLeader"), stmt.getString("teamIslandLocation"), stmt.getInt("resetleft"), Utils.stringToArray(stmt.getString("banList"), ", "));
         } catch (SQLException ex) {
             if (ASkyBlock.get().isDebug()) {
                 ex.printStackTrace();

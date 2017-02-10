@@ -15,12 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.larryTheCoder.command;
+package com.larryTheCoder.command.management;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.storage.IslandData;
 
 /**

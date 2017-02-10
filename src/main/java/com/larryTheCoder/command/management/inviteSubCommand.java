@@ -14,72 +14,76 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.larryTheCoder.command;
+
+package com.larryTheCoder.command.management;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.utils.TextFormat;
-import java.util.ArrayList;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.command.SubCommand;
+import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.utils.Utils;
-import java.util.List;
 
 /**
  * @author larryTheCoder
  */
-public class homeSubCommand extends SubCommand {
+public class inviteSubCommand extends SubCommand {
 
-    public homeSubCommand(ASkyBlock plugin) {
+    public inviteSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.isPlayer() && sender.hasPermission("is.command.home");
+        return sender.isPlayer() && sender.hasPermission("is.command.addteam");
     }
 
     @Override
     public String getUsage() {
-        return "<island number>";
+        return "<player>";
     }
 
     @Override
     public String getName() {
-        return "home";
+        return "invite";
     }
 
     @Override
     public String getDescription() {
-        return "Teleport to your island";
+        return "Invite a player to be member of your island";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{"h"};
+        return new String[]{"inv"};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        int islandNumber;
-        if (args.length != 2) {
-            islandNumber = 1;
-        } else if (Utils.isNumeric(args[1]) && Integer.getInteger(args[1]) == 1) {
-            islandNumber = Integer.getInteger(args[1]);
-        } else {
+        if(args.length != 2){
             return false;
         }
-        List<IslandData> island = getPlugin().getDatabase().getIslands(sender.getName());
-        if (island == null) {
-            sender.sendMessage(getPrefix() + getMsg("no_island_error"));
+        Player p = sender.getServer().getPlayer(sender.getName());    
+        if(!getPlugin().getIsland().checkIsland(p)){
+            sender.sendMessage(getMsg("no_island_error"));
             return true;
         }
-        if (island.size() != islandNumber) {
-            sender.sendMessage(TextFormat.RED + "You don't have an island with home number " + islandNumber);
+        Player invite = sender.getServer().getPlayer(args[1]);
+        if(invite == null){
+            sender.sendMessage(getMsg("player_error2"));
             return true;
         }
-        Player p = sender.getServer().getPlayer(sender.getName());
-        getPlugin().getGrid().homeTeleport(p, islandNumber);
+        PlayerData pdinv = ASkyBlock.get().getDatabase().getPlayerData(invite);
+        PlayerData pd = ASkyBlock.get().getDatabase().getPlayerData(p);
+        if(pdinv.inTeam){
+            sender.sendMessage(getMsg("player_has_teamed").replace("[player]", args[1]));
+            return false;
+        }
+        if(pd.members.contains(invite.getName())){
+            sender.sendMessage(getMsg("player_in_team").replace("[player]", args[1]));
+            return false;
+        }
+        getPlugin().getInvitationHandler().addInvitation(p, invite, pd);
         return true;
     }
 

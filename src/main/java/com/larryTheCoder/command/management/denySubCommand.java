@@ -15,58 +15,57 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.larryTheCoder.command;
+package com.larryTheCoder.command.management;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.command.SubCommand;
+import com.larryTheCoder.listener.invitation.InvitationHandler;
 
 /**
  * @author larryTheCoder
  */
-public class deleteSubCommand extends SubCommand{
+public class denySubCommand extends SubCommand{
 
-    public deleteSubCommand(ASkyBlock plugin) {
+    public denySubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.command.reset") && sender.isPlayer();
+        return sender.hasPermission("is.command.reject") && sender.isPlayer();
     }
 
     @Override
     public String getUsage() {
-        return "<homes>";
+        return "";
     }
 
     @Override
     public String getName() {
-        return "delete";
+        return "deny";
     }
 
     @Override
     public String getDescription() {
-        return "Delete your island";
+        return "Decline an invitation";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{"reset","del"};
+        return new String[]{"decline", "unaccept"};
     }
 
     @Override
-    public boolean execute(CommandSender sender, String[] args) {        
-        if(args.length != 2){
+    public boolean execute(CommandSender sender, String[] args) {
+        Player p = sender.getServer().getPlayer(sender.getName());
+        InvitationHandler pd = ASkyBlock.get().getInvitationHandler();
+        if(pd.getInvitation(p) == null){
+            sender.sendMessage(getMsg("no_pending"));
             return false;
         }
-        Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if(getPlugin().getIsland().checkIsland(p)){
-            sender.sendMessage(getPrefix() + getMsg("no_island_error"));
-            return true;
-        }
-        
-        getPlugin().getIsland().reset(p, false, Integer.parseInt(args[1]));
+        pd.getInvitation(p).deny();
         return true;
     }
 

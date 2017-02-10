@@ -15,57 +15,72 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.larryTheCoder.command;
+package com.larryTheCoder.command.generic;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.level.Location;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.command.SubCommand;
 
 /**
  * @author larryTheCoder
  */
-public class ASetLobbySubCommand extends SubCommand{
+public class VGamemodeSubCommand extends SubCommand{
 
-    public ASetLobbySubCommand(ASkyBlock plugin) {
+    public VGamemodeSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.admin") && sender.isPlayer();
+        return sender.hasPermission("is.vip") && sender.isPlayer();
     }
 
     @Override
     public String getUsage() {
-        return "";
+        return "<gamemode>";
     }
 
     @Override
     public String getName() {
-        return "setlobby";
+        return "gamemode";
     }
 
     @Override
     public String getDescription() {
-        return "set the ASkyBlock main lobby";
+        return "Change your gamemode! In Island!";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{};
+        return new String[]{"gm","gmc", "gms"};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        Location loc = p.getLocation();
-        getPlugin().cfg.set("lobby.lobbyX", loc.getFloorX());
-        getPlugin().cfg.set("lobby.lobbyY", loc.getFloorY());
-        getPlugin().cfg.set("lobby.lobbyZ", loc.getFloorZ());
-        getPlugin().cfg.set("lobby.world", p.getLevel().getName());
-        getPlugin().cfg.save();
+        if(args[0].equalsIgnoreCase("gmc")){
+            p.setGamemode(1);
+            return true;
+        } else if(args[0].equalsIgnoreCase("gms")){
+            p.setGamemode(0);
+            return true;
+        } else if (args.length != 2){
+            return false;
+        } else {
+            switch (args[1]) {
+                case "1":
+                    p.setGamemode(1);
+                    break;
+                case "0":
+                    p.setGamemode(0);
+                    break;
+                default:
+                    return false;
+            }
+        }            
         return true;
     }
 
+    
 }

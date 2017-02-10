@@ -15,53 +15,59 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.larryTheCoder.command;
+package com.larryTheCoder.command.island;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.command.SubCommand;
 
 /**
  * @author larryTheCoder
  */
-public class teleportSubCommand extends SubCommand{
+public class deleteSubCommand extends SubCommand{
 
-    public teleportSubCommand(ASkyBlock plugin) {
+    public deleteSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.command.teleport") && sender.isPlayer();
+        return sender.hasPermission("is.command.reset") && sender.isPlayer();
     }
 
     @Override
     public String getUsage() {
-        return "<player>";
+        return "<homes>";
     }
 
     @Override
     public String getName() {
-        return "teleport";
+        return "delete";
     }
 
     @Override
     public String getDescription() {
-        return "teleport to others player Island";
+        return "Delete your island";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{"tp"};
+        return new String[]{"reset","del"};
     }
 
     @Override
-    public boolean execute(CommandSender sender, String[] args) {
+    public boolean execute(CommandSender sender, String[] args) {        
         if(args.length != 2){
             return false;
         }
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        getPlugin().getIsland().teleportPlayer(p, args[1]);
+        if(getPlugin().getIsland().checkIsland(p)){
+            sender.sendMessage(getPrefix() + getMsg("no_island_error"));
+            return true;
+        }
+        
+        getPlugin().getIsland().reset(p, false, Integer.parseInt(args[1]));
         return true;
     }
 

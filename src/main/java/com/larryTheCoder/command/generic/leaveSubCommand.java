@@ -14,25 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package com.larryTheCoder.command;
+package com.larryTheCoder.command.generic;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.level.Position;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.command.SubCommand;
 
 /**
  * @author larryTheCoder
  */
-public class infoSubCommand extends SubCommand{
+public class leaveSubCommand extends SubCommand {
 
-    public infoSubCommand(ASkyBlock plugin) {
+    public leaveSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.command.info") && sender.isPlayer();
+        return sender.hasPermission("is.command.leave") && sender.isPlayer();
     }
 
     @Override
@@ -42,29 +43,40 @@ public class infoSubCommand extends SubCommand{
 
     @Override
     public String getName() {
-        return "info";
+        return "leave";
     }
 
     @Override
     public String getDescription() {
-        return "get the Island information";
+        return "return to main world";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{"inf", "get"};
+        return new String[]{"lobby", "exit"};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        Player p =  sender.getServer().getPlayer(sender.getName());
-        for(String level : getPlugin().level){
-            if(!p.getLevel().getName().equalsIgnoreCase(level)){
-                sender.sendMessage(getMsg("level_error"));
+        Player pt = getPlugin().getServer().getPlayer(sender.getName());
+        for (String level : getPlugin().level) {
+            if (!pt.getLevel().getName().equalsIgnoreCase(level)) {
+                sender.sendMessage(getMsg("leave_error"));
                 return true;
             }
         }
-        getPlugin().getIsland().islandInfo(p, p.getLocation());
+        // Check if sender is in gamemode 1
+        if(!pt.isOp()){
+            if(pt.getGamemode() == 1){
+                pt.setGamemode(0);
+            }
+        }
+        getPlugin().getInventory().loadPlayerInventory(pt);
+        int x = getPlugin().cfg.getInt("lobby.lobbyX");
+        int y = getPlugin().cfg.getInt("lobby.lobbyY");
+        int z = getPlugin().cfg.getInt("lobby.lobbyZ");
+        String world = getPlugin().cfg.getString("lobby.world");
+        pt.teleport(new Position(x, y, z, getPlugin().getServer().getLevelByName(world)));
         return true;
     }
 

@@ -14,25 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.larryTheCoder.command;
+
+package com.larryTheCoder.command.management;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.level.Position;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.command.SubCommand;
+import com.larryTheCoder.listener.invitation.InvitationHandler;
 
 /**
  * @author larryTheCoder
  */
-public class leaveSubCommand extends SubCommand {
+public class acceptSubCommand extends SubCommand{
 
-    public leaveSubCommand(ASkyBlock plugin) {
+    public acceptSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.command.leave") && sender.isPlayer();
+        return sender.hasPermission("is.command.accept") && sender.isPlayer();
     }
 
     @Override
@@ -42,40 +44,28 @@ public class leaveSubCommand extends SubCommand {
 
     @Override
     public String getName() {
-        return "leave";
+        return "accept";
     }
 
     @Override
     public String getDescription() {
-        return "return to main world";
+        return "Accept an invitation";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{"lobby", "exit"};
+        return new String[]{"accpt"};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        Player pt = getPlugin().getServer().getPlayer(sender.getName());
-        for (String level : getPlugin().level) {
-            if (!pt.getLevel().getName().equalsIgnoreCase(level)) {
-                sender.sendMessage(getMsg("leave_error"));
-                return true;
-            }
+        Player p = sender.getServer().getPlayer(sender.getName());
+        InvitationHandler pd = ASkyBlock.get().getInvitationHandler();
+        if(pd.getInvitation(p) == null){
+            sender.sendMessage(getMsg("no_pending"));
+            return false;
         }
-        // Check if sender is in gamemode 1
-        if(!pt.isOp()){
-            if(pt.getGamemode() == 1){
-                pt.setGamemode(0);
-            }
-        }
-        getPlugin().getInventory().loadPlayerInventory(pt);
-        int x = getPlugin().cfg.getInt("lobby.lobbyX");
-        int y = getPlugin().cfg.getInt("lobby.lobbyY");
-        int z = getPlugin().cfg.getInt("lobby.lobbyZ");
-        String world = getPlugin().cfg.getString("lobby.world");
-        pt.teleport(new Position(x, y, z, getPlugin().getServer().getLevelByName(world)));
+        pd.getInvitation(p).accept();
         return true;
     }
 

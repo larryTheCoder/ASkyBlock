@@ -14,57 +14,73 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.larryTheCoder.command;
+package com.larryTheCoder.command.island;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.utils.TextFormat;
+import java.util.ArrayList;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.command.SubCommand;
+import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.utils.Utils;
+import java.util.List;
 
 /**
  * @author larryTheCoder
  */
-public class resetIslandSubCommand extends SubCommand {
+public class homeSubCommand extends SubCommand {
 
-    public resetIslandSubCommand(ASkyBlock plugin) {
+    public homeSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.command.reset") && sender.isPlayer();
+        return sender.isPlayer() && sender.hasPermission("is.command.home");
     }
 
     @Override
     public String getUsage() {
-        return "<homes>";
+        return "<island number>";
     }
 
     @Override
     public String getName() {
-        return "reset";
+        return "home";
     }
 
     @Override
     public String getDescription() {
-        return "Refresh your island";
+        return "Teleport to your island";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{"refresh", "clean"};
+        return new String[]{"h"};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        if(args.length != 2){
+        int islandNumber;
+        if (args.length != 2) {
+            islandNumber = 1;
+        } else if (Utils.isNumeric(args[1]) && Integer.getInteger(args[1]) == 1) {
+            islandNumber = Integer.getInteger(args[1]);
+        } else {
             return false;
         }
-        Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if (getPlugin().getIsland().checkIsland(p)) {
+        List<IslandData> island = getPlugin().getDatabase().getIslands(sender.getName());
+        if (island == null) {
             sender.sendMessage(getPrefix() + getMsg("no_island_error"));
             return true;
         }
-        getPlugin().getIsland().reset(p, true, Integer.parseInt(args[1]));
+        if (island.size() != islandNumber) {
+            sender.sendMessage(TextFormat.RED + "You don't have an island with home number " + islandNumber);
+            return true;
+        }
+        Player p = sender.getServer().getPlayer(sender.getName());
+        getPlugin().getGrid().homeTeleport(p, islandNumber);
         return true;
     }
 

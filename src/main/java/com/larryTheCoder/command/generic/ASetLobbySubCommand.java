@@ -15,25 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.larryTheCoder.command;
+package com.larryTheCoder.command.generic;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.level.Location;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.listener.invitation.InvitationHandler;
+import com.larryTheCoder.command.SubCommand;
 
 /**
  * @author larryTheCoder
  */
-public class denySubCommand extends SubCommand{
+public class ASetLobbySubCommand extends SubCommand{
 
-    public denySubCommand(ASkyBlock plugin) {
+    public ASetLobbySubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.command.reject") && sender.isPlayer();
+        return sender.hasPermission("is.admin") && sender.isPlayer();
     }
 
     @Override
@@ -43,28 +44,28 @@ public class denySubCommand extends SubCommand{
 
     @Override
     public String getName() {
-        return "deny";
+        return "setlobby";
     }
 
     @Override
     public String getDescription() {
-        return "Decline an invitation";
+        return "set the ASkyBlock main lobby";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{"decline", "unaccept"};
+        return new String[]{};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        Player p = sender.getServer().getPlayer(sender.getName());
-        InvitationHandler pd = ASkyBlock.get().getInvitationHandler();
-        if(pd.getInvitation(p) == null){
-            sender.sendMessage(getMsg("no_pending"));
-            return false;
-        }
-        pd.getInvitation(p).deny();
+        Player p = getPlugin().getServer().getPlayer(sender.getName());
+        Location loc = p.getLocation();
+        getPlugin().cfg.set("lobby.lobbyX", loc.getFloorX());
+        getPlugin().cfg.set("lobby.lobbyY", loc.getFloorY());
+        getPlugin().cfg.set("lobby.lobbyZ", loc.getFloorZ());
+        getPlugin().cfg.set("lobby.world", p.getLevel().getName());
+        getPlugin().cfg.save();
         return true;
     }
 

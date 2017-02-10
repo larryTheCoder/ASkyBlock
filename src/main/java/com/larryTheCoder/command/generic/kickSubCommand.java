@@ -15,26 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.larryTheCoder.command;
+package com.larryTheCoder.command.generic;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.player.PlayerData;
-import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.command.SubCommand;
 
 /**
  * @author larryTheCoder
  */
-public class inviteSubCommand extends SubCommand {
+public class kickSubCommand extends SubCommand{
 
-    public inviteSubCommand(ASkyBlock plugin) {
+    public kickSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.isPlayer() && sender.hasPermission("is.command.addteam");
+        return sender.hasPermission("is.command.kick") && sender.isPlayer();
     }
 
     @Override
@@ -44,45 +43,33 @@ public class inviteSubCommand extends SubCommand {
 
     @Override
     public String getName() {
-        return "invite";
+        return "expel";
     }
 
     @Override
     public String getDescription() {
-        return "Invite a player to be member of your island";
+        return "Kick the intruders from your island!";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{"inv"};
+        return new String[]{};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        if(args.length != 2){
-            return false;
-        }
-        Player p = sender.getServer().getPlayer(sender.getName());    
-        if(!getPlugin().getIsland().checkIsland(p)){
+        Player p = getPlugin().getServer().getPlayer(sender.getName());
+        if(getPlugin().getIsland().checkIsland(p)){
             sender.sendMessage(getMsg("no_island_error"));
             return true;
+        } else if(args.length != 1){
+            return false;
         }
-        Player invite = sender.getServer().getPlayer(args[1]);
-        if(invite == null){
-            sender.sendMessage(getMsg("player_error2"));
+        if(getPlugin().getServer().getPlayer(args[1]) == null){
+            sender.sendMessage(getMsg("player_error").replace("[player]", args[1]));
             return true;
         }
-        PlayerData pdinv = ASkyBlock.get().getDatabase().getPlayerData(invite);
-        PlayerData pd = ASkyBlock.get().getDatabase().getPlayerData(p);
-        if(pdinv.inTeam){
-            sender.sendMessage(getMsg("player_has_teamed").replace("[player]", args[1]));
-            return false;
-        }
-        if(pd.members.contains(invite.getName())){
-            sender.sendMessage(getMsg("player_in_team").replace("[player]", args[1]));
-            return false;
-        }
-        getPlugin().getInvitationHandler().addInvitation(p, invite, pd);
+        getPlugin().getIsland().kickPlayerByName(p, args[1]);
         return true;
     }
 

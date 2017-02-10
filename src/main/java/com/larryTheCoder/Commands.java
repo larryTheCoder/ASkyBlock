@@ -26,26 +26,26 @@ import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import com.larryTheCoder.command.AGenerateSubCommand;
-import com.larryTheCoder.command.AKickSubCommand;
-import com.larryTheCoder.command.CreateISubCommand;
+import com.larryTheCoder.command.generic.AGenerateSubCommand;
+import com.larryTheCoder.command.generic.AKickSubCommand;
+import com.larryTheCoder.command.island.CreateISubCommand;
 import com.larryTheCoder.command.SubCommand;
-import com.larryTheCoder.command.kickSubCommand;
-import com.larryTheCoder.command.VGamemodeSubCommand;
-import com.larryTheCoder.command.leaveSubCommand;
-import com.larryTheCoder.command.deleteSubCommand;
-import com.larryTheCoder.command.ASetLobbySubCommand;
-import com.larryTheCoder.command.ChallengesCommand;
-import com.larryTheCoder.command.ToggleSubCommand;
-import com.larryTheCoder.command.acceptSubCommand;
-import com.larryTheCoder.command.denySubCommand;
-import com.larryTheCoder.command.homeSubCommand;
-import com.larryTheCoder.command.infoSubCommand;
-import com.larryTheCoder.command.inviteSubCommand;
-import com.larryTheCoder.command.teleportSubCommand;
+import com.larryTheCoder.command.generic.kickSubCommand;
+import com.larryTheCoder.command.generic.VGamemodeSubCommand;
+import com.larryTheCoder.command.generic.leaveSubCommand;
+import com.larryTheCoder.command.island.deleteSubCommand;
+import com.larryTheCoder.command.generic.ASetLobbySubCommand;
+import com.larryTheCoder.command.ChallangesCMD;
+import com.larryTheCoder.command.management.ToggleSubCommand;
+import com.larryTheCoder.command.management.acceptSubCommand;
+import com.larryTheCoder.command.management.denySubCommand;
+import com.larryTheCoder.command.island.homeSubCommand;
+import com.larryTheCoder.command.island.infoSubCommand;
+import com.larryTheCoder.command.management.inviteSubCommand;
+import com.larryTheCoder.command.island.teleportSubCommand;
 
 /**
- * Commands v1.2 [MyPlot]
+ * Commands v2.0 [SkyBlock]
  *
  * @author larryTheCoder
  */
@@ -63,20 +63,20 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.setDescription("SkyBlock main command");
         this.plugin = plugin;
 
-        //plugin.getServer().getCommandMap().register("ASkyBlock", new ChallengesCommand(plugin));
+        plugin.getServer().getCommandMap().register("ASkyBlock", new ChallangesCMD(plugin));
         this.loadSubCommand(new AGenerateSubCommand(getPlugin()));
-        //this.loadSubCommand(new acceptSubCommand(getPlugin()));
+        this.loadSubCommand(new acceptSubCommand(getPlugin()));
         this.loadSubCommand(new AKickSubCommand(getPlugin()));
         this.loadSubCommand(new ASetLobbySubCommand(getPlugin()));
         this.loadSubCommand(new CreateISubCommand(getPlugin()));
-        //this.loadSubCommand(new denySubCommand(getPlugin()));
+        this.loadSubCommand(new denySubCommand(getPlugin()));
         this.loadSubCommand(new deleteSubCommand(getPlugin()));
         this.loadSubCommand(new infoSubCommand(getPlugin()));
-        //this.loadSubCommand(new inviteSubCommand(getPlugin()));
-        //this.loadSubCommand(new kickSubCommand(getPlugin()));
+        this.loadSubCommand(new inviteSubCommand(getPlugin()));
+        this.loadSubCommand(new kickSubCommand(getPlugin()));
         this.loadSubCommand(new leaveSubCommand(getPlugin()));
         this.loadSubCommand(new teleportSubCommand(getPlugin()));
-        //this.loadSubCommand(new ToggleSubCommand(getPlugin()));
+        this.loadSubCommand(new ToggleSubCommand(getPlugin()));
         this.loadSubCommand(new VGamemodeSubCommand(getPlugin()));
         this.loadSubCommand(new homeSubCommand(getPlugin()));
     }

@@ -20,7 +20,6 @@ import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.Config;
-import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
@@ -33,7 +32,7 @@ import java.util.List;
 /**
  * @author larryTheCoder
  */
-public class ChallengesCommand extends Command {
+public class ChallangesCMD extends Command {
 
     private final ASkyBlock plugin;
     // Database of challenges
@@ -41,10 +40,10 @@ public class ChallengesCommand extends Command {
     private Config challengeFile = null;
     private File challengeConfigFile;
 
-    public ChallengesCommand(ASkyBlock ev) {
+    public ChallangesCMD(ASkyBlock ev) {
         super("challenges", "Challange yourself for some big prize", "\u00a77<parameters>", new String[]{"c", "chall", "ch"});
-        this.reloadChallengeConfig();
         this.plugin = ev;
+        this.reloadChallengeConfig();
     }
 
     @Override
@@ -56,71 +55,20 @@ public class ChallengesCommand extends Command {
         Player p = plugin.getServer().getPlayer(sender.getName());
         switch (args.length) {
             case 0:
-                if (isLevelAvailable(p, getChallengeConfig().getString("challenges.challengeList." + args[1].toLowerCase() + ".level"))) {
-                    // Provide info on the challenge
-                    // Challenge Name
-                    // Description
-                    // Type
-                    // Items taken or not
-                    // island or not
-                    final String challenge = args[1].toLowerCase();
-                    sender.sendMessage(TextFormat.GOLD + "Challenges Name: " + TextFormat.WHITE + challenge);
-                    sender.sendMessage(TextFormat.WHITE + "Max Level: " + TextFormat.GOLD
-                            + getChallengeConfig().getString("challenges.challengeList." + challenge + ".level", ""));
-                    String desc = TextFormat.colorize('&', getChallengeConfig().getString("challenges.challengeList." + challenge + ".description", "").replace("[label]", ""));
-                    List<String> result = new ArrayList<>();
-                    if (desc.contains("|")) {
-                        result.addAll(Arrays.asList(desc.split("\\|")));
-                    } else {
-                        result.add(desc);
-                    }
-                    for (String line : result) {
-                        sender.sendMessage(TextFormat.GOLD + line);
-                    }
-                    final String type = getChallengeConfig().getString("challenges.challengeList." + challenge + ".type", "").toLowerCase();
-                    if (type.equals("inventory")) {
-                        if (getChallengeConfig().getBoolean("challenges.challengeList." + args[1].toLowerCase() + ".takeItems")) {
-                            sender.sendMessage(TextFormat.RED + "All required items are taken when you complete this challenge!");
-                        }
-                    } else if (type.equals("island")) {
-                        sender.sendMessage(TextFormat.RED + "All required items must be close to you on your island!");
-                    }
-                    if (plugin.getPlayerInfo(p).checkChallenge(challenge)
-                            && (!type.equals("inventory") || !getChallengeConfig().getBoolean("challenges.challengeList." + challenge + ".repeatable", false))) {
-                        sender.sendMessage(TextFormat.RED + "This Challenge is not repeatable!");
-                        return true;
-                    }
-                    double moneyReward;
-                    int expReward;
-                    String rewardText;
-
-                    if (!plugin.getPlayerInfo(p).checkChallenge(challenge)) {
-                        // First time
-                        moneyReward = getChallengeConfig().getDouble("challenges.challengeList." + challenge.toLowerCase() + ".moneyReward", 0D);
-                        rewardText = TextFormat.colorize('&',
-                                getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".rewardText", "Goodies!"));
-                        expReward = getChallengeConfig().getInt("challenges.challengeList." + challenge + ".expReward", 0);
-                        sender.sendMessage(TextFormat.GOLD + "First time reward(s)");
-                    } else {
-                        // Repeat challenge
-                        moneyReward = getChallengeConfig().getDouble("challenges.challengeList." + challenge.toLowerCase() + ".repeatMoneyReward", 0D);
-                        rewardText = TextFormat.colorize('&',
-                                getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".repeatRewardText", "Goodies!"));
-                        expReward = getChallengeConfig().getInt("challenges.challengeList." + challenge + ".repeatExpReward", 0);
-                        sender.sendMessage(TextFormat.GOLD + "Repeat reward(s)");
-
-                    }
-                    sender.sendMessage(TextFormat.WHITE + rewardText);
-                    if (Settings.useEconomy && moneyReward > 0) {
-                    }
-                } else {
-                }
+                p.sendMessage("\u00a7aUse /c <name> to view information about a challenge.");
+                p.sendMessage("\u00a7aUse /c complete <name> to attempt to complete that challenge.");
+                p.sendMessage("\u00a7aUse /c list  to view all information about the challenge.");
                 break;
             case 1:
-                if (args[1].equalsIgnoreCase("help") || args[1].equalsIgnoreCase("complete") || args[1].equalsIgnoreCase("c")) {
-                    p.sendMessage("\u00a7aUse /c <name> to view information about a challenge.");
-                    p.sendMessage("\u00a7aUse /c complete <name> to attempt to complete that challenge.");
+                if (args[1].equalsIgnoreCase("list")) {
+                    for (String key : getChallengeConfig().getSection("schematics").getKeys(false)) {
+
+                    }
                 }
+
+                break;
+            default:
+                break;
         }
         return true;
     }

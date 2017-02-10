@@ -15,56 +15,55 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.larryTheCoder.command;
+package com.larryTheCoder.command.generic;
 
-import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.listener.invitation.InvitationHandler;
+import com.larryTheCoder.command.SubCommand;
 
 /**
  * @author larryTheCoder
  */
-public class acceptSubCommand extends SubCommand{
+public class AKickSubCommand extends SubCommand{
 
-    public acceptSubCommand(ASkyBlock plugin) {
+    public AKickSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.command.accept") && sender.isPlayer();
+        return sender.hasPermission("is.admin");
     }
 
     @Override
     public String getUsage() {
-        return "";
+        return "<player>";
     }
 
     @Override
     public String getName() {
-        return "accept";
+        return "kick";
     }
 
     @Override
     public String getDescription() {
-        return "Accept an invitation";
+        return "Kick the player inside from island level";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{"accpt"};
+        return new String[]{};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        Player p = sender.getServer().getPlayer(sender.getName());
-        InvitationHandler pd = ASkyBlock.get().getInvitationHandler();
-        if(pd.getInvitation(p) == null){
-            sender.sendMessage(getMsg("no_pending"));
+        if(args.length != 2){
             return false;
+        } else if(!sender.hasPermission("is.admin")){
+            sender.sendMessage(getMsg("no_permission"));
+            return true;
         }
-        pd.getInvitation(p).accept();
+        getPlugin().getIsland().kickPlayerByAdmin(sender, args[1]);     
         return true;
     }
 

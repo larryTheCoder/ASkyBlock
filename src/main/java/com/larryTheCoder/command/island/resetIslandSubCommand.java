@@ -14,72 +14,59 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package com.larryTheCoder.command;
+package com.larryTheCoder.command.island;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.command.SubCommand;
 
 /**
  * @author larryTheCoder
  */
-public class VGamemodeSubCommand extends SubCommand{
+public class resetIslandSubCommand extends SubCommand {
 
-    public VGamemodeSubCommand(ASkyBlock plugin) {
+    public resetIslandSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.vip") && sender.isPlayer();
+        return sender.hasPermission("is.command.reset") && sender.isPlayer();
     }
 
     @Override
     public String getUsage() {
-        return "<gamemode>";
+        return "<homes>";
     }
 
     @Override
     public String getName() {
-        return "gamemode";
+        return "reset";
     }
 
     @Override
     public String getDescription() {
-        return "Change your gamemode! In Island!";
+        return "Refresh your island";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{"gm","gmc", "gms"};
+        return new String[]{"refresh", "clean"};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if(args[0].equalsIgnoreCase("gmc")){
-            p.setGamemode(1);
-            return true;
-        } else if(args[0].equalsIgnoreCase("gms")){
-            p.setGamemode(0);
-            return true;
-        } else if (args.length != 2){
+        if(args.length != 2){
             return false;
-        } else {
-            switch (args[1]) {
-                case "1":
-                    p.setGamemode(1);
-                    break;
-                case "0":
-                    p.setGamemode(0);
-                    break;
-                default:
-                    return false;
-            }
-        }            
+        }
+        Player p = getPlugin().getServer().getPlayer(sender.getName());
+        if (getPlugin().getIsland().checkIsland(p)) {
+            sender.sendMessage(getPrefix() + getMsg("no_island_error"));
+            return true;
+        }
+        getPlugin().getIsland().reset(p, true, Integer.parseInt(args[1]));
         return true;
     }
 
-    
 }

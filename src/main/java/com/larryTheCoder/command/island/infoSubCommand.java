@@ -15,60 +15,57 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.larryTheCoder.command;
+package com.larryTheCoder.command.island;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.command.SubCommand;
 
 /**
  * @author larryTheCoder
  */
-public class kickSubCommand extends SubCommand{
+public class infoSubCommand extends SubCommand{
 
-    public kickSubCommand(ASkyBlock plugin) {
+    public infoSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.command.kick") && sender.isPlayer();
+        return sender.hasPermission("is.command.info") && sender.isPlayer();
     }
 
     @Override
     public String getUsage() {
-        return "<player>";
+        return "";
     }
 
     @Override
     public String getName() {
-        return "expel";
+        return "info";
     }
 
     @Override
     public String getDescription() {
-        return "Kick the intruders from your island!";
+        return "get the Island information";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{};
+        return new String[]{"inf", "get"};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if(getPlugin().getIsland().checkIsland(p)){
-            sender.sendMessage(getMsg("no_island_error"));
-            return true;
-        } else if(args.length != 1){
-            return false;
+        Player p =  sender.getServer().getPlayer(sender.getName());
+        for(String level : getPlugin().level){
+            if(!p.getLevel().getName().equalsIgnoreCase(level)){
+                sender.sendMessage(getMsg("level_error"));
+                return true;
+            }
         }
-        if(getPlugin().getServer().getPlayer(args[1]) == null){
-            sender.sendMessage(getMsg("player_error").replace("[player]", args[1]));
-            return true;
-        }
-        getPlugin().getIsland().kickPlayerByName(p, args[1]);
+        getPlugin().getIsland().islandInfo(p, p.getLocation());
         return true;
     }
 

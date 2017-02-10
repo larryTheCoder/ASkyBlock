@@ -384,6 +384,7 @@ public class Schematic {
             topGrass = null;
         }
         if (countBlocks != 0) {
+            Server.getInstance().getLogger().info(TextFormat.YELLOW + " - " + schematicFolder.getName().toUpperCase().replace(".SCHEMATIC", "") + " Info:");
             Server.getInstance().getLogger().info(TextFormat.GRAY + "   - Blocks: " + TextFormat.GREEN + countBlocks + " ");
             Server.getInstance().getLogger().info(TextFormat.GRAY + "   - SafeSpot: " + TextFormat.GREEN + spot.size() + " SafeSpot found");
         }
