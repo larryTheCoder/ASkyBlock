@@ -480,10 +480,10 @@ public class Schematic {
      * @param player
      * @param teleport
      */
-    public void pasteSchematic(Location loc, Player player, boolean teleport) {
+    public void pasteSchematic(Location loc) {
         // If this is not a file schematic, paste the default island
         if (this.schematicFolder == null) {
-            plugin.getFallback().createIsland(loc.getLevel(), loc.getFloorX() - 13, loc.getFloorY(), loc.getFloorZ() - 14, player);
+            //plugin.getFallback().createIsland(loc.getLevel(), loc.getFloorX() - 13, loc.getFloorY(), loc.getFloorZ() - 14, player);
             Utils.ConsoleMsg(TextFormat.RED + "Missing schematic - using default block only");
             return;
         }
@@ -494,15 +494,6 @@ public class Schematic {
         islandBlocks.stream().forEach((b) -> {
             b.paste(blockLoc, true);
         });
-        if (teleport) {
-            plugin.getIsland().setTeleport(player, true);
-            player.teleport(world.getSpawnLocation());
-            TaskManager.runTaskLater(() -> {
-                plugin.getGrid().homeTeleport(player);
-                plugin.getIsland().setTeleport(player, false);
-            }, 10);
-
-        }
     }
 
     /**

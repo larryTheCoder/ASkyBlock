@@ -18,16 +18,26 @@ package com.larryTheCoder.database.yaml;
 
 import cn.nukkit.Player;
 import cn.nukkit.level.Position;
+import cn.nukkit.utils.Config;
 import com.larryTheCoder.database.Database;
 import com.larryTheCoder.player.PlayerData;
 import java.util.ArrayList;
 import com.larryTheCoder.storage.IslandData;
+import java.io.File;
 import java.util.List;
 
 /**
  * @author larryTheCoder
  */
 public class YamlDatabase implements Database {
+
+    private final File file;
+    private final Config cf;
+
+    public YamlDatabase(File path) {
+        this.file = path;
+        this.cf = new Config(path);
+    }
 
     @Override
     public IslandData getIslandLocation(String levelName, int X, int Z) {

@@ -5,7 +5,7 @@
 ###########################################################################################
 ---
 # Logger messages
-onLoad: "&aLoading source &eASkyBlock &aversion "
+onLoad: "&aLoading source &eASkyBlock &av"
 onEnable: "&aASkyBlock has seccessfully enabled!"
 
 ###################
@@ -46,10 +46,10 @@ teleport: "&aYou will be teleported in {0} seconds."
 #########################
 # Command Error Message #
 #########################
-schematics_list: "&cUnkwnown schematic. &eThe schematic names are: \n&a[SCEM]"
+schematics_list: "&eUnkwnown schematic. The schematic names are: \n&a[SCEM]"
 error_have_team: "&cYou already created a team!"
 error_in_team: "&cYou already have a team!"
-max_islands: "&cYou reached the limit of [maxplot] plots per player"
+max_islands: "&cYou reached the limit of [maxplot] Island per player"
 no_pending: "&cYou dont have any pending invitations"
 player_error: "&cUnknown player named &c[player] &cat SkyBlock level"
 player_error2: "&cUnknown player named &e[player]"

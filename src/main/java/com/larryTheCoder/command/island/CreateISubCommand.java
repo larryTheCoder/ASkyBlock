@@ -62,32 +62,33 @@ public class CreateISubCommand extends SubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        Player p = sender.getServer().getPlayer(sender.getName());
         Schematic smt = null;
         String name = "My Island";
         switch (args.length) {
-            case 1:
-                name = args[1];
-                break;
             case 2:
                 name = args[1];
-                if (getPlugin().getSchematic(args[2]) != null) {
+                break;
+            case 3:
+                name = args[1];
+                if (getPlugin().getSchematic(args[2]) == null) {
                     List<String> ft = new ArrayList<>();
                     ASkyBlock.schematics.keySet().stream().forEach((de) -> {
                         ft.add(de);
                     });
-                    p.sendMessage(getMsg("schematics_list").replace("[SCEM]", Utils.arrayToString(ft)));
+                    sender.sendMessage(getMsg("schematics_list").replace("[SCEM]", Utils.arrayToString(ft)));
                     return true;
+                } else {
+                    smt = getPlugin().getSchematic(args[2]);
                 }
                 break;
         }
         int maxIslands = getPlugin().cfg.getInt("maxhome");
-        List<IslandData> maxPlotsOfPlayers = getPlugin().getDatabase().getIslands(p.getName());
+        List<IslandData> maxPlotsOfPlayers = getPlugin().getDatabase().getIslands(sender.getName());
         if (maxIslands >= 0 && maxPlotsOfPlayers.size() >= maxIslands) {
             sender.sendMessage(getPlugin().getMsg("max_islands").replace("[maxplot]", "" + maxIslands));
             return true;
         }
-        getPlugin().getIsland().createIsland(p, smt, name);
+        getPlugin().getIsland().createIsland(sender.getName(), smt, name);
         return true;
     }
 

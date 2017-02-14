@@ -43,20 +43,9 @@ import java.util.List;
 public class IslandManager {
 
     public ASkyBlock plugin;
-    public HashMap<UUID, Boolean> teleports = new HashMap<>();
 
     public IslandManager(ASkyBlock plugin) {
         this.plugin = plugin;
-        this.teleports.clear();
-    }
-
-    public boolean setTeleport(Player p, boolean type) {
-        this.teleports.put(p.getUniqueId(), type);
-        return true;
-    }
-
-    public boolean isTeleport(Player p) {
-        return this.teleports.containsKey(p.getUniqueId());
     }
 
     public void handleIslandCommand(Player p) {
@@ -81,7 +70,7 @@ public class IslandManager {
                 plugin.getInventory().savePlayerInventory(p);
             }
             plugin.getGrid().homeTeleport(p, homes);
-            if(Settings.gamemode != -1){
+            if (Settings.gamemode != -1) {
                 p.setGamemode(Settings.gamemode);
             }
         } else {
@@ -157,6 +146,10 @@ public class IslandManager {
 
     public void createIsland(Player p, Schematic stmt, String home) {
         p.sendMessage(TextFormat.GREEN + "Creating a new island for you...");
+        this.createIsland(p.getName(), stmt, home);
+    }
+
+    public void createIsland(String p, Schematic stmt, String home) {
         for (int i = 0; i < 1000000; ++i) {
             int width = i * Settings.islandSize * 2;
             int wx = (int) (Math.random() * width);
@@ -168,7 +161,11 @@ public class IslandManager {
             if (pd == null) {
                 Level world = Server.getInstance().getLevelByName("SkyBlock");
                 Location locIsland = new Location(wx, wy, wz, world);
-                plugin.getSchematic(stmt != null ? stmt.getName() : "default").pasteSchematic(locIsland, p, false);
+                if (stmt != null) {
+                    stmt.pasteSchematic(locIsland);
+                } else {
+                    plugin.getSchematic("default").pasteSchematic(locIsland);
+                }
                 claim(p, locIsland, home);
                 break;
             }
@@ -185,7 +182,7 @@ public class IslandManager {
         return x / Settings.islandSize + z / Settings.islandSize * 10000;
     }
 
-    public boolean claim(Player p, Location loc, String home) {
+    public boolean claim(String p, Location loc, String home) {
         int x = loc.getFloorX();
         int z = loc.getFloorZ();
         if (!checkIslandAt(loc)) {
@@ -194,12 +191,12 @@ public class IslandManager {
 
         int iKey = generateIslandKey(loc);
         IslandData pd = plugin.getDatabase().getIslandLocation(loc.getLevel().getName(), x, z);
-        List<IslandData> number = plugin.getDatabase().getIslands(p.getName());
+        List<IslandData> number = plugin.getDatabase().getIslands(p);
         pd.id = number.size() + 1;
         pd.biome = Settings.defaultBiome.getName();
         pd.name = home;
         pd.islandId = iKey;
-        pd.owner = p.getName();
+        pd.owner = p;
         pd.X = x;
         pd.floor_y = loc.getFloorY();
         pd.Z = z;
@@ -207,10 +204,15 @@ public class IslandManager {
         pd.locked = false;
 
         boolean result = plugin.getDatabase().saveIsland(pd);
-        if (result) {
-            p.sendMessage(plugin.getMsg("create"));
+        if (Server.getInstance().getPlayer(p) != null) {
+            Player pr = Server.getInstance().getPlayer(p);
+            if (result) {
+                pr.sendMessage(plugin.getMsg("create"));
+            } else {
+                pr.sendMessage(plugin.getPrefix() + "&cUnable to save your island SQL Error");
+            }
         } else {
-            p.sendMessage("Unable to save your island SQL Error");
+
         }
         return true;
     }

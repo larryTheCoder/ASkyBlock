@@ -111,7 +111,9 @@ public final class ASConnection implements Database {
             if (stmt == null) {
                 return null;
             }
-            return new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getBoolean("locked"));
+            while (stmt.next()) {
+                return new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getBoolean("locked"));
+            }
         } catch (SQLException ex) {
             Utils.ConsoleMsg(TextFormat.RED + "An error occured while fecthing SQLite: #location #X" + X + "#Z" + Z);
             if (ASkyBlock.get().isDebug()) {
@@ -193,7 +195,9 @@ public final class ASConnection implements Database {
             if (stmt == null) {
                 return null;
             }
-            return new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getBoolean("locked"));
+            while (stmt.next()) {
+                return new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getBoolean("locked"));
+            }
         } catch (SQLException ex) {
             Utils.ConsoleMsg(TextFormat.RED + "An error occured while fecthing SQLite: #id " + id);
             if (ASkyBlock.get().isDebug()) {
@@ -215,10 +219,8 @@ public final class ASConnection implements Database {
 
     @Override
     public boolean saveIsland(IslandData pd) {
-        try (PreparedStatement stmt = connection.prepareStatement("INSERT OR REPLACE INTO "
-                + "`island`"
-                + "(*) VALUES"
-                + "(*);")) {
+        
+        try (PreparedStatement stmt = connection.prepareStatement("INSERT OR REPLACE INTO `island` (`id`, `islandId`, `x`, `y`, `z`,`owner`, `name`, `world`, `biome`, `locked`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
             stmt.setInt(1, pd.id);
             stmt.setInt(2, pd.islandId);
             stmt.setInt(3, pd.X);
@@ -233,7 +235,7 @@ public final class ASConnection implements Database {
             stmt.close();
             return true;
         } catch (SQLException ex) {
-            Utils.ConsoleMsg(TextFormat.RED + "An error occured while saving SQLite: #id " + pd.id + "#Text 1 Cause of: " + ex.getErrorCode() + "AND " + ex.getSQLState());
+            Utils.ConsoleMsg(TextFormat.RED + "An error occured while saving SQLite: #id " + pd.id + " Error Code: " + ex.getErrorCode() + " AND " + ex.getMessage());
             if (ASkyBlock.get().isDebug()) {
                 ex.printStackTrace();
             }

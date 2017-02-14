@@ -72,14 +72,14 @@ public class ORMLiteDatabase implements Database {
         Config cfg = ASkyBlock.get().cfg;
         if (mysql) {
             connection = DbLib.getConnectionSource(DbLib.getMySqlUrl(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database")), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password"));
-            Utils.ConsoleMsg(TextFormat.YELLOW + "Starting MySql-JDBC This will take a while...");
+            Utils.ConsoleMsg(TextFormat.YELLOW + "Starting MySql-ORMLITE This will take a while...");
             TaskManager.runTaskLater(() -> {
                 Utils.ConsoleMsg(TextFormat.YELLOW + "Connecting...");
             }, 20);
 
         } else {
             connection = DbLib.getConnectionSource("jdbc:sqlite:" + dbLocation, "", "");
-            Utils.ConsoleMsg(TextFormat.YELLOW + "Starting Sqlite-JDBC This will take a while...");
+            Utils.ConsoleMsg(TextFormat.YELLOW + "Starting Sqlite-ORMLITE This will take a while...");
         }
         try {
             Thread.sleep(Utils.secondsAsMillis(50));
@@ -89,7 +89,7 @@ public class ORMLiteDatabase implements Database {
             Utils.ConsoleMsg("&cFailed to connect to " + (mysql ? "MySql" : "Sqlite"));
             return;
         }
-        Utils.ConsoleMsg(TextFormat.GREEN + "Seccessfully started " + (mysql ? cfg.getString("database.MySQL.host") + ":" + cfg.getInt("database.MySQL.port") : "Sqlite-JDBC"));
+        Utils.ConsoleMsg(TextFormat.GREEN + "Seccessfully connected into " + (mysql ? cfg.getString("database.MySQL.host") + ":" + cfg.getInt("database.MySQL.port") : "Sqlite-JDBC"));
         try {
             islandDB = DaoManager.createDao(connection, IslandDataTable.class);
             TableUtils.createTableIfNotExists(connection, IslandDataTable.class);
@@ -190,7 +190,7 @@ public class ORMLiteDatabase implements Database {
     public PlayerData getPlayerData(Player pl) {
         List<PlayerDataTable> records;
         try {
-            records = playerDB.queryForEq("player", pl);
+            records = playerDB.queryForEq("player", pl.getName());
         } catch (SQLException ex) {
             if (ASkyBlock.get().isDebug()) {
                 ex.printStackTrace();
@@ -241,7 +241,7 @@ public class ORMLiteDatabase implements Database {
                 }
             }
         }
-        // The player has an Island!
+        // The player has a table
         PlayerDataTable table = null;
         for (PlayerDataTable rec : record) {
             table = rec;
@@ -301,7 +301,7 @@ public class ORMLiteDatabase implements Database {
                 ex.printStackTrace();
             }
         }
-        if (record == null || record.isEmpty()) {
+        if (record == null) {
             // if not try to create a new Database
             try {
                 islandDB.create(new IslandDataTable(pd));

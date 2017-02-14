@@ -129,7 +129,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     @Override
     public int[] getVersion() {
-        return this.version;
+        return version;
     }
 
     @Override
@@ -290,7 +290,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
         PluginManager pm = getServer().getPluginManager();
         chatHandler = new ChatHandler(this);
-        this.teleportLogic = new TeleportLogic(this);
+        teleportLogic = new TeleportLogic(this);
         invitationHandler = new InvitationHandler(this);
         getServer().getPluginManager().registerEvents(chatHandler, this);
         pm.registerEvents(new IslandListener(this), this);
@@ -302,7 +302,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
      * Find all database that had generated
      */
     private void reloadLevel() {
-        this.getDatabase().getWorlds().stream().forEach((leveln) -> {
+        getDatabase().getWorlds().stream().forEach((leveln) -> {
             level.add(leveln);
         });
     }
@@ -313,7 +313,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
      * TO-DO: Support Multi-World
      */
     private void saveLevel() {
-        this.getDatabase().saveWorlds(level);
+        getDatabase().saveWorlds(level);
     }
 
     private void registerObject() {
@@ -328,18 +328,18 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         inventory = new InventorySave(this);
         backup = new IslandFallback(this);
         backup.init();
-        this.getServer().getCommandMap().register("SkyBlock", new Commands(this));
+        getServer().getCommandMap().register("SkyBlock", new Commands(this));
         switch (cfg.getString("database.provider").toLowerCase()) {
             case "jdbc":
                 if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {
                     try {
-                        this.db = new ASConnection(new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")), true);
+                        db = new ASConnection(new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")), true);
                     } catch (SQLException | ClassNotFoundException ex) {
                         Utils.ConsoleMsg("Unable to create MySql database");
                     }
                 } else {
                     try {
-                        this.db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
+                        db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
                     } catch (SQLException | ClassNotFoundException ex) {
                         Utils.ConsoleMsg("Unable to create Sqlite database");
                     }
@@ -347,16 +347,16 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
                 break;
             case "ormlite":
                 if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {
-                    this.db = new ORMLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db"), true);
+                    db = new ORMLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db"), true);
                 } else {
-                    this.db = new ORMLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db"));
+                    db = new ORMLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db"));
                 }
                 break;
             case "yaml":
             case "unknown":
                 Utils.ConsoleMsg("&cYAML and Unknown Database not available. Sorry. Using default: JDBC");
                 try {
-                    this.db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
+                    db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
                 } catch (SQLException | ClassNotFoundException ex) {
                     Utils.ConsoleMsg("Unable to create Sqlite database");
                 }
@@ -364,7 +364,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
             default:
                 Utils.ConsoleMsg("&c" + cfg.getString("database.provider") + " is not available. Sorry. Using default: JDBC");
                 try {
-                    this.db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
+                    db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
                 } catch (SQLException | ClassNotFoundException ex) {
                     Utils.ConsoleMsg("&cUnable to create Sqlite database");
                 }
@@ -389,12 +389,15 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         Utils.EnsureDirectory(Utils.DIRECTORY);
         Utils.EnsureDirectory(Utils.LOCALES_DIRECTORY);
         //initLocales();        
-        if (this.getResource("config.yml") != null) {
-            this.saveResource("config.yml");
+        if (getResource("config.yml") != null) {
+            saveResource("config.yml");
+        }
+        if (getResource("challenges.yml") != null) {
+            saveResource("challenges.yml");
         }
         cfg = new Config(new File(getDataFolder(), "config.yml"), Config.YAML);
-        if (this.getResource("English.yml") != null) {
-            this.saveResource("English.yml");
+        if (getResource("English.yml") != null) {
+            saveResource("English.yml");
         }
         msg = new Config(new File(getDataFolder(), "English.yml"), Config.YAML);
         ConfigManager.load();

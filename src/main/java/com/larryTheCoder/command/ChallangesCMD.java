@@ -20,6 +20,7 @@ import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
@@ -32,7 +33,7 @@ import java.util.List;
 /**
  * @author larryTheCoder
  */
-public class ChallangesCMD extends Command {
+public final class ChallangesCMD extends Command {
 
     private final ASkyBlock plugin;
     // Database of challenges
@@ -43,46 +44,79 @@ public class ChallangesCMD extends Command {
     public ChallangesCMD(ASkyBlock ev) {
         super("challenges", "Challange yourself for some big prize", "\u00a77<parameters>", new String[]{"c", "chall", "ch"});
         this.plugin = ev;
-        this.reloadChallengeConfig();
+        saveDefaultChallengeConfig();
+        reloadChallengeConfig();
     }
 
     @Override
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
-        if (!sender.isPlayer()) {
-            sender.sendMessage("Run this command in-game");
-            return true;
-        }
-        Player p = plugin.getServer().getPlayer(sender.getName());
-        switch (args.length) {
-            case 0:
+        CommandSender p = sender;
+        switch (args[0]) {
+            case "list":
+                if (Utils.isNumeric(args[1])) {
+                    this.showHelp(p, Integer.valueOf(args[1]));
+                } else {
+                    p.sendMessage("\u00a7cUsage /c list \u00a77<Number>");
+                }
+                break;
+            default:
                 p.sendMessage("\u00a7aUse /c <name> to view information about a challenge.");
                 p.sendMessage("\u00a7aUse /c complete <name> to attempt to complete that challenge.");
                 p.sendMessage("\u00a7aUse /c list  to view all information about the challenge.");
                 break;
-            case 1:
-                if (args[1].equalsIgnoreCase("list")) {
-                    for (String key : getChallengeConfig().getSection("schematics").getKeys(false)) {
-
-                    }
-                }
-
-                break;
-            default:
-                break;
         }
         return true;
+    }
+
+    private void showHelp(CommandSender sender, int numbers) {
+        List<String> vars = new ArrayList<>();
+        getChallengeConfig().getSection("challenges.challengeList").getKeys(false).stream().forEach((AADES) -> {
+            vars.add(AADES);
+        });
+        String key = vars.get(numbers - 1);
+        // Provide info on the challenge:
+        //    Challenge Name.
+        //    Description.
+        //    Type.
+        //    Items taken or not.
+        //    island or not.
+        final String challenge = key.toLowerCase();
+        sender.sendMessage(TextFormat.GREEN + "Challenges Name: " + TextFormat.YELLOW + challenge);
+        sender.sendMessage(TextFormat.GREEN + "Max Level: " + TextFormat.YELLOW
+                + getChallengeConfig().getString("challenges.challengeList." + challenge + ".level", ""));
+        String desc = TextFormat.colorize('&', getChallengeConfig().getString("challenges.challengeList." + challenge + ".description", "").replace("[label]", ""));
+        List<String> result = new ArrayList<>();
+        if (desc.contains("|")) {
+            result.addAll(Arrays.asList(desc.split("\\|")));
+        } else {
+            result.add(desc);
+        }
+        result.stream().forEach((line) -> {
+            sender.sendMessage(TextFormat.GRAY + line);
+        });
+        final String type = getChallengeConfig().getString("challenges.challengeList." + challenge + ".type", "").toLowerCase();
+        if (type.equals("inventory")) {
+            if (getChallengeConfig().getBoolean("challenges.challengeList." + key.toLowerCase() + ".takeItems")) {
+                sender.sendMessage(TextFormat.RED + "All required items are taken in your inventory when you complete this challenge!");
+            }
+        } else if (type.equals("island")) {
+            sender.sendMessage(TextFormat.RED + "All required items must be close to you on your island!");
+        }
+//        if (plugin.getPlayerInfo(sender).checkChallenge(challenge)
+//                && (!type.equals("inventory") || !getChallengeConfig().getBoolean("challenges.challengeList." + challenge + ".repeatable", false))) {
+//            sender.sendMessage(TextFormat.RED + "This Challenge is not repeatable!");
+//        }
+        if (!vars.get(numbers).isEmpty()) {
+            sender.sendMessage(TextFormat.GREEN + "Type " + TextFormat.YELLOW + "/c list " + (numbers + 1) + TextFormat.GREEN + " to see the next page.");
+        }
     }
 
     /**
      * Saves the challenge.yml file if it does not exist
      */
     public void saveDefaultChallengeConfig() {
-        if (challengeConfigFile == null) {
-            challengeConfigFile = new File(plugin.getDataFolder(), "challenges.yml");
-        }
-        if (!challengeConfigFile.exists()) {
-            plugin.saveResource("challenges.yml", false);
-        }
+        challengeFile = new Config(new File(plugin.getDataFolder(), "challenges.yml"), Config.YAML);
+        challengeConfigFile = new File(plugin.getDataFolder(), "challenges.yml");
     }
 
     /**
@@ -98,13 +132,7 @@ public class ChallangesCMD extends Command {
     /**
      * Reloads the challenge config file
      */
-    public final void reloadChallengeConfig() {
-        this.saveDefaultChallengeConfig();
-        if (challengeConfigFile == null) {
-            challengeConfigFile = new File(plugin.getDataFolder(), "challenges.yml");
-        }
-        challengeFile = new Config(challengeConfigFile);
-
+    public void reloadChallengeConfig() {
         Settings.challengeList = getChallengeConfig().getSection("challenges.challengeList").getKeys(false);
         Settings.challengeLevels = Arrays.asList(getChallengeConfig().getString("challenges.levels", "").split(" "));
         Settings.freeLevels = Arrays.asList(getChallengeConfig().getString("challenges.freelevels", "").split(" "));
