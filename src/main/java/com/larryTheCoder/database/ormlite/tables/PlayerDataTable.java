@@ -52,6 +52,8 @@ public class PlayerDataTable {
     String challengeList;
     @DatabaseField(canBeNull = true, columnName = "challengelisttimes")
     String challengelistTimes;
+    @DatabaseField(canBeNull = true, columnName = "islandlvl")
+    int islandLevel;
 
     PlayerDataTable() {
     }
@@ -69,7 +71,7 @@ public class PlayerDataTable {
     }
 
     public PlayerData toData() {
-        return new PlayerData(player, homes, Utils.stringToArray(members, ", "), (HashMap<String, Boolean>) Utils.stringToMap(challengeList), (HashMap<String, Integer>) Utils.stringToMap(challengelistTimes), inTeam, teamLeader, teamIslandLocation, resetleft, Utils.stringToArray(banList, ", "));
+        return new PlayerData(player, homes, Utils.stringToArray(members, ", "), (HashMap<String, Boolean>) Utils.stringToMap(challengeList), (HashMap<String, Integer>) Utils.stringToMap(challengelistTimes),islandLevel ,inTeam, teamLeader, teamIslandLocation, resetleft, Utils.stringToArray(banList, ", "));
     }
 
     public void save(PlayerData pd) {

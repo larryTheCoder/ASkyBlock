@@ -65,22 +65,22 @@ public class inviteSubCommand extends SubCommand {
         }
         Player p = sender.getServer().getPlayer(sender.getName());    
         if(!getPlugin().getIsland().checkIsland(p)){
-            sender.sendMessage(getMsg("no_island_error"));
+            sender.sendMessage(getPrefix() +getMsg("no_island_error"));
             return true;
         }
         Player invite = sender.getServer().getPlayer(args[1]);
         if(invite == null){
-            sender.sendMessage(getMsg("player_error2"));
+            sender.sendMessage(getPrefix() +getMsg("player_error2"));
             return true;
         }
         PlayerData pdinv = ASkyBlock.get().getDatabase().getPlayerData(invite);
         PlayerData pd = ASkyBlock.get().getDatabase().getPlayerData(p);
         if(pdinv.inTeam){
-            sender.sendMessage(getMsg("player_has_teamed").replace("[player]", args[1]));
+            sender.sendMessage(getPrefix() +getMsg("player_has_teamed").replace("[player]", args[1]));
             return false;
         }
         if(pd.members.contains(invite.getName())){
-            sender.sendMessage(getMsg("player_in_team").replace("[player]", args[1]));
+            sender.sendMessage(getPrefix() +getMsg("player_in_team").replace("[player]", args[1]));
             return false;
         }
         getPlugin().getInvitationHandler().addInvitation(p, invite, pd);

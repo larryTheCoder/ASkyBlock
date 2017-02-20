@@ -25,9 +25,12 @@ import cn.nukkit.level.Position;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.BlockUtil;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author larryTheCoder
@@ -46,6 +49,66 @@ public class GridManager {
 
     public boolean onGrid(int x, int z) {
         return x % Settings.islandSize == 0 || z % Settings.islandSize == 0;
+    }
+
+    /**
+     * Checks if an online player is on their island, on a team island or on a
+     * coop island
+     *
+     * @param player
+     * @return true if on valid island, false if not
+     */
+    public boolean playerIsOnIsland(final Player player) {
+        return locationIsAtHome(player, player.getLocation());
+    }
+
+    /**
+     * Checks if a location is within the home boundaries of a player. If coop
+     * is true, this check includes coop players.
+     *
+     * @param player
+     * @param coop
+     * @param loc
+     * @return true if the location is within home boundaries
+     */
+    public boolean locationIsAtHome(final Player player, Location loc) {
+        // Make a list of test locations and test them
+        Set<Location> islandTestLocations = new HashSet<>();
+        if (plugin.getIsland().checkIsland(player)) {
+            IslandData pd = plugin.getIslandInfo(player);
+            islandTestLocations.add(new Location(pd.X, pd.floor_y, pd.Z, 0, 0, plugin.getServer().getLevelByName(pd.levelName)));
+        } else if (plugin.getTManager().hasTeam(player)) {
+//            islandTestLocations.add(plugin.getPlayers().getTeamIslandLocation(player.getUniqueId()));
+//            if (Settings.createNether && Settings.newNether && ASkyBlock.getNetherWorld() != null) {
+//                islandTestLocations.add(netherIsland(plugin.getPlayers().getTeamIslandLocation(player.getUniqueId())));
+//            }
+        }
+        if (islandTestLocations.isEmpty()) {
+            return false;
+        }
+        // Run through all the locations
+        for (Location islandTestLocation : islandTestLocations) {
+            // Must be in the same world as the locations being checked
+            // Note that getWorld can return null if a world has been deleted on the server
+            if (islandTestLocation != null && islandTestLocation.getLevel() != null && islandTestLocation.getLevel().equals(loc.getLevel())) {
+                int protectionRange = Settings.protectionrange;
+                if (plugin.getIsland().checkIslandAt(islandTestLocation) == true) {
+                    // Get the protection range for this location if possible
+                    IslandData island = plugin.getIsland().GetIslandAt(islandTestLocation);
+                    if (island != null) {
+                        // We are in a protected island area.
+                        protectionRange = island.getProtectionSize();
+                    }
+                }
+                if (loc.getX() > islandTestLocation.getX() - protectionRange / 2
+                        && loc.getX() < islandTestLocation.getX() + protectionRange / 2
+                        && loc.getZ() > islandTestLocation.getZ() - protectionRange / 2
+                        && loc.getZ() < islandTestLocation.getZ() + protectionRange / 2) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -126,7 +189,7 @@ public class GridManager {
         home = getSafeHomeLocation(player, number);
         //if the home null
         if (home == null) {
-            player.sendMessage(TextFormat.RED + "Your island could not be found! Error?");
+            player.sendMessage(plugin.getPrefix() + TextFormat.RED + "Your island could not be found! Error?");
             return true;
         }
         plugin.getTeleportLogic().safeTeleport(player, home, false, number);

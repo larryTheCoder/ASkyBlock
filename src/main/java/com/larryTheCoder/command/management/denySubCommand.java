@@ -62,7 +62,7 @@ public class denySubCommand extends SubCommand{
         Player p = sender.getServer().getPlayer(sender.getName());
         InvitationHandler pd = ASkyBlock.get().getInvitationHandler();
         if(pd.getInvitation(p) == null){
-            sender.sendMessage(getMsg("no_pending"));
+            sender.sendMessage(getPrefix() +getMsg("no_pending"));
             return false;
         }
         pd.getInvitation(p).deny();

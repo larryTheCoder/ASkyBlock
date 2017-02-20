@@ -60,7 +60,7 @@ public class ChatSubCommand extends SubCommand {
     public boolean execute(CommandSender sender, String[] args) {
         Player p = Server.getInstance().getPlayer(sender.getName());
         if (getPlugin().getIsland().checkIsland(p)) {
-            sender.sendMessage(getMsg("no_island_error"));
+            sender.sendMessage(getPrefix() +getMsg("no_island_error"));
             return true;
         }
 //        if (plugin.ggetDa.inTeam(playerUUID)) {
@@ -72,21 +72,21 @@ public class ChatSubCommand extends SubCommand {
 //                }
 //            }
 //            if (!online) {
-//                player.sendMessage(ChatColor.RED + plugin.myLocale(playerUUID).teamChatNoTeamAround);
-//                player.sendMessage(ChatColor.GREEN + plugin.myLocale(playerUUID).teamChatStatusOff);
+//                player.sendMessage(getPrefix() +ChatColor.RED + plugin.myLocale(playerUUID).teamChatNoTeamAround);
+//                player.sendMessage(getPrefix() +ChatColor.GREEN + plugin.myLocale(playerUUID).teamChatStatusOff);
 //                plugin.getChatListener().unSetPlayer(playerUUID);
 //                return true;
 //            }
 //            if (plugin.getChatListener().isTeamChat(playerUUID)) {
 //                // Toggle
-//                player.sendMessage(ChatColor.GREEN + plugin.myLocale(playerUUID).teamChatStatusOff);
+//                player.sendMessage(getPrefix() +ChatColor.GREEN + plugin.myLocale(playerUUID).teamChatStatusOff);
 //                plugin.getChatListener().unSetPlayer(playerUUID);
 //            } else {
-//                player.sendMessage(ChatColor.GREEN + plugin.myLocale(playerUUID).teamChatStatusOn);
+//                player.sendMessage(getPrefix() +ChatColor.GREEN + plugin.myLocale(playerUUID).teamChatStatusOn);
 //                plugin.getChatListener().setPlayer(playerUUID);
 //            }
 //        } else {
-//            player.sendMessage(ChatColor.RED + plugin.myLocale(playerUUID).teamChatNoTeam);
+//            player.sendMessage(getPrefix() +ChatColor.RED + plugin.myLocale(playerUUID).teamChatNoTeam);
 //        }
         return false;
     }

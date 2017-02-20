@@ -29,22 +29,79 @@
 #      - warp winner_circle [player]
 # If a command fails, it will be noted in the console.
 #
-# The format for POTIONS is as follows:
-#
-# Format POTION:NAME:<LEVEL>:<EXTENDED>:<SPLASH/LINGER>:QTY
-# LEVEL, EXTENDED, SPLASH, LINGER are optional.
-# LEVEL is a number, 1 or 2
-# Examples:
-# POTION:STRENGTH:1:EXTENDED:SPLASH:1
-# POTION:INSTANT_DAMAGE:2::LINGER:2
-# POTION:JUMP:2:NOTEXTENDED:NOSPLASH:1
-# POTION:WEAKNESS::::1   -  any weakness potion
-# 
-# Valid potion names are:
-# WATER, REGEN, SPEED, FIRE_RESISTANCE, POISON, INSTANT_HEAL, NIGHT_VISION, WEAKNESS,
-# STRENGTH, SLOWNESS, JUMP, INSTANT_DAMAGE, WATER_BREATHING, INVISIBILITY
-# LUCK, MUNDANE, THICK, AWKWARD
+# The POTIONS ID's are as follows:
+#   NO_EFFECTS = 0;
+#   MUNDANE = 1;
+#   MUNDANE_II = 2;
+#   THICK = 3;
+#   AWKWARD = 4;
+#   NIGHT_VISION = 5;
+#   NIGHT_VISION_LONG = 6;
+#   INVISIBLE = 7;
+#   INVISIBLE_LONG = 8;
+#   LEAPING = 9;
+#   LEAPING_LONG = 10;
+#   LEAPING_II = 11;
+#   FIRE_RESISTANCE = 12;
+#   FIRE_RESISTANCE_LONG = 13;
+#   SPEED = 14;
+#   SPEED_LONG = 15;
+#   SPEED_II = 16;
+#   SLOWNESS = 17;
+#   SLOWNESS_LONG = 18;
+#   WATER_BREATHING = 19;
+#   WATER_BREATHING_LONG = 20;
+#   INSTANT_HEALTH = 21;
+#   INSTANT_HEALTH_II = 22;
+#   HARMING = 23;
+#   HARMING_II = 24;
+#   POISON = 25;
+#   POISON_LONG = 26;
+#   POISON_II = 27;
+#   REGENERATION = 28;
+#   REGENERATION_LONG = 29;
+#   REGENERATION_II = 30;
+#   STRENGTH = 31;
+#   STRENGTH_LONG = 32;
+#   STRENGTH_II = 33;
+#   WEAKNESS = 34;
+#   WEAKNESS_LONG = 35;
+#   DECAY = 36;
+# Example:
+#   DiamondDays: // The challange name [be creative] :D
+#     friendlyname: 'Cats Tamer'         // The name of that challange
+#     description: '&aCreate 2 diamond'  // The description of that challange
+#     level: 'Novice'       // The required level for this challange [leave blank if dont want to use it]
+#     type: island          // Supports 2 type: island, inventory
+#     // `requiredItems` Must be formatted as `NAME:COUNT:META` or `NAME:COUNT`
+#     requiredItems: 'BED_BLOCK:1 WORKBENCH:1 GLASS:1 WOODEN_DOOR:1 FURNACE:1 BOOKSHELF:1 TORCH:1'
+#      # You can require the player has a certain amount of money for inventory challenges.
+#      # Remember to mention it in the description!
+#      # If takeItems is true, the money will be removed, so you may want to give it
+#      # back in the reward.
+#      #requiredMoney: 10
+#      takeItems: true
+#      itemReward: 'ICE:1'
+#      rewardText: '1 block of ice'
+#      #rewardcommands:
+#      #- kit tools [player]
+#      moneyReward: 10
+#      expReward: 30
+#      permissionReward: ''
+#      repeatable: true
+#      repeatItemReward: 'ICE:1'
+#      repeatRewardText: '1 block of ice'
+#      repeatMoneyReward: 5
+#      repeatExpReward: 10
+#      #repeatrewardcommands:
+#      # Max times limits how many times a challenge can be done. Comment out to make unlimited
+#      maxtimes: 2
+#      # Allow this challenge to reset when the player resets their island
+#      # Default is true. Set to false to keep this challenge completed.
+#      # Admins can always reset challenges even if this is set to false.
+#      resetallowed: true
 ##########################################################################################
+# TODO code cleanup and special checks
 ---
 challenges:
   # Challenge levels - list as many as you like. If a challenge's level is '' it can

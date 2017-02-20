@@ -51,6 +51,8 @@ public class Settings {
     public static List<String> freeLevels;
     public static int waiverAmount;
     public static boolean useEconomy;
+    public static boolean broadcastMessages;
+    public static double moneyAmount;
 
     public static class enabled {
 

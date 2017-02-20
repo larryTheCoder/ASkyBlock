@@ -81,4 +81,8 @@ public class IslandData implements Cloneable{
     public int getMinProtectedX() {
         return (X - Settings.islandSize / 2);
     }
+
+    public int getProtectionSize() {
+        return Settings.protectionrange;
+    }
 }

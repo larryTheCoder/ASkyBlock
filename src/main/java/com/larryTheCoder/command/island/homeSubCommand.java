@@ -76,7 +76,7 @@ public class homeSubCommand extends SubCommand {
             return true;
         }
         if (island.size() != islandNumber) {
-            sender.sendMessage(TextFormat.RED + "You don't have an island with home number " + islandNumber);
+            sender.sendMessage(getPrefix() +TextFormat.RED + "You don't have an island with home number " + islandNumber);
             return true;
         }
         Player p = sender.getServer().getPlayer(sender.getName());

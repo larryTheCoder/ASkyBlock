@@ -80,12 +80,16 @@ public final class ASConnection implements Database {
                         + "`locked` INTEGER NOT NULL)");
                 stmt.addBatch("CREATE TABLE IF NOT EXISTS `worlds` (`world` VARCHAR)");
                 // TODO Ranks
-                stmt.addBatch("CREATE TABLE IF NOT EXISTS"
-                        + "`teams` ("
-                        + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        + "`name` VARCHAR(45) NOT NULL,"
-                        + "`leader` VARCHAR(45) NOT NULL,"
-                        + "`teams` VARCHAR(45))");
+                stmt.addBatch("CREATE TABLE IF NOT EXISTS `player` (`player` VARCHAR NOT NULL,"
+                        + "`homes` INTEGER NOT NULL,"
+                        + "`resetleft` INTEGER NOT NULL,"
+                        + "`banlist` VARCHAR,"
+                        + "`teamleader` VARCHAR,"
+                        + "`teamislandlocation` VARCHAR,"
+                        + "`inteam` BOOLEAN,"
+                        + "`islandlvl` INTEGER,"
+                        + "`members` VARCHAR,"
+                        + "`name` VARCHAR)");
                 stmt.executeBatch();
                 stmt.clearBatch();
             }
@@ -219,7 +223,7 @@ public final class ASConnection implements Database {
 
     @Override
     public boolean saveIsland(IslandData pd) {
-        
+
         try (PreparedStatement stmt = connection.prepareStatement("INSERT OR REPLACE INTO `island` (`id`, `islandId`, `x`, `y`, `z`,`owner`, `name`, `world`, `biome`, `locked`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
             stmt.setInt(1, pd.id);
             stmt.setInt(2, pd.islandId);
@@ -252,7 +256,7 @@ public final class ASConnection implements Database {
                 return null;
             }
             while (stmt.next()) {
-                world.add(stmt.getString("world"));
+                world = Utils.stringToArray(stmt.getString("world"), ", ");
             }
         } catch (SQLException ex) {
             if (ASkyBlock.get().isDebug()) {
@@ -265,9 +269,7 @@ public final class ASConnection implements Database {
     @Override
     public boolean saveWorlds(ArrayList pd) {
         try (PreparedStatement stmt = connection.prepareStatement("INSERT OR REPLACE INTO `worlds` (`world`) VALUES (?);")) {
-            for (String world : (ArrayList<String>) pd) {
-                stmt.setString(1, world);
-            }
+            stmt.setString(1, Utils.arrayToString(pd));
             return true;
         } catch (SQLException ex) {
             if (ASkyBlock.get().isDebug()) {
@@ -309,7 +311,7 @@ public final class ASConnection implements Database {
             if (stmt == null) {
                 return null;
             }
-            return new PlayerData(stmt.getString("player"), stmt.getInt("homes"), Utils.stringToArray(stmt.getString("members"), ", "), (HashMap<String, Boolean>) Utils.stringToMap(stmt.getString("challengelist")), (HashMap<String, Integer>) Utils.stringToMap(stmt.getString("challengelisttimes")), stmt.getBoolean("inTeam"), stmt.getString("teamLeader"), stmt.getString("teamIslandLocation"), stmt.getInt("resetleft"), Utils.stringToArray(stmt.getString("banList"), ", "));
+            return new PlayerData(stmt.getString("player"), stmt.getInt("homes"), Utils.stringToArray(stmt.getString("members"), ", "), (HashMap<String, Boolean>) Utils.stringToMap(stmt.getString("challengelist")), (HashMap<String, Integer>) Utils.stringToMap(stmt.getString("challengelisttimes")), stmt.getInt("islandlvl"), stmt.getBoolean("inTeam"), stmt.getString("teamLeader"), stmt.getString("teamIslandLocation"), stmt.getInt("resetleft"), Utils.stringToArray(stmt.getString("banList"), ", "));
         } catch (SQLException ex) {
             if (ASkyBlock.get().isDebug()) {
                 ex.printStackTrace();
@@ -342,7 +344,7 @@ public final class ASConnection implements Database {
 
     @Override
     public boolean savePlayerData(PlayerData pd) {
-        try (PreparedStatement stmt = connection.prepareStatement("INSERT OR REPLACE INTO `players` (*) VALUES (*);")) {
+        try (PreparedStatement stmt = connection.prepareStatement("INSERT OR REPLACE INTO `players` (`player`, `homes`, `resetleft`, `banlist`, `teamleader`, `teamislandlocation`, `inteam` , `islandlvl`, `members`, `name`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
             stmt.setString(1, pd.playerName);
             stmt.setInt(2, pd.homes);
             stmt.setInt(3, pd.resetleft);
@@ -350,8 +352,9 @@ public final class ASConnection implements Database {
             stmt.setString(5, pd.teamLeader);
             stmt.setString(6, pd.teamIslandLocation);
             stmt.setBoolean(7, pd.inTeam);
-            stmt.setString(8, Utils.arrayToString(pd.members));
-            stmt.setString(5, pd.name);
+            stmt.setInt(8, pd.islandLevel);
+            stmt.setString(9, Utils.arrayToString(pd.members));
+            stmt.setString(10, pd.name);
             return true;
         } catch (SQLException ex) {
             if (ASkyBlock.get().isDebug()) {

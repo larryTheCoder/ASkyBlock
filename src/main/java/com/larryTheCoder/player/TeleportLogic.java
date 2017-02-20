@@ -53,7 +53,7 @@ public class TeleportLogic implements Listener {
         if (player.hasPermission("is.bypass.wait") || (teleportDelay == 0) || force) {
             player.teleport(targetLoc);
         } else {
-            player.sendMessage(plugin.getMsg("teleport").replace("{0}", "" + teleportDelay));
+            player.sendMessage(plugin.getPrefix() +plugin.getMsg("teleport").replace("{0}", "" + teleportDelay));
             TaskHandler task = plugin.getServer().getScheduler().scheduleDelayedTask(() -> {
                 pendingTPs.remove(player.getUniqueId());
                 Location loc = targetLoc.clone();
@@ -61,9 +61,9 @@ public class TeleportLogic implements Listener {
                     loc.getLevel().loadChunk((int) loc.getX() >> 4, (int) loc.getZ() >> 4);
                 }
                 if (home == 1) {
-                    player.sendMessage(TextFormat.GREEN + "Teleported to your island");
+                    player.sendMessage(plugin.getPrefix() +TextFormat.GREEN + "Teleported to your island");
                 } else {
-                    player.sendMessage(TextFormat.GREEN + "Teleported to your island #" + home);
+                    player.sendMessage(plugin.getPrefix() +TextFormat.GREEN + "Teleported to your island #" + home);
                 }
                 player.teleport(targetLoc);
             }, (int) Utils.secondsAsMillis(teleportDelay));
@@ -108,7 +108,7 @@ public class TeleportLogic implements Listener {
                 if (distance > cancelDistance) {
                     task.cancel();
                     pendingTPs.remove(player.getUniqueId());
-                    player.sendMessage(plugin.getMsg("teleport_failed"));
+                    player.sendMessage(plugin.getPrefix() +plugin.getMsg("teleport_failed"));
                 }
             }
         }

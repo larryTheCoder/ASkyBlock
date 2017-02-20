@@ -24,6 +24,7 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.utils.TextFormat;
+import com.intellectiualcrafters.TaskManager;
 
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.database.Database;
@@ -35,6 +36,7 @@ import com.larryTheCoder.utils.Utils;
 import java.util.HashMap;
 import java.util.UUID;
 import com.larryTheCoder.schematic.Schematic;
+import com.larryTheCoder.task.DeleteIslandTask;
 import java.util.List;
 
 /**
@@ -63,7 +65,7 @@ public class IslandManager {
             }
             IslandData pd = ASkyBlock.get().getDatabase().getIsland(p.getName(), homes);
             if (pd == null || pd.owner == null) {
-                p.sendMessage(TextFormat.RED + "No island found or could be created for you.");
+                p.sendMessage(plugin.getPrefix() +TextFormat.RED + "No island found or could be created for you.");
                 return;
             }
             if (plugin.cfg.getBoolean("island.saveInventory")) {
@@ -83,52 +85,52 @@ public class IslandManager {
         final Location loc = pOwner.getLocation();
         final IslandData pd = GetIslandAt(loc);
         if (pd == null || pd.owner == null || !pd.owner.equals(pOwner.getName())) {
-            pOwner.sendMessage(TextFormat.RED + "You don't own a island where you stand.");
+            pOwner.sendMessage(plugin.getPrefix() +TextFormat.RED + "You don't own a island where you stand.");
             return;
         }
         final int orgKey = generateIslandKey(loc);
         final Player pVictim = Server.getInstance().getPlayer(victimName);
         if (pVictim == null || !pVictim.isOnline()) {
-            pOwner.sendMessage(TextFormat.RED + "No player found: " + TextFormat.YELLOW + victimName);
+            pOwner.sendMessage(plugin.getPrefix() +TextFormat.RED + "No player found: " + TextFormat.YELLOW + victimName);
             return;
         }
         if (!(pOwner.isOp())) {
             if (pVictim.isOp()) {
-                pOwner.sendMessage(TextFormat.RED + "You can't island kick admins...");
+                pOwner.sendMessage(plugin.getPrefix() +TextFormat.RED + "You can't island kick admins...");
                 return;
             }
         }
         if (victimName.equalsIgnoreCase(pOwner.getName())) {
-            pOwner.sendMessage(TextFormat.RED + "You can't island kick yourself!");
+            pOwner.sendMessage(plugin.getPrefix() +TextFormat.RED + "You can't island kick yourself!");
             return;
         }
         final Location locVict = pVictim.getLocation();
         final int tgtKey = generateIslandKey(locVict);
         if (tgtKey != orgKey) {
-            pOwner.sendMessage(TextFormat.RED + "They are not currently on this island.");
+            pOwner.sendMessage(plugin.getPrefix() +TextFormat.RED + "They are not currently on this island.");
             return;
         }
         final String msg = "Island kick by " + pOwner.getName() + " @ " + Utils.LocStringShort(loc) + " -- kicking " + victimName + " @ " + Utils.LocStringShortNoWorld(locVict);
         Utils.ConsoleMsg(msg);
-        pOwner.sendMessage(TextFormat.GREEN + "Success! You send " + TextFormat.YELLOW + victimName + TextFormat.GREEN + " to spawn!");
-        pVictim.sendMessage(TextFormat.RED + "You were kicked from island owned by " + TextFormat.YELLOW + pOwner.getName());
+        pOwner.sendMessage(plugin.getPrefix() +TextFormat.GREEN + "Success! You send " + TextFormat.YELLOW + victimName + TextFormat.GREEN + " to spawn!");
+        pVictim.sendMessage(plugin.getPrefix() +TextFormat.RED + "You were kicked from island owned by " + TextFormat.YELLOW + pOwner.getName());
         pVictim.teleport(Server.getInstance().getDefaultLevel().getSafeSpawn());
     }
 
     public void kickPlayerByAdmin(CommandSender sender, String arg) {
         Player p = Server.getInstance().getPlayer(arg);
         if (p == null) {
-            sender.sendMessage(plugin.getMsg("player_error").replace("[player]", arg));
+            sender.sendMessage(plugin.getPrefix() +plugin.getMsg("player_error").replace("[player]", arg));
             return;
         }
         Location locVict = p.getLocation();
         for (String lvl : ASkyBlock.get().level) {
             if (!locVict.getLevel().getName().equalsIgnoreCase(lvl)) {
-                sender.sendMessage(plugin.getMsg("player_error").replace("[player]", arg));
+                sender.sendMessage(plugin.getPrefix() +plugin.getMsg("player_error").replace("[player]", arg));
                 return;
             }
         }
-        sender.sendMessage(plugin.getMsg("kick").replace("[player]", arg));
+        sender.sendMessage(plugin.getPrefix() +plugin.getMsg("kick").replace("[player]", arg));
         p.teleport(Server.getInstance().getDefaultLevel().getSafeSpawn());
     }
 
@@ -145,7 +147,7 @@ public class IslandManager {
     }
 
     public void createIsland(Player p, Schematic stmt, String home) {
-        p.sendMessage(TextFormat.GREEN + "Creating a new island for you...");
+        p.sendMessage(plugin.getPrefix() +TextFormat.GREEN + "Creating a new island for you...");
         this.createIsland(p.getName(), stmt, home);
     }
 
@@ -207,7 +209,7 @@ public class IslandManager {
         if (Server.getInstance().getPlayer(p) != null) {
             Player pr = Server.getInstance().getPlayer(p);
             if (result) {
-                pr.sendMessage(plugin.getMsg("create"));
+                pr.sendMessage(plugin.getPrefix() +plugin.getMsg("create"));
             } else {
                 pr.sendMessage(plugin.getPrefix() + "&cUnable to save your island SQL Error");
             }
@@ -220,34 +222,10 @@ public class IslandManager {
     public void reset(Player p, boolean reset, int homes) {
         IslandData pd = ASkyBlock.get().getDatabase().getIsland(p.getName(), homes);
         if (pd == null || pd.owner == null) {
-            p.sendMessage(plugin.getMsg("no_island_error"));
+            p.sendMessage(plugin.getPrefix() +plugin.getMsg("no_island_error"));
             return;
         }
-        Level world = Server.getInstance().getLevelByName("SkyBlock");
-        Location loc = new Location(pd.X, pd.floor_y, pd.Z, 0, 0, world);
-        Utils.ConsoleMsg(plugin.getMsg("att_reset").replace("[location]", Utils.LocStringShort(loc)).replace("[player]", p.getName()));
-        int sx = loc.getFloorX();
-        sx -= sx % Settings.islandSize;
-        int sz = loc.getFloorX();
-        sz -= sz % Settings.islandSize;
-        if (sx < 0 || sz < 0) {
-            return;
-        }
-        int ex = sx + Settings.islandSize - 1;
-        int ez = sz + Settings.islandSize - 1;
-        int y = 0;
-        while (y < 128) {
-            int x = sx;
-            while (x <= ex) {
-                int z = sz;
-                while (z <= ez) {
-                    world.setBlockIdAt(x, y, z, Block.AIR);
-                    ++z;
-                }
-                ++x;
-            }
-            ++y;
-        }
+        TaskManager.runTask(new DeleteIslandTask(plugin, pd));
         if (reset) {
             p.sendMessage(plugin.getPrefix() + plugin.getMsg("reset").replace("[min]", "30"));
             handleIslandCommand(p, true, homes);
@@ -299,7 +277,7 @@ public class IslandManager {
 
     public void islandInfo(Player p, Location loc) {
         if (!checkIslandAt(loc)) {
-            p.sendMessage(plugin.getMsg("level_error"));
+            p.sendMessage(plugin.getPrefix() +plugin.getMsg("level_error"));
             return;
         }
         final IslandData pd = GetIslandAt(loc);
@@ -328,7 +306,7 @@ public class IslandManager {
     public void teleportPlayer(Player p, String arg) {
         IslandData pd = ASkyBlock.get().getDatabase().getIsland(arg, 1);
         if (pd.owner != null) {
-            p.sendMessage(plugin.getMsg("player_error").replace("[player]", arg));
+            p.sendMessage(plugin.getPrefix() +plugin.getMsg("player_error").replace("[player]", arg));
             return;
         }
         Level lvl = ASkyBlock.get().getServer().getLevelByName(pd.levelName);

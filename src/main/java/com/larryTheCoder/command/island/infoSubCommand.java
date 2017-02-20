@@ -61,7 +61,7 @@ public class infoSubCommand extends SubCommand{
         Player p =  sender.getServer().getPlayer(sender.getName());
         for(String level : getPlugin().level){
             if(!p.getLevel().getName().equalsIgnoreCase(level)){
-                sender.sendMessage(getMsg("level_error"));
+                sender.sendMessage(getPrefix() +getMsg("level_error"));
                 return true;
             }
         }

@@ -37,7 +37,7 @@ public class CreateISubCommand extends SubCommand {
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.create") && sender.isPlayer();
+        return sender.hasPermission("is.create");//&& sender.isPlayer();
     }
 
     @Override
@@ -75,7 +75,7 @@ public class CreateISubCommand extends SubCommand {
                     ASkyBlock.schematics.keySet().stream().forEach((de) -> {
                         ft.add(de);
                     });
-                    sender.sendMessage(getMsg("schematics_list").replace("[SCEM]", Utils.arrayToString(ft)));
+                    sender.sendMessage(getPrefix() +getMsg("schematics_list").replace("[SCEM]", Utils.arrayToString(ft)));
                     return true;
                 } else {
                     smt = getPlugin().getSchematic(args[2]);
@@ -85,7 +85,7 @@ public class CreateISubCommand extends SubCommand {
         int maxIslands = getPlugin().cfg.getInt("maxhome");
         List<IslandData> maxPlotsOfPlayers = getPlugin().getDatabase().getIslands(sender.getName());
         if (maxIslands >= 0 && maxPlotsOfPlayers.size() >= maxIslands) {
-            sender.sendMessage(getPlugin().getMsg("max_islands").replace("[maxplot]", "" + maxIslands));
+            sender.sendMessage(getPrefix() +getPlugin().getMsg("max_islands").replace("[maxplot]", "" + maxIslands));
             return true;
         }
         getPlugin().getIsland().createIsland(sender.getName(), smt, name);

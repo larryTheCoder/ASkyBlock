@@ -63,7 +63,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.setDescription("SkyBlock main command");
         this.plugin = plugin;
 
-        plugin.getServer().getCommandMap().register("ASkyBlock", new ChallangesCMD(plugin));
+        
         this.loadSubCommand(new AGenerateSubCommand(getPlugin()));
         this.loadSubCommand(new acceptSubCommand(getPlugin()));
         this.loadSubCommand(new AKickSubCommand(getPlugin()));

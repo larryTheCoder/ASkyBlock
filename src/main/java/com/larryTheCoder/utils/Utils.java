@@ -98,7 +98,7 @@ public class Utils {
             Long msDelta = curMS - msBefore;
             Long msWaitTime = 1000 * (long) seconds;
             if (msDelta < msWaitTime) {
-                p.sendMessage(TextFormat.RED + "[" + what + "] Too soon, you must wait: " + TextFormat.AQUA + Utils.TimeDeltaString_JustMinutesSecs(msWaitTime - msDelta));
+                p.sendMessage(ASkyBlock.get().getPrefix() +TextFormat.RED + "[" + what + "] Too soon, you must wait: " + TextFormat.AQUA + Utils.TimeDeltaString_JustMinutesSecs(msWaitTime - msDelta));
                 return true;
             }
         }
@@ -427,5 +427,9 @@ public class Utils {
             result.add(color + line);
         }
         return result;
+    }
+
+    public static String prettifyText(String toString) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

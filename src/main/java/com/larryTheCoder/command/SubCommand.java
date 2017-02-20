@@ -51,7 +51,7 @@ public abstract class SubCommand {
     }
     
     public String getPrefix(){
-        return plugin.getPrefix();
+        return getPrefix();
     }
     /**
      * @param sender CommandSender

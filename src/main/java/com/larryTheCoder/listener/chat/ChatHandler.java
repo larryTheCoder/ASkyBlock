@@ -26,6 +26,8 @@ import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import com.larryTheCoder.ASkyBlock;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author larryTheCoder
@@ -35,10 +37,17 @@ public class ChatHandler implements Listener {
     private final ASkyBlock plugin;
     private final ConcurrentHashMap<Player, String> playerLevels;
     private ConcurrentHashMap<Player, Boolean> teamChatUsers;
+    private final ConcurrentHashMap<UUID, String> playerChallengeLevels;
 
     public ChatHandler(ASkyBlock plugin) {
         this.plugin = plugin;
         this.playerLevels = new ConcurrentHashMap<>();
+        this.playerChallengeLevels = new ConcurrentHashMap<>();
+        // Add all online player Levels
+        for (Player player : plugin.getServer().getOnlinePlayers().values()) {
+            playerLevels.put(player, String.valueOf(plugin.getIslandLevel(player)));
+            //playerChallengeLevels.put(player.getUniqueId(), plugin.getChallenges().getChallengeLevel(player));
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -74,7 +83,7 @@ public class ChatHandler implements Listener {
             for (String teamMembers : teams) {
                 Player teamPlayer = plugin.getServer().getPlayer(teamMembers);
                 if (teamPlayer != null) {
-                    teamPlayer.sendMessage(message);
+                    teamPlayer.sendMessage(plugin.getPrefix() + message);
                     if (!teamMembers.equals(playerUUID)) {
                         online = true;
                     }
@@ -82,13 +91,13 @@ public class ChatHandler implements Listener {
             }
             // todo spy function
             if (!online) {
-                player.sendMessage(TextFormat.RED + plugin.getMsg("no_members_around"));
-                player.sendMessage(TextFormat.RED + plugin.getMsg("chat_off"));
+                player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg("no_members_around"));
+                player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg("chat_off"));
                 teamChatUsers.remove(player);
             }
         } else {
-            player.sendMessage(TextFormat.RED + plugin.getMsg("no_members_around"));
-            player.sendMessage(TextFormat.RED + plugin.getMsg("chat_off"));
+            player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg("no_members_around"));
+            player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg("chat_off"));
             // Not in a team any more so delete   
             teamChatUsers.remove(player);
         }
@@ -118,6 +127,16 @@ public class ChatHandler implements Listener {
      */
     public boolean isTeamChat(Player p) {
         return this.teamChatUsers.containsKey(p);
+    }
+
+    /**
+     * Store the player's challenge level for use in their chat tag
+     *
+     * @param player
+     */
+    public void setPlayerChallengeLevel(Player player) {
+        //plugin.getLogger().info("DEBUG: setting player's challenge level to " + plugin.getChallenges().getChallengeLevel(player));
+        //playerChallengeLevels.put(player.getUniqueId(), plugin.getChallenges().getChallengeLevel(player));
     }
 
     /**

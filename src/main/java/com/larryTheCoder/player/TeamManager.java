@@ -65,12 +65,12 @@ public class TeamManager {
         }
         PlayerData te = plugin.getDatabase().getPlayerData(leader);
         if (!te.members.contains(member.getName())) {
-            leader.sendMessage(plugin.getMsg("player_error2"));
+            leader.sendMessage(plugin.getPrefix() +plugin.getMsg("player_error2"));
             return true;
         }
         te.members.remove(member.getName());
         if (member.isOnline()) {
-            member.sendMessage(kickMessage);
+            member.sendMessage(plugin.getPrefix() +kickMessage);
         }
         //todo: Add kick message if player doesnt exsits
         //todo: Kick the player if the player in ASkyBlock level

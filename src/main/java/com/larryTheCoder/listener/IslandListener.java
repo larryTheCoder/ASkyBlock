@@ -61,11 +61,11 @@ public class IslandListener implements Listener {
         for (final String restrictedCmd : Settings.bannedCommands) {
             if (umsg.startsWith(restrictedCmd.toUpperCase())) {
                 if (!p.isOp()) {
-                    p.sendMessage(plugin.getPrefix() + plugin.getMsg("command_disabled"));
+                    p.sendMessage(plugin.getPrefix() +plugin.getPrefix()  + plugin.getMsg("command_disabled"));
                     event.setCancelled(true);
                     return;
                 }
-                p.sendMessage(plugin.getPrefix() + plugin.getMsg("admin"));
+                p.sendMessage(plugin.getPrefix() +plugin.getPrefix() + plugin.getMsg("admin"));
                 break;
             }
         }
@@ -77,7 +77,7 @@ public class IslandListener implements Listener {
         Location breakLoc = blk.getLocation();
         Player p = e.getPlayer();
         if (!plugin.getIsland().CanPlayerAccess(p, breakLoc)) {
-            p.sendMessage(plugin.getMsg("break_error"));
+            p.sendMessage(plugin.getPrefix() +plugin.getMsg("break_error"));
             e.setCancelled(true);
         }
     }
@@ -86,7 +86,7 @@ public class IslandListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent e) {
         Player p = e.getPlayer();
         if (!plugin.getIsland().CanPlayerAccess(p, e.getBlock().getLocation())) {
-            p.sendMessage(plugin.getMsg("place_error"));
+            p.sendMessage(plugin.getPrefix() +plugin.getMsg("place_error"));
             e.setCancelled(true);
         }
     }

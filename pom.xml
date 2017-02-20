@@ -36,6 +36,14 @@
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
         <!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
+        <!-- D:\Backup Desktop\Nukkit\plugins\ASkyBlock-Maven\lib\EconomyAPI-1.0.1.jar -->
+        <dependency>
+            <groupId>EconomyAPI</groupId>
+            <artifactId>EconomyAPI</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/EconomyAPI-1.0.1.jar</systemPath>
+        </dependency>
         <dependency>
             <groupId>dblib</groupId>
             <artifactId>DbLib</artifactId>

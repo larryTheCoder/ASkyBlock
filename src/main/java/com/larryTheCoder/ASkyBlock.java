@@ -42,6 +42,7 @@ import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.intellectiualcrafters.updater.Updater;
+import com.larryTheCoder.command.ChallangesCMD;
 import com.larryTheCoder.database.Database;
 import com.larryTheCoder.database.jdbc.ASConnection;
 import com.larryTheCoder.database.jdbc.variables.MySQLDatabase;
@@ -58,6 +59,7 @@ import com.larryTheCoder.storage.InventorySave;
 import com.larryTheCoder.listener.IslandListener;
 import com.larryTheCoder.listener.chat.ChatHandler;
 import com.larryTheCoder.database.ormlite.ORMLiteDatabase;
+import com.larryTheCoder.economyHandler.Economy;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandFallback;
@@ -70,6 +72,7 @@ import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author larryTheCoder
@@ -83,6 +86,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     // Managers
     private Config msg;
+    public static Economy econ;
     private Database db = null;
     private ChatHandler chatHandler;
     private static ASkyBlock object;
@@ -93,6 +97,8 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     private InventorySave inventory;
     private TeamManager managers;
     private TeleportLogic teleportLogic;
+    private ChallangesCMD cmds;
+    private Messages msgs;
 
     @Override
     public void registerSchematic(File schematic, String name) {
@@ -165,6 +171,11 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     public boolean checkVersion(int[] version, int... version2) {
         return version[0] > version2[0] || version[0] == version2[0] && version[1] > version2[1] || version[0] == version2[0]
                 && version[1] == version2[1] && version[2] >= version2[2];
+    }
+
+    public Integer getIslandLevel(Player player) {
+        PlayerData pd = getPlayerInfo(player);
+        return pd.getIslandLevel();
     }
 
     /**
@@ -247,6 +258,17 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         return getDatabase().getIslandLocation(location.getLevel().getName(), location.getFloorX(), location.getFloorZ());
     }
 
+    public ChallangesCMD getChallenges() {
+        return cmds;
+    }
+    /**
+     * Checks how often a challenge has been completed
+     * 
+     * @param player
+     * @param challenge
+     * @return number of times
+     */
+
     @Override
     public PlayerData getPlayerInfo(Player player) {
         return getDatabase().getPlayerData(player);
@@ -327,8 +349,11 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         managers = new TeamManager(this);
         inventory = new InventorySave(this);
         backup = new IslandFallback(this);
+        msgs = new Messages(this);
         backup.init();
-        getServer().getCommandMap().register("SkyBlock", new Commands(this));
+        getServer().getCommandMap().register("ASkyBlock", new Commands(this));
+        // WARNING: Do not try to add this function to this code NUCLEAR MATERIAL! CRASHABLE! CONTAINS ERRORS!
+        //getServer().getCommandMap().register("ASkyBlock", this.cmds = new ChallangesCMD(this));
         switch (cfg.getString("database.provider").toLowerCase()) {
             case "jdbc":
                 if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {
@@ -370,6 +395,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
                 }
                 break;
         }
+        //TODO
         reloadLevel();
         Level world = getServer().getLevelByName("SkyBlock");
         world.setTime(1600);
@@ -717,4 +743,9 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         getServer().getLogger().info("§7<§cSMC§7> §aSeccessfully loaded island Schematic");
 
     }
+
+    public Messages getMessages() {
+        return msgs;
+    }
+
 }
