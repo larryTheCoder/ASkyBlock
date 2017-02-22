@@ -21,9 +21,12 @@ import cn.nukkit.Server;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemPotion;
+import cn.nukkit.item.ItemPotionSplash;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.sound.ExperienceOrbSound;
 import cn.nukkit.level.sound.Sound;
@@ -96,7 +99,7 @@ public final class ChallangesCMD extends Command {
                         String level = Settings.challengeLevels.get(newLevel);
                         if (!level.isEmpty() && !checkChallenge(p, level)) {
                             //Utils.ConsoleMsg("DEBUG: level name = " + level);
-                            completeChallenge(p.getUniqueId(), level);
+                            completeChallenge(p, level);
                             String message = TextFormat.colorize('&', getChallengeConfig().getString("challenges.levelUnlock." + level + ".message", ""));
                             if (!message.isEmpty()) {
                                 p.sendMessage(TextFormat.GREEN + message);
@@ -142,7 +145,7 @@ public final class ChallangesCMD extends Command {
         return true;
     }
 
-    private void showHelp(CommandSender sender, int numbers) {
+    private void showHelp(Player sender, int numbers) {
         List<String> names = new ArrayList<>();
         getChallengeConfig().getSection("challenges.challengeList").getKeys(false).stream().forEach((AADES) -> {
             names.add(AADES);
@@ -158,14 +161,10 @@ public final class ChallangesCMD extends Command {
         int i = 1;
         for (String cn : names) {
             if (i >= (pageNumber - 1) * pageHeight + 1 && i <= Math.min(names.size(), pageNumber * pageHeight)) {
-//                if (plugin.getPlayerInfo(sender).checkChallenge(challenge)
-//                        && (!type.equals("inventory") || !getChallengeConfig().getBoolean("challenges.challengeList." + cn + ".repeatable", false))) {
-//                    sender.sendMessage(getPrefix() +TextFormat.RED + "This Challenge is not repeatable!");
-//                }                
                 sender.sendMessage(TextFormat.GREEN + "Challenges Name: " + TextFormat.YELLOW + cn);
                 sender.sendMessage(TextFormat.GREEN + "Max Level: " + TextFormat.YELLOW
                         + getChallengeConfig().getString("challenges.challengeList." + cn + ".level", ""));
-                String desc = TextFormat.colorize('&', getChallengeConfig().getString("challenges.challengeList." + cn + ".description", "").replace("[label]", ""));
+                String desc = TextFormat.colorize('&', getChallengeConfig().getString("challenges.challengeList." + cn + ".description", "").replace("[label]", "is"));
                 List<String> result = new ArrayList<>();
                 if (desc.contains("|")) {
                     result.addAll(Arrays.asList(desc.split("\\|")));
@@ -351,7 +350,7 @@ public final class ChallangesCMD extends Command {
         // Check if the challenge exists
         /*
         if (!isLevelAvailable(player, getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".level"))) {
-            player.sendMessage(TextFormat.RED + plugin.myLocale(player.getUniqueId()).challengesunknownChallenge + " '" + challenge + "'");
+            player.sendMessage(TextFormat.RED + plugin.myLocale(player).challengesunknownChallenge + " '" + challenge + "'");
             return false;
         }*/
         // Check if this challenge level is available
@@ -399,7 +398,7 @@ public final class ChallangesCMD extends Command {
             // Check if the player has the required items
             if (!hasRequired(player, challenge, "inventory")) {
                 player.sendMessage(TextFormat.RED + "You dont have enough items");
-                String desc = TextFormat.colorize('&', getChallengeConfig().getString("challenges.challengeList." + challenge + ".description", "").replace("[label]", "/is"));
+                String desc = TextFormat.colorize('&', getChallengeConfig().getString("challenges.challengeList." + challenge + ".description", "").replace("[label]", "is"));
                 List<String> result = new ArrayList<String>();
                 if (desc.contains("|")) {
                     result.addAll(Arrays.asList(desc.split("\\|")));
@@ -455,9 +454,9 @@ public final class ChallangesCMD extends Command {
             return false;
         }
         player.sendMessage(TextFormat.RED + "Command not ready yet");
-        plugin.getLogger().error(
-                "The challenge " + challenge + " is of an unknown type " + getChallengeConfig().getString("challenges.challengeList." + challenge + ".type"));
-        plugin.getLogger().error("Types should be 'island', 'inventory' or 'level'");
+        Utils.ConsoleMsg(TextFormat.RED
+                + "The challenge " + challenge + " is of an unknown type " + getChallengeConfig().getString("challenges.challengeList." + challenge + ".type"));
+        Utils.ConsoleMsg(TextFormat.RED + "Types should be 'island', 'inventory' or 'level'");
         return false;
     }
 
@@ -471,7 +470,382 @@ public final class ChallangesCMD extends Command {
      * @return true if the player has everything required
      */
     public boolean hasRequired(final Player player, final String challenge, final String type) {
-        //This part is todo
+        // Check money
+        double moneyReq = 0D;
+        if (Settings.useEconomy) {
+            moneyReq = getChallengeConfig().getDouble("challenges.challengeList." + challenge + ".requiredMoney", 0D);
+            if (moneyReq > 0D) {
+                if (!ASkyBlock.econ.reduceMoney(player, moneyReq)) {
+                    player.sendMessage(TextFormat.RED + "You dont have enough money!");
+                    String desc = TextFormat.colorize('&', getChallengeConfig().getString("challenges.challengeList." + challenge + ".description").replace("[label]", "is"));
+                    List<String> result = new ArrayList<>();
+                    if (desc.contains("|")) {
+                        result.addAll(Arrays.asList(desc.split("\\|")));
+                    } else {
+                        result.add(desc);
+                    }
+                    result.stream().forEach((line) -> {
+                        player.sendMessage(TextFormat.RED + line);
+                    });
+                    return false;
+                }
+            }
+        }
+        final String[] reqList = getChallengeConfig().getString("challenges.challengeList." + challenge + ".requiredItems").split(" ");
+        // The format of the requiredItems is as follows:
+        // Item:Qty
+        // or
+        // Item:damage:Qty
+        // This second one is so that items such as potions or variations on
+        // standard items can be collected
+        if (type.equalsIgnoreCase("inventory")) {
+            List<Item> toBeRemoved = new ArrayList<Item>();
+            Item reqItem;
+            int reqAmount = 0;
+            for (final String s : reqList) {
+                final String[] part = s.split(":");
+                // Item:Qty
+                if (part.length == 2) {
+                    try {
+                        // Correct some common mistakes
+                        if (part[0].equalsIgnoreCase("potato")) {
+                            part[0] = "POTATO_ITEM";
+                        } else if (part[0].equalsIgnoreCase("brewing_stand")) {
+                            part[0] = "BREWING_STAND_ITEM";
+                        } else if (part[0].equalsIgnoreCase("carrot")) {
+                            part[0] = "CARROT_ITEM";
+                        } else if (part[0].equalsIgnoreCase("cauldron")) {
+                            part[0] = "CAULDRON_ITEM";
+                        } else if (part[0].equalsIgnoreCase("skull")) {
+                            part[0] = "SKULL_ITEM";
+                        }
+                        // TODO: add netherwart vs. netherstalk?
+                        if (Utils.isNumeric(part[0])) {
+                            reqItem = Item.get(Integer.parseInt(part[0]));
+                        } else {
+                            reqItem = Item.fromString(part[0].toUpperCase());
+                        }
+                        reqAmount = Integer.parseInt(part[1]);
+                        Item item = reqItem;
+                        // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: required item = " +
+                        // reqItem.toString());
+                        // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: item amount = " +
+                        // reqAmount);
+
+                        if (!player.getInventory().contains(reqItem)) {
+                            return false;
+                        } else {
+                            // check amount
+                            int amount = 0;
+                            // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: Amount in inventory = "
+                            // + player.getInventory().all(reqItem).size());
+                            // Go through all the inventory and try to find
+                            // enough required items
+                            for (Map.Entry<Integer, Item> en : player.getInventory().all(reqItem).entrySet()) {
+                                // Get the item
+                                Item i = en.getValue();
+                                // If the item is enchanted, skip - it doesn't count
+                                // Map needs special handling because the
+                                // durability increments every time a new one is
+                                // made by the player
+                                // TODO: if there are any other items that act
+                                // in the same way, they need adding too...
+                                if (i.hasEnchantments() == false || (reqItem.getId() == Item.MAP && i.getId() == Item.MAP)) {
+                                    // Clear any naming, or lore etc.
+                                    //i.setItemMeta(null);
+                                    //player.getInventory().setItem(en.getKey(), i);
+                                    // #1 item stack qty + amount is less than
+                                    // required items - take all i
+                                    // #2 item stack qty + amount = required
+                                    // item -
+                                    // take all
+                                    // #3 item stack qty + amount > req items -
+                                    // take
+                                    // portion of i
+                                    // amount += i.getCount();
+                                    if ((amount + i.getCount()) < reqAmount) {
+                                        // Remove all of this item stack - clone
+                                        // otherwise it will keep a reference to
+                                        // the
+                                        // original
+                                        toBeRemoved.add(i.clone());
+                                        amount += i.getCount();
+                                        // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: amount is <= req Remove "
+                                        // + i.toString() + ":" +
+                                        // i.getDurability() + " x " +
+                                        // i.getCount());
+                                    } else if ((amount + i.getCount()) == reqAmount) {
+                                        // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: amount is = req Remove "
+                                        // + i.toString() + ":" +
+                                        // i.getDurability() + " x " +
+                                        // i.getCount());
+                                        toBeRemoved.add(i.clone());
+                                        amount += i.getCount();
+                                        break;
+                                    } else {
+                                        // Remove a portion of this item
+                                        // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: amount is > req Remove "
+                                        // + i.toString() + ":" +
+                                        // i.getDurability() + " x " +
+                                        // i.getCount());
+
+                                        item.setCount(reqAmount - amount);
+                                        toBeRemoved.add(item);
+                                        amount += i.getCount();
+                                        break;
+                                    }
+                                }
+                            }
+                            // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: amount "+
+                            // amount);
+                            if (amount < reqAmount) {
+                                return false;
+                            }
+                        }
+                    } catch (Exception e) {
+                        Utils.ConsoleMsg(TextFormat.RED + "Problem with " + s + " in challenges.yml!");
+                        player.sendMessage(TextFormat.RED + "Error: challange error contact server admin");
+                        String materialList = "";
+                        boolean hint = false;
+                        for (Item m : Item.getCreativeItems()) {
+                            materialList += m.toString() + ",";
+                            if (m.toString().contains(s.substring(0, 3).toUpperCase())) {
+                                Utils.ConsoleMsg(TextFormat.RED + "Did you mean " + m.toString() + "?");
+                                hint = true;
+                            }
+                        }
+                        if (!hint) {
+                            Utils.ConsoleMsg(TextFormat.RED + "Sorry, I have no idea what " + s + " is. Pick from one of these:");
+                            Utils.ConsoleMsg(TextFormat.RED + materialList.substring(0, materialList.length() - 1));
+                        } else {
+                            Utils.ConsoleMsg(TextFormat.RED + "Correct challenges.yml with the correct material.");
+                        }
+                        return false;
+                    }
+                } else if (part.length == 3) {
+                    // This handles items with durability
+                    // Correct some common mistakes
+                    if (part[0].equalsIgnoreCase("potato")) {
+                        part[0] = "POTATO_ITEM";
+                    } else if (part[0].equalsIgnoreCase("brewing_stand")) {
+                        part[0] = "BREWING_STAND_ITEM";
+                    } else if (part[0].equalsIgnoreCase("carrot")) {
+                        part[0] = "CARROT_ITEM";
+                    } else if (part[0].equalsIgnoreCase("cauldron")) {
+                        part[0] = "CAULDRON_ITEM";
+                    } else if (part[0].equalsIgnoreCase("skull")) {
+                        part[0] = "SKULL_ITEM";
+                    }
+                    if (Utils.isNumeric(part[0])) {
+                        reqItem = Item.get(Integer.parseInt(part[0]));
+                    } else {
+                        reqItem = Item.fromString(part[0].toUpperCase());
+                    }
+                    reqAmount = Integer.parseInt(part[2]);
+                    int reqDurability = Integer.parseInt(part[1]);
+                    Item item = reqItem;
+
+                    // Item
+                    item.setDamage(reqDurability);
+                    // check amount
+                    int amount = 0;
+                    // Go through all the inventory and try to find
+                    // enough required items
+                    for (Map.Entry<Integer, ? extends Item> en : player.getInventory().all(reqItem).entrySet()) {
+                        // Get the item
+                        Item i = en.getValue();
+                        if (i.getDamage() == reqDurability) {
+                            // Clear any naming, or lore etc.
+                            //i.setItemMeta(null);
+                            // player.getInventory().setItem(en.getKey(), i);
+                            // #1 item stack qty + amount is less than
+                            // required items - take all i
+                            // #2 item stack qty + amount = required
+                            // item -
+                            // take all
+                            // #3 item stack qty + amount > req items -
+                            // take
+                            // portion of i
+                            // amount += i.getCount();
+                            if ((amount + i.getCount()) < reqAmount) {
+                                // Remove all of this item stack - clone
+                                // otherwise it will keep a reference to
+                                // the
+                                // original
+                                toBeRemoved.add(i.clone());
+                                amount += i.getCount();
+                                // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: amount is <= req Remove "
+                                // + i.toString() + ":" +
+                                // i.getDurability()
+                                // + " x " + i.getCount());
+                            } else if ((amount + i.getCount()) == reqAmount) {
+                                toBeRemoved.add(i.clone());
+                                amount += i.getCount();
+                                break;
+                            } else {
+                                // Remove a portion of this item
+                                // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: amount is > req Remove "
+                                // + i.toString() + ":" +
+                                // i.getDurability()
+                                // + " x " + i.getCount());
+
+                                item.setCount(reqAmount - amount);
+                                item.setDamage(i.getDamage());
+                                toBeRemoved.add(item);
+                                amount += i.getCount();
+                                break;
+                            }
+                        }
+                    }
+                    // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: amount is " +
+                    // amount);
+                    // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: req amount is " +
+                    // reqAmount);
+                    if (amount < reqAmount) {
+                        return false;
+                    }
+
+                    // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: before set amount " +
+                    // item.toString() + ":" + item.getDurability() + " x "
+                    // + item.getCount());
+                    // item.setAmount(reqAmount);
+                    // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: after set amount " +
+                    // item.toString() + ":" + item.getDurability() + " x "
+                    // + item.getCount());
+                    // toBeRemoved.add(item);
+                } else if (part.length == 6 && part[0].contains("POTION")) {
+                    // BUKKIT v1.0
+                    // Run through player's inventory for the item
+                    Map<Integer, Item> playerInv = player.getInventory().getContents();
+                    try {
+                        reqAmount = Integer.parseInt(part[5]);
+                        //Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: required amount is " + reqAmount);
+                    } catch (Exception e) {
+                        Utils.ConsoleMsg(TextFormat.RED + "Could not parse the quantity of the potion item " + s);
+                        return false;
+                    }
+                    int count = reqAmount;
+                    for (Item i : playerInv.values()) {
+                        // Catches all POTION, LINGERING_POTION and SPLASH_POTION
+                        if (i instanceof ItemPotion || i instanceof ItemPotionSplash) {
+                            //Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG:6 part potion check!");
+                            // POTION:NAME:<LEVEL>:<EXTENDED>:<SPLASH/LINGER>:QTY
+                            // Test potion
+                            Potion potionType = Potion.getPotion(i.getDamage());
+                            boolean match = true;
+                            // plugin.getLogger().info("DEBUG: name check " + part[1]);
+                            // Name check
+                            if (!part[1].isEmpty()) {
+                                // There is a name
+                                if (Potion.getPotionByName(part[1]) != null) {
+                                    if (!potionType.getEffect().getName().equalsIgnoreCase(part[1])) {
+                                        match = false;
+                                        // plugin.getLogger().info("DEBUG: name does not match");
+                                    } else {
+                                        // plugin.getLogger().info("DEBUG: name matches");
+                                    }
+                                } else {
+                                    Utils.ConsoleMsg(TextFormat.RED + "Potion type is unknown");
+                                    match = false;
+                                }
+                            }
+                            // Level check (upgraded)
+                            // plugin.getLogger().info("DEBUG: level check " + part[2]);
+                            if (!part[2].isEmpty()) {
+                                // There is a level declared - check it
+                                if (Utils.isNumeric(part[2])) {
+                                    int level = Integer.valueOf(part[2]);
+                                    if (level != potionType.getLevel()) {
+                                        // plugin.getLogger().info("DEBUG: level does not match");
+                                        match = false;
+                                    }
+                                }
+                            }
+                            // Extended check
+                            // plugin.getLogger().info("DEBUG: extended check " + part[3]);
+                            if (!part[3].isEmpty()) {
+                                // Post a pull request for new Potion API later
+//                                if (part[3].equalsIgnoreCase("EXTENDED") && !potionType.hasExtendedDuration()) {
+//                                    match = false;
+//                                    // plugin.getLogger().info("DEBUG: extended does not match");
+//                                }
+//                                if (part[3].equalsIgnoreCase("NOTEXTENDED") && potionType.hasExtendedDuration()) {
+//                                    match = false;
+//                                    // plugin.getLogger().info("DEBUG: extended does not match");
+//                                }
+                            }
+                            // Splash or Linger check
+                            // plugin.getLogger().info("DEBUG: splash/linger check " + part[4]);
+                            if (!part[4].isEmpty()) {
+                                if (part[4].equalsIgnoreCase("SPLASH") && i.getId() != Item.SPLASH_POTION) {
+                                    match = false;
+                                    // plugin.getLogger().info("DEBUG: not splash");
+                                }
+                                if (part[4].equalsIgnoreCase("NOSPLASH") && i.getId() == Item.SPLASH_POTION) {
+                                    match = false;
+                                    // plugin.getLogger().info("DEBUG: not no splash");
+                                }
+                                if (part[4].equalsIgnoreCase("LINGER") && i.getId() != Item.LINGERING_POTION) {
+                                    match = false;
+                                    // plugin.getLogger().info("DEBUG: not linger");
+                                }
+                                if (part[4].equalsIgnoreCase("NOLINGER") && i.getId() == Item.LINGERING_POTION) {
+                                    match = false;
+                                    // plugin.getLogger().info("DEBUG: not no linger");
+                                }
+                            }
+                            // Quantity check
+                            if (match) {
+                                // plugin.getLogger().info("DEBUG: potion matches!");
+                                Item removeItem = i.clone();
+                                if (removeItem.getCount() > reqAmount) {
+                                    // plugin.getLogger().info("DEBUG: found " + removeItem.getAmount() + " qty in inv");
+                                    removeItem.setCount(reqAmount);
+                                }
+                                count = count - removeItem.getCount();
+                                // plugin.getLogger().info("DEBUG: " + count + " left");
+                                toBeRemoved.add(removeItem);
+                            }
+                        }
+                        if (count <= 0) {
+                            // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: Player has enough");
+                            break;
+                        }
+                        // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: still need " + count + " to complete");
+                    }
+                    if (count > 0) {
+                        // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: Player does not have enough");
+                        return false;
+                    }
+
+                }
+            }
+            // Build up the items in the inventory and remove them if they are
+            // all there.
+            if (getChallengeConfig().getBoolean("challenges.challengeList." + challenge + ".takeItems")) {
+                for (Item i : toBeRemoved) {
+                    Item[] leftOver = player.getInventory().removeItem(i);
+                    if (leftOver.length != 0) {
+                        Utils.ConsoleMsg(TextFormat.RED
+                                + "Exploit? Could not remove the following in challenge " + challenge + " for player " + player.getName() + ":");
+                        for (Item left : leftOver) {
+                            Utils.ConsoleMsg(TextFormat.GREEN + left.toString());
+                        }
+                        return false;
+                    }
+                }
+                // Remove money
+                if (moneyReq > 0D) {
+                    boolean er = ASkyBlock.econ.reduceMoney(player, moneyReq);
+                    if (!er) {
+
+                        Utils.ConsoleMsg(TextFormat.RED
+                                + "Exploit? Could not remove $" + moneyReq + " from " + player.getName()
+                                + " in challenge " + challenge);
+                    }
+                }
+            }
+        }
         return true;
     }
 
@@ -540,10 +914,10 @@ public final class ChallangesCMD extends Command {
         if (Settings.useEconomy && moneyReward > 0) {
             //EconomyResponse e = VaultHelper.econ.depositPlayer(player, Settings.worldName, moneyReward);
             if (false) {
-                //player.sendMessage(TextFormat.GOLD + plugin.myLocale(player.getUniqueId()).challengesmoneyReward + ": " + TextFormat.WHITE + VaultHelper.econ.format(moneyReward));
+                //player.sendMessage(TextFormat.GOLD + plugin.myLocale(player).challengesmoneyReward + ": " + TextFormat.WHITE + VaultHelper.econ.format(moneyReward));
             } else {
-                plugin.getLogger().error("Error giving player " + player.getUniqueId() + " challenge money:");//) e.errorMessage);
-                plugin.getLogger().error("Reward was $" + moneyReward);
+                Utils.ConsoleMsg(TextFormat.RED + "Error giving player " + player + " challenge money:");//) e.errorMessage);
+                Utils.ConsoleMsg(TextFormat.RED + "Reward was $" + moneyReward);
             }
         }
         // Dole out permissions
@@ -572,7 +946,7 @@ public final class ChallangesCMD extends Command {
         }
 
         // Mark the challenge as complete
-        // if (!plugin.getPlayers().checkChallenge(player.getUniqueId(),challenge)) {
+        // if (!plugin.getPlayers().checkChallenge(player,challenge)) {
         plugin.getPlayerInfo(player).completeChallenge(challenge);
         // }
         // Call the Challenge Complete Event
@@ -584,12 +958,200 @@ public final class ChallangesCMD extends Command {
     private List<Item> giveItems(Player player, String[] itemRewards) {
         List<Item> rewardedItems = new ArrayList<>();
         Item rewardItem;
+        int rewardQty;
+        // Build the item stack of rewards to give the player
+        for (final String s : itemRewards) {
+            final String[] element = s.split(":");
+            if (element.length == 2) {
+                try {
+                    if (Utils.isNumeric(element[0])) {
+                        rewardItem = Item.get(Integer.parseInt(element[0]));
+                    } else {
+                        rewardItem = Item.fromString(element[0].toUpperCase());
+                    }
+                    rewardQty = Integer.parseInt(element[1]);
+                    Item item = new Item(rewardItem.getId(), rewardQty);
+                    rewardedItems.add(item);
+                    Item[] leftOvers = player.getInventory().addItem(new Item[]{item});
+                    if (leftOvers.length != 0) {
+                        player.getLevel().dropItem(player.getLocation(), leftOvers[0]);
+                    }
+                } catch (Exception e) {
+                    player.sendMessage(TextFormat.RED + "There a problem while executing your command");
+                    Utils.ConsoleMsg(TextFormat.RED + "Could not give " + element[0] + ":" + element[1] + " to " + player.getName() + " for challenge reward!");
+                    String materialList = "";
+                    boolean hint = false;
+                    for (Item m : Item.getCreativeItems()) {
+                        materialList += m.toString() + ",";
+                        if (element[0].length() > 3) {
+                            if (m.toString().startsWith(element[0].substring(0, 3))) {
+                                Utils.ConsoleMsg(TextFormat.RED + "Did you mean " + m.toString() + "? If so, put that in challenges.yml.");
+                                hint = true;
+                            }
+                        }
+                    }
+                    if (!hint) {
+                        Utils.ConsoleMsg(TextFormat.RED + "Sorry, I have no idea what " + element[0] + " is. Pick from one of these:");
+                        Utils.ConsoleMsg(TextFormat.RED + materialList.substring(0, materialList.length() - 1));
+                    }
+                }
+            } else if (element.length == 3) {
+                try {
+                    if (Utils.isNumeric(element[0])) {
+                        rewardItem = Item.get(Integer.parseInt(element[0]));
+                    } else {
+                        rewardItem = Item.fromString(element[0].toUpperCase());
+                    }
+                    rewardQty = Integer.parseInt(element[2]);
+                    // Check for POTION
+                    if (rewardItem.equals(Item.POTION)) {
+                        givePotion(player, rewardedItems, element, rewardQty);
+                    } else {
+                        Item item = null;
+                        // Normal item, not a potion, check if it is a Monster Egg
+                        if (rewardItem.equals(Item.MONSTER_EGG)) {
+
+                        }
+                    }
+                } catch (Exception e) {
+                    player.sendMessage(TextFormat.RED + "There was a problem giving your reward. Ask Admin to check log!");
+                    Utils.ConsoleMsg(TextFormat.RED + "Could not give " + element[0] + ":" + element[1] + " to " + player.getName() + " for challenge reward!");
+                    /*
+                    if (element[0].equalsIgnoreCase("POTION")) {
+                        String potionList = "";
+                        boolean hint = false;
+                        for (PotionEffectType m : PotionEffectType.values()) {
+                            potionList += m.toString() + ",";
+                            if (element[1].length() > 3) {
+                                if (m.toString().startsWith(element[1].substring(0, 3))) {
+                                    Utils.ConsoleMsg(TextFormat.RED + "Did you mean " + m.toString() + "?");
+                                    hint = true;
+                                }
+                            }
+                        }
+                        if (!hint) {
+                            Utils.ConsoleMsg(TextFormat.RED + "Sorry, I have no idea what potion type " + element[1] + " is. Pick from one of these:");
+                            Utils.ConsoleMsg(TextFormat.RED + potionList.substring(0, potionList.length() - 1));
+                        }
+
+                    } else {*/
+                    String materialList = "";
+                    boolean hint = false;
+                    for (Item m : Item.getCreativeItems()) {
+                        materialList += m.toString() + ",";
+                        if (m.toString().startsWith(element[0].substring(0, 3))) {
+                            Utils.ConsoleMsg(TextFormat.RED + "Did you mean " + m.toString() + "? If so, put that in challenges.yml.");
+                            hint = true;
+                        }
+                    }
+                    if (!hint) {
+                        Utils.ConsoleMsg(TextFormat.RED + "Sorry, I have no idea what " + element[0] + " is. Pick from one of these:");
+                        Utils.ConsoleMsg(TextFormat.RED + materialList.substring(0, materialList.length() - 1));
+                    }
+                    //}
+                    return null;
+                }
+            }
+        }
+        //todo
         return rewardedItems;
     }
 
     private void runCommands(Player player, List<String> commands) {
+        for (String cmd : commands) {
+            if (cmd.startsWith("[SELF]")) {
+                plugin.getLogger().info("Running command '" + cmd + "' as " + player.getName());
+                cmd = cmd.substring(6, cmd.length()).replace("[player]", player.getName()).trim();
+                try {
+                    plugin.getServer().dispatchCommand(player, cmd);
+                } catch (Exception e) {
+                    Utils.ConsoleMsg(TextFormat.RED + "Problem executing island command executed by player - skipping!");
+                    Utils.ConsoleMsg(TextFormat.RED + "Command was : " + cmd);
+                    Utils.ConsoleMsg(TextFormat.RED + "Error was: " + e.getMessage());
+                    e.printStackTrace();
+                }
+
+                continue;
+            }
+            // Substitute in any references to player
+            try {
+                if (!plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), cmd.replace("[player]", player.getName()))) {
+                    Utils.ConsoleMsg(TextFormat.RED + "Problem executing challenge reward commands - skipping!");
+                    Utils.ConsoleMsg(TextFormat.RED + "Command was : " + cmd);
+                }
+            } catch (Exception e) {
+                Utils.ConsoleMsg(TextFormat.RED + "Problem executing challenge reward commands - skipping!");
+                Utils.ConsoleMsg(TextFormat.RED + "Command was : " + cmd);
+                Utils.ConsoleMsg(TextFormat.RED + "Error was: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 
-    private void completeChallenge(UUID uniqueId, String level) {
+    private void completeChallenge(Player uniqueId, String level) {
+        PlayerData pd = plugin.getPlayerInfo(uniqueId);
+        pd.completeChallenge(level);
+    }
+
+    private void givePotion(Player player, List<Item> rewardedItems, String[] element, int rewardQty) {
+        Item item = getPotion(element, rewardQty, "challenges.yml");
+        rewardedItems.add(item);
+        Item[] leftOvers = player.getInventory().addItem(item);
+        if (leftOvers.length != 0) {
+            player.getLevel().dropItem(player.getLocation(), leftOvers[0]);
+        }
+    }
+
+    /**
+     * Converts a serialized potion to a ItemStack of that potion
+     *
+     * @param element
+     * @param rewardQty
+     * @param configFile that is being used
+     * @return ItemStack of the potion
+     */
+    private Item getPotion(String[] element, int rewardQty, String configFile) {
+        // Check for potion aspects
+        boolean splash = false;
+        boolean extended = false;
+        boolean linger = false;
+        int level = 1;
+        if (element.length > 2) {
+            // Add level etc.
+            if (!element[2].isEmpty()) {
+                try {
+                    level = Integer.valueOf(element[2]);
+                } catch (Exception e) {
+                    level = 1;
+                }
+            }
+        }
+        if (element.length > 3) {
+            //plugin.getLogger().info("DEBUG: level = " + Integer.valueOf(element[2]));
+            if (element[3].equalsIgnoreCase("EXTENDED")) {
+                //plugin.getLogger().info("DEBUG: Extended");
+                extended = true;
+            }
+        }
+        if (element.length > 4) {
+            if (element[4].equalsIgnoreCase("SPLASH")) {
+                //plugin.getLogger().info("DEBUG: splash");
+                splash = true;
+            }
+            if (element[4].equalsIgnoreCase("LINGER")) {
+                //plugin.getLogger().info("DEBUG: linger");
+                linger = true;
+            }
+        }
+        // Add the effect of the potion
+        Item result = new Item(Item.POTION, rewardQty);
+        if (splash) {
+            result = new Item(Item.SPLASH_POTION, rewardQty);
+        }
+        if (linger) {
+            result = new Item(Item.LINGERING_POTION, rewardQty);
+        }
+        
+        return result;
     }
 }

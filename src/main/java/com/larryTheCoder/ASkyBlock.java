@@ -352,8 +352,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         msgs = new Messages(this);
         backup.init();
         getServer().getCommandMap().register("ASkyBlock", new Commands(this));
-        // WARNING: Do not try to add this function to this code NUCLEAR MATERIAL! CRASHABLE! CONTAINS ERRORS!
-        //getServer().getCommandMap().register("ASkyBlock", this.cmds = new ChallangesCMD(this));
+        getServer().getCommandMap().register("ASkyBlock", this.cmds = new ChallangesCMD(this));
         switch (cfg.getString("database.provider").toLowerCase()) {
             case "jdbc":
                 if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {

@@ -17,16 +17,15 @@
 package com.larryTheCoder.economyHandler;
 
 import cn.nukkit.Player;
-import me.onebone.economyapi.EconomyAPI;
 
-public class EconomyA implements Economy {
+public class EconomyAPI implements Economy {
 
     @Override
     public boolean reduceMoney(Player p, double amount) {
-        double money = EconomyAPI.getInstance().myMoney(p);
+        double money = me.onebone.economyapi.EconomyAPI.getInstance().myMoney(p);
         if (money < amount) {
-            int ret = EconomyAPI.getInstance().reduceMoney(p, amount);
-            if (ret == EconomyAPI.RET_SUCCESS) {
+            int ret = me.onebone.economyapi.EconomyAPI.getInstance().reduceMoney(p, amount);
+            if (ret == me.onebone.economyapi.EconomyAPI.RET_SUCCESS) {
                 return true;
             }
         }
@@ -35,6 +34,6 @@ public class EconomyA implements Economy {
 
     @Override
     public void addMoney(Player p, double amount) {
-        EconomyAPI.getInstance().addMoney(p, amount, true);
+        me.onebone.economyapi.EconomyAPI.getInstance().addMoney(p, amount, true);
     }
 }
