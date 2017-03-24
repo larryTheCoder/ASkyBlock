@@ -16,7 +16,6 @@
  */
 package com.larryTheCoder.command.island;
 
-import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import java.util.ArrayList;
 import java.util.List;

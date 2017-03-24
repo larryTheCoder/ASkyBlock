@@ -114,12 +114,12 @@ public class ORMLiteDatabase implements Database {
         try {
             records = islandDB.queryForFieldValues(ev);
         } catch (SQLException ex) {
-            return new IslandData(levelName, X, Z);
+            return new IslandData(levelName, X, Z, Settings.protectionrange);
         }
         for (IslandDataTable island : records) {
             return island.toIsland();
         }
-        return new IslandData(levelName, X, Z);
+        return new IslandData(levelName, X, Z,Settings.protectionrange);
     }
 
     @Override

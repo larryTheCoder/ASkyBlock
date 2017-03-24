@@ -109,7 +109,7 @@ public class ASkyBlockEvent extends Event {
      * @return the island location
      */
     public Location getIslandLocation() {
-        return new Location(island.X, island.floor_y, island.Z, 0, 0, Server.getInstance().getLevelByName(island.levelName));
+        return new Location(island.X, island.Y, island.Z, 0, 0, Server.getInstance().getLevelByName(island.levelName));
     }
 
     public HandlerList getHandlers() {

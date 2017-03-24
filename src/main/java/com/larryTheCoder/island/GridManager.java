@@ -25,7 +25,6 @@ import cn.nukkit.level.Position;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.BlockUtil;
@@ -76,7 +75,7 @@ public class GridManager {
         Set<Location> islandTestLocations = new HashSet<>();
         if (plugin.getIsland().checkIsland(player)) {
             IslandData pd = plugin.getIslandInfo(player);
-            islandTestLocations.add(new Location(pd.X, pd.floor_y, pd.Z, 0, 0, plugin.getServer().getLevelByName(pd.levelName)));
+            islandTestLocations.add(new Location(pd.X, pd.Y, pd.Z, 0, 0, plugin.getServer().getLevelByName(pd.levelName)));
         } else if (plugin.getTManager().hasTeam(player)) {
 //            islandTestLocations.add(plugin.getPlayers().getTeamIslandLocation(player.getUniqueId()));
 //            if (Settings.createNether && Settings.newNether && ASkyBlock.getNetherWorld() != null) {
@@ -142,7 +141,7 @@ public class GridManager {
         Level world = Server.getInstance().getLevelByName("SkyBlock");
         int px = pd.X;
         int pz = pd.Z;
-        int py = pd.floor_y;
+        int py = pd.Y;
         for (int dy = 1; dy <= 30; dy++) {
             for (int dx = 1; dx <= 30; dx++) {
                 for (int dz = 1; dz <= 30; dz++) {

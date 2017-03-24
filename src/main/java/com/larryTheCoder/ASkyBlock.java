@@ -71,8 +71,6 @@ import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import java.sql.SQLException;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author larryTheCoder
@@ -261,9 +259,10 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     public ChallangesCMD getChallenges() {
         return cmds;
     }
+
     /**
      * Checks how often a challenge has been completed
-     * 
+     *
      * @param player
      * @param challenge
      * @return number of times
@@ -309,7 +308,6 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
      * Load every islands Components
      */
     private void initIslands() {
-
         PluginManager pm = getServer().getPluginManager();
         chatHandler = new ChatHandler(this);
         teleportLogic = new TeleportLogic(this);
@@ -331,16 +329,14 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     /**
      * Reload every level that had generated
-     *
-     * TO-DO: Support Multi-World
      */
     private void saveLevel() {
         getDatabase().saveWorlds(level);
     }
 
     private void registerObject() {
+        Utils.ConsoleMsg(TextFormat.GREEN + "Loading the Island Framework");
         loadSchematic();
-        generateLevel();
         if (cfg.getBoolean("updater")) {
             Updater.getUpdate();
         }
@@ -394,8 +390,8 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
                 }
                 break;
         }
-        //TODO
         reloadLevel();
+        generateLevel();
         Level world = getServer().getLevelByName("SkyBlock");
         world.setTime(1600);
         world.stopTime();
@@ -460,7 +456,6 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     }
 
     private void generateLevel() {
-        Utils.ConsoleMsg(TextFormat.GREEN + "Loading the Island Framework");
         if (!Server.getInstance().isLevelGenerated("SkyBlock")) {
             Server.getInstance().generateLevel("SkyBlock", 0, SkyBlockGenerator.class);
         }

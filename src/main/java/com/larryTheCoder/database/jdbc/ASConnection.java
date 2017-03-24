@@ -73,6 +73,7 @@ public final class ASConnection implements Database {
                         + "`x` INTEGER NOT NULL,"
                         + "`y` INTEGER NOT NULL,"
                         + "`z` INTEGER NOT NULL,"
+                        + "`psize` INTEGER NOT NULL,"
                         + "`owner` VARCHAR NOT NULL,"
                         + "`name` VARCHAR NOT NULL,"
                         + "`world` VARCHAR NOT NULL,"
@@ -107,7 +108,7 @@ public final class ASConnection implements Database {
 
     @Override
     public IslandData getIslandLocation(String levelName, int X, int Z) {
-        IslandData database = new IslandData(levelName, X, Z);
+        IslandData database = new IslandData(levelName, X, Z, Settings.protectionrange);
         try (PreparedStatement rt = connection.prepareStatement("SELECT * FROM `island` WHERE(`world` = ? AND `islandId` = ?)")) {
             rt.setString(1, levelName);
             rt.setInt(2, ASkyBlock.get().getIsland().generateIslandKey(X, Z));
@@ -116,7 +117,7 @@ public final class ASConnection implements Database {
                 return null;
             }
             while (stmt.next()) {
-                return new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getBoolean("locked"));
+                return new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"),stmt.getInt("psize"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getBoolean("locked"));
             }
         } catch (SQLException ex) {
             Utils.ConsoleMsg(TextFormat.RED + "An error occured while fecthing SQLite: #location #X" + X + "#Z" + Z);
@@ -137,7 +138,7 @@ public final class ASConnection implements Database {
                 return null;
             }
             while (stmt.next()) {
-                pd.add(new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getBoolean("locked")));
+                pd.add(new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"),stmt.getInt("psize"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getBoolean("locked")));
             }
         } catch (SQLException ex) {
             Utils.ConsoleMsg(TextFormat.RED + "An error occured while fecthing SQLite: #Player " + owner);
@@ -157,7 +158,7 @@ public final class ASConnection implements Database {
             if (stmt == null) {
                 return null;
             }
-            return new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getBoolean("locked"));
+            return new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"),stmt.getInt("psize"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getBoolean("locked"));
         } catch (SQLException ex) {
             if (ASkyBlock.get().isDebug()) {
                 ex.printStackTrace();
@@ -200,7 +201,7 @@ public final class ASConnection implements Database {
                 return null;
             }
             while (stmt.next()) {
-                return new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getBoolean("locked"));
+                return new IslandData(stmt.getString("world"), stmt.getInt("x"), stmt.getInt("y"), stmt.getInt("z"),stmt.getInt("psize"), stmt.getString("name"), stmt.getString("owner"), stmt.getString("biome"), stmt.getInt("id"), stmt.getInt("islandId"), stmt.getBoolean("locked"));
             }
         } catch (SQLException ex) {
             Utils.ConsoleMsg(TextFormat.RED + "An error occured while fecthing SQLite: #id " + id);
@@ -224,17 +225,18 @@ public final class ASConnection implements Database {
     @Override
     public boolean saveIsland(IslandData pd) {
 
-        try (PreparedStatement stmt = connection.prepareStatement("INSERT OR REPLACE INTO `island` (`id`, `islandId`, `x`, `y`, `z`,`owner`, `name`, `world`, `biome`, `locked`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
+        try (PreparedStatement stmt = connection.prepareStatement("INSERT OR REPLACE INTO `island` (`id`, `islandId`, `x`, `y`, `z`, `psize`, `owner`, `name`, `world`, `biome`, `locked`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
             stmt.setInt(1, pd.id);
             stmt.setInt(2, pd.islandId);
             stmt.setInt(3, pd.X);
-            stmt.setInt(4, pd.floor_y);
+            stmt.setInt(4, pd.Y);
             stmt.setInt(5, pd.Z);
-            stmt.setString(6, pd.owner);
-            stmt.setString(7, pd.name);
-            stmt.setString(8, pd.levelName);
-            stmt.setString(9, pd.biome);
-            stmt.setBoolean(10, pd.locked);
+            stmt.setInt(6, pd.getProtectionSize());
+            stmt.setString(7, pd.owner);
+            stmt.setString(8, pd.name);
+            stmt.setString(9, pd.levelName);
+            stmt.setString(10, pd.biome);
+            stmt.setBoolean(11, pd.locked);
             stmt.executeUpdate();
             stmt.close();
             return true;
@@ -250,13 +252,13 @@ public final class ASConnection implements Database {
     @Override
     public ArrayList<String> getWorlds() {
         ArrayList<String> world = new ArrayList<>();
-        try (PreparedStatement kt = connection.prepareStatement("SELECT * FROM `worlds`")) {
+        try (PreparedStatement kt = connection.prepareStatement("SELECT `world` FROM `worlds`")) {
             ResultSet stmt = kt.executeQuery();
             if (stmt == null) {
-                return null;
+                return world;
             }
             while (stmt.next()) {
-                world = Utils.stringToArray(stmt.getString("world"), ", ");
+                world.add(stmt.getString("world"));
             }
         } catch (SQLException ex) {
             if (ASkyBlock.get().isDebug()) {
@@ -267,9 +269,13 @@ public final class ASConnection implements Database {
     }
 
     @Override
-    public boolean saveWorlds(ArrayList pd) {
+    public boolean saveWorlds(ArrayList<String> pd) {
         try (PreparedStatement stmt = connection.prepareStatement("INSERT OR REPLACE INTO `worlds` (`world`) VALUES (?);")) {
-            stmt.setString(1, Utils.arrayToString(pd));
+            for (String pd2 : pd) {
+                stmt.setString(1, pd2);
+                stmt.executeUpdate();
+            }
+            stmt.close();
             return true;
         } catch (SQLException ex) {
             if (ASkyBlock.get().isDebug()) {

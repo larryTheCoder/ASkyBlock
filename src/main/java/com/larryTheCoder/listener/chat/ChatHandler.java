@@ -26,7 +26,6 @@ import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import com.larryTheCoder.ASkyBlock;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -46,7 +45,7 @@ public class ChatHandler implements Listener {
         // Add all online player Levels
         for (Player player : plugin.getServer().getOnlinePlayers().values()) {
             playerLevels.put(player, String.valueOf(plugin.getIslandLevel(player)));
-            //playerChallengeLevels.put(player.getUniqueId(), plugin.getChallenges().getChallengeLevel(player));
+            playerChallengeLevels.put(player.getUniqueId(), plugin.getChallenges().getChallengeLevel(player));
         }
     }
 
@@ -136,7 +135,7 @@ public class ChatHandler implements Listener {
      */
     public void setPlayerChallengeLevel(Player player) {
         //plugin.getLogger().info("DEBUG: setting player's challenge level to " + plugin.getChallenges().getChallengeLevel(player));
-        //playerChallengeLevels.put(player.getUniqueId(), plugin.getChallenges().getChallengeLevel(player));
+        playerChallengeLevels.put(player.getUniqueId(), plugin.getChallenges().getChallengeLevel(player));
     }
 
     /**

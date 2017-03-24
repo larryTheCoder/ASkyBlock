@@ -17,22 +17,15 @@
 package com.larryTheCoder.command;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.command.ConsoleCommandSender;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemPotion;
 import cn.nukkit.item.ItemPotionSplash;
-import cn.nukkit.level.Location;
-import cn.nukkit.level.sound.ExperienceOrbSound;
-import cn.nukkit.level.sound.Sound;
 import cn.nukkit.potion.Potion;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.economyHandler.Economy;
 import com.larryTheCoder.events.ChallengeCompleteEvent;
 import com.larryTheCoder.events.ChallengeLevelCompleteEvent;
 import com.larryTheCoder.player.PlayerData;
@@ -41,11 +34,9 @@ import com.larryTheCoder.utils.Utils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author larryTheCoder
@@ -68,7 +59,7 @@ public final class ChallangesCMD extends Command {
     @Override
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
         Player p = sender.getServer().getPlayer(sender.getName());
-        if (args[0] != null) {
+        if (args[0] == null) {
             p.sendMessage(plugin.getPrefix() + "§cfew parameters, /c help for a list of commands");
         }
         switch (args[0]) {
@@ -230,7 +221,7 @@ public final class ChallangesCMD extends Command {
      */
     public void populateChallengeList() {
         challengeList.clear();
-        for (String s : Settings.challengeList) {
+        Settings.challengeList.stream().forEach((s) -> {
             String level = getChallengeConfig().getString("challenges.challengeList." + s + ".level", "");
             // Verify that this challenge's level is in the list of levels
             if (Settings.challengeLevels.contains(level) || level.isEmpty()) {
@@ -244,7 +235,7 @@ public final class ChallangesCMD extends Command {
             } else {
                 Utils.ConsoleMsg("&cLevel (" + level + ") for challenge " + s + " does not exist. Check challenges.yml.");
             }
-        }
+        });
     }
 
     /**
@@ -291,11 +282,7 @@ public final class ChallangesCMD extends Command {
         List<String> levelChallengeList = challengeList.get(level);
         int waiver = Settings.waiverAmount;
         if (levelChallengeList != null) {
-            for (String challenge : levelChallengeList) {
-                if (plugin.getPlayerInfo(player).checkChallenge(challenge)) {
-                    challengesCompleted++;
-                }
-            }
+            challengesCompleted = levelChallengeList.stream().filter((challenge) -> (plugin.getPlayerInfo(player).checkChallenge(challenge))).map((_item) -> 1).reduce(challengesCompleted, Integer::sum);
             // If the number of challenges in a level is below the waiver amount, then they all need to be done
             if (levelChallengeList.size() <= Settings.waiverAmount) {
                 waiver = 0;
@@ -399,15 +386,15 @@ public final class ChallangesCMD extends Command {
             if (!hasRequired(player, challenge, "inventory")) {
                 player.sendMessage(TextFormat.RED + "You dont have enough items");
                 String desc = TextFormat.colorize('&', getChallengeConfig().getString("challenges.challengeList." + challenge + ".description", "").replace("[label]", "is"));
-                List<String> result = new ArrayList<String>();
+                List<String> result = new ArrayList<>();
                 if (desc.contains("|")) {
                     result.addAll(Arrays.asList(desc.split("\\|")));
                 } else {
                     result.add(desc);
                 }
-                for (String line : result) {
+                result.stream().forEach((line) -> {
                     player.sendMessage(TextFormat.RED + line);
-                }
+                });
                 return false;
             }
             return true;
@@ -429,15 +416,15 @@ public final class ChallangesCMD extends Command {
                 }
                 player.sendMessage(TextFormat.RED + "You must be standing within [number] blocks of all required items.".replace("[number]", String.valueOf(searchRadius)));
                 String desc = TextFormat.colorize('&', getChallengeConfig().getString("challenges.challengeList." + challenge + ".description").replace("[label]", "is"));
-                List<String> result = new ArrayList<String>();
+                List<String> result = new ArrayList<>();
                 if (desc.contains("|")) {
                     result.addAll(Arrays.asList(desc.split("\\|")));
                 } else {
                     result.add(desc);
                 }
-                for (String line : result) {
+                result.stream().forEach((line) -> {
                     player.sendMessage(TextFormat.RED + line);
-                }
+                });
                 return false;
             }
             // Utils.ConsoleMsg("DEBUG: 7");
@@ -499,9 +486,9 @@ public final class ChallangesCMD extends Command {
         // This second one is so that items such as potions or variations on
         // standard items can be collected
         if (type.equalsIgnoreCase("inventory")) {
-            List<Item> toBeRemoved = new ArrayList<Item>();
+            List<Item> toBeRemoved = new ArrayList<>();
             Item reqItem;
-            int reqAmount = 0;
+            int reqAmount;
             for (final String s : reqList) {
                 final String[] part = s.split(":");
                 // Item:Qty
@@ -870,9 +857,9 @@ public final class ChallangesCMD extends Command {
         // Grab the rewards from the config.yml file
         String[] permList;
         String[] itemRewards;
-        double moneyReward = 0;
-        int expReward = 0;
-        String rewardText = "";
+        double moneyReward;
+        int expReward;
+        String rewardText;
         // If the friendly name is available use it
         String challengeName = TextFormat.colorize('&', getChallengeConfig().getString("challenges.challengeList." + challenge + ".friendlyname",
                 challenge.substring(0, 1).toUpperCase() + challenge.substring(1)));
@@ -883,10 +870,10 @@ public final class ChallangesCMD extends Command {
             // First time
             player.sendMessage(TextFormat.GREEN + "You completed the challange: [challenge]".replace("[challenge]", challengeName));
             if (Settings.broadcastMessages) {
-                for (Player p : plugin.getServer().getOnlinePlayers().values()) {
+                plugin.getServer().getOnlinePlayers().values().stream().forEach((p) -> {
                     p.sendMessage(
                             TextFormat.GOLD + "[name] just completed a challange: [challenge] !".replace("[name]", player.getDisplayName()).replace("[challenge]", challengeName));
-                }
+                });
             }
             plugin.getMessages().tellOfflineTeam(player.getUniqueId(),
                     TextFormat.GOLD + "[name] just completed a challange: [challenge] !".replace("[name]", player.getName()).replace("[challenge]", challengeName));
@@ -912,9 +899,8 @@ public final class ChallangesCMD extends Command {
             player.addExperience(expReward);
         }
         if (Settings.useEconomy && moneyReward > 0) {
-            //EconomyResponse e = VaultHelper.econ.depositPlayer(player, Settings.worldName, moneyReward);
-            if (false) {
-                //player.sendMessage(TextFormat.GOLD + plugin.myLocale(player).challengesmoneyReward + ": " + TextFormat.WHITE + VaultHelper.econ.format(moneyReward));
+            if (ASkyBlock.econ.addMoney(player, moneyReward)) {
+                player.sendMessage(TextFormat.GOLD + "You retrived" + TextFormat.WHITE + " $" + moneyReward);
             } else {
                 Utils.ConsoleMsg(TextFormat.RED + "Error giving player " + player + " challenge money:");//) e.errorMessage);
                 Utils.ConsoleMsg(TextFormat.RED + "Reward was $" + moneyReward);
@@ -1151,7 +1137,7 @@ public final class ChallangesCMD extends Command {
         if (linger) {
             result = new Item(Item.LINGERING_POTION, rewardQty);
         }
-        
+
         return result;
     }
 }

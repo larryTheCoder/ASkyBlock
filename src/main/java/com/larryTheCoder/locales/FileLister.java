@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import com.larryTheCoder.ASkyBlock;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author larryTheCoder
@@ -47,16 +48,9 @@ public final class FileLister {
         // Check if the locale folder exists
         File localeDir = new File(plugin.getDataFolder(), FOLDERPATH);
         if (localeDir.exists()) {
-            FilenameFilter ymlFilter = new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                    String lowercaseName = name.toLowerCase();
-                    if (lowercaseName.endsWith(".yml")) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
+            FilenameFilter ymlFilter = (File dir, String name) -> {
+                String lowercaseName = name.toLowerCase();
+                return lowercaseName.endsWith(".yml");
             };
             for (String fileName : localeDir.list(ymlFilter)) {
                 result.add(fileName.replace(".yml", ""));
@@ -76,33 +70,35 @@ public final class FileLister {
             method.setAccessible(true);
 
             jarfile = (File) method.invoke(this.plugin);
-        } catch (Exception e) {
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             throw new IOException(e);
         }
-
-        JarFile jar = new JarFile(jarfile);
 
         /**
          * Loop through all the entries.
          */
-        Enumeration<JarEntry> entries = jar.entries();
-        while (entries.hasMoreElements()) {
-            JarEntry entry = entries.nextElement();
-            String path = entry.getName();
-
+        try (JarFile jar = new JarFile(jarfile)) {
             /**
-             * Not in the folder.
+             * Loop through all the entries.
              */
-            if (!path.startsWith(FOLDERPATH)) {
-                continue;
+            Enumeration<JarEntry> entries = jar.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                String path = entry.getName();
+                
+                /**
+                 * Not in the folder.
+                 */
+                if (!path.startsWith(FOLDERPATH)) {
+                    continue;
+                }
+                
+                if (entry.getName().endsWith(".yml")) {
+                    result.add((entry.getName().replace(".yml", "")).replace("locale/", ""));
+                }
+                
             }
-
-            if (entry.getName().endsWith(".yml")) {
-                result.add((entry.getName().replace(".yml", "")).replace("locale/", ""));
-            }
-
         }
-        jar.close();
         return result;
     }
 }

@@ -18,7 +18,6 @@ package com.larryTheCoder.island;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
-import cn.nukkit.block.Block;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
@@ -33,8 +32,6 @@ import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
-import java.util.HashMap;
-import java.util.UUID;
 import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.task.DeleteIslandTask;
 import java.util.List;
@@ -200,7 +197,7 @@ public class IslandManager {
         pd.islandId = iKey;
         pd.owner = p;
         pd.X = x;
-        pd.floor_y = loc.getFloorY();
+        pd.Y = loc.getFloorY();
         pd.Z = z;
         pd.levelName = loc.getLevel().getName();
         pd.locked = false;
@@ -310,7 +307,7 @@ public class IslandManager {
             return;
         }
         Level lvl = ASkyBlock.get().getServer().getLevelByName(pd.levelName);
-        p.teleport(new Location(pd.X, pd.floor_y, pd.Z, 0, 0, lvl));
+        p.teleport(new Location(pd.X, pd.Y, pd.Z, 0, 0, lvl));
     }
 
     public void setHomeLocation(Player p, Position lPlusOne, int number) {

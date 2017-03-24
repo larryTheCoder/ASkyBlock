@@ -72,8 +72,8 @@ public class TeamManager {
         if (member.isOnline()) {
             member.sendMessage(plugin.getPrefix() +kickMessage);
         }
-        //todo: Add kick message if player doesnt exsits
-        //todo: Kick the player if the player in ASkyBlock level
+        //todo: Store kick message if player doesnt exsits
+        //todo: Kick the player if the player in player team area level
         return done;
     }
 

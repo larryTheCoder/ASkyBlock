@@ -48,6 +48,8 @@ public class IslandDataTable {
     String biome;
     @DatabaseField(canBeNull = false, columnName = "locked")
     boolean locked;
+    @DatabaseField(canBeNull = false, columnName = "psize")
+    int PSize;
 
     IslandDataTable() {
     }
@@ -55,7 +57,7 @@ public class IslandDataTable {
     public IslandDataTable(IslandData pd) {
         this.world = pd.levelName;
         this.x = pd.X;
-        this.y = pd.floor_y;
+        this.y = pd.Y;
         this.z = pd.Z;
         this.name = pd.name;
         this.owner = pd.owner;
@@ -81,7 +83,7 @@ public class IslandDataTable {
     public void saveIslandData(IslandData pd) {
         this.world = pd.levelName;
         this.x = pd.X;
-        this.y = pd.floor_y;
+        this.y = pd.Y;
         this.z = pd.Z;
         this.name = pd.name;
         this.owner = pd.owner;
@@ -92,6 +94,6 @@ public class IslandDataTable {
     }
 
     public IslandData toIsland() {
-        return new IslandData(world, x, y, z, name, owner, biome, id, islandId, locked);
+        return new IslandData(world, x, y, z, PSize, name, owner, biome, id, islandId, locked);
     }
 }

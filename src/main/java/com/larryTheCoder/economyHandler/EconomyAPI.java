@@ -33,7 +33,7 @@ public class EconomyAPI implements Economy {
     }
 
     @Override
-    public void addMoney(Player p, double amount) {
-        me.onebone.economyapi.EconomyAPI.getInstance().addMoney(p, amount, true);
+    public boolean addMoney(Player p, double amount) {
+        return me.onebone.economyapi.EconomyAPI.getInstance().addMoney(p, amount, true) == me.onebone.economyapi.EconomyAPI.RET_SUCCESS;
     }
 }

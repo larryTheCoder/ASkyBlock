@@ -35,7 +35,6 @@ import com.larryTheCoder.command.generic.VGamemodeSubCommand;
 import com.larryTheCoder.command.generic.leaveSubCommand;
 import com.larryTheCoder.command.island.deleteSubCommand;
 import com.larryTheCoder.command.generic.ASetLobbySubCommand;
-import com.larryTheCoder.command.ChallangesCMD;
 import com.larryTheCoder.command.management.ToggleSubCommand;
 import com.larryTheCoder.command.management.acceptSubCommand;
 import com.larryTheCoder.command.management.denySubCommand;

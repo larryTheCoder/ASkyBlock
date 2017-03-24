@@ -27,5 +27,5 @@ public interface Economy {
     
     public boolean reduceMoney(Player p, double amount);
     
-    public void addMoney(Player p, double amount);
+    public boolean addMoney(Player p, double amount);
 }

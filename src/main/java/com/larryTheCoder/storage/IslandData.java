@@ -16,42 +16,40 @@
  */
 package com.larryTheCoder.storage;
 
-import com.larryTheCoder.utils.Settings;
-
 /**
- * Taken from PlotMe
- *
  * @author larryTheCoder
  */
-public class IslandData implements Cloneable{
+public class IslandData implements Cloneable {
 
     public int islandId;
     public int id;
     public String levelName;
-    public int X;
-    public int Z;
+    public int X = 0;
+    public int Y = 0;
+    public int Z = 0;
     public String name;
     public String owner;
     public String biome;
-    public boolean locked;    
-    public int floor_y;
+    public boolean locked;
+    private int ProtectionSize = 0; //Unaccessable
 
-    public IslandData(String levelName, int X, int Z) {
+    public IslandData(String levelName, int X, int Z, int PSize) {
         this.X = X;
         this.Z = Z;
         this.levelName = levelName;
-
+        this.ProtectionSize = PSize;
     }
 
     @SuppressWarnings("AssignmentToMethodParameter")
-    public IslandData(String levelName, int X, int Y, int Z, String name, String owner, String biome, int id, int islandId, boolean locked) {
+    public IslandData(String levelName, int X, int Y, int Z, int PSize, String name, String owner, String biome, int id, int islandId, boolean locked) {
         if (biome.isEmpty()) {
             biome = "PLAINS";
         }
         this.levelName = levelName;
         this.X = X;
-        this.floor_y = Y;
+        this.Y = Y;
         this.Z = Z;
+        this.ProtectionSize = PSize;
         this.name = name;
         this.owner = owner;
         this.biome = biome;
@@ -59,7 +57,7 @@ public class IslandData implements Cloneable{
         this.islandId = islandId;
         this.locked = locked;
     }
-    
+
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
@@ -67,22 +65,21 @@ public class IslandData implements Cloneable{
     public Object clone() throws CloneNotSupportedException {
         try {
             return super.clone();
-        }
-        catch (CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             // This should never happen
             throw new InternalError(e.toString());
         }
     }
 
     public int getMinProtectedZ() {
-        return (Z - Settings.islandSize / 2);
+        return (Z - ProtectionSize / 2);
     }
 
     public int getMinProtectedX() {
-        return (X - Settings.islandSize / 2);
+        return (X - ProtectionSize / 2);
     }
 
     public int getProtectionSize() {
-        return Settings.protectionrange;
+        return ProtectionSize;
     }
 }

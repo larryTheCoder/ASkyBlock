@@ -25,13 +25,8 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
-import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.math.Vector3;
-import cn.nukkit.scheduler.AsyncTask;
-import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A class that calculates finds a safe spot asynchronously and then teleports
