@@ -225,7 +225,7 @@ public final class ASConnection implements Database {
     @Override
     public boolean saveIsland(IslandData pd) {
 
-        try (PreparedStatement stmt = connection.prepareStatement("INSERT OR REPLACE INTO `island` (`id`, `islandId`, `x`, `y`, `z`, `psize`, `owner`, `name`, `world`, `biome`, `locked`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
+        try (PreparedStatement stmt = connection.prepareStatement("INSERT OR REPLACE INTO `island` (`id`, `islandId`, `x`, `y`, `z`, `psize`, `owner`, `name`, `world`, `biome`, `locked`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
             stmt.setInt(1, pd.id);
             stmt.setInt(2, pd.islandId);
             stmt.setInt(3, pd.X);
