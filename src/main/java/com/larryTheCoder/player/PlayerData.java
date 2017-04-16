@@ -17,6 +17,7 @@
 package com.larryTheCoder.player;
 
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -153,6 +154,7 @@ public class PlayerData implements Cloneable {
         }
         times++;
         challengeListTimes.put(challenge.toLowerCase(), times);
+        Utils.ConsoleMsg(Utils.hashToString(challengeListTimes));
         // plugin.getLogger().info("DEBUG: complete " + challenge + ":" +
         // challengeListTimes.get(challenge.toLowerCase()).intValue() );
         ASkyBlock.get().getDatabase().savePlayerData(this);

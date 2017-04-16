@@ -202,7 +202,7 @@ public class IslandManager {
         pd.levelName = loc.getLevel().getName();
         pd.locked = false;
 
-        boolean result = plugin.getDatabase().saveIsland(pd);
+        boolean result = plugin.getDatabase().createIsland(pd);
         if (Server.getInstance().getPlayer(p) != null) {
             Player pr = Server.getInstance().getPlayer(p);
             if (result) {
@@ -222,7 +222,7 @@ public class IslandManager {
             p.sendMessage(plugin.getPrefix() +plugin.getMsg("no_island_error"));
             return;
         }
-        TaskManager.runTask(new DeleteIslandTask(plugin, pd));
+        plugin.getServer().getScheduler().scheduleTask(new DeleteIslandTask(plugin, pd));
         if (reset) {
             p.sendMessage(plugin.getPrefix() + plugin.getMsg("reset").replace("[min]", "30"));
             handleIslandCommand(p, true, homes);

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2016 larryTheHarry
  *
  * This program is free software: you can redistribute it and/or modify
@@ -71,6 +71,7 @@ import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 /**
  * @author larryTheCoder
@@ -293,6 +294,9 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         initIslands();
         registerObject();
         getServer().getLogger().info(TextFormat.YELLOW + "------------------------------------------------------------");
+        getServer().getLogger().notice(TextFormat.colorize('&', "&eYou are using BETA-Builds of ASkyBlock!"));
+        getServer().getLogger().notice(TextFormat.colorize('&', "&eWarning! You might experience some crash and errors while using this plugin"));        
+        getServer().getLogger().notice(TextFormat.colorize('&', "&eIt is recommended to report any issues at: http://www.github.com/larryTheCoder/ASkyBlock/issues"));
         getServer().getLogger().info(getPrefix() + getMsg("onEnable"));
     }
 
@@ -356,22 +360,20 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
                         db = new ASConnection(new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")), true);
                     } catch (SQLException | ClassNotFoundException ex) {
                         Utils.ConsoleMsg("Unable to create MySql database");
-                    }
+                    } catch (InterruptedException ex) {
+                Logger.getLogger(ASkyBlock.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            }
                 } else {
                     try {
                         db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
                     } catch (SQLException | ClassNotFoundException ex) {
                         Utils.ConsoleMsg("Unable to create Sqlite database");
-                    }
+                    } catch (InterruptedException ex) {
+                Logger.getLogger(ASkyBlock.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            }
                 }
                 break;
             case "ormlite":
-                if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {
-                    db = new ORMLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db"), true);
-                } else {
-                    db = new ORMLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db"));
-                }
-                break;
             case "yaml":
             case "unknown":
                 Utils.ConsoleMsg("&cYAML and Unknown Database not available. Sorry. Using default: JDBC");
@@ -379,7 +381,9 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
                     db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
                 } catch (SQLException | ClassNotFoundException ex) {
                     Utils.ConsoleMsg("Unable to create Sqlite database");
-                }
+                } catch (InterruptedException ex) {
+            Logger.getLogger(ASkyBlock.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
                 break;
             default:
                 Utils.ConsoleMsg("&c" + cfg.getString("database.provider") + " is not available. Sorry. Using default: JDBC");
@@ -387,7 +391,9 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
                     db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
                 } catch (SQLException | ClassNotFoundException ex) {
                     Utils.ConsoleMsg("&cUnable to create Sqlite database");
-                }
+                } catch (InterruptedException ex) {
+            Logger.getLogger(ASkyBlock.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
                 break;
         }
         reloadLevel();

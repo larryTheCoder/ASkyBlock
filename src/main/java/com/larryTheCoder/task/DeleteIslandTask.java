@@ -23,6 +23,7 @@ import cn.nukkit.math.Vector3;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
+import com.larryTheCoder.utils.Utils;
 
 /**
  *
@@ -31,45 +32,47 @@ import com.larryTheCoder.utils.Settings;
 public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> implements TaskSkyBlock{
 
     private final IslandData pd;
-    private int minZ = 0;
-    private int minX = 0;
-    private int maxZ = 0;
-    private int maxX = 0;
+
     private Level level = null;
 
     public DeleteIslandTask(ASkyBlock owner, IslandData ps) {
         super(owner);
         this.pd = ps;
-        // Find out what location are within the island protection range
-        maxX = pd.X + (Settings.islandSize / 2);
-        maxZ = pd.Z + (Settings.islandSize / 2);
-        minX = pd.X - (Settings.islandSize / 2);
-        minZ = pd.X - (Settings.islandSize / 2);
         level = getOwner().getServer().getLevelByName(pd.levelName);
+        Utils.ConsoleMsg("Obesity K9");
+        this.onRun(0);
     }
 
     @Override
     public void onRun(int currentTick) {
+        Utils.ConsoleMsg("Running AVA-1");
+        int maxX = pd.X + (pd.getProtectionSize() / 2);
+        int maxZ = pd.Z + (pd.getProtectionSize() / 2);
+        int mineX = pd.X - (pd.getProtectionSize() / 2);
+        int mineZ = pd.X - (pd.getProtectionSize() / 2);
+        Utils.ConsoleMsg("Form: " + maxX + " " + maxZ + " " + mineZ + " " + mineX);
         int blocks = 0;
-        for (; minX < maxX; minX++) {
+        for (int minX = pd.X - (pd.getProtectionSize() / 2); minX < maxX; minX++) {
             for (int y = 0; y < 257; y++) {
-                for (; minZ < maxZ; minZ++) {
+                for (int minZ = pd.X - (pd.getProtectionSize() / 2); minZ < maxZ; minZ++) {
                     int block = Block.AIR;
                     if (y < Settings.seaLevel) {
                         block = Block.WATER;
                     }
+                    Utils.ConsoleMsg("Running AVA-2");
                     level.setBlock(new Vector3(minX, y, minZ), Block.get(block), true, true);
                     blocks++;
-                    if (blocks == Settings.maxBlocks) {
+                    if (blocks == 50) {
+                        Utils.ConsoleMsg("LOOP AVA-3");
                         getOwner().getServer().getScheduler().scheduleDelayedTask(this, 2);
                         break;
                     }
                 }
             }
         }
+        Utils.ConsoleMsg("Running AVA-4-SECCESS");
         Player p = getOwner().getServer().getPlayer(pd.owner);
-        if (p != null) {
-            p.sendMessage(getOwner().getPrefix() +"Seccessfully cleared your island");
-        }
+        p.sendMessage(getOwner().getPrefix() +"Seccessfully cleared your island");
+        ASkyBlock.get().getDatabase().deleteIsland(pd);
     }
 }

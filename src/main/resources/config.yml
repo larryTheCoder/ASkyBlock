@@ -1,7 +1,7 @@
 ## Default Config for ASkyBlock
 ---
 ## Game Prefix.
-Prefix: "&8[&eSkyBlock&8]&r "
+Prefix: "&d[&eASkyBlock&d] &e"
 ## Max islands homes
 # You will have to set this as digit and will be used
 # On island!

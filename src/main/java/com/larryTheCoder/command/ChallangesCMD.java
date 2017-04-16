@@ -47,7 +47,6 @@ public final class ChallangesCMD extends Command {
     // Database of challenges
     private final LinkedHashMap<String, List<String>> challengeList = new LinkedHashMap<>();
     private Config challengeFile = null;
-    private File challengeConfigFile;
 
     public ChallangesCMD(ASkyBlock ev) {
         super("challenges", "Challange yourself for some big prize", "\u00a77<parameters>", new String[]{"c", "chall", "ch"});
@@ -59,23 +58,29 @@ public final class ChallangesCMD extends Command {
     @Override
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
         Player p = sender.getServer().getPlayer(sender.getName());
-        if (args[0] == null) {
+        if (args.length == 0) {
             p.sendMessage(plugin.getPrefix() + "§cfew parameters, /c help for a list of commands");
+            return true;
         }
         switch (args[0]) {
             case "help":
                 p.sendMessage("§d--- §aChallanges help page §e1 §aof §e1 §d---");
-                p.sendMessage("\u00a7aUse /c <name> to view information about a challenge.");
-                p.sendMessage("\u00a7aUse /c complete <name> to attempt to complete that challenge.");
-                p.sendMessage("\u00a7aUse /c list to view all information about the challenge.");
+                p.sendMessage("§aUse /c <name> to view information about a challenge.");
+                p.sendMessage("§aUse /c complete <name> to attempt to complete that challenge.");
+                p.sendMessage("§aUse /c list <page> to view all information about the challenge.");
+                break;
             case "list":
-                if (args[1] != null) {
+                if (args.length == 2) {
                     this.showHelp(p, Integer.valueOf(args[1]));
                 } else {
                     this.showHelp(p, 1);
                 }
                 break;
             case "complete":
+                if(args.length != 2){
+                    p.sendMessage(plugin.getPrefix() + "§eUsage: /c complete [challenge name]");
+                    break;
+                }
                 if (checkIfCanCompleteChallenge(p, args[1].toLowerCase())) {
                     int oldLevel = getLevelDone(p);
                     giveReward(p, args[1].toLowerCase());
@@ -93,24 +98,23 @@ public final class ChallangesCMD extends Command {
                             completeChallenge(p, level);
                             String message = TextFormat.colorize('&', getChallengeConfig().getString("challenges.levelUnlock." + level + ".message", ""));
                             if (!message.isEmpty()) {
-                                p.sendMessage(TextFormat.GREEN + message);
+                                p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + message);
                             }
-
                             String[] itemReward = getChallengeConfig().getString("challenges.levelUnlock." + level + ".itemReward", "").split(" ");
                             String rewardDesc = getChallengeConfig().getString("challenges.levelUnlock." + level + ".rewardDesc", "");
                             if (!rewardDesc.isEmpty()) {
-                                // p.sendMessage(TextFormat.GOLD + ": " + TextFormat.WHITE + rewardDesc);
+                                p.sendMessage(plugin.getPrefix() + TextFormat.GOLD + ": " + TextFormat.WHITE + rewardDesc);
                             }
                             List<Item> rewardedItems = giveItems(p, itemReward);
                             double moneyReward = getChallengeConfig().getDouble("challenges.levelUnlock." + level + ".moneyReward", 0D);
                             int expReward = getChallengeConfig().getInt("challenges.levelUnlock." + level + ".expReward", 0);
                             if (expReward > 0) {
-                                p.sendMessage(TextFormat.GOLD + "You got Exp: " + TextFormat.WHITE + expReward);
+                                p.sendMessage(plugin.getPrefix() + TextFormat.GOLD + "You got Exp: " + TextFormat.WHITE + expReward);
                                 p.addExperience(expReward);
                             }
                             if (Settings.useEconomy && moneyReward > 0 && (ASkyBlock.econ != null)) {
                                 ASkyBlock.econ.addMoney(p, moneyReward);
-                                p.sendMessage(TextFormat.GOLD + "You received : " + TextFormat.WHITE + "$" + moneyReward);
+                                p.sendMessage(plugin.getPrefix() + TextFormat.GOLD + "You received : " + TextFormat.WHITE + "$" + moneyReward);
                             }
                             String[] permList = getChallengeConfig().getString("challenges.levelUnlock." + level + ".permissionReward", "").split(" ");
 
@@ -129,6 +133,7 @@ public final class ChallangesCMD extends Command {
                         }
                     }
                 }
+                break;
             default:
                 p.sendMessage(plugin.getPrefix() + "§cUnknown parameters, /c help for a list of commands");
                 break;
@@ -136,7 +141,7 @@ public final class ChallangesCMD extends Command {
         return true;
     }
 
-    private void showHelp(Player sender, int numbers) {
+    private void showHelp(CommandSender sender, int numbers) {
         List<String> names = new ArrayList<>();
         getChallengeConfig().getSection("challenges.challengeList").getKeys(false).stream().forEach((AADES) -> {
             names.add(AADES);
@@ -173,7 +178,7 @@ public final class ChallangesCMD extends Command {
                 } else if (type.equals("island")) {
                     sender.sendMessage(TextFormat.RED + "All required items must be close to you on your island!");
                 }
-                sender.sendMessage(TextFormat.AQUA + "----");
+                sender.sendMessage(TextFormat.YELLOW + "------------------------------------");
             }
             i++;
         }
@@ -188,7 +193,6 @@ public final class ChallangesCMD extends Command {
      */
     public void saveDefaultChallengeConfig() {
         challengeFile = new Config(new File(plugin.getDataFolder(), "challenges.yml"), Config.YAML);
-        challengeConfigFile = new File(plugin.getDataFolder(), "challenges.yml");
     }
 
     /**

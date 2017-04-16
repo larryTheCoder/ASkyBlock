@@ -378,4 +378,9 @@ public class ORMLiteDatabase implements Database {
             return false;
         }
     }
+
+    @Override
+    public boolean createIsland(IslandData pd) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

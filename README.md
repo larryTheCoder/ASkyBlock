@@ -40,3 +40,4 @@ Releases have a clean version number, has been tested, and should be safe for pr
 *Note*: Config files might change quite a bit, and upon activation, the plugin will NOT try to merge the existing ones with the new ones. No backup will be saved into folder.
 
 Please make sure, that the config files are as you expect them to be, before using the plugin or releasing it to "the public".
+

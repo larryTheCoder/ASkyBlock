@@ -18,6 +18,7 @@ package com.larryTheCoder.events;
 
 import cn.nukkit.Player;
 import cn.nukkit.event.Event;
+import cn.nukkit.event.HandlerList;
 import cn.nukkit.item.Item;
 import java.util.List;
 
@@ -35,7 +36,12 @@ public class ChallengeCompleteEvent extends Event {
     private final int expReward;
     private final String rewardText;
     private final List<Item> rewardedItems;
+    private static final HandlerList HANDLERS = new HandlerList();
 
+    public static HandlerList getHandlers(){
+        return HANDLERS;
+    }
+    
     /**
      * @param player
      * @param challengeName

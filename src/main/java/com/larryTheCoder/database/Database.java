@@ -119,4 +119,6 @@ public interface Database {
      */
     public boolean setPosition(Position pos, int id, String owner);
 
+    public boolean createIsland(IslandData pd);
+
 }

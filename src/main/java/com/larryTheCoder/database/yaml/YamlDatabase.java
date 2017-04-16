@@ -103,4 +103,9 @@ public class YamlDatabase implements Database {
     public boolean savePlayerData(PlayerData pd) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public boolean createIsland(IslandData pd) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

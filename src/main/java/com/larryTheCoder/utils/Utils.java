@@ -98,7 +98,7 @@ public class Utils {
             Long msDelta = curMS - msBefore;
             Long msWaitTime = 1000 * (long) seconds;
             if (msDelta < msWaitTime) {
-                p.sendMessage(ASkyBlock.get().getPrefix() +TextFormat.RED + "[" + what + "] Too soon, you must wait: " + TextFormat.AQUA + Utils.TimeDeltaString_JustMinutesSecs(msWaitTime - msDelta));
+                p.sendMessage(ASkyBlock.get().getPrefix() + TextFormat.RED + "[" + what + "] Too soon, you must wait: " + TextFormat.AQUA + Utils.TimeDeltaString_JustMinutesSecs(msWaitTime - msDelta));
                 return true;
             }
         }
@@ -214,6 +214,9 @@ public class Utils {
     }
 
     public static Map stringToMap(String append) {
+        if (append.isEmpty()) {
+            return new HashMap<>();
+        }
         HashMap errs = new HashMap<>();
         String[] at = append.split(", ");
         for (String string : at) {
@@ -253,6 +256,9 @@ public class Utils {
     }
 
     public static ArrayList<String> stringToArray(String charc, String commas) {
+        if (charc.isEmpty()) {
+            return new ArrayList<>();
+        }
         String[] at = charc.split(commas);
         ArrayList<String> atd = new ArrayList<>();
         atd.addAll(Arrays.asList(at));

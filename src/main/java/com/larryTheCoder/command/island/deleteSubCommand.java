@@ -62,7 +62,7 @@ public class deleteSubCommand extends SubCommand{
             return false;
         }
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if(getPlugin().getIsland().checkIsland(p)){
+        if(!getPlugin().getIsland().checkIsland(p, Integer.parseInt(args[1]))){
             sender.sendMessage(getPrefix() + getMsg("no_island_error"));
             return true;
         }
