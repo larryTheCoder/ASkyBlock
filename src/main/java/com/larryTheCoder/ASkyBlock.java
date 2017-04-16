@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2016 larryTheHarry
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,6 +22,7 @@
  * SECURITY FIX:
  *  - Change the player name into UUID
  */
+
 package com.larryTheCoder;
 
 import com.larryTheCoder.task.PluginTask;
@@ -296,7 +297,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         getServer().getLogger().info(TextFormat.YELLOW + "------------------------------------------------------------");
         getServer().getLogger().notice(TextFormat.colorize('&', "&eYou are using BETA-Builds of ASkyBlock!"));
         getServer().getLogger().notice(TextFormat.colorize('&', "&eWarning! You might experience some crash and errors while using this plugin"));        
-        getServer().getLogger().notice(TextFormat.colorize('&', "&eIt is recommended to report any issues at: http://www.github.com/larryTheCoder/ASkyBlock/issues"));
+        getServer().getLogger().notice(TextFormat.colorize('&', "&eIt is recommended to report any issues at: http://www.github.com/larryTheCoder/ASkyBlock-Nukkit/issues"));
         getServer().getLogger().info(getPrefix() + getMsg("onEnable"));
     }
 
