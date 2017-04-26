@@ -85,6 +85,7 @@ public class ConfigManager {
         if (cfg.get("island.islandSize") != null) {
             try {
                 Settings.islandSize = islandDistance;
+                Settings.protectionrange = (islandDistance / 2);
             } catch (Throwable exc2) {
                 Utils.ConsoleMsg("Invalid IslandSize setting");
                 error += 1;
