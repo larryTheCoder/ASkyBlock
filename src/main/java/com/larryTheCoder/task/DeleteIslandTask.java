@@ -39,13 +39,10 @@ public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> 
         super(owner);
         this.pd = ps;
         level = getOwner().getServer().getLevelByName(pd.levelName);
-        Utils.ConsoleMsg("Obesity K9");
-        this.onRun(0);
     }
 
     @Override
     public void onRun(int currentTick) {
-        Utils.ConsoleMsg("Running AVA-1");
         int maxX = pd.X + (pd.getProtectionSize() / 2);
         int maxZ = pd.Z + (pd.getProtectionSize() / 2);
         int mineX = pd.X - (pd.getProtectionSize() / 2);
@@ -59,18 +56,15 @@ public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> 
                     if (y < Settings.seaLevel) {
                         block = Block.WATER;
                     }
-                    Utils.ConsoleMsg("Running AVA-2");
                     level.setBlock(new Vector3(minX, y, minZ), Block.get(block), true, true);
                     blocks++;
                     if (blocks == 50) {
-                        Utils.ConsoleMsg("LOOP AVA-3");
                         getOwner().getServer().getScheduler().scheduleDelayedTask(this, 2);
                         break;
                     }
                 }
             }
         }
-        Utils.ConsoleMsg("Running AVA-4-SECCESS");
         Player p = getOwner().getServer().getPlayer(pd.owner);
         p.sendMessage(getOwner().getPrefix() +"Seccessfully cleared your island");
         ASkyBlock.get().getDatabase().deleteIsland(pd);
