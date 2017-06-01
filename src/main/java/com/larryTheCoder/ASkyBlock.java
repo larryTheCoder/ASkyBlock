@@ -66,7 +66,6 @@ import com.larryTheCoder.island.IslandManager;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.player.TeleportLogic;
-import com.larryTheCoder.safecontrol.SHAHashingExample;
 import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
