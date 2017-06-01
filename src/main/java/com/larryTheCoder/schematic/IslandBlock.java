@@ -435,7 +435,7 @@ public class IslandBlock {
         // found the problem why blocks didnt shows up
         blockLoc.getLevel().setBlock(block, Block.get(typeId, data), usePhysics, true);
 
-        if (Block.get(typeId, data).getId() == Block.SIGN_POST || Block.get(typeId, data).getId() == Block.WALL_SIGN) {
+        if (signText != null) {
             TaskManager.runTaskLater(new SignPopulateTask(loc, signText), 10);
         } else if (pot != null) {
             pot.set(blockLoc, block);

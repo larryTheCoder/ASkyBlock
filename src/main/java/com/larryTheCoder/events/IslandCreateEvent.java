@@ -72,7 +72,7 @@ public class IslandCreateEvent extends Event implements Cancellable {
      * @return the protectionSize
      */
     public int getProtectionSize() {
-        return Settings.islandSize / 2;
+        return Settings.islandDistance / 2;
     }
 
     /**
@@ -86,7 +86,7 @@ public class IslandCreateEvent extends Event implements Cancellable {
      * @return the islandDistance
      */
     public int getIslandDistance() {
-        return Settings.islandSize;
+        return Settings.islandDistance;
     }
 
     public HandlerList getHandlers() {

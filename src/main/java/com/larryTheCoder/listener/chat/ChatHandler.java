@@ -26,6 +26,7 @@ import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.utils.Settings;
 import java.util.UUID;
 
 /**
@@ -58,7 +59,7 @@ public class ChatHandler implements Listener {
         }
         String format = event.getFormat().replace("{ISLAND_LEVEL}", level);
         event.setFormat(format);
-        if (ASkyBlock.get().cfg.getBoolean("teamChat") && teamChatUsers.containsKey(event.getPlayer())) {
+        if (Settings.facebook && teamChatUsers.containsKey(event.getPlayer())) {
             // Cancel the event
             event.setCancelled(true);
             // Queue the sync task because you cannot use HashMaps asynchronously. Delaying to the next tick

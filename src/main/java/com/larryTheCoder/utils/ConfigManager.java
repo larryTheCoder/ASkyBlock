@@ -18,21 +18,88 @@ package com.larryTheCoder.utils;
 
 import cn.nukkit.Server;
 import cn.nukkit.item.Item;
+import cn.nukkit.level.Location;
+import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import java.io.File;
 import java.util.ArrayList;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.storage.IslandData.SettingsFlag;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author larryTheCoder
  */
 public class ConfigManager {
 
+    /**
+     * Loads the various settings from the config.yml file into the plugin
+     */
     public static void load() {
-        int error = 0;
         Config cfg = new Config(new File(ASkyBlock.get().getDataFolder(), "config.yml"), Config.YAML);
 
+        // The order in this file should match the order in config.yml so that it is easy to check that everything is covered
+        // ********************** Island settings **************************
+        Settings.maxHome = cfg.getInt("maxhome", 10);
+        Settings.updater = cfg.getBoolean("updater");
+        Settings.islandDistance = cfg.getInt("island.islandSize", 200);
+        Settings.islandHieght = cfg.getInt("island.islandHieght", 100);
+        Settings.protectionrange = cfg.getInt("island.protectionRange", 100);
+        if (Settings.protectionrange % 2 != 0) {
+            Settings.protectionrange--;
+            Utils.ConsoleMsg("Protection range must be even, using " + Settings.protectionrange);
+        }
+        if (Settings.protectionrange > Settings.islandDistance) {
+            Utils.ConsoleMsg("Protection range cannot be > island distance. Setting them to be equal.");
+            Settings.protectionrange = Settings.islandDistance;
+        }
+        if (Settings.protectionrange < 0) {
+            Settings.protectionrange = 0;
+        }
+        // xoffset and zoffset are not public and only used for IslandWorld compatibility
+        Settings.islandXOffset = cfg.getInt("island.xoffset", 0);
+        if (Settings.islandXOffset < 0) {
+            Settings.islandXOffset = 0;
+            Utils.ConsoleMsg("Setting minimum island X Offset to 0");
+        } else if (Settings.islandXOffset > Settings.islandDistance) {
+            Settings.islandXOffset = Settings.islandDistance;
+            Utils.ConsoleMsg("Setting maximum island X Offset to " + Settings.islandDistance);
+        }
+        Settings.islandZOffset = cfg.getInt("island.zoffset", 0);
+        if (Settings.islandZOffset < 0) {
+            Settings.islandZOffset = 0;
+            Utils.ConsoleMsg("Setting minimum island Z Offset to 0");
+        } else if (Settings.islandZOffset > Settings.islandDistance) {
+            Settings.islandZOffset = Settings.islandDistance;
+            Utils.ConsoleMsg("Setting maximum island Z Offset to " + Settings.islandDistance);
+        }
+        Settings.facebook = cfg.getBoolean("chat.teamChat", true);
+        Settings.islandMaxNameLong = cfg.getInt("island.nameLimit", 20);
+        Settings.cleanrate = cfg.getInt("island.chunkResetPerBlocks", 256);
+        Settings.seaLevel = cfg.getInt("island.seaLevel", 3);
+        String cmd = cfg.getString("island.restrictedCommands", "");
+        final String[] pieces = cmd.substring(cmd.length()).trim().split(",");
+        String[] array;
+        for (int length = (array = pieces).length, i = 0; i < length; ++i) {
+            final String piece = array[i];
+            if (piece != null) {
+                if (piece.length() > 0) {
+                    Settings.bannedCommands.add(piece);
+                }
+            }
+        }
+        Settings.reset = cfg.getInt("island.reset", 0);
+        Settings.gamemode = cfg.getInt("island.gamemode", 0);
+        Settings.memberTimeOut = cfg.getInt("island.timeOut", 0);
+        // Companion names
+        List<String> companionNames = cfg.getStringList("island.companionnames");
+        Settings.companionNames = new ArrayList<>();
+        companionNames.forEach((name) -> {
+            Settings.companionNames.add(TextFormat.colorize('&', name));
+        });
         //Chest Items
         String chestItems = cfg.getString("island.chestItems", "");
         // Check chest items
@@ -61,7 +128,6 @@ public class ConfigManager {
                     }
                     Server.getInstance().getLogger().error("Problem loading chest item from config.yml so skipping it: " + chestItemString[i]);
                     Server.getInstance().getLogger().error("Error is : " + ex.getMessage());
-                    error += 1;
                 } catch (Exception e) {
                     if (ASkyBlock.get().isDebug()) {
                         e.printStackTrace();
@@ -71,7 +137,6 @@ public class ConfigManager {
                     Item.getCreativeItems().stream().forEach((c) -> {
                         Server.getInstance().getLogger().info(c.getName());
                     });
-                    error += 1;
                 }
             }
             Settings.chestItems = tempChest;
@@ -79,137 +144,46 @@ public class ConfigManager {
             // Nothing in the chest
             Settings.chestItems = new Item[0];
         }
-
-        // Island Size
-        int islandDistance = cfg.getInt("island.islandSize", 200);
-        if (cfg.get("island.islandSize") != null) {
-            try {
-                Settings.islandSize = islandDistance;
-                Settings.protectionrange = (islandDistance / 2);
-            } catch (Throwable exc2) {
-                Utils.ConsoleMsg("Invalid IslandSize setting");
-                error += 1;
-            }
-            if (Settings.islandSize < 10) {
-                Utils.ConsoleMsg("IslandSize too small. Using islandSize: 100 instead.");
-                Settings.islandSize = 100;
-                error += 1;
-            }
-
+        Settings.saveInventory = cfg.getBoolean("island.saveInventory");
+        Settings.stclock = new Location(cfg.getInt("lobby.lobbyX"), cfg.getInt("lobby.lobbyY"), cfg.getInt("lobby.lobbyZ"), Server.getInstance().getLevelByName(cfg.getString("lobby.world")));
+        // Challenges
+        Settings.broadcastMessages = cfg.getBoolean("general.broadcastmessages", true);
+        // ******************** Biome Settings *********************
+        Settings.biomeCost = cfg.getDouble("biomesettings.defaultcost", 100D);
+        if (Settings.biomeCost < 0D) {
+            Settings.biomeCost = 0D;
+            Utils.ConsoleMsg("Biome default cost is < $0, so set to zero.");
+        }
+        String defaultBiome = cfg.getString("biomesettings.defaultbiome", "PLAINS");
+        try {
+            // re-check if the biome exsits
+            Settings.defaultBiome = Biome.getBiome(defaultBiome);
+        } catch (Exception e) {
+            Utils.ConsoleMsg("Could not parse biome " + defaultBiome + " using PLAINS instead.");
+            Settings.defaultBiome = Biome.getBiome(Biome.PLAINS);
         }
 
-        // island Hieght
-        int islandHieght = cfg.getInt("island.islandHieght", 60);
-        if (cfg.get("island.islandHieght") != null) {
+        // System utils eg., Default world protection, cancel teleport distance
+        // ************ Protection Settings ****************
+        // Default settings hashmaps - make sure this is kept up to date with new settings
+        // If a setting is not listed, the world default is used
+        Settings.defaultWorldSettings.clear();
+        Settings.defaultIslandSettings.clear();
+        Settings.defaultSpawnSettings.clear();
+        Settings.visitorSettings.clear();
+        ConfigSection protectionWorld = cfg.getSections("protection.world");
+        for (Iterator<String> it = protectionWorld.getKeys(false).iterator(); it.hasNext();) {
+            String setting = it.next();
             try {
-                Settings.islandHieght = islandHieght;
-            } catch (Throwable ignore) {
-                Utils.ConsoleMsg("Invalid islandHieght setting");
-                error += 1;
-            }
-            if (Settings.islandHieght < 10 || Settings.islandHieght > 257) {
-                Utils.ConsoleMsg("IslandHieght too BIG!. Using islandHieght: 60 instead.");
-                Settings.islandHieght = 100;
-                error += 1;
-            }
-
-        }
-
-        //restriced commands
-        String cmd = cfg.getString("island.restrictedCommands", "");
-        if (cfg.get("island.restrictedCommands") != null) {
-            Settings.bannedCommands = new ArrayList<>();
-            try {
-                final String[] pieces = cmd.substring(cmd.length()).trim().split(",");
-                String[] array;
-                for (int length = (array = pieces).length, i = 0; i < length; ++i) {
-                    final String piece = array[i];
-                    if (piece != null) {
-                        if (piece.length() > 0) {
-                            Settings.bannedCommands.add(piece);
-                        }
-                    }
-                }
-            } catch (Throwable exc2) {
-                Utils.ConsoleMsg("Check your config! [Restricted Commands]");
-                error += 1;
+                SettingsFlag flag = SettingsFlag.valueOf(setting.toUpperCase());
+                boolean value = cfg.getBoolean("protection.world." + flag.name());
+                Settings.defaultWorldSettings.put(flag, value);
+                Settings.defaultSpawnSettings.put(flag, value);
+                Settings.defaultIslandSettings.put(flag, value);
+            } catch (Exception e) {
+                Utils.ConsoleMsg("Unknown setting in config.yml:protection.world " + setting.toUpperCase() + " skipping...");
             }
         }
-
-        // Island Sea level
-        int sealevel = cfg.getInt("island.seaLevel", 5);
-        if (cfg.get("island.seaLevel") != null) {
-            try {
-                Settings.seaLevel = sealevel;
-            } catch (Throwable exc2) {
-                Utils.ConsoleMsg("Check your config! [SeaLevel]");
-                error += 1;
-            }
-        }
-        // Reset for players
-        int islandTimer = cfg.getInt("island.resetPerPlayer", 5);
-        if (cfg.get("island.resetPerPlayer") != null) {
-            try {
-                Settings.reset = islandTimer;
-            } catch (Throwable exc2) {
-                Utils.ConsoleMsg("Check your config! [Reset PerPlayer!]");
-                error += 1;
-            }
-        }
-
-        // Island timeout
-        int members = cfg.getInt("island.timeOut", 10);
-        if (cfg.get("island.timeOut") != null) {
-            try {
-                Settings.memberTimeOut = members;
-            } catch (Throwable exc) {
-                Utils.ConsoleMsg("Check your config! [IslandTimeOut]");
-                error += 1;
-            }
-        }
-
-        // Companion Names
-        String names = cfg.getString("island.companionNames", "&aFood?");
-        if (cfg.get("island.companionNames") != null) {
-            try {
-                final String[] name = names.split(", ");
-                for (String name1 : name) {
-                    Settings.companionNames.add(name1.replace("&", "§"));
-                }
-
-            } catch (Throwable exc) {
-                Utils.ConsoleMsg("Check your config! [companionNames]");
-                error += 1;
-            }
-        }
-        if (cfg.get("island.gamemode") != null) {
-            try {
-                boolean enabled = cfg.getBoolean("island.gamemode.enable");
-                if (enabled) {
-                    int mode = cfg.getInt("island.gamemode.mode");
-                    Settings.gamemode = mode;
-                } else {
-                    Settings.gamemode = -1;
-                }
-            } catch (Throwable ex) {
-                Utils.ConsoleMsg("Check your config! [gamemode]");
-                error += 1;
-            }
-        }
-        if (cfg.get("island.chunkResetPerBlocks") != null) {
-            try {
-                int mode = cfg.getInt("island.chunkResetPerBlocks");
-                Settings.maxBlocks = mode;
-            } catch (Throwable ex) {
-                Utils.ConsoleMsg("Check your config! [gamemode]");
-                error += 1;
-            }
-        }
-        if (error > 5) {
-            Utils.ConsoleMsg(TextFormat.RED + "You might check your config.yml!");
-            Utils.ConsoleMsg(TextFormat.RED + "Make sure it is in the right format");
-        } else {
-            Utils.ConsoleMsg(TextFormat.YELLOW + "Seccessfully checked config.yml with " + TextFormat.RED + error + TextFormat.YELLOW + " Errors");
-        }
+        Utils.ConsoleMsg(TextFormat.YELLOW + "Seccessfully checked config.yml");
     }
 }

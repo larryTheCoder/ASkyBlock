@@ -20,9 +20,12 @@ permissions:
     is.command.help:
      default: true
      description: "List all of ASkyBlock commands"
-    is.command.kick:
+    is.command.expel:
      default: true
      description: "Kick a player from your island"   
+    is.command.edit:
+     default: true
+     descripotion: "Edit your island information"
     is.command.reset:
      default: true
      description: "Reset player island"
@@ -43,11 +46,17 @@ permissions:
      description: "Invite a player who didnt have a Team"
     is.command.create:
      default: true
-     description: "Create a new island"  
-
+     description: "Create a new island"
     is.command.info:
      default: true
      description: "get the players island info"
+    is.mod.bypassprotect:
+     default: op
+     description: "Bypass the island Guard settings"
+    is.mod.bypasslock:
+     default: op
+     description: "Bypass the island Lock settings"
+     
     # Admin Island Command
     is.admin.generate:
      default: op

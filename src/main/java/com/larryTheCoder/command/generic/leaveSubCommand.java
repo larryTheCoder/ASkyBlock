@@ -18,9 +18,9 @@ package com.larryTheCoder.command.generic;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.level.Position;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
+import com.larryTheCoder.utils.Settings;
 
 /**
  * @author larryTheCoder
@@ -72,11 +72,7 @@ public class leaveSubCommand extends SubCommand {
             }
         }
         getPlugin().getInventory().loadPlayerInventory(pt);
-        int x = getPlugin().cfg.getInt("lobby.lobbyX");
-        int y = getPlugin().cfg.getInt("lobby.lobbyY");
-        int z = getPlugin().cfg.getInt("lobby.lobbyZ");
-        String world = getPlugin().cfg.getString("lobby.world");
-        pt.teleport(new Position(x, y, z, getPlugin().getServer().getLevelByName(world)));
+        pt.teleport(Settings.stclock);
         return true;
     }
 

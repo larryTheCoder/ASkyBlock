@@ -62,7 +62,6 @@ public class SignPopulateTask implements TaskSkyBlock {
                 .putString("Text2", signText.get(1))
                 .putString("Text3", signText.get(2))
                 .putString("Text4", signText.get(3));
-        BlockEntity.createBlockEntity(BlockEntity.SIGN, level.getChunk((int) x >> 4, (int) z >> 4), nbt);
         new BlockEntitySign(level.getChunk((int) x >> 4, (int) z >> 4), nbt);
     }
 

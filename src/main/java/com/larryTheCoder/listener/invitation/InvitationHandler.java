@@ -21,6 +21,7 @@ import cn.nukkit.Server;
 import java.util.HashMap;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.PlayerData;
+import com.larryTheCoder.utils.Settings;
 
 /**
  * This class handle all Invitations and addmember function It will tick every
@@ -79,7 +80,7 @@ public class InvitationHandler {
     }
 
     public void tick() {
-        if (plugin.cfg.getInt("island.timeOut") != -1) {
+        if (Settings.memberTimeOut != -1) {
             invitation.values().stream().forEach((inv) -> {
                 inv.tick();
             });

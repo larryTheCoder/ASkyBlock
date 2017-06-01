@@ -47,7 +47,7 @@ public class GridManager {
     }
 
     public boolean onGrid(int x, int z) {
-        return x % Settings.islandSize == 0 || z % Settings.islandSize == 0;
+        return x % Settings.islandDistance == 0 || z % Settings.islandDistance == 0;
     }
 
     /**
@@ -194,6 +194,23 @@ public class GridManager {
         plugin.getTeleportLogic().safeTeleport(player, home, false, number);
         return true;
 
+    }
+
+    public IslandData getProtectedIslandAt(Location location) {
+        //plugin.getLogger().info("DEBUG: getProtectedIslandAt " + location);
+        IslandData island = plugin.getIslandInfo(location);
+        if (island == null) {
+            //plugin.getLogger().info("DEBUG: no island at this location");
+            return null;
+        }
+        if (island.onIsland(location)) {
+            return island;
+        }
+        return null;
+    }
+
+    public boolean isAtSpawn(Location location) {
+        return plugin.getDatabase().getSpawn().onIsland(location);
     }
 
 }

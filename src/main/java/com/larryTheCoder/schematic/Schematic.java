@@ -87,7 +87,7 @@ public class Schematic {
     private int rating;
     private boolean useDefaultChest;
     private Biome biome;
-    private boolean usePhysics;
+    private boolean usePhysics = true;
     private boolean pasteEntities;
     private boolean visible;
     private int order;
@@ -110,7 +110,6 @@ public class Schematic {
         rating = 50;
         useDefaultChest = true;
         biome = Settings.defaultBiome;
-        usePhysics = Settings.usePhysics;
         schematicFolder = null;
         islandCompanion = new ArrayList<>();
         islandCompanion.add(Settings.islandCompanion);
@@ -142,7 +141,6 @@ public class Schematic {
         schematicFolder = folder;
         useDefaultChest = true;
         biome = Settings.defaultBiome;
-        usePhysics = Settings.usePhysics;
         islandCompanion = new ArrayList<>();
         islandCompanion.add(Settings.islandCompanion);
         companionNames = Settings.companionNames;
@@ -345,13 +343,6 @@ public class Schematic {
                     if (blocks[index] != 0) {
                         countBlocks += 1;
                     }
-                    if (loop) {
-                        if (plugin.cfg.getBoolean("island.ISafeSpawning.enable")) {
-                            new ISafeSpawning(this, blocks[index], x, y, z, "SkyBlock");
-                        } else if (!plugin.cfg.getBoolean("island.ISafeSpawning.enable")) {
-                            loop = false;
-                        }
-                    }
                 }
             }
         }
@@ -443,7 +434,7 @@ public class Schematic {
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; ++y) {
                 for (int z = 0; z < length; ++z) {
-                    int h = Settings.islandLevel + y - bedrock.getFloorY();
+                    int h = Settings.seaLevel + y - bedrock.getFloorY();
                     if (h >= 0 && h < 255) {
                         int index = y * width * length + z * width + x;
                         IslandBlock block = new IslandBlock(x, y, z);
@@ -476,8 +467,6 @@ public class Schematic {
      * This method pastes a schematic
      *
      * @param loc
-     * @param player
-     * @param teleport
      */
     public void pasteSchematic(Location loc) {
         // If this is not a file schematic, paste the default island

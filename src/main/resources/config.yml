@@ -15,77 +15,227 @@ updater: false
 chat:
   # Use chat formatting such as &7 will return to §7
   UCFormatting: true
+  # Team chatting (Just like Facebook)
+  teamChat: true
 
-## Island part
+##### Island Related Settings #####
 island:
-  # Size of the island, You will have to set this
-  #   if islandSize = 200, the size of island will be 100
-  #   More easy if you use calculator `200 / 2` == 100
-  #   Minimum: 50
-  islandSize: 200
-  # Island Hieght
-  #   You can use this as island High
-  #   Minimum: 20
-  islandHieght: 60
-  # Island reset
-  #   Here you can control the 
-  #   Blocks when players reset their island
-  #   NOTE: more higher you made, more lag your server
-  #         depends on your schematic blocks
-  chunkResetPerBlocks: 256
-  # Island sea level
-  #   You can use this to keeping the
-  #   lag to a minimum
-  #   You may use this at maximum: 5
-  seaLevel: 3
-  # Restricted commands in Island / SkyBlock
-  #   level. You must respect the command format
-  #   Such as `/example1, /example2`
-  restrictedCommands: "/fly, /sell, /sg"
-  # Island reset
-  # You can use -1 for unlimited island reset
-  resetPerPlayer: 3
-  # Island gamemode, you can decide what gamemode will needed
-  gamemode:
-    # Enabling this will teleport player in 'GAMEMODE'
-    enable: true
-    # What is the gamemode in island?
-    # Integer: '1 FOR CREATIVE; 0 FOR SURVIVAL; 2 FOR NOTHING :P'
-    mode: 1
-  # ISafeSpawning config
-  ISafeSpawning:
-    # Enabling ISafeSpawning might be lagging your server
-    # Your choice to decide this
-    enable: true
-    # Force SafeSpawning if there is no SafeSpot where found
-    # THIS STILL IN DEVELOPMENT! IT WILL TROW DUMP FILE ON YOUR CONSOLE
-    forceSpot: false
-  # Island addMember time out
-  #   You can use -1 for unlimited time but 
-  #   Recommeded 20 seconds
-  timeOut: 20
-  # Island companion names
-  #   Your passion to add this or nor
-  #   Syantax: "&aFood?, &eEmergency Food?, &cYour Pet!"
-  companionNames: "&aFood?, &eEmergency Food?, &cYour Pet!"
-  # Island Biome
-  #   Your choice to 
-  # Items that will be in the chest when the player starts an island
-  # Must be in Nukkit Item format. Format is <ID>:<Qty> or <ID>:<Data>:<Qty>
-  # Use <Data> to set the durability of a item or to select sub-items/colors.  
-  #
-  # Spawn EGGs is not available yet! do not put I warned you :P
-  #
-  # Check console for errors and guidance after reloading configuration
-  chestItems: 'ICE:2 MELON:1 TORCH:2 BONE:1 LAVA_BUCKET:1 PUMPKIN_SEEDS:1 SUGAR_CANE:1 RED_MUSHROOM:1 BROWN_MUSHROOM:1 CACTUS:1 BREAD:1 WHEAT:1 LEATHER_BOOTS:1 LEATHER_HELMET:1 LEATHER_CHESTPLATE:1 LEATHER_LEGGINGS:1'
+   # Space between islands in blocks - NEVER change this mid-game.
+   # Values for a new world:
+   # 400 - puts players distance enough that they usually cannot see each other
+   # 200 - allows some expansion of the protected zone (recommended)
+   # 110 - for compatibility with established worlds. Cozy.
+   # 50 - minimum - not recommended
+   # IF YOU ARE UPGRADING YOU MUST USE YOUR OLD VALUE EXACTLY, E.G., 110
+   # OR RESET YOUR WORLD
+   # Value must be an even number
+   islandSize: 200
+   # Island Hieght
+   #   You can use this as island High
+   #   Minimum: 20
+   islandHieght: 60
+   # Default protection range (even number). Min = 0, Recommended = 100
+   # Larger values will take longer to calculate the island level
+   # For optimal performance, keep protection range at leat 16 blocks less than distance.
+   protectionRange: 100
+   # Island name limit
+   #   Here you can control th
+   #   Limit of the island naming size
+   #   You can use -1 to make it infinite
+   nameLimit: 20
+   # Island reset
+   #   Here you can control the 
+   #   Blocks when players reset their island
+   #   NOTE: more higher you made, more lag your server
+   #         depends on your schematic blocks
+   chunkResetPerBlocks: 256
+   # Sea level height (don't changes this mid-game unless you delete the world)
+   # Minimum is 0, which means you are playing sky block!
+   # If sea level is less than about 10, then players will drop right through it
+   # if it exists. Makes for an interesting variation on skyblock.
+   seaLevel: 3
+   # Restricted commands in Island / SkyBlock
+   #   level. You must respect the command format
+   #   Such as `/example1, /example2`
+   restrictedCommands: "/fly, /sell, /sg"
+   # Island reset
+   # You can use -1 for unlimited island reset
+   reset: 3
+   # Island gamemode, you can decide the gamemode
+   gamemode: 0
+   # Island addMember time out
+   #   You can use -1 for unlimited time but 
+   #   Recomended 20 seconds
+   timeOut: 20
+   # Island companion names
+   #   Your passion to add this or nor
+   #   Syantax: "&aFood?, &eEmergency Food?, &cYour Pet!"
+   companionNames: "&aFood?, &eEmergency Food?, &cYour Pet!"
+   # Items that will be in the chest when the player starts an island
+   # Must be in Nukkit Item format. Format is <ID>:<Qty> or <ID>:<Data>:<Qty>
+   # Use <Data> to set the durability of a item or to select sub-items/colors.  
+   #
+   # Spawn EGGs is not available yet! do not put I warned you :P
+   #
+   # Check console for errors and guidance after reloading configuration
+   chestItems: 'ICE:2 MELON:1 TORCH:2 BONE:1 LAVA_BUCKET:1 PUMPKIN_SEEDS:1 SUGAR_CANE:1 RED_MUSHROOM:1 BROWN_MUSHROOM:1 CACTUS:1 BREAD:1 WHEAT:1 LEATHER_BOOTS:1 LEATHER_HELMET:1 LEATHER_CHESTPLATE:1 LEATHER_LEGGINGS:1'
 
-## Main lobby
-lobby:
-  # The location of lobby 
-  lobbyX: 50
-  lobbyY: 90
-  lobbyZ: 50
-  world: "world"
+# This section contains the biomes that can be bought or used
+biomesettings:
+  # The default cost for changing biome. Can be over-ridden by the Biome settings
+  # Default is 100 if this is not set. Cannot be <0.
+  defaultcost: 100
+
+  # Default biome - what every player will start with. Default is PLAINS. See below
+  # for other options
+  defaultbiome: PLAINS
+  
+# Protection settings
+protection:
+   # Protection Setting Flags:
+   # ACID_DAMAGE, ANVIL, BEACON, BED, BREAK_BLOCKS, BREEDING, BREWING, 
+   # BUCKET, COLLECT_LAVA, COLLECT_WATER, CHEST, CHORUS_FRUIT, CRAFTING, CROP_TRAMPLE, 
+   # DOOR, EGGS, ENCHANTING, ENDER_PEARL, ENTER_EXIT_MESSAGES, FIRE, FIRE_EXTINGUISH, 
+   # FIRE_SPREAD, FURNACE, GATE, HORSE_INVENTORY, HORSE_RIDING, HURT_MOBS, LEASH,
+   # LEVER_BUTTON, MOB_SPAWN, PLACE_BLOCKS, PORTAL, PRESSURE_PLATE, PVP,
+   # MILKING, NETHER_PVP, REDSTONE, SPAWN_EGGS, SHEARING, VILLAGER_TRADING,
+   # VISITOR_ITEM_DROP, VISITOR_ITEM_PICKUP
+   #
+   # -- World defaults --
+   # Applies everywhere and are the default for islands and spawn.
+   # If not listed, default is false.
+   world:
+     # Acid causes damage above sea-level (if acid is active)
+     ACID_DAMAGE: true
+     # Allow anvil use
+     ANVIL: false
+     # Allow beacon use
+     BEACON: false
+     # Allow bed use
+     BED: false
+     # Players can break blocks or generally damage things
+     BREAK_BLOCKS: false
+     # Allow animal breeding
+     BREEDING: false
+     # Allow use of cauldrons and brewing stands
+     BREWING: false
+     # Allow use of buckets, either fill or dump them
+     BUCKET: false
+     # Collect Lava (overrides BUCKET setting for collecting lava)
+     COLLECT_LAVA: false
+     # Collect water (overrides BUCKET setting for collecting water)
+     COLLECT_WATER: false
+     # Allow access chests of any kind, droppers, dispensers and hoppers
+     CHEST: false
+     # Allow eating or use of chorus fruit
+     CHORUS_FRUIT: false
+     # Allow use of crafting benches
+     CRAFTING: true
+     # Allow creepers to hurt players (but not damage blocks)
+     CREEPER_PAIN: true
+     # Allow crop trampling
+     CROP_TRAMPLE: false
+     # Allow use of doors or trapdoors. Not including redstone activations.
+     DOOR: true
+     # Allow chicken egg throwing
+     EGGS: false
+     # Allow use of enchanting tables
+     ENCHANTING: true
+     # Allow enderpearl throwing
+     ENDER_PEARL: false
+     # Enable or disable join/leave messages from the player's island
+     ENTER_EXIT_MESSAGES: true
+     # Allow fire (flint & steel use, TNT priming) Making portals is allowed.
+     FIRE: false
+     # Can extinguish fires by punching them
+     FIRE_EXTINGUISH: false
+     # Allow fire spreading
+     FIRE_SPREAD: false
+     # Allow furnace use
+     FURNACE: true
+     # Allow gate use
+     GATE: false
+     # Allow horse/llama inventory use - only works when riding is enabled     
+     HORSE_INVENTORY: false
+     # Allow riding of horses/llamas
+     HORSE_RIDING: false
+     # Allow friendly mob hurting(cows etc.)
+     HURT_MOBS: false
+     # Allow monsters hurting
+     HURT_MONSTERS: true
+     # Allow leash use
+     LEASH: false
+     # Allow lever or button use
+     LEVER_BUTTON: true
+     # Cows can be milked
+     MILKING: true
+     # Animals, etc. can spawn naturally
+     MOB_SPAWN: true
+     # Allow monsters to spawn naturally
+     MONSTER_SPAWN: true
+     # Allow PVP in the nether world
+     NETHER_PVP: false
+     # Players can place blocks
+     PLACE_BLOCKS: false
+     # Allow portal use
+     PORTAL: true
+     # Allow pressure plate activation by players
+     PRESSURE_PLATE: true
+     # Allow PVP in the overworld
+     PVP: false
+     # Allow adjustment of diodes or comparators
+     REDSTONE: false
+     # Spawn eggs can be used
+     SPAWN_EGGS: false
+     # Allow sheep shearing
+     SHEARING: false
+     # Allow trading with villagers
+     VILLAGER_TRADING: true
+     # Allow item drop
+     VISITOR_ITEM_DROP: true
+     # Allow item pickup
+     VISITOR_ITEM_PICKUP: true
+   # -- Island Settings --
+   # Settings for islands. Some are for visitors, some for the island itself.
+   # If setting is not listed, it will not show in GUI and the world default will be used.
+   # Add settings here to give the player the ability to see them in the GUI. Give the
+   # player the permission for the setting for them to be able to change the setting.
+   island:
+     # Allow visitor anvil use
+     ANVIL: true
+     # Allow visitor beacon use
+     BEACON: false
+     # Allow visitor bed use
+     BED: false
+     # Allow visitor block breaking, or other damage
+     BREAK_BLOCKS: false
+     # Allow visitor animal breeding
+     BREEDING: false
+     # Allow visitor use of cauldrons and brewing stands
+     BREWING: false
+     # Allow visitor access chests of any kind, droppers, dispensers and hoppers
+     CHEST: false
+     # Allow visitors to use crafting benches
+     CRAFTING: true
+     # Allow visitor use of doors or trapdoors. Not including redstone activations.
+     DOOR: true
+     # Allow visitor chicken egg throwing
+     EGGS: false
+     # Allow visitors to use enchanting tables
+     ENCHANTING: true
+     # Allow visitor furnace use
+     FURNACE: true
+     # Allow gate use
+     GATE: true
+     # Allow portal use by visitors
+     PORTAL: true
+     # Allow pressure plate activation by visitors (players only)
+     PRESSURE_PLATE: false
+     # Allow adjustment of diodes or comparators
+     REDSTONE: false
+     # Allow visitors to shear sheep
+     SHEARING: false
+   
 # General section
 general:
   # The time for teleports 
@@ -96,15 +246,13 @@ general:
   # How far players can go to cancel
   # Teleports
   teleportCancelDistance: 0.2
+  # Broadcast 1st time challenge completion messages to all players.
+  # Change to false if the spam becomes too much.
+  broadcastmessages: true
+  
 ## Database
-# Recomended to NOT change this in game
+# Recomended to NOT change this in mid game
 database:
-  ## Choose the Provider that I given below
-  # ORMLITE - Easy Sqlite, MySql database.
-  # JDBC - SQLite database configured at DBLib plugin
-  # YAML - in .yaml files
-  # UNKNOWN - .dat - My Database
-  provider: JDBC
   # Configuration of DATABASE Connection:
   #  DBLIB  - default connection, defined in DbLib plugin
   #  SQLITE - custom sqlite file

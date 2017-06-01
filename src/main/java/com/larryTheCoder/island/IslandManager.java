@@ -21,12 +21,10 @@ import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
-import cn.nukkit.level.Position;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
-import com.intellectiualcrafters.TaskManager;
 
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.database.Database;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
@@ -65,7 +63,7 @@ public class IslandManager {
                 p.sendMessage(plugin.getPrefix() +TextFormat.RED + "No island found or could be created for you.");
                 return;
             }
-            if (plugin.cfg.getBoolean("island.saveInventory")) {
+            if (Settings.saveInventory) {
                 plugin.getInventory().savePlayerInventory(p);
             }
             plugin.getGrid().homeTeleport(p, homes);
@@ -150,12 +148,12 @@ public class IslandManager {
 
     public void createIsland(String p, Schematic stmt, String home) {
         for (int i = 0; i < 1000000; ++i) {
-            int width = i * Settings.islandSize * 2;
+            int width = i * Settings.islandDistance * 2;
             int wx = (int) (Math.random() * width);
             int wz = (int) (Math.random() * width);
             int wy = Settings.islandHieght;
-            wx = wx - wx % Settings.islandSize + Settings.islandSize / 2;
-            wz = wz - wz % Settings.islandSize + Settings.islandSize / 2;
+            wx = wx - wx % Settings.islandDistance + Settings.islandDistance / 2;
+            wz = wz - wz % Settings.islandDistance + Settings.islandDistance / 2;
             IslandData pd = plugin.getDatabase().getIslandById(generateIslandKey(wx, wz));
             if (pd == null) {
                 Level world = Server.getInstance().getLevelByName("SkyBlock");
@@ -178,7 +176,7 @@ public class IslandManager {
     }
 
     public int generateIslandKey(int x, int z) {
-        return x / Settings.islandSize + z / Settings.islandSize * 10000;
+        return x / Settings.islandDistance + z / Settings.islandDistance * 10000;
     }
 
     public boolean claim(String p, Location loc, String home) {
@@ -216,8 +214,14 @@ public class IslandManager {
         return true;
     }
 
-    public void reset(Player p, boolean reset, int homes) {
-        IslandData pd = ASkyBlock.get().getDatabase().getIsland(p.getName(), homes);
+    public boolean isPlayerIsland(Player p, Location loc){
+        if(!loc.getLevel().getName().equalsIgnoreCase("SkyBlock")){
+            return false;
+        }
+        return !plugin.getIslandInfo(loc).owner.equalsIgnoreCase(p.getName());
+    }
+    
+    public void reset(Player p, boolean reset, IslandData pd) {
         if (pd == null || pd.owner == null) {
             p.sendMessage(plugin.getPrefix() +plugin.getMsg("no_island_error"));
             return;
@@ -225,7 +229,7 @@ public class IslandManager {
         plugin.getServer().getScheduler().scheduleTask(new DeleteIslandTask(plugin, pd));
         if (reset) {
             p.sendMessage(plugin.getPrefix() + plugin.getMsg("reset").replace("[min]", "30"));
-            handleIslandCommand(p, true, homes);
+            handleIslandCommand(p, true, pd.id);
         } else {
             p.sendMessage(plugin.getPrefix() + plugin.getMsg("restart").replace("[min]", "30"));
         }
@@ -310,9 +314,7 @@ public class IslandManager {
         p.teleport(new Location(pd.X, pd.Y, pd.Z, 0, 0, lvl));
     }
 
-    public void setHomeLocation(Player p, Position lPlusOne, int number) {
-        Database db = ASkyBlock.get().getDatabase();
-        Position loc = lPlusOne;
-        db.setPosition(loc, number, p.getName());
+    public boolean locationIsOnIsland(Player player, Vector3 touchVector) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

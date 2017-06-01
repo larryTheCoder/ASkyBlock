@@ -22,7 +22,6 @@
  * SECURITY FIX:
  *  - Change the player name into UUID
  */
-
 package com.larryTheCoder;
 
 import com.larryTheCoder.task.PluginTask;
@@ -44,10 +43,10 @@ import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.intellectiualcrafters.updater.Updater;
 import com.larryTheCoder.command.ChallangesCMD;
-import com.larryTheCoder.database.Database;
-import com.larryTheCoder.database.jdbc.ASConnection;
-import com.larryTheCoder.database.jdbc.variables.MySQLDatabase;
-import com.larryTheCoder.database.jdbc.variables.SQLiteDatabase;
+import com.larryTheCoder.database.ASConnection;
+import com.larryTheCoder.database.JDBCUtilities;
+import com.larryTheCoder.database.variables.MySQLDatabase;
+import com.larryTheCoder.database.variables.SQLiteDatabase;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +58,6 @@ import java.util.List;
 import com.larryTheCoder.storage.InventorySave;
 import com.larryTheCoder.listener.IslandListener;
 import com.larryTheCoder.listener.chat.ChatHandler;
-import com.larryTheCoder.database.ormlite.ORMLiteDatabase;
 import com.larryTheCoder.economyHandler.Economy;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.island.GridManager;
@@ -68,11 +66,11 @@ import com.larryTheCoder.island.IslandManager;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.player.TeleportLogic;
+import com.larryTheCoder.safecontrol.SHAHashingExample;
 import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import java.sql.SQLException;
-import java.util.logging.Logger;
 
 /**
  * @author larryTheCoder
@@ -87,7 +85,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     // Managers
     private Config msg;
     public static Economy econ;
-    private Database db = null;
+    private ASConnection db = null;
     private ChatHandler chatHandler;
     private static ASkyBlock object;
     private InvitationHandler invitationHandler;
@@ -139,7 +137,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     }
 
     @Override
-    public Database getDatabase() {
+    public ASConnection getDatabase() {
         return db;
     }
 
@@ -266,10 +264,8 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
      * Checks how often a challenge has been completed
      *
      * @param player
-     * @param challenge
      * @return number of times
      */
-
     @Override
     public PlayerData getPlayerInfo(Player player) {
         return getDatabase().getPlayerData(player);
@@ -296,7 +292,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         registerObject();
         getServer().getLogger().info(TextFormat.YELLOW + "------------------------------------------------------------");
         getServer().getLogger().notice(TextFormat.colorize('&', "&eYou are using BETA-Builds of ASkyBlock!"));
-        getServer().getLogger().notice(TextFormat.colorize('&', "&eWarning! You might experience some crash and errors while using this plugin"));        
+        getServer().getLogger().notice(TextFormat.colorize('&', "&eWarning! You might experience some crash and errors while using this plugin"));
         getServer().getLogger().notice(TextFormat.colorize('&', "&eIt is recommended to report any issues at: http://www.github.com/larryTheCoder/ASkyBlock-Nukkit/issues"));
         getServer().getLogger().info(getPrefix() + getMsg("onEnable"));
     }
@@ -354,48 +350,22 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         backup.init();
         getServer().getCommandMap().register("ASkyBlock", new Commands(this));
         getServer().getCommandMap().register("ASkyBlock", this.cmds = new ChallangesCMD(this));
-        switch (cfg.getString("database.provider").toLowerCase()) {
-            case "jdbc":
-                if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {
-                    try {
-                        db = new ASConnection(new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")), true);
-                    } catch (SQLException | ClassNotFoundException ex) {
-                        Utils.ConsoleMsg("Unable to create MySql database");
-                    } catch (InterruptedException ex) {
-                Logger.getLogger(ASkyBlock.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {
+            try {
+                db = new ASConnection(new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")), true);
+            } catch (SQLException ex) {
+                JDBCUtilities.printSQLException(ex);
+            } catch (ClassNotFoundException | InterruptedException ex) {
+                Utils.ConsoleMsg("Unable to create MySql database");
             }
-                } else {
-                    try {
-                        db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
-                    } catch (SQLException | ClassNotFoundException ex) {
-                        Utils.ConsoleMsg("Unable to create Sqlite database");
-                    } catch (InterruptedException ex) {
-                Logger.getLogger(ASkyBlock.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } else {
+            try {
+                db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
+            } catch (SQLException ex) {
+                JDBCUtilities.printSQLException(ex);
+            } catch (ClassNotFoundException | InterruptedException ex) {
+                Utils.ConsoleMsg("Unable to create MySql database");
             }
-                }
-                break;
-            case "ormlite":
-            case "yaml":
-            case "unknown":
-                Utils.ConsoleMsg("&cYAML and Unknown Database not available. Sorry. Using default: JDBC");
-                try {
-                    db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
-                } catch (SQLException | ClassNotFoundException ex) {
-                    Utils.ConsoleMsg("Unable to create Sqlite database");
-                } catch (InterruptedException ex) {
-            Logger.getLogger(ASkyBlock.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-                break;
-            default:
-                Utils.ConsoleMsg("&c" + cfg.getString("database.provider") + " is not available. Sorry. Using default: JDBC");
-                try {
-                    db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
-                } catch (SQLException | ClassNotFoundException ex) {
-                    Utils.ConsoleMsg("&cUnable to create Sqlite database");
-                } catch (InterruptedException ex) {
-            Logger.getLogger(ASkyBlock.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-                break;
         }
         reloadLevel();
         generateLevel();

@@ -17,8 +17,12 @@
 package com.larryTheCoder.utils;
 
 import cn.nukkit.item.Item;
+import cn.nukkit.level.Location;
 import cn.nukkit.level.generator.biome.Biome;
+import com.larryTheCoder.storage.IslandData.SettingsFlag;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -28,38 +32,63 @@ import java.util.Set;
 public class Settings {
 
     public static GameType GAMETYPE = GameType.SKYBLOCK;
-    public static Item[] chestItems = new Item[0];
-    public static int islandSize = 200;
-    public static int islandHieght = 60;
-    public static ArrayList<String> bannedCommands = new ArrayList<>();
-    public static int islandLevel = 0;
-    public static int seaLevel = 0;
-    public static int reset = 3;
-    public static int memberTimeOut;
-    public static int protectionrange;
+    
+    // system variables
     public static boolean useSchematicPanel;
     public static boolean chooseIslandRandomly;
     public static List<String> challengeLevels = new ArrayList<>();
-
-    public static Biome defaultBiome = Biome.getBiome(Biome.PLAINS);
-    public static boolean usePhysics = false;
-    public static String islandCompanion = "COW";
-    public static List<String> companionNames = new ArrayList<>();
+    
+    // config variables
+    public static int maxHome;
+    public static boolean updater;
+    public static int islandDistance = 200;
+    public static int islandHieght = 60;
+    public static int protectionrange;
+    public static int islandXOffset;
+    public static int islandZOffset;
+    public static int islandMaxNameLong;
+    public static int cleanrate;
+    public static int seaLevel = 0;
+    public static ArrayList<String> bannedCommands = new ArrayList<>();
+    public static int reset = 3;
     public static int gamemode;
-    public static int maxBlocks;
-    public static Set<String> challengeList;
-    public static List<String> freeLevels;
-    public static int waiverAmount;
-    public static boolean useEconomy;
+    public static int memberTimeOut;
+    public static List<String> companionNames = new ArrayList<>();
+    public static Item[] chestItems = new Item[0];
     public static boolean broadcastMessages;
-    public static double moneyAmount;
+    public static double biomeCost;
+    public static Biome defaultBiome;
+    public static boolean facebook;
+    public static boolean saveInventory;
+    public static Location stclock;
+    
+    // default variables
+    public static String islandCompanion = "COW";
+    public static Set<String> challengeList = new HashSet<>();
+    public static List<String> freeLevels = new ArrayList<>();
+    public static int waiverAmount = 0;
+    public static boolean useEconomy = false;
 
-    public static class enabled {
+    /**
+     * Default world protection settings
+     */
+    public static HashMap<SettingsFlag, Boolean> defaultWorldSettings = new HashMap<SettingsFlag, Boolean>();
 
-        public static boolean DATABASE = true;
-        public static boolean EVENTS = false;
-        public static boolean TEAM = false;
-        public static boolean UPDATER = true;
-        public static boolean ANTIHACK = false; // A day will come for a long time ago
-    }
+    /**
+     * Default island protection settings
+     */
+    public static HashMap<SettingsFlag, Boolean> defaultIslandSettings = new HashMap<SettingsFlag, Boolean>();
+    /**
+     * Default spawn protection settings
+     */
+    public static HashMap<SettingsFlag, Boolean> defaultSpawnSettings = new HashMap<SettingsFlag, Boolean>();
+    /**
+     * Visitors settings to show in the GUI
+     */
+    public static HashMap<SettingsFlag, Boolean> visitorSettings = new HashMap<SettingsFlag, Boolean>();
+    public static boolean allowTNTDamage;
+    public static boolean allowChestDamage;
+    public static boolean allowCreeperGriefing;
+    public static boolean allowCreeperDamage;
+    
 }

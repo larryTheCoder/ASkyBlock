@@ -38,6 +38,8 @@ import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
 /**
+ * Basic island listener
+ * 
  * @author larryTheCoder
  */
 public class IslandListener implements Listener {
@@ -146,7 +148,7 @@ public class IslandListener implements Listener {
         // load player inventory if exsits
         plugin.getInventory().loadPlayerInventory(ex.getPlayer());
         if(plugin.getDatabase().getPlayerData(ex.getPlayer()) == null){
-            Utils.ConsoleMsg("NULL Created");
+            Utils.ConsoleMsg(ex.getPlayer().getName() + " data doesn`t exsits. Creating new ones");
             plugin.getDatabase().createPlayer(ex.getPlayer());
         }
     }

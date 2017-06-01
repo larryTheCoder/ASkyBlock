@@ -19,7 +19,7 @@ package com.larryTheCoder;
 import cn.nukkit.Player;
 import cn.nukkit.level.Location;
 import cn.nukkit.plugin.Plugin;
-import com.larryTheCoder.database.Database;
+import com.larryTheCoder.database.ASConnection;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.storage.IslandData;
@@ -109,7 +109,7 @@ public interface ASkyBlockAPI extends Plugin {
      * @return ASConnection
      * @since 0.1.0
      */
-    Database getDatabase();
+    ASConnection getDatabase();
 
     /**
      * get the plug-in version

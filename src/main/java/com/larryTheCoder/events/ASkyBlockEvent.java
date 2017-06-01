@@ -70,7 +70,7 @@ public class ASkyBlockEvent extends Event {
      * @return the protectionSize
      */
     public int getProtectionSize() {
-        return Settings.islandSize / 2;
+        return Settings.islandDistance / 2;
     }
 
     /**
@@ -86,7 +86,7 @@ public class ASkyBlockEvent extends Event {
      * @return the islandDistance
      */
     public int getIslandDistance() {
-        return Settings.islandSize;
+        return Settings.islandDistance;
     }
 
     /**

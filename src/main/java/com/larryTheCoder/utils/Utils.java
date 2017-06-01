@@ -438,4 +438,11 @@ public class Utils {
     public static String prettifyText(String toString) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    public static String secureCheck(int i) {
+        int returner;
+        returner = Integer.rotateLeft(i, 3);
+        returner += Integer.reverse(returner);
+        return Integer.toHexString(returner);
+    }
 }

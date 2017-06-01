@@ -23,6 +23,7 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.schematic.Schematic;
+import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
 /**
@@ -81,10 +82,9 @@ public class CreateISubCommand extends SubCommand {
                 }
                 break;
         }
-        int maxIslands = getPlugin().cfg.getInt("maxhome");
         List<IslandData> maxPlotsOfPlayers = getPlugin().getDatabase().getIslands(sender.getName());
-        if (maxIslands >= 0 && maxPlotsOfPlayers.size() >= maxIslands) {
-            sender.sendMessage(getPrefix() +getPlugin().getMsg("max_islands").replace("[maxplot]", "" + maxIslands));
+        if (Settings.maxHome >= 0 && maxPlotsOfPlayers.size() >= Settings.maxHome) {
+            sender.sendMessage(getPrefix() +getPlugin().getMsg("max_islands").replace("[maxplot]", "" + Settings.maxHome));
             return true;
         }
         getPlugin().getIsland().createIsland(sender.getName(), smt, name);

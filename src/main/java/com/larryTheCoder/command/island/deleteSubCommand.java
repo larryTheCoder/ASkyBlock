@@ -48,7 +48,7 @@ public class deleteSubCommand extends SubCommand{
 
     @Override
     public String getDescription() {
-        return "Delete your island";
+        return "Delete your where you standing at";
     }
 
     @Override
@@ -62,12 +62,12 @@ public class deleteSubCommand extends SubCommand{
             return false;
         }
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if(!getPlugin().getIsland().checkIsland(p, Integer.parseInt(args[1]))){
+        if(!getPlugin().getIsland().isPlayerIsland(p, p.getLocation())){
             sender.sendMessage(getPrefix() + getMsg("no_island_error"));
             return true;
         }
-        
-        getPlugin().getIsland().reset(p, false, Integer.parseInt(args[1]));
+        // safe
+        getPlugin().getIsland().reset(p, false, getPlugin().getIslandInfo(p.getLocation()));
         return true;
     }
 

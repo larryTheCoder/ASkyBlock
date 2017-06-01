@@ -20,6 +20,7 @@ import cn.nukkit.Player;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.PlayerData;
+import com.larryTheCoder.utils.Settings;
 
 /**
  * @author larryTheCoder
@@ -49,7 +50,7 @@ public class Invitation {
         this.sender = sender;
         this.receiver = receiver;
         this.island = island;
-        this.time = ASkyBlock.get().cfg.getInt("island.timeOut");
+        this.time = Settings.memberTimeOut;
     }
 
     /**

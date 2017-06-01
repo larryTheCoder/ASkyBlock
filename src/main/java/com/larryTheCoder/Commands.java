@@ -30,12 +30,12 @@ import com.larryTheCoder.command.generic.AGenerateSubCommand;
 import com.larryTheCoder.command.generic.AKickSubCommand;
 import com.larryTheCoder.command.island.CreateISubCommand;
 import com.larryTheCoder.command.SubCommand;
-import com.larryTheCoder.command.generic.kickSubCommand;
+import com.larryTheCoder.command.generic.ExpelSubCommand;
 import com.larryTheCoder.command.generic.VGamemodeSubCommand;
 import com.larryTheCoder.command.generic.leaveSubCommand;
 import com.larryTheCoder.command.island.deleteSubCommand;
-import com.larryTheCoder.command.generic.ASetLobbySubCommand;
-import com.larryTheCoder.command.management.ToggleSubCommand;
+import com.larryTheCoder.command.generic.SetSpawnSubCommand;
+import com.larryTheCoder.command.management.editSubCommand;
 import com.larryTheCoder.command.management.acceptSubCommand;
 import com.larryTheCoder.command.management.denySubCommand;
 import com.larryTheCoder.command.island.homeSubCommand;
@@ -66,16 +66,16 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.loadSubCommand(new AGenerateSubCommand(getPlugin()));
         this.loadSubCommand(new acceptSubCommand(getPlugin()));
         this.loadSubCommand(new AKickSubCommand(getPlugin()));
-        this.loadSubCommand(new ASetLobbySubCommand(getPlugin()));
+        this.loadSubCommand(new SetSpawnSubCommand(getPlugin()));
         this.loadSubCommand(new CreateISubCommand(getPlugin()));
         this.loadSubCommand(new denySubCommand(getPlugin()));
         this.loadSubCommand(new deleteSubCommand(getPlugin()));
         this.loadSubCommand(new infoSubCommand(getPlugin()));
         this.loadSubCommand(new inviteSubCommand(getPlugin()));
-        this.loadSubCommand(new kickSubCommand(getPlugin()));
+        this.loadSubCommand(new ExpelSubCommand(getPlugin()));
         this.loadSubCommand(new leaveSubCommand(getPlugin()));
         this.loadSubCommand(new teleportSubCommand(getPlugin()));
-        this.loadSubCommand(new ToggleSubCommand(getPlugin()));
+        this.loadSubCommand(new editSubCommand(getPlugin()));
         this.loadSubCommand(new VGamemodeSubCommand(getPlugin()));
         this.loadSubCommand(new homeSubCommand(getPlugin()));
     }
@@ -127,6 +127,10 @@ public class Commands extends PluginCommand<ASkyBlock> {
 
     private boolean sendHelp(CommandSender sender, String[] args) {
         if (args.length != 0) {
+            if(!args[0].equalsIgnoreCase("help")){
+                sender.sendMessage(TextFormat.RED + "Unknown command use /is help for a list of commands");
+                return true;
+            }
             if (args.length == 2 && !Utils.isNumeric(args[1])) {
                 if (SubCommand.containsKey(args[1].toLowerCase())) {
                     // Show help for #IRC

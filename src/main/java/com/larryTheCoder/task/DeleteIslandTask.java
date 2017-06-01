@@ -43,11 +43,18 @@ public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> 
 
     @Override
     public void onRun(int currentTick) {
+        // Check code
+        // maxX = 50 + (200 / 2) = 150
+        // maxZ = 50 + (200 / 2) = 150
+        // minX = 50 - (200 / 2) = 50
+        // minZ = 50 - (200 / 2) = 50
+        //
+        //
         int maxX = pd.X + (pd.getProtectionSize() / 2);
         int maxZ = pd.Z + (pd.getProtectionSize() / 2);
         int mineX = pd.X - (pd.getProtectionSize() / 2);
         int mineZ = pd.X - (pd.getProtectionSize() / 2);
-        Utils.ConsoleMsg("Form: " + maxX + " " + maxZ + " " + mineZ + " " + mineX);
+        Utils.ConsoleMsg("Form: " + maxX + " " + maxZ + " to " + mineZ + " " + mineX);
         int blocks = 0;
         for (int minX = pd.X - (pd.getProtectionSize() / 2); minX < maxX; minX++) {
             for (int y = 0; y < 257; y++) {

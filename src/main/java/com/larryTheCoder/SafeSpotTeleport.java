@@ -104,11 +104,11 @@ public class SafeSpotTeleport {
             return;
         }
         ArrayList<Location> pos = new ArrayList<>();
-        int maxX = pd.X + (Settings.islandSize / 2);
-        int maxZ = pd.Z + (Settings.islandSize / 2);
-        for (int minX = pd.X - (Settings.islandSize / 2); minX < maxX; minX++) {
+        int maxX = pd.X + (Settings.islandDistance / 2);
+        int maxZ = pd.Z + (Settings.islandDistance / 2);
+        for (int minX = pd.X - (Settings.islandDistance / 2); minX < maxX; minX++) {
             for (int y = 157; y > 0; y--) { // Start from up to down
-                for (int minZ = pd.Z - (Settings.islandSize / 2); minZ < maxZ; minX++) {
+                for (int minZ = pd.Z - (Settings.islandDistance / 2); minZ < maxZ; minX++) {
                     if (checkBlock(lc.getLevel(), minX, y, minZ)) {
                         pos.add(new Location(minX, y, minZ));
                     }

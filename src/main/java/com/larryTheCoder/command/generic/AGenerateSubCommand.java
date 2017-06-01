@@ -32,7 +32,7 @@ public class AGenerateSubCommand extends SubCommand {
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.admin");
+        return sender.hasPermission("is.admin.generate");
     }
 
     @Override

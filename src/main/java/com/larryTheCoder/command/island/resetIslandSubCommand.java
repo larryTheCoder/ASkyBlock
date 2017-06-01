@@ -47,7 +47,7 @@ public class resetIslandSubCommand extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "Refresh your island";
+        return "Refresh your island where you standing at";
     }
 
     @Override
@@ -61,11 +61,11 @@ public class resetIslandSubCommand extends SubCommand {
             return false;
         }
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if (getPlugin().getIsland().checkIsland(p)) {
+        if (getPlugin().getIsland().isPlayerIsland(p, p.getLocation())) {
             sender.sendMessage(getPrefix() + getMsg("no_island_error"));
             return true;
         }
-        getPlugin().getIsland().reset(p, true, Integer.parseInt(args[1]));
+        getPlugin().getIsland().reset(p, true, getPlugin().getIslandInfo(p.getLocation()));
         return true;
     }
 
