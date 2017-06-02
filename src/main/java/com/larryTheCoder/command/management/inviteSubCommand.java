@@ -26,9 +26,9 @@ import com.larryTheCoder.player.PlayerData;
 /**
  * @author larryTheCoder
  */
-public class inviteSubCommand extends SubCommand {
+public class InviteSubCommand extends SubCommand {
 
-    public inviteSubCommand(ASkyBlock plugin) {
+    public InviteSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 

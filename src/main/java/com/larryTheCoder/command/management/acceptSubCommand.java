@@ -26,9 +26,9 @@ import com.larryTheCoder.listener.invitation.InvitationHandler;
 /**
  * @author larryTheCoder
  */
-public class acceptSubCommand extends SubCommand{
+public class AcceptSubCommand extends SubCommand{
 
-    public acceptSubCommand(ASkyBlock plugin) {
+    public AcceptSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 

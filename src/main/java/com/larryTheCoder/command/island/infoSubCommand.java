@@ -25,9 +25,9 @@ import com.larryTheCoder.command.SubCommand;
 /**
  * @author larryTheCoder
  */
-public class infoSubCommand extends SubCommand{
+public class InfoSubCommand extends SubCommand{
 
-    public infoSubCommand(ASkyBlock plugin) {
+    public InfoSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 

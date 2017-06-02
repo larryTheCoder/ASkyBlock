@@ -25,9 +25,9 @@ import com.larryTheCoder.command.SubCommand;
 /**
  * @author larryTheCoder
  */
-public class deleteSubCommand extends SubCommand{
+public class DeleteSubCommand extends SubCommand{
 
-    public deleteSubCommand(ASkyBlock plugin) {
+    public DeleteSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 

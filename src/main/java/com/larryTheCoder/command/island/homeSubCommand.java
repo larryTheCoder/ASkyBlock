@@ -28,9 +28,9 @@ import java.util.List;
 /**
  * @author larryTheCoder
  */
-public class homeSubCommand extends SubCommand {
+public class HomeSubCommand extends SubCommand {
 
-    public homeSubCommand(ASkyBlock plugin) {
+    public HomeSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 

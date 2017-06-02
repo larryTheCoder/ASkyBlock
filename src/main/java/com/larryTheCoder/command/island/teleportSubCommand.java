@@ -25,9 +25,9 @@ import com.larryTheCoder.command.SubCommand;
 /**
  * @author larryTheCoder
  */
-public class teleportSubCommand extends SubCommand{
+public class TeleportSubCommand extends SubCommand{
 
-    public teleportSubCommand(ASkyBlock plugin) {
+    public TeleportSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 

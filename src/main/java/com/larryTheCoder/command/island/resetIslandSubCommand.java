@@ -24,9 +24,9 @@ import com.larryTheCoder.command.SubCommand;
 /**
  * @author larryTheCoder
  */
-public class resetIslandSubCommand extends SubCommand {
+public class ResetIslandSubCommand extends SubCommand {
 
-    public resetIslandSubCommand(ASkyBlock plugin) {
+    public ResetIslandSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 

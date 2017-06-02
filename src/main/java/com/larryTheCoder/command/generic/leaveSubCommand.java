@@ -25,9 +25,9 @@ import com.larryTheCoder.utils.Settings;
 /**
  * @author larryTheCoder
  */
-public class leaveSubCommand extends SubCommand {
+public class LeaveSubCommand extends SubCommand {
 
-    public leaveSubCommand(ASkyBlock plugin) {
+    public LeaveSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 

@@ -20,6 +20,6 @@ package com.larryTheCoder.command.generic;
 /**
  * @author larryTheCoder
  */
-public class localeSubCommand {
+public class LocaleSubCommand {
 
 }

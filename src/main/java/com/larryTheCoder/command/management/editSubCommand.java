@@ -27,9 +27,9 @@ import com.larryTheCoder.utils.Settings;
 /**
  * @author larryTheCoder
  */
-public class editSubCommand extends SubCommand {
+public class EditSubCommand extends SubCommand {
 
-    public editSubCommand(ASkyBlock plugin) {
+    public EditSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 

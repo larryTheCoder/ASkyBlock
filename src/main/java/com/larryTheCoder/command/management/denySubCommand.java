@@ -26,9 +26,9 @@ import com.larryTheCoder.listener.invitation.InvitationHandler;
 /**
  * @author larryTheCoder
  */
-public class denySubCommand extends SubCommand{
+public class DenySubCommand extends SubCommand{
 
-    public denySubCommand(ASkyBlock plugin) {
+    public DenySubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 

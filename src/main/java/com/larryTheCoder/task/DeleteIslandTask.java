@@ -23,13 +23,12 @@ import cn.nukkit.math.Vector3;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
-import com.larryTheCoder.utils.Utils;
 
 /**
  *
  * @author larryTheCoder
  */
-public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> implements TaskSkyBlock{
+public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> {
 
     private final IslandData pd;
 
@@ -48,27 +47,21 @@ public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> 
         // maxZ = 50 + (200 / 2) = 150
         // minX = 50 - (200 / 2) = 50
         // minZ = 50 - (200 / 2) = 50
-        //
-        //
+        // 150 - 50 = 100 [Island Primeter = 100]
+        // Island Square/blocks
+        
         int maxX = pd.X + (pd.getProtectionSize() / 2);
         int maxZ = pd.Z + (pd.getProtectionSize() / 2);
-        int mineX = pd.X - (pd.getProtectionSize() / 2);
-        int mineZ = pd.X - (pd.getProtectionSize() / 2);
-        Utils.ConsoleMsg("Form: " + maxX + " " + maxZ + " to " + mineZ + " " + mineX);
-        int blocks = 0;
-        for (int minX = pd.X - (pd.getProtectionSize() / 2); minX < maxX; minX++) {
+        int minX = pd.X - (pd.getProtectionSize() / 2);
+        int minZ = pd.X - (pd.getProtectionSize() / 2);
+        for (; minX < maxX; minX++) {
             for (int y = 0; y < 257; y++) {
-                for (int minZ = pd.X - (pd.getProtectionSize() / 2); minZ < maxZ; minZ++) {
+                for (; minZ < maxZ; minZ++) {
                     int block = Block.AIR;
                     if (y < Settings.seaLevel) {
                         block = Block.WATER;
                     }
                     level.setBlock(new Vector3(minX, y, minZ), Block.get(block), true, true);
-                    blocks++;
-                    if (blocks == 50) {
-                        getOwner().getServer().getScheduler().scheduleDelayedTask(this, 2);
-                        break;
-                    }
                 }
             }
         }

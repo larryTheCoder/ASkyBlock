@@ -32,16 +32,16 @@ import com.larryTheCoder.command.island.CreateISubCommand;
 import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.command.generic.ExpelSubCommand;
 import com.larryTheCoder.command.generic.VGamemodeSubCommand;
-import com.larryTheCoder.command.generic.leaveSubCommand;
-import com.larryTheCoder.command.island.deleteSubCommand;
+import com.larryTheCoder.command.generic.LeaveSubCommand;
+import com.larryTheCoder.command.island.DeleteSubCommand;
 import com.larryTheCoder.command.generic.SetSpawnSubCommand;
-import com.larryTheCoder.command.management.editSubCommand;
-import com.larryTheCoder.command.management.acceptSubCommand;
-import com.larryTheCoder.command.management.denySubCommand;
-import com.larryTheCoder.command.island.homeSubCommand;
-import com.larryTheCoder.command.island.infoSubCommand;
-import com.larryTheCoder.command.management.inviteSubCommand;
-import com.larryTheCoder.command.island.teleportSubCommand;
+import com.larryTheCoder.command.management.EditSubCommand;
+import com.larryTheCoder.command.management.AcceptSubCommand;
+import com.larryTheCoder.command.management.DenySubCommand;
+import com.larryTheCoder.command.island.HomeSubCommand;
+import com.larryTheCoder.command.island.InfoSubCommand;
+import com.larryTheCoder.command.management.InviteSubCommand;
+import com.larryTheCoder.command.island.TeleportSubCommand;
 
 /**
  * Commands v2.0 [SkyBlock]
@@ -64,20 +64,20 @@ public class Commands extends PluginCommand<ASkyBlock> {
 
         
         this.loadSubCommand(new AGenerateSubCommand(getPlugin()));
-        this.loadSubCommand(new acceptSubCommand(getPlugin()));
+        this.loadSubCommand(new AcceptSubCommand(getPlugin()));
         this.loadSubCommand(new AKickSubCommand(getPlugin()));
         this.loadSubCommand(new SetSpawnSubCommand(getPlugin()));
         this.loadSubCommand(new CreateISubCommand(getPlugin()));
-        this.loadSubCommand(new denySubCommand(getPlugin()));
-        this.loadSubCommand(new deleteSubCommand(getPlugin()));
-        this.loadSubCommand(new infoSubCommand(getPlugin()));
-        this.loadSubCommand(new inviteSubCommand(getPlugin()));
+        this.loadSubCommand(new DenySubCommand(getPlugin()));
+        this.loadSubCommand(new DeleteSubCommand(getPlugin()));
+        this.loadSubCommand(new InfoSubCommand(getPlugin()));
+        this.loadSubCommand(new InviteSubCommand(getPlugin()));
         this.loadSubCommand(new ExpelSubCommand(getPlugin()));
-        this.loadSubCommand(new leaveSubCommand(getPlugin()));
-        this.loadSubCommand(new teleportSubCommand(getPlugin()));
-        this.loadSubCommand(new editSubCommand(getPlugin()));
+        this.loadSubCommand(new LeaveSubCommand(getPlugin()));
+        this.loadSubCommand(new TeleportSubCommand(getPlugin()));
+        this.loadSubCommand(new EditSubCommand(getPlugin()));
         this.loadSubCommand(new VGamemodeSubCommand(getPlugin()));
-        this.loadSubCommand(new homeSubCommand(getPlugin()));
+        this.loadSubCommand(new HomeSubCommand(getPlugin()));
     }
 
     private void loadSubCommand(SubCommand cmd) {
