@@ -90,5 +90,6 @@ public class Settings {
     public static boolean allowChestDamage;
     public static boolean allowCreeperGriefing;
     public static boolean allowCreeperDamage;
+    public static String defaultLanguage;
     
 }

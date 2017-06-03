@@ -33,6 +33,7 @@ import cn.nukkit.block.Block;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
+import cn.nukkit.level.Position;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.biome.Biome;
@@ -64,6 +65,7 @@ import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandFallback;
 import com.larryTheCoder.island.IslandManager;
+import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.player.TeleportLogic;
@@ -98,6 +100,8 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     private TeleportLogic teleportLogic;
     private ChallangesCMD cmds;
     private Messages msgs;
+    // Localization Strings
+    private HashMap<String, ASlocales> availableLocales = new HashMap<>();
 
     @Override
     public void registerSchematic(File schematic, String name) {
@@ -287,15 +291,15 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     @Override
     public void onEnable() {
         initConfig();
-        getServer().getLogger().info(getPrefix() + getMsg("onLoad") + getPluginVersionString());
+        getServer().getLogger().info(getPrefix() + "§aLoading source §eASkyBlock §a" + getPluginVersionString());
         getServer().getLogger().info(TextFormat.YELLOW + "------------------------------------------------------------");
         initIslands();
         registerObject();
         getServer().getLogger().info(TextFormat.YELLOW + "------------------------------------------------------------");
-        getServer().getLogger().notice(TextFormat.colorize('&', "&eYou are using BETA-Builds of ASkyBlock!"));
-        getServer().getLogger().notice(TextFormat.colorize('&', "&eWarning! You might experience some crash and errors while using this plugin"));
-        getServer().getLogger().notice(TextFormat.colorize('&', "&eIt is recommended to report any issues at: http://www.github.com/larryTheCoder/ASkyBlock-Nukkit/issues"));
-        getServer().getLogger().info(getPrefix() + getMsg("onEnable"));
+        getServer().getLogger().notice(TextFormat.colorize('&', "You are using BETA-Builds of ASkyBlock!"));
+        getServer().getLogger().notice(TextFormat.colorize('&', "Warning! You might experience some crash and errors while using this plugin"));
+        getServer().getLogger().notice(TextFormat.colorize('&', "It is recommended to report any issues at: http://www.github.com/larryTheCoder/ASkyBlock-Nukkit/issues"));
+        getServer().getLogger().info(getPrefix() + "§aASkyBlock has seccessfully enabled!");
     }
 
     @Override
@@ -379,9 +383,12 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         return cfg.getString("Prefix").replace("&", "§");
     }
 
-    public String getMsg(String key) {
-        String mssg = msg.getString(key).replace("&", "§");
-        return mssg;
+//    public String getMsg(String key) {
+//  String mssg = msg.getString(key).replace("&", "§");
+//  return mssg;
+//    }
+    public ASlocales getMsg(Player p) {
+        return new ASlocales(this, "NULL", 0);
     }
 
     public final void initConfig() {
@@ -718,6 +725,105 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     public Messages getMessages() {
         return msgs;
+    }
+
+    public void setAvailableLocales(HashMap<String, ASlocales> availableLocales) {
+        this.availableLocales = availableLocales;
+    }
+
+    public HashMap<String, ASlocales> getAvailableLocales() {
+        return availableLocales;
+    }
+
+    /**
+     * Debug tools
+     *
+     * Where I test database and commands
+     */
+    private void test() {
+        // getIsland() == seccess
+        // deleteIsland() == seccess
+        // createIsland() == seccess
+        // getIslandLocation() == seccess
+        // getIslands() == seccess
+        // saveIsland() == seccess
+        // getSpawn() == seccess
+        // setSpawnPosition() == seccess
+        // Island Data debug
+        ASConnection con = getDatabase();
+        String p = "PFrankDebug";
+        IslandData pd = new IslandData(p, 50, 50, Settings.protectionrange);
+        Utils.ConsoleMsg("&aAttempting to test Connection on Islands [Target]: " + p);
+        int index = 1;
+        // delete island
+        if (con.getIsland(p, 1) != null) {
+            Utils.ConsoleMsg("Case " + index + " [Island Delete]:");
+            index++;
+            pd = con.getIsland(p, 1);
+            boolean result = con.deleteIsland(pd);
+            Utils.ConsoleMsg("&aDeleted: " + result);
+        }
+        // create island
+        if (con.getIsland(p, 1) == null) {
+            Utils.ConsoleMsg("Case " + index + " [Island Create]:");
+            pd.id = 1;
+            pd.biome = Settings.defaultBiome.getName();
+            pd.name = "WALK my PRANK!";
+            pd.islandId = getIsland().generateIslandKey(50, 50);
+            pd.owner = p;
+            pd.X = 50;
+            pd.Y = 50;
+            pd.Z = 50;
+            pd.levelName = "SkyBlock";
+            pd.locked = false;
+            boolean result = con.createIsland(pd);
+            index++;
+            Utils.ConsoleMsg("&aCreated: " + result);
+            // Find island getIslandLocation()
+            Utils.ConsoleMsg("Case " + index + " [Island cords XYZ]:");
+            pd = con.getIslandLocation("SkyBlock", 50, 50);
+            if (pd.biome.isEmpty()) {
+                Utils.ConsoleMsg("&cFailed to find island");
+            } else {
+                Utils.ConsoleMsg("&aSeccessfully find my island!");
+            }
+            index++;
+            Utils.ConsoleMsg("Case " + index + " [Island Find Array]:");
+            ArrayList<IslandData> pd2 = con.getIslands(p);
+            Utils.ConsoleMsg("&aSize of ArrayList: " + pd2.size());
+            boolean isOwnerIsland = false;
+            for (IslandData pda : pd2) {
+                if (pda.owner.equalsIgnoreCase(p)) {
+                    isOwnerIsland = true;
+                    break;
+                }
+            }
+            index++;
+            Utils.ConsoleMsg("&aIsland Ownership?: " + isOwnerIsland);
+            pd = con.getIsland(p, 1);
+            // Test on spawns
+            Utils.ConsoleMsg("Case " + index + " [Island Save]:");
+            pd.setSpawn(true);
+            result = con.saveIsland(pd);
+            index++;
+            Utils.ConsoleMsg("&aSeccess save island: " + result);
+            Utils.ConsoleMsg("Case " + index + " [Island Spawn]:");
+            pd = con.getSpawn();
+            if (pd == null) {
+                Utils.ConsoleMsg("&cFailed to detect island spawn!");
+            } else {
+                Utils.ConsoleMsg("&aSeccess! Found island spawn!");
+            }
+            index++;
+            Utils.ConsoleMsg("Case " + index + " [Island setSpawn]:");
+            Position pos = new Position(50, 50, 50, getServer().getLevelByName("SkyBlock"));
+            if (con.setSpawnPosition(pos)) {
+                Utils.ConsoleMsg("&aSeccess setSpawn on island spawn");
+            } else {
+                Utils.ConsoleMsg("&cFailed setSpawn on island spawn");                
+            }
+        }
+        
     }
 
 }

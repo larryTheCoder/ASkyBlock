@@ -60,13 +60,13 @@ public class ExpelSubCommand extends SubCommand{
     public boolean execute(CommandSender sender, String[] args) {
         Player p = getPlugin().getServer().getPlayer(sender.getName());
         if(getPlugin().getIsland().checkIsland(p)){
-            sender.sendMessage(getPrefix() +getMsg("no_island_error"));
+            sender.sendMessage(getPrefix() + getMsg(p).errorNoIsland);
             return true;
-        } else if(args.length != 1){
+        } else if(args.length != 2){
             return false;
         }
         if(getPlugin().getServer().getPlayer(args[1]) == null){
-            sender.sendMessage(getPrefix() +getMsg("player_error").replace("[player]", args[1]));
+            sender.sendMessage(getPrefix() + getMsg(p).errorOfflinePlayer);
             return true;
         }
         getPlugin().getIsland().kickPlayerByName(p, args[1]);

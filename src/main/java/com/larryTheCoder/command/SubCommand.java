@@ -17,9 +17,11 @@
 
 package com.larryTheCoder.command;
 
+import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.locales.ASlocales;
 
 /**
  * Info: if class starts with `A`, thats mean the class is
@@ -46,7 +48,7 @@ public abstract class SubCommand {
         return plugin;
     }
 
-    public String getMsg(String key){
+    public ASlocales getMsg(Player key){
         return plugin.getMsg(key);
     }
     

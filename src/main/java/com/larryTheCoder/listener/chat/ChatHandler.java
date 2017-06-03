@@ -91,13 +91,13 @@ public class ChatHandler implements Listener {
             }
             // todo spy function
             if (!online) {
-                player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg("no_members_around"));
-                player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg("chat_off"));
+                player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg(player).teamChatNoTeamAround);
+                player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg(player).teamChatStatusOff);
                 teamChatUsers.remove(player);
             }
         } else {
-            player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg("no_members_around"));
-            player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg("chat_off"));
+            player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg(player).teamChatNoTeamAround);
+            player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg(player).teamChatStatusOff);
             // Not in a team any more so delete   
             teamChatUsers.remove(player);
         }

@@ -59,9 +59,6 @@ public class AKickSubCommand extends SubCommand{
     public boolean execute(CommandSender sender, String[] args) {
         if(args.length != 2){
             return false;
-        } else if(!sender.hasPermission("is.admin")){
-            sender.sendMessage(getMsg("no_permission"));
-            return true;
         }
         getPlugin().getIsland().kickPlayerByAdmin(sender, args[1]);     
         return true;

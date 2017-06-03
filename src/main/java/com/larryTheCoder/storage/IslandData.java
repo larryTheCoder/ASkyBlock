@@ -23,6 +23,7 @@ import cn.nukkit.math.Vector3;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.utils.Settings;
+import com.larryTheCoder.utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -64,13 +65,15 @@ public class IslandData implements Cloneable {
         } else {
             setIgsDefaults();
         }
-        String[] igsd = defaultvalue.split(" ");
         boolean value;
+        ArrayList<String> bool = Utils.stringToArray(defaultvalue, ", ");
         for(int i = 0; i < SettingsFlag.values().length; i++){
+            String pool = bool.get(i);
+            value = Boolean.parseBoolean(pool);
             SettingsFlag[] set = SettingsFlag.values();
-            value = !igsd[i].equalsIgnoreCase("0");
             igs.put(set[i], value);
         }
+        
     }
 
     public void setSpawn(boolean b) {
@@ -418,16 +421,11 @@ public class IslandData implements Cloneable {
         // Personal island protection settings - serialize enum into 1's and 0's representing the boolean values
         //plugin.getLogger().info("DEBUG: igs = " + igs.toString());
         try {
-            for (SettingsFlag f : SettingsFlag.values()) {
-                //plugin.getLogger().info("DEBUG: flag f = " + f);
-                if (this.igs.containsKey(f)) {
-                    //plugin.getLogger().info("DEBUG: contains key");
-                    result += this.igs.get(f) ? "1" : "0";
-                } else {
-                    //plugin.getLogger().info("DEBUG: does not contain key");
-                    result += "0";
-                }
+            ArrayList<Boolean> FANTASTIC = new ArrayList<>();
+            for (Boolean f : igs.values()) {
+                FANTASTIC.add(f);
             }
+            result = Utils.arrayToString(FANTASTIC);
         } catch (Exception e) {
             e.printStackTrace();
             result = "";

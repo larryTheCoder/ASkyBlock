@@ -10,6 +10,11 @@ maxhome: 1
 debug: false
 ## Allow to get Updates 
 updater: false
+## Locale language
+##  Locale is CASE_SENSITIVE!
+##  Available locales are:
+##    en-US.
+defaultlanguage: "en-US"
 
 ## Chat Formattin
 chat:

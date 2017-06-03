@@ -40,7 +40,7 @@ import java.util.Map;
 public class Utils {
 
     public static SimpleDateFormat shortDateFormat = new SimpleDateFormat("MM/dd/yyyy");
-    public static String LOCALES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "locales";
+    public static String LOCALES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "locale";
     public static String DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator;
     public static ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap<>();
 

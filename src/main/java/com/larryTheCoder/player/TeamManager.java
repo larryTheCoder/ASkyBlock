@@ -65,12 +65,12 @@ public class TeamManager {
         }
         PlayerData te = plugin.getDatabase().getPlayerData(leader);
         if (!te.members.contains(member.getName())) {
-            leader.sendMessage(plugin.getPrefix() +plugin.getMsg("player_error2"));
+            leader.sendMessage(plugin.getPrefix() + plugin.getMsg(leader).errorOfflinePlayer);
             return true;
         }
         te.members.remove(member.getName());
         if (member.isOnline()) {
-            member.sendMessage(plugin.getPrefix() +kickMessage);
+            member.sendMessage(plugin.getPrefix() + kickMessage);
         }
         //todo: Store kick message if player doesnt exsits
         //todo: Kick the player if the player in player team area level
@@ -84,13 +84,13 @@ public class TeamManager {
         }
         return null;
     }
-    
-    private boolean kick(Player p, PlayerData td){
-        if(p.getLevel().getName().equalsIgnoreCase("SkyBlock")){
+
+    private boolean kick(Player p, PlayerData td) {
+        if (p.getLevel().getName().equalsIgnoreCase("SkyBlock")) {
             String st = td.leader;
             IslandData pd = plugin.getDatabase().getIsland(p.getName(), 1);
             IslandData p1 = plugin.getDatabase().getIsland(st, 1);
-            if(plugin.getIsland().generateIslandKey(p.getLocation()) == p1.islandId){
+            if (plugin.getIsland().generateIslandKey(p.getLocation()) == p1.islandId) {
                 //kick the player
                 p.teleport(new Location());
             }

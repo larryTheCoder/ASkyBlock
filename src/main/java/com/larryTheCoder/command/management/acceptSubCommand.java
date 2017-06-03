@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.larryTheCoder.command.management;
 
 import cn.nukkit.Player;
@@ -26,7 +25,7 @@ import com.larryTheCoder.listener.invitation.InvitationHandler;
 /**
  * @author larryTheCoder
  */
-public class AcceptSubCommand extends SubCommand{
+public class AcceptSubCommand extends SubCommand {
 
     public AcceptSubCommand(ASkyBlock plugin) {
         super(plugin);
@@ -61,8 +60,8 @@ public class AcceptSubCommand extends SubCommand{
     public boolean execute(CommandSender sender, String[] args) {
         Player p = sender.getServer().getPlayer(sender.getName());
         InvitationHandler pd = ASkyBlock.get().getInvitationHandler();
-        if(pd.getInvitation(p) == null){
-            sender.sendMessage(getPrefix() +getMsg("no_pending"));
+        if (pd.getInvitation(p) == null) {
+            sender.sendMessage(getPrefix() + getMsg(p).errorNotPending);
             return false;
         }
         pd.getInvitation(p).accept();

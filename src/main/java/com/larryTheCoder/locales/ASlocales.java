@@ -17,6 +17,7 @@
 package com.larryTheCoder.locales;
 
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.TextFormat;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -31,8 +32,6 @@ import com.larryTheCoder.ASkyBlock;
  * @author larryTheHarry
  */
 public final class ASlocales {
-    
-    
 
     private final static Set<String> TITLE_COLORS = new HashSet<>(Arrays.asList(
             "black",
@@ -52,12 +51,52 @@ public final class ASlocales {
             "yellow",
             "white"
     ));
+    // Localization Strings
     private Config locale = null;
     private File localeFile = null;
     private ASkyBlock plugin;
     private Locale localeObject;
+
+    public String changingObsidiantoLava;
+    public String acidLore;
+    public String acidBucket;
+    public String acidBottle;
+    public String drankAcidAndDied;
+    public String drankAcid;
+    // Errors defaults
+    public String errorUnknownPlayer = "&cThat player is unknown.";
+    public String errorNoPermission = "&cYou don't have permission to use that command!";
+    public String errorNoIsland = "&cYou do not have an island!";
+    public String errorNoIslandOther = "&cThat player does not have an island!";
+    public String errorCommandNotReady = "&cYou can't use that command right now.";
+    public String errorOfflinePlayer = "&cThat player is offline or doesn't exist.";
+    public String errorUnknownCommand = "&cUnknown command.";
+    public String errorNoTeam = "&cPlayer is not in a team.";
+    public String errorMaxIslands = "&cThe world is full of islands! Try again later!";
+    public String errorNotABlock = "&cThat is not a block";
+    public String errorNotOnIsland = "&cYou are not in an island space!";
+    public String errorTooLong = "&cToo long. Maximum size is [length].";
+    public String errorTooShort = "&cToo short. Minimum size is [length].";
+    public String errorUseInGame = "&cThis command must be used in-game.";
+    public String errorWrongWorld = "&cYou cannot do that in this world.";
+    public String errorMaxIsland = "&cYou reached the limit of [maxplot] Island per player";
+    public String errorNotPending = "&cNo invintation pending! Try again later";
+    public String errorInTeam = "&cThe player [player] are already in team!";
+    // Commands messages
+    public String kickSeccess = "&aKicked [player] from SkyBlock world!";
+    public String createSeccess = "&aSeccesfully created you an island!";
+    public String resetSeccess = "&aSeccesfully cleared your island";
+    // Teleport messages
+    public String teleportDelay = "&aYou will be teleported in {0} seconds.";
+    public String teleportCancelled = "&cTeleport cancelled";
+    // Admin commands message
+    public String adminOverride = "You override this command";
+    public String teamChatStatusOff = "&aTeam chat is off";
+    public String teamChatStatusOn = "&aTeam chat is on";
+    public String teamChatNoTeamAround = "&cNone of your team are online!";
     private String localeName;
     private int index;
+    public String generalSuccess;
 
     /**
      * Creates a locale object full of localized strings for a language
@@ -90,6 +129,7 @@ public final class ASlocales {
 
     /**
      * Reloads the locale file
+     *
      * @param localeName
      */
     public void reloadLocale(String localeName) {
@@ -127,7 +167,7 @@ public final class ASlocales {
     }
 
     private void loadLocale() {
-        
+
     }
 
     /**

@@ -61,7 +61,7 @@ public class LeaveSubCommand extends SubCommand {
         Player pt = getPlugin().getServer().getPlayer(sender.getName());
         for (String level : getPlugin().level) {
             if (!pt.getLevel().getName().equalsIgnoreCase(level)) {
-                sender.sendMessage(getPrefix() +getMsg("leave_error"));
+                sender.sendMessage(getPrefix() + getMsg(pt).errorWrongWorld);
                 return true;
             }
         }

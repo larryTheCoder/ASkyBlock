@@ -26,7 +26,11 @@ import cn.nukkit.utils.TextFormat;
 import java.io.File;
 import java.util.ArrayList;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.locales.ASlocales;
+import com.larryTheCoder.locales.FileLister;
 import com.larryTheCoder.storage.IslandData.SettingsFlag;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -184,6 +188,27 @@ public class ConfigManager {
                 Utils.ConsoleMsg("Unknown setting in config.yml:protection.world " + setting.toUpperCase() + " skipping...");
             }
         }
+                // Get the default language
+        Settings.defaultLanguage = cfg.getString("general.defaultlanguage", "en-US");
+        
+        // Load languages
+        HashMap<String,ASlocales> availableLocales = new HashMap<>();
+        FileLister fl = new FileLister(ASkyBlock.get());
+        try {
+            int index = 1;
+            for (String code: fl.list()) {
+                //plugin.getLogger().info("DEBUG: lang file = " + code);
+                availableLocales.put(code, new ASlocales(ASkyBlock.get(), code, index++));
+            }
+        } catch (IOException e1) {
+            Utils.ConsoleMsg("&cCould not add locales!");
+        }
+        if (!availableLocales.containsKey(Settings.defaultLanguage)) {
+            Utils.ConsoleMsg("&c'" + Settings.defaultLanguage + ".yml' not found in /locale folder. Using /locale/en-US.yml");
+            Settings.defaultLanguage = "en-US";
+            availableLocales.put(Settings.defaultLanguage, new ASlocales(ASkyBlock.get(), Settings.defaultLanguage, 0));
+        }
+        ASkyBlock.get().setAvailableLocales(availableLocales);
         Utils.ConsoleMsg(TextFormat.YELLOW + "Seccessfully checked config.yml");
     }
 }

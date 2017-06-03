@@ -42,6 +42,7 @@ import com.larryTheCoder.command.island.HomeSubCommand;
 import com.larryTheCoder.command.island.InfoSubCommand;
 import com.larryTheCoder.command.management.InviteSubCommand;
 import com.larryTheCoder.command.island.TeleportSubCommand;
+import com.larryTheCoder.locales.ASlocales;
 
 /**
  * Commands v2.0 [SkyBlock]
@@ -121,7 +122,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
         return true;
     }
 
-    public String getMsg(String key) {
+    public ASlocales getMsg(Player key) {
         return getPlugin().getMsg(key);
     }
 

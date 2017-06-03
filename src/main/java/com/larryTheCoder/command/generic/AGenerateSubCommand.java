@@ -61,16 +61,16 @@ public class AGenerateSubCommand extends SubCommand {
             return false;
         }
         if (getPlugin().level.contains(args[1])) {
-            sender.sendMessage(getPrefix() + getMsg("generate_error"));
+            sender.sendMessage(getPrefix() + "The level has already generated!");
             return true;
         } else if (!getPlugin().getServer().isLevelGenerated(args[1])) {
             getPlugin().getServer().generateLevel(args[1], System.currentTimeMillis(), SkyBlockGenerator.class);
             getPlugin().getServer().loadLevel(args[1]);
             getPlugin().level.add(args[1]);
-            sender.sendMessage(getPrefix() + getMsg("generate").replace("[level]", args[1]));
+            sender.sendMessage(getPrefix() + "The level has already generated!");
             return true;
         }
-        sender.sendMessage(getPrefix() + getMsg("generate_error"));
+        sender.sendMessage(getPrefix() + "The level has already generated!");
         return true;
     }
 

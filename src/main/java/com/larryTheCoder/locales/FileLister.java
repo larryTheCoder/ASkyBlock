@@ -35,11 +35,10 @@ import java.lang.reflect.InvocationTargetException;
 public final class FileLister {
 
     private final ASkyBlock plugin;
-    private final String FOLDERPATH;
+    private final static String FOLDERPATH = "locale";
 
-    public FileLister(ASkyBlock plugin, String folderPath) {
+    public FileLister(ASkyBlock plugin) {
         this.plugin = plugin;
-        FOLDERPATH = folderPath;
     }
 
     public List<String> list() throws IOException {

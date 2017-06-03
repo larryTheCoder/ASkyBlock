@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.larryTheCoder.command.island;
 
 import cn.nukkit.Player;
@@ -25,7 +24,7 @@ import com.larryTheCoder.command.SubCommand;
 /**
  * @author larryTheCoder
  */
-public class InfoSubCommand extends SubCommand{
+public class InfoSubCommand extends SubCommand {
 
     public InfoSubCommand(ASkyBlock plugin) {
         super(plugin);
@@ -58,10 +57,10 @@ public class InfoSubCommand extends SubCommand{
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        Player p =  sender.getServer().getPlayer(sender.getName());
-        for(String level : getPlugin().level){
-            if(!p.getLevel().getName().equalsIgnoreCase(level)){
-                sender.sendMessage(getPrefix() +getMsg("level_error"));
+        Player p = sender.getServer().getPlayer(sender.getName());
+        for (String level : getPlugin().level) {
+            if (!p.getLevel().getName().equalsIgnoreCase(level)) {
+                sender.sendMessage(getPrefix() + getMsg(p).errorWrongWorld);
                 return true;
             }
         }

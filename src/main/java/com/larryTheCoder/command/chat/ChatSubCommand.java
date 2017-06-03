@@ -60,34 +60,32 @@ public class ChatSubCommand extends SubCommand {
     public boolean execute(CommandSender sender, String[] args) {
         Player p = Server.getInstance().getPlayer(sender.getName());
         if (getPlugin().getIsland().checkIsland(p)) {
-            sender.sendMessage(getPrefix() +getMsg("no_island_error"));
+            sender.sendMessage(getPrefix() + getMsg(p).errorNoIsland);
             return true;
         }
-//        if (plugin.ggetDa.inTeam(playerUUID)) {
-//            // Check if team members are online
-//            boolean online = false;
-//            for (UUID teamMember : plugin.getPlayers().getMembers(playerUUID)) {
-//                if (!teamMember.equals(playerUUID) && plugin.getServer().getPlayer(teamMember) != null) {
-//                    online = true;
-//                }
-//            }
+        if (getPlugin().getTManager().hasTeam(p)) {
+            // Check if team members are online
+            boolean online = false;
+            for (String teamMember : getPlugin().getPlayerInfo(p).members) {
+                if (!teamMember.equals(p.getName()) && getPlugin().getServer().getPlayer(teamMember) != null) {
+                    online = true;
+                }
+            }    
 //            if (!online) {
-//                player.sendMessage(getPrefix() +ChatColor.RED + plugin.myLocale(playerUUID).teamChatNoTeamAround);
-//                player.sendMessage(getPrefix() +ChatColor.GREEN + plugin.myLocale(playerUUID).teamChatStatusOff);
-//                plugin.getChatListener().unSetPlayer(playerUUID);
+//                player.sendMessage(getPrefix() +ChatColor.RED + getPlugin().myLocale(playerUUID).teamChatNoTeamAround);
+//                player.sendMessage(getPrefix() +ChatColor.GREEN + getPlugin().myLocale(playerUUID).teamChatStatusOff);
+//                getPlugin().getChatListener().unSetPlayer(playerUUID);
 //                return true;
 //            }
-//            if (plugin.getChatListener().isTeamChat(playerUUID)) {
+//            if (getPlugin().getChatListener().isTeamChat(playerUUID)) {
 //                // Toggle
-//                player.sendMessage(getPrefix() +ChatColor.GREEN + plugin.myLocale(playerUUID).teamChatStatusOff);
-//                plugin.getChatListener().unSetPlayer(playerUUID);
+//                player.sendMessage(getPrefix() +ChatColor.GREEN + getPlugin().myLocale(playerUUID).teamChatStatusOff);
+//                getPlugin().getChatListener().unSetPlayer(playerUUID);
 //            } else {
-//                player.sendMessage(getPrefix() +ChatColor.GREEN + plugin.myLocale(playerUUID).teamChatStatusOn);
-//                plugin.getChatListener().setPlayer(playerUUID);
-//            }
-//        } else {
-//            player.sendMessage(getPrefix() +ChatColor.RED + plugin.myLocale(playerUUID).teamChatNoTeam);
-//        }
+//                player.sendMessage(getPrefix() +ChatColor.GREEN + getPlugin().myLocale(playerUUID).teamChatStatusOn);
+//                getPlugin().getChatListener().setPlayer(playerUUID);
+//            }            
+        }
         return false;
     }
 

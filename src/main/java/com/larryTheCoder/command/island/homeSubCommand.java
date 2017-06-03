@@ -69,16 +69,16 @@ public class HomeSubCommand extends SubCommand {
         } else {
             return false;
         }
+        Player p = sender.getServer().getPlayer(sender.getName());
         List<IslandData> island = getPlugin().getDatabase().getIslands(sender.getName());
         if (island == null) {
-            sender.sendMessage(getPrefix() + getMsg("no_island_error"));
+            sender.sendMessage(getPrefix() + getMsg(p).errorNoIsland);
             return true;
         }
         if (island.size() != islandNumber) {
             sender.sendMessage(getPrefix() +TextFormat.RED + "You don't have an island with home number " + islandNumber);
             return true;
         }
-        Player p = sender.getServer().getPlayer(sender.getName());
         getPlugin().getGrid().homeTeleport(p, islandNumber);
         return true;
     }

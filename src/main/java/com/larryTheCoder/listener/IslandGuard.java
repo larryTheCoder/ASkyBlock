@@ -1102,7 +1102,7 @@ public class IslandGuard implements Listener {
         if (inWorld(player)) {
             if (event.getRecipe().getResult().getId() == ENDER_CHEST) {
                 if (!(player.hasPermission("is.craft.enderchest"))) {
-                    player.sendMessage(plugin.getMsg("no_permission"));
+                    player.sendMessage(plugin.getMsg(player).errorNoPermission);
                     event.setCancelled(true);
                 }
             }
@@ -1121,7 +1121,7 @@ public class IslandGuard implements Listener {
             if (event.getAction() == PlayerInteractEvent.RIGHT_CLICK_BLOCK) {
                 if (event.getBlock().getId() == ENDER_CHEST) {
                     if (!(event.getPlayer().hasPermission("is.craft.enderchest"))) {
-                        player.sendMessage(plugin.getMsg("no_permission"));
+                        player.sendMessage(plugin.getMsg(player).errorNoPermission);
                         event.setCancelled(true);
                     }
                 }

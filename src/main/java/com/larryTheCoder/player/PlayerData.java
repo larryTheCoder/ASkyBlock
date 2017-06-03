@@ -16,7 +16,9 @@
  */
 package com.larryTheCoder.player;
 
+import cn.nukkit.Player;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +36,7 @@ public class PlayerData implements Cloneable {
     public HashMap<String, Boolean> challengeList = new HashMap<>();
     public HashMap<String, Integer> challengeListTimes = new HashMap<>();
     public ArrayList<String> banList = new ArrayList<>();
+    public String pubLocale;
     // Team Data
     public String teamLeader;
     public String teamIslandLocation;
@@ -46,9 +49,10 @@ public class PlayerData implements Cloneable {
         this.playerName = playerName;
         this.homes = homes;
         this.resetleft = resetleft;
+        this.pubLocale = Settings.defaultLanguage;
     }
 
-    public PlayerData(String playerName, int homes, ArrayList<String> members, HashMap<String, Boolean> list, HashMap<String, Integer> times, int islandlvl, boolean inTeam, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList) {
+    public PlayerData(String playerName, int homes, ArrayList<String> members, HashMap<String, Boolean> list, HashMap<String, Integer> times, int islandlvl, boolean inTeam, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList, String locale) {
         this.homes = homes;
         this.members = members;
         this.inTeam = inTeam;
@@ -58,6 +62,7 @@ public class PlayerData implements Cloneable {
         this.resetleft = resetleft;
         this.playerName = playerName;
         this.banList = banList;
+        this.pubLocale = locale;
     }
 
     /**
@@ -158,6 +163,10 @@ public class PlayerData implements Cloneable {
         // plugin.getLogger().info("DEBUG: complete " + challenge + ":" +
         // challengeListTimes.get(challenge.toLowerCase()).intValue() );
         ASkyBlock.get().getDatabase().savePlayerData(this);
+    }
+
+    public void setLocale(String locale) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

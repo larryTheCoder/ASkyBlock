@@ -62,7 +62,7 @@ public class ResetIslandSubCommand extends SubCommand {
         }
         Player p = getPlugin().getServer().getPlayer(sender.getName());
         if (getPlugin().getIsland().isPlayerIsland(p, p.getLocation())) {
-            sender.sendMessage(getPrefix() + getMsg("no_island_error"));
+            sender.sendMessage(getPrefix() + getMsg(p).errorNoIsland);
             return true;
         }
         getPlugin().getIsland().reset(p, true, getPlugin().getIslandInfo(p.getLocation()));

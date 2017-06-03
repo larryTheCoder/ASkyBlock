@@ -1,1 +1,22 @@
-
+###########################################################################################
+# This is a YML file. Be careful when editing. Check your edits in a YAML checker like    #
+# the one at http://yaml-online-parser.appspot.com                                        #
+###########################################################################################
+error:
+  blockedbyapi: "&cA plugin using the API blocked this action."
+  unknownPlayer: "&cThat player is unknown."
+  noPermission: "&cYou don't have permission to use that command!"  
+  noIsland: "&cYou do not have an island!"
+  noIslandOther: "&cThat player does not have an island!"  
+  commandNotReady: "&cYou can't use that command right now."
+  offlinePlayer: "&cThat player is offline or doesn't exist."  
+  unknownCommand: "&cUnknown command."
+  noTeam: "&cPlayer is not in a team."
+  maxIslands: "&cThe world is full of islands! Try again later!"
+  notABlock: "&cThat is not a block"
+  notOnIsland: "&cYou are not in an island space!"
+  tooLong: "&cToo long. Maximum size is [length]."
+  tooShort: "&cToo short. Minimum size is [length]."
+  useInGame: "&cThis command must be used in-game."
+  wrongWorld: "&cYou cannot do that in this world."
+  

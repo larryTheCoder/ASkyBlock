@@ -4,14 +4,6 @@
 # If this file is deleted, then it will be recreate at the next reload.                   #
 ###########################################################################################
 ---
-# Logger messages
-onLoad: "&aLoading source &eASkyBlock &av"
-onEnable: "&aASkyBlock has seccessfully enabled!"
-
-###################
-# Command Message #
-###################
-help: "&cUnknown &ccommand! Use: &c/is &chelp &cfor &ca &clist &cof &ccommands"
 
 ########################
 # Command help Message #

@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.larryTheCoder.command.management;
 
 import cn.nukkit.Player;
@@ -59,27 +58,27 @@ public class InviteSubCommand extends SubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        if(args.length != 2){
+        if (args.length != 2) {
             return false;
         }
-        Player p = sender.getServer().getPlayer(sender.getName());    
-        if(!getPlugin().getIsland().checkIsland(p)){
-            sender.sendMessage(getPrefix() +getMsg("no_island_error"));
+        Player p = sender.getServer().getPlayer(sender.getName());
+        if (!getPlugin().getIsland().checkIsland(p)) {
+            sender.sendMessage(getPrefix() + getMsg(p).errorNoIsland);
             return true;
         }
         Player invite = sender.getServer().getPlayer(args[1]);
-        if(invite == null){
-            sender.sendMessage(getPrefix() +getMsg("player_error2"));
+        if (invite == null) {
+            sender.sendMessage(getPrefix() + getMsg(p).errorOfflinePlayer);
             return true;
         }
         PlayerData pdinv = ASkyBlock.get().getDatabase().getPlayerData(invite);
         PlayerData pd = ASkyBlock.get().getDatabase().getPlayerData(p);
-        if(pdinv.inTeam){
-            sender.sendMessage(getPrefix() +getMsg("player_has_teamed").replace("[player]", args[1]));
+        if (pdinv.inTeam) {
+            sender.sendMessage(getPrefix() + getMsg(p).errorInTeam.replace("[player]", args[1]));
             return false;
         }
-        if(pd.members.contains(invite.getName())){
-            sender.sendMessage(getPrefix() +getMsg("player_in_team").replace("[player]", args[1]));
+        if (pd.members.contains(invite.getName())) {
+            sender.sendMessage(getPrefix() + getMsg(p).errorInTeam.replace("[player]", args[1]));
             return false;
         }
         getPlugin().getInvitationHandler().addInvitation(p, invite, pd);

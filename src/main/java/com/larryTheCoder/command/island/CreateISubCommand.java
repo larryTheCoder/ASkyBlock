@@ -16,6 +16,7 @@
  */
 package com.larryTheCoder.command.island;
 
+import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class CreateISubCommand extends SubCommand {
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.create");//&& sender.isPlayer();
+        return sender.hasPermission("is.create") && sender.isPlayer();
     }
 
     @Override
@@ -62,6 +63,7 @@ public class CreateISubCommand extends SubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
+        Player p = sender.getServer().getPlayer(sender.getName());
         Schematic smt = null;
         String name = "My Island";
         switch (args.length) {
@@ -75,7 +77,7 @@ public class CreateISubCommand extends SubCommand {
                     ASkyBlock.schematics.keySet().stream().forEach((de) -> {
                         ft.add(de);
                     });
-                    sender.sendMessage(getPrefix() +getMsg("schematics_list").replace("[SCEM]", Utils.arrayToString(ft)));
+                    p.sendMessage(getPrefix() + "".replace("[SCEM]", Utils.arrayToString(ft)));
                     return true;
                 } else {
                     smt = getPlugin().getSchematic(args[2]);
@@ -84,10 +86,10 @@ public class CreateISubCommand extends SubCommand {
         }
         List<IslandData> maxPlotsOfPlayers = getPlugin().getDatabase().getIslands(sender.getName());
         if (Settings.maxHome >= 0 && maxPlotsOfPlayers.size() >= Settings.maxHome) {
-            sender.sendMessage(getPrefix() +getPlugin().getMsg("max_islands").replace("[maxplot]", "" + Settings.maxHome));
+            sender.sendMessage(getPrefix() +getPlugin().getMsg(p).errorMaxIsland.replace("[maxplot]", "" + Settings.maxHome));
             return true;
         }
-        getPlugin().getIsland().createIsland(sender.getName(), smt, name);
+        getPlugin().getIsland().createIsland(p.getName(), smt, name);
         return true;
     }
 
