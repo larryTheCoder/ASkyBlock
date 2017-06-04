@@ -18,8 +18,22 @@ __Welcome developers to this Magic SkyBlock plugin builded by me!
 Its still in development but I really need your help to complete this plugin.
 Build specially for Nukkit__
 
+## Commands Help
+
+Default command parameters and permissions:
+
+| Command | Parameters | Info | Permission | Default |
+| :-----: | :-------: | :---------: | :-------: | :-------: |
+| `/is` | `args` | `Main island command` | `is.command` | `All` |
+| `/is help | `command` | `show help for island's command` | `none` | `All` |
+| `/is generate | `world name` | `Create a new island world` | `is.admin.generate` | `admin` |
+| `/is accept` | `none` | `Accept an invitation from other player` | `is.command.accept` | `All` |
+| `/is expel` | `player` | `Kick a player from your island` | `is.command.expel` | `All` |
+| `/is kick` | `player` | `Kick a player from island world` | `is.admin.kick` | `admin` |
+
 # API
-Comming soon!
+This plugin has an api for an example:
+
 
 # Installation
 
