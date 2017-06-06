@@ -17,6 +17,8 @@
 package com.larryTheCoder.schematic;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.blockentity.BlockEntitySign;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
@@ -33,9 +35,8 @@ import java.util.Map;
 
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.task.ChestPopulateTask;
-import com.larryTheCoder.task.SignPopulateTask;
 import com.larryTheCoder.utils.Utils;
-import static com.larryTheCoder.utils.Utils.loadChunkAt;
+import static com.larryTheCoder.utils.Utils.*;
 
 import org.jnbt.CompoundTag;
 import org.jnbt.ListTag;
@@ -308,20 +309,20 @@ public class IslandBlock {
                                         } else if (key.equalsIgnoreCase("text")) {
                                             lineText += value;
                                         } else // Formatting - usually the value is always true, but check just in case
-                                         if (key.equalsIgnoreCase("obfuscated") && value.equalsIgnoreCase("true")) {
-                                                lineText += TextFormat.OBFUSCATED;
-                                            } else if (key.equalsIgnoreCase("underlined") && value.equalsIgnoreCase("true")) {
-                                                lineText += TextFormat.UNDERLINE;
-                                            } else {
-                                                // The rest of the formats
-                                                try {
-                                                    lineText += TextFormat.valueOf(key.toUpperCase());
-                                                } catch (Exception noFormat) {
-                                                    // Ignore
-                                                    //System.out.println("DEBUG3:" + key + "=>" + value);
-                                                    Utils.ConsoleMsg("Unknown format " + value + " in sign when pasting schematic, skipping...");
-                                                }
+                                        if (key.equalsIgnoreCase("obfuscated") && value.equalsIgnoreCase("true")) {
+                                            lineText += TextFormat.OBFUSCATED;
+                                        } else if (key.equalsIgnoreCase("underlined") && value.equalsIgnoreCase("true")) {
+                                            lineText += TextFormat.UNDERLINE;
+                                        } else {
+                                            // The rest of the formats
+                                            try {
+                                                lineText += TextFormat.valueOf(key.toUpperCase());
+                                            } catch (Exception noFormat) {
+                                                // Ignore
+                                                //System.out.println("DEBUG3:" + key + "=>" + value);
+                                                Utils.ConsoleMsg("Unknown format " + value + " in sign when pasting schematic, skipping...");
                                             }
+                                        }
                                     }
                                 } else// This is unformatted text. It is included in "". A reset is required to clear
                                 // any previous formatting
@@ -343,17 +344,17 @@ public class IslandBlock {
                         e.printStackTrace();
                     }
                 } else // This is unformatted text (not JSON). It is included in "".
-                 if (text.get(line).length() > 1) {
-                        try {
-                            lineText = text.get(line).substring(text.get(line).indexOf('"') + 1, text.get(line).lastIndexOf('"'));
-                        } catch (Exception e) {
-                            //There may not be those "'s, so just use the raw line
-                            lineText = text.get(line);
-                        }
-                    } else {
-                        // just in case it isn't - show the raw line
+                if (text.get(line).length() > 1) {
+                    try {
+                        lineText = text.get(line).substring(text.get(line).indexOf('"') + 1, text.get(line).lastIndexOf('"'));
+                    } catch (Exception e) {
+                        //There may not be those "'s, so just use the raw line
                         lineText = text.get(line);
                     }
+                } else {
+                    // just in case it isn't - show the raw line
+                    lineText = text.get(line);
+                }
                 //Bukkit.getLogger().info("Line " + line + " is " + lineText);
             }
             signText.add(lineText);
@@ -436,7 +437,17 @@ public class IslandBlock {
         blockLoc.getLevel().setBlock(block, Block.get(typeId, data), usePhysics, true);
 
         if (signText != null) {
-            TaskManager.runTaskLater(new SignPopulateTask(loc, signText), 10);
+            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                    .putString("id", BlockEntity.SIGN)
+                    .putInt("x", (int) x)
+                    .putInt("y", (int) y)
+                    .putInt("z", (int) z)
+                    .putString("Text1", signText.get(0))
+                    .putString("Text2", signText.get(1))
+                    .putString("Text3", signText.get(2))
+                    .putString("Text4", signText.get(3));
+            BlockEntitySign sign = new BlockEntitySign(blockLoc.getLevel().getChunk((int) x >> 4, (int) z >> 4), nbt);
+            sign.spawnToAll();
         } else if (pot != null) {
             pot.set(blockLoc, block);
         } else if (Block.get(typeId, data).getId() == Block.CHEST) {

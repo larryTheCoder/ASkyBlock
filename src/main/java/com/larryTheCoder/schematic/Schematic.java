@@ -21,11 +21,13 @@ import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.entity.item.EntityPainting.Motive; // Art
 import static cn.nukkit.entity.item.EntityPainting.motives;
+import static cn.nukkit.math.BlockFace.*;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.generator.biome.Biome;
+import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 
@@ -68,7 +70,7 @@ public class Schematic {
     private Map<Vector3, Map<String, Tag>> tileEntitiesMap = new HashMap<>();
     private Map<String, Motive> paintingList = new HashMap<>();
     private Set<Integer> attachable = new HashSet<>();
-    private Map<Byte, Integer> facingList = new HashMap<>();
+    private Map<Byte, BlockFace> facingList = new HashMap<>();
     public HashMap<Integer, Position> spot = new HashMap<>();
     private Vector3 bedrock;
     private Vector3 chest;
@@ -378,10 +380,10 @@ public class Schematic {
             Server.getInstance().getLogger().info(TextFormat.GRAY + "   - Blocks: " + TextFormat.GREEN + countBlocks + " ");
             Server.getInstance().getLogger().info(TextFormat.GRAY + "   - SafeSpot: " + TextFormat.GREEN + spot.size() + " SafeSpot found");
         }
-        facingList.put((byte) 0, Vector3.getOppositeSide(Vector3.SIDE_SOUTH));
-        facingList.put((byte) 1, Vector3.getOppositeSide(Vector3.SIDE_WEST));
-        facingList.put((byte) 2, Vector3.getOppositeSide(Vector3.SIDE_NORTH));
-        facingList.put((byte) 3, Vector3.getOppositeSide(Vector3.SIDE_EAST));
+        facingList.put((byte) 0, SOUTH);
+        facingList.put((byte) 1, WEST);
+        facingList.put((byte) 2, NORTH);
+        facingList.put((byte) 3, EAST);
         prePasteSchematic(blocks, data);
     }
 

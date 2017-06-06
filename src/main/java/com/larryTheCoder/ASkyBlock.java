@@ -70,6 +70,7 @@ import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.utils.ConfigUpdater;
 import com.larryTheCoder.utils.Settings;
 import java.sql.SQLException;
 
@@ -392,7 +393,6 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     public final void initConfig() {
         Utils.EnsureDirectory(Utils.DIRECTORY);
         Utils.EnsureDirectory(Utils.LOCALES_DIRECTORY);
-        //initLocales();        
         if (getResource("config.yml") != null) {
             saveResource("config.yml");
         }
@@ -404,9 +404,25 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
             saveResource("English.yml");
         }
         msg = new Config(new File(getDataFolder(), "English.yml"), Config.YAML);
+        recheck();
         ConfigManager.load();
     }
 
+    public void recheck() {
+        boolean update = false;
+        File file;
+        Config cfgg = new Config(file = new File(ASkyBlock.get().getDataFolder(), "config.yml"), Config.YAML);
+        if(!cfgg.getString("version").equalsIgnoreCase(ConfigManager.CONFIG_VERSION)){
+            Utils.ConsoleMsg("&cOutdated config! Creating new one");
+            Utils.ConsoleMsg("&aYour old config will be renamed into config.old!");
+            update = true;
+        }
+        if(update){
+            file.renameTo(new File(ASkyBlock.get().getDataFolder(), "config.old"));
+            ASkyBlock.get().saveResource("config.yml");
+        }
+    }
+    
     /**
      * List schematics this player can access. If @param ignoreNoPermission is
      * true, then only schematics with a specific permission set will be

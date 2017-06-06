@@ -55,6 +55,7 @@ public class JSONArray extends ArrayList implements List, JSONAware, JSONStreamA
 		out.write(']');
 	}
 	
+        @Override
 	public void writeJSONString(Writer out) throws IOException{
 		writeJSONString(this, out);
 	}
@@ -94,10 +95,12 @@ public class JSONArray extends ArrayList implements List, JSONAware, JSONStreamA
 		return sb.toString();
 	}
 
+        @Override
 	public String toJSONString(){
 		return toJSONString(this);
 	}
 	
+        @Override
 	public String toString() {
 		return toJSONString();
 	}

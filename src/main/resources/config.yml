@@ -1,5 +1,7 @@
 ## Default Config for ASkyBlock
 ---
+## Do not change this
+version: "Alpha091215"
 ## Game Prefix.
 Prefix: "&d[&eASkyBlock&d] &e"
 ## Max islands homes

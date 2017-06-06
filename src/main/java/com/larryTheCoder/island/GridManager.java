@@ -22,7 +22,6 @@ import cn.nukkit.block.Block;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
-import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
@@ -30,6 +29,8 @@ import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.BlockUtil;
 import java.util.HashSet;
 import java.util.Set;
+
+import static cn.nukkit.math.BlockFace.*;
 
 /**
  * @author larryTheCoder
@@ -122,9 +123,9 @@ public class GridManager {
         if (l == null) {
             return false;
         }
-        final Block ground = l.getLevelBlock().getSide(Vector3.SIDE_DOWN);
+        final Block ground = l.getLevelBlock().getSide(DOWN);
         final Block space1 = l.getLevelBlock();
-        final Block space2 = l.getLevelBlock().getSide(Vector3.SIDE_UP);
+        final Block space2 = l.getLevelBlock().getSide(UP);
         return ground.isSolid() && BlockUtil.isBreathable(space1) && BlockUtil.isBreathable(space2);
     }
 
