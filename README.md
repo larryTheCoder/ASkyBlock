@@ -1,5 +1,4 @@
 # ASkyBlock-Nukkit
-===
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Lesser General Public License as published by
@@ -34,18 +33,18 @@ Default command parameters and permissions:
 # API
 This plugin has an api for an example:
 
-        public void openAPI(){
-            Plugin plugin = this.getServer().getPluginManager().getPlugin("ASkyBlock");
-            // Get the plugin
-            if (plugin == null) {
-                // Disable this plugin
-                return null;
-            }
-            // Get the plugin instance
-            ASkyBlock block = (Plugin) ASkyBlock.get();
-            this.instance = block;
-            // Place the things you want to
+    public void openAPI(){
+        Plugin plugin = this.getServer().getPluginManager().getPlugin("ASkyBlock");
+        // Get the plugin
+        if (plugin == null) {
+            // Disable this plugin
+            return null;
         }
+        // Get the plugin instance
+        ASkyBlock block = (Plugin) ASkyBlock.get();
+        this.instance = block;
+        // Place the things you want to
+    }
 
 # Installation
 
