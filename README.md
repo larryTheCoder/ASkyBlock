@@ -34,13 +34,28 @@ Default command parameters and permissions:
 # API
 This plugin has an api for an example:
 
+        public void openAPI(){
+            Plugin plugin = this.getServer().getPluginManager().getPlugin("ASkyBlock");
+            // Get the plugin
+            if (plugin == null) {
+                // Disable this plugin
+                return null;
+            }
+            // Get the plugin instance
+            ASkyBlock block = (Plugin) ASkyBlock.get();
+            this.instance = block;
+            // Place the things you want to
+        }
 
 # Installation
 
 This version depends on the following plugins:
 
-* Nukkit 1.0 or greater 
+* Nukkit MCPE v1.0.8++
 * DbLib 0.2.x
+
+**Note:** This plugin had been tested on Nukkit v1.0.4. The server under this MC version might not
+supported due to *API implementation*
 
 ### Releases
 Pre-releases are considered **unsafe** for production servers.
@@ -51,7 +66,8 @@ Releases have a clean version number, has been tested, and should be safe for pr
 
 ## Config-files
 
-*Note*: Config files might change quite a bit, and upon activation, the plugin will NOT try to merge the existing ones with the new ones. No backup will be saved into folder.
+*For experts only*
 
-Please make sure, that the config files are as you expect them to be, before using the plugin or releasing it to "the public".
-
+The plugin folder is a variables that contains DB, YAML, SQL. Please be informed that this plugin 
+will try to re-update the old file into new one. The case is the player data might be gone, replaced
+and corrupted. It is recommended to not using this procedure.

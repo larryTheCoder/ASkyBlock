@@ -432,24 +432,27 @@ public class IslandBlock {
         Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
         loadChunkAt(loc);
         // Only paste air if it is below the sea level and in the overworld
-        Block block = loc.getLevelBlock();
         // found the problem why blocks didnt shows up
-        blockLoc.getLevel().setBlock(block, Block.get(typeId, data), usePhysics, true);
+        // prevent the block to show up
+        blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), usePhysics, true);
 
+        // DO NOT MAKE THIS RUN!
         if (signText != null) {
-            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                    .putString("id", BlockEntity.SIGN)
-                    .putInt("x", (int) x)
-                    .putInt("y", (int) y)
-                    .putInt("z", (int) z)
-                    .putString("Text1", signText.get(0))
-                    .putString("Text2", signText.get(1))
-                    .putString("Text3", signText.get(2))
-                    .putString("Text4", signText.get(3));
-            BlockEntitySign sign = new BlockEntitySign(blockLoc.getLevel().getChunk((int) x >> 4, (int) z >> 4), nbt);
-            sign.spawnToAll();
+//            blockLoc.getLevel().setBlock(loc, Block.get(Block.SIGN_POST), usePhysics, true);
+//            //some time the sign wont appear
+//            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+//                    .putString("id", BlockEntity.SIGN)
+//                    .putInt("x", (int) x)
+//                    .putInt("y", (int) y)
+//                    .putInt("z", (int) z)
+//                    .putString("Text1", signText.get(0))
+//                    .putString("Text2", signText.get(1))
+//                    .putString("Text3", signText.get(2))
+//                    .putString("Text4", signText.get(3));
+//            BlockEntitySign sign = new BlockEntitySign(blockLoc.getLevel().getChunk((int) x >> 4, (int) z >> 4), nbt);
+//            sign.spawnToAll();
         } else if (pot != null) {
-            pot.set(blockLoc, block);
+            //pot.set(blockLoc, block);
         } else if (Block.get(typeId, data).getId() == Block.CHEST) {
             TaskManager.runTaskLater(new ChestPopulateTask(loc, chestContents), 10);
         }

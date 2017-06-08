@@ -387,7 +387,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 //  return mssg;
 //    }
     public ASlocales getMsg(Player p) {
-        return new ASlocales(this, "NULL", 0);
+        return new ASlocales(this, "en-US", 0);
     }
 
     public final void initConfig() {
