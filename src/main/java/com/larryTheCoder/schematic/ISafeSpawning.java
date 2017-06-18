@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import cn.nukkit.level.Position;
  * This is the class where all THE SAFE SPOT TELEPORT goes This will never
  * return null. might be lagging your server but for the first time use only
  *
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class ISafeSpawning {
 

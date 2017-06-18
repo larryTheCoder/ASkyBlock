@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheCoder
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import com.larryTheCoder.storage.IslandData;
 
 /**
  * Fired when a player exits an island's protected area
- * @author larryTheCoder
+ * @author Adam Matthew
  *
  */
 public class IslandExitEvent extends ASkyBlockEvent {

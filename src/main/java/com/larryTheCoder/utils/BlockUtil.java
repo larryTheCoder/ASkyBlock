@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public enum BlockUtil {;
     private static final Collection<Integer> FLUIDS = Arrays.asList(Block.STILL_WATER, Block.WATER, Block.LAVA, Block.STILL_LAVA);

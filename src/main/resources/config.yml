@@ -1,7 +1,7 @@
 ## Default Config for ASkyBlock
 ---
 ## Do not change this
-version: "Alpha091215"
+version: "FVMPlsartel0"
 ## Game Prefix.
 Prefix: "&d[&eASkyBlock&d] &e"
 ## Max islands homes
@@ -17,6 +17,20 @@ updater: false
 ##  Available locales are:
 ##    en-US.
 defaultlanguage: "en-US"
+## Economy section
+economy:
+  # Enable economys?
+  # You can set this to 'true' if you has an Economy plugin listed below
+  # If there is no economy plugin detected, this section will return 'false'
+  #  Supported economy are:
+  #  - EconomyAPI
+  enable: false
+  # Starting island money
+  #  Decide if you want the first island created to be paid or not
+  payNewIsland: false
+  # Island cost $$$
+  #  You will NOT have to put '$' symbol
+  islandCost: 10
 
 ## Chat Formattin
 chat:
@@ -37,6 +51,11 @@ island:
    # OR RESET YOUR WORLD
    # Value must be an even number
    islandSize: 200
+   # Level Information
+   #  Stop the time in island world
+   #  Recommended to not set this to 'true' because it will chage the game
+   #  Enviroment.
+   stopTime: false
    # Island Hieght
    #   You can use this as island High
    #   Minimum: 20

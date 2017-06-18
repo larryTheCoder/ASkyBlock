@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,17 +17,16 @@
 package com.larryTheCoder.command.generic;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.level.Location;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.utils.Settings;
 
 /**
- * @author larryTheCoder
+ * The main island spawn
+ * 
+ * @author Adam Matthew
  */
 public class SetSpawnSubCommand extends SubCommand {
 
@@ -64,13 +63,13 @@ public class SetSpawnSubCommand extends SubCommand {
     public boolean execute(CommandSender sender, String[] args) {
         Player p = getPlugin().getServer().getPlayer(sender.getName());
         if (getPlugin().getIslandInfo(p) == null) {
-            p.sendMessage(getPrefix() + TextFormat.RED + "You need to create an island first!");
+            p.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
-        } else if (!p.getLevel().getName().equalsIgnoreCase("SkyBlock")) {
-            p.sendMessage(getPrefix() + TextFormat.RED + "You must be inside the island world.");
+        } else if (!getPlugin().inIslandWorld(p)) {
+            p.sendMessage(getPrefix() + getLocale(p).errorWrongWorld);
             return true;
         } else if(!getPlugin().getIslandInfo(p.getLocation()).owner.equalsIgnoreCase(p.getName())){
-            p.sendMessage(getPrefix() + TextFormat.RED + "You must standing on your OWN island");
+            p.sendMessage(getPrefix() + getLocale(p).errorNotOnIsland);
             return true;            
         }
         // To avoid multiple spawns, try to remove the old spawn
@@ -83,7 +82,7 @@ public class SetSpawnSubCommand extends SubCommand {
         IslandData pd = getPlugin().getIslandInfo(p.getLocation());
         pd.setSpawn(true);
         getPlugin().getDatabase().saveIsland(pd);
-        sender.sendMessage(TextFormat.GREEN + "Seccess! ");
+        sender.sendMessage(TextFormat.GREEN + getLocale(p).generalSuccess);
         return true;
     }
 

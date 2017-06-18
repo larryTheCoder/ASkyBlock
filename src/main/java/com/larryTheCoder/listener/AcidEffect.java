@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import java.util.List;
 import com.larryTheCoder.ASkyBlock;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class AcidEffect implements Listener {
 
@@ -133,7 +133,7 @@ public class AcidEffect implements Listener {
     @EventHandler(priority = EventPriority.NORMAL)
     public void onWeatherChange(final WeatherChangeEvent e) {
         // Check that they are in the ASkyBlock world
-        if (!e.getLevel().getName().equalsIgnoreCase("SkyBlock")) {
+        if (!plugin.level.contains(e.getLevel().getName())) {
             return;
         }
         this.isRaining = e.toWeatherState();

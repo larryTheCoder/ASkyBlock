@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,11 +24,10 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.locales.ASlocales;
 
 /**
- * Info: if class starts with `A`, thats mean the class is
- * for `admin override this command only`and if the class starts with
- * `V`, that mean the class is for `V.I.P override this command only`
+ * A class that define a command parameters.
+ * Requires an ASkyBlock instance.
  * 
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public abstract class SubCommand {
 
@@ -42,14 +41,14 @@ public abstract class SubCommand {
     }
 
     /**
-     * @return larryTheCoder\ASkyBlock
+     * @return Adam Matthew\ASkyBlock
      */
     public ASkyBlock getPlugin(){
         return plugin;
     }
 
-    public ASlocales getMsg(Player key){
-        return plugin.getMsg(key);
+    public ASlocales getLocale(Player key){
+        return plugin.getLocale(key);
     }
     
     public String getPrefix(){

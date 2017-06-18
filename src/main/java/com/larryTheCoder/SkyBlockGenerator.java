@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,11 @@ import cn.nukkit.math.Vector3;
 import java.util.Map;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class SkyBlockGenerator extends Generator {
 
-    public static final int TYPE_SKYBLOCK = 0x3b9aca00;
+    public static final int TYPE_SKYBLOCK = 0x7fffffff;
     private ChunkManager level;
     private NukkitRandom random;
     private final Map<String, Object> options;

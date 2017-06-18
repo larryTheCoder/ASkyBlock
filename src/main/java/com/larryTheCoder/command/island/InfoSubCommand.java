@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class InfoSubCommand extends SubCommand {
 
@@ -60,7 +60,7 @@ public class InfoSubCommand extends SubCommand {
         Player p = sender.getServer().getPlayer(sender.getName());
         for (String level : getPlugin().level) {
             if (!p.getLevel().getName().equalsIgnoreCase(level)) {
-                sender.sendMessage(getPrefix() + getMsg(p).errorWrongWorld);
+                sender.sendMessage(getPrefix() + getLocale(p).errorWrongWorld);
                 return true;
             }
         }

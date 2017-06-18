@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import com.intellectiualcrafters.updater.Updater;
 import com.larryTheCoder.ASkyBlock;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class PluginTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> implements TaskSkyBlock {
 

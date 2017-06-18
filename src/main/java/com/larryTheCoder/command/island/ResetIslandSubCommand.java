@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class ResetIslandSubCommand extends SubCommand {
 
@@ -62,7 +62,7 @@ public class ResetIslandSubCommand extends SubCommand {
         }
         Player p = getPlugin().getServer().getPlayer(sender.getName());
         if (getPlugin().getIsland().isPlayerIsland(p, p.getLocation())) {
-            sender.sendMessage(getPrefix() + getMsg(p).errorNoIsland);
+            sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
         }
         getPlugin().getIsland().reset(p, true, getPlugin().getIslandInfo(p.getLocation()));

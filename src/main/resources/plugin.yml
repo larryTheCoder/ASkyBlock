@@ -1,70 +1,106 @@
 name: "ASkyBlock"
-version: "0.2.6"
-author: larryTheCoder
+version: "0.3.0"
+author: Adam Matthew
 api: ["1.0.0"]
 main: com.larryTheCoder.ASkyBlock
 load: POSTWORLD
 website: http://github.com/larryTheCoder/ASkyBlock-Nukkit
-author: "larryTheHarry"
-depends: ["DbLib", "FastAsyncWorldEdit"]
+author: "Adam Matthew"
+depends: ["DbLib"]
 permissions:
-    is.bypass.wait:
-     description: "bypass the reset timer / teleports"
-     default: false    
+    # Island create perm
     is.create:
      default: true
      description: "Create an island"
+    # On /is command perm
     is.command:
      default: true
      description: "SkyBlock main command"
-    is.command.help:
+    # Island team chatting command
+    is.command.teamChat:
      default: true
-     description: "List all of ASkyBlock commands"
+     description: "Enable chatting with team"
+    # Island messages command
+    is.command.message:
+     default: true
+     description: "Read the offline messages"
+    # Kick player from owner's island
     is.command.expel:
      default: true
-     description: "Kick a player from your island"   
-    is.command.edit:
-     default: true
-     descripotion: "Edit your island information"
-    is.command.reset:
-     default: true
-     description: "Reset player island"
+     description: "Kick a player from your island"  
+    # Island leave permission
     is.command.leave:
      default: true
      description: "leave island"
-    is.command.delete:
+    # Message language (this is what I am waiting for!)
+    is.command.lang:
      default: true
-     description: "Delete player island"  
-    is.command.reject:
+     description: "Set your default language"
+    # Island spawn
+    is.command.setspawn:
+     default: op
+     description: "Set the island main spawn."
+    # Reset island command? or Delete island command...
+    is.command.reset:
      default: true
-     description: "Reject an invitation"   
-    is.command.accept:
+     description: "Reset player island"
+    # Island home permission
+    is.command.home:
      default: true
-     description: "accept an invitation"
-    is.command.invite:
-     default: true
-     description: "Invite a player who didnt have a Team"
-    is.command.create:
-     default: true
-     description: "Create a new island"
+     description: "Teleport back to home"
+    # Get island info
     is.command.info:
      default: true
      description: "get the players island info"
+    # Teleport or warp? Hmmm...
+    is.command.teleport:
+     default: true
+     description: "Teleport to other island!"   
+    # Has an invitation? Of course!
+    is.command.accept:
+     default: true
+     description: "accept an invitation"   
+    # Sorry I didn't like to join you
+    is.command.reject:
+     default: true
+     description: "Reject an invitation"  
+    # Edit island. eg biome, name
+    is.command.edit:
+     default: true
+     description: "Edit your island information"
+    # Invite me please!
+    is.command.invite:
+     default: true
+     description: "Invite a player"
+    # I did like this world please
+    is.command.setworld:
+     default: true
+     description: "Set the player default world (Where island were generated)"
+    # These are bypass perm
     is.mod.bypassprotect:
      default: op
      description: "Bypass the island Guard settings"
     is.mod.bypasslock:
      default: op
      description: "Bypass the island Lock settings"
-     
+    is.craft.enderchest:
+     default: op
+     description: "Bypass the enderchest usage"
+    is.bypass.wait:
+     default: op
+     description: "Bypass the reset timer"
+    # Admin on /asc command
+    is.admin.command:
+     default: op
+     description: "Admin main command"
     # Admin Island Command
     is.admin.generate:
      default: op
      description: "Generate a new island world"
+    # Admin kick command
     is.admin.kick:
      default: op
      description: "Kick a player from island world"
-    # V.I.P permissions
-    is.vip:
+    is.admin.rename:
      default: op
-     description: "Add a VIP full permissions of commands"
+     description: "Rename other players island"

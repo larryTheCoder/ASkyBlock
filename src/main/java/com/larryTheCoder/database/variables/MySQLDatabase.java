@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class MySQLDatabase implements AbstractDatabase{
 

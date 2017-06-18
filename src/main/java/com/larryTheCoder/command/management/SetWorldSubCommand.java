@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,53 +14,70 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.larryTheCoder.command.management;
 
-package com.larryTheCoder.command.generic;
-
+import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
+import com.larryTheCoder.player.PlayerData;
+import com.larryTheCoder.utils.Utils;
 
 /**
- * @author larryTheCoder
+ *
+ * @author Adam Matthew
  */
-public class AKickSubCommand extends SubCommand{
+public class SetWorldSubCommand extends SubCommand {
 
-    public AKickSubCommand(ASkyBlock plugin) {
+    public SetWorldSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.admin.kick");
+        return sender.isPlayer() && sender.hasPermission("is.command.setworld");
     }
 
     @Override
     public String getUsage() {
-        return "<player>";
+        return "<level>";
     }
 
     @Override
     public String getName() {
-        return "kick";
+        return "setlevel";
     }
 
     @Override
     public String getDescription() {
-        return "Kick the player inside from island level";
+        return "Set where you want to create your island!";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{};
+        return new String[]{"setlvl"};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        if(args.length != 2){
+        if (args.length != 2) {
             return false;
         }
-        getPlugin().getIsland().kickPlayerByAdmin(sender, args[1]);     
+        Player p = Server.getInstance().getPlayer(sender.getName());
+        if(!getPlugin().level.contains(args[1])){
+            sender.sendMessage(getLocale(p).errorWrongWorld);
+            sender.sendMessage(Utils.arrayToString(getPlugin().level));
+            return true;
+        }
+        PlayerData pd = getPlugin().getPlayerInfo(p);
+        pd.defaultLevel = args[1];
+        boolean result = getPlugin().getDatabase().savePlayerData(pd);
+        if(result){
+            sender.sendMessage(getLocale(p).setworldSeccess);
+        } else {
+            sender.sendMessage(getLocale(p).errorFailed);
+        }
         return true;
     }
 

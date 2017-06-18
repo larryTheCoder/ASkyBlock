@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,9 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
 
 /**
- * @author larryTheCoder
+ * This class is to handle Player's teammate
+ *
+ * @author Adam Matthew
  */
 public class TeamManager {
 
@@ -58,26 +60,28 @@ public class TeamManager {
     }
 
     public boolean kickTeam(Player leader, Player member, String message) {
-        String kickMessage = TextFormat.RED + "You has been kicked from your team";
+        String kickMessage = TextFormat.RED + plugin.getLocale(member).kickedFromTeam.replace("[name]", leader.getName());
         boolean done = false;
         if (!message.isEmpty()) {
             kickMessage = message;
         }
         PlayerData te = plugin.getDatabase().getPlayerData(leader);
         if (!te.members.contains(member.getName())) {
-            leader.sendMessage(plugin.getPrefix() + plugin.getMsg(leader).errorOfflinePlayer);
+            leader.sendMessage(plugin.getPrefix() + plugin.getLocale(leader).errorOfflinePlayer);
             return true;
         }
         te.members.remove(member.getName());
         if (member.isOnline()) {
             member.sendMessage(plugin.getPrefix() + kickMessage);
+        } else {
+            plugin.getMessages().setMessage(member.getName(), message);
         }
         //todo: Store kick message if player doesnt exsits
-        //todo: Kick the player if the player in player team area level
+        //todo: Kick the player if the player in owner's island
         return done;
     }
 
-    public ArrayList<String> getPlayerMembers(Player p) {
+    public ArrayList<String> getPlayerMembers(String p) {
         PlayerData pd = plugin.getDatabase().getPlayerData(p);
         if (pd.members != null && !pd.members.isEmpty()) {
             return pd.members;
@@ -86,7 +90,7 @@ public class TeamManager {
     }
 
     private boolean kick(Player p, PlayerData td) {
-        if (p.getLevel().getName().equalsIgnoreCase("SkyBlock")) {
+        if (plugin.level.contains(p.getLevel().getName())) {
             String st = td.leader;
             IslandData pd = plugin.getDatabase().getIsland(p.getName(), 1);
             IslandData p1 = plugin.getDatabase().getIsland(st, 1);
@@ -96,5 +100,15 @@ public class TeamManager {
             }
         }
         return true;
+    }
+
+    public String getLeader(String p) {
+        PlayerData pd = plugin.getDatabase().getPlayerData(p);
+        return pd.leader;
+    }
+
+    public boolean inTeam(String team) {
+        PlayerData pd = plugin.getDatabase().getPlayerData(team);
+        return pd.inTeam == true;
     }
 }

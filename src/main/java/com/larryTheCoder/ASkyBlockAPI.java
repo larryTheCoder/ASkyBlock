@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheHarry
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import java.io.File;
  * To get hold of an API object, make sure your plugin depends on ASkyBlock, and
  * then do:
  * <pre>{@code
- *     ASkyBlockAPI api = Bukkit.getPluginManager().getPlugin("ASkyBlock");
+ *     ASkyBlockAPI api = (ASkyBlockAPI) Server.getInstance().getPluginManager().getPlugin("ASkyBlock");
  *     if (api != null && api.isEnabled()) {
  *         // Access the api here...
  *     } else {
@@ -42,10 +42,20 @@ import java.io.File;
  *     }
  * }</pre>
  *
- * @since v0.2.5
+ * @since v0.2.5 
  */
 public interface ASkyBlockAPI extends Plugin {
-
+    
+    /**
+     * Returns the island level from the last time it was calculated. Note this
+     * does not calculate the island level.
+     * 
+     * @param player
+     * @return the last level calculated for the island or zero if none.
+     * @since 0.3.0
+     */
+    Integer getIslandLevel(Player player);
+    
     /**
      * Returns the island-information for the player, or <code>null</code> if
      * none exist.
@@ -135,5 +145,5 @@ public interface ASkyBlockAPI extends Plugin {
      * @return true if `version` is >= `version2`
      * @since 0.1.0
      */
-    boolean checkVersion(int[] version, int... version2) ;
+    boolean checkVersion(int[] version, int... version2);
 }

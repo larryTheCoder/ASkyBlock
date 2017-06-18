@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,6 @@
 package com.larryTheCoder.schematic;
 
 import cn.nukkit.block.Block;
-import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.blockentity.BlockEntitySign;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
@@ -51,7 +49,7 @@ import org.json.simple.parser.ParseException;
  * The package will rules every object in Schematic without this, the schematic
  * is useless
  *
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class IslandBlock {
 

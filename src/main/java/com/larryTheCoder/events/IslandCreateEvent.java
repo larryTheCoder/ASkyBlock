@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,11 @@ import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.schematic.Schematic;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class IslandCreateEvent extends Event implements Cancellable {
 
-    private static final HandlerList handlers = new HandlerList();
+    private static final HandlerList HANDLERS = new HandlerList();
     private final Player player;
     private final Schematic schematic;
     private final IslandData island;
@@ -72,7 +72,7 @@ public class IslandCreateEvent extends Event implements Cancellable {
      * @return the protectionSize
      */
     public int getProtectionSize() {
-        return Settings.islandDistance / 2;
+        return island.getProtectionSize();
     }
 
     /**
@@ -89,11 +89,7 @@ public class IslandCreateEvent extends Event implements Cancellable {
         return Settings.islandDistance;
     }
 
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
+    public static HandlerList getHandlers() {
+        return HANDLERS;
     }
 }

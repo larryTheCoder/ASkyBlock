@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,12 +18,11 @@ package com.larryTheCoder.listener.invitation;
 
 import cn.nukkit.Player;
 import cn.nukkit.utils.TextFormat;
-import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.utils.Settings;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class Invitation {
 

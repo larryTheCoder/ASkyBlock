@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.player.PlayerData;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class InviteSubCommand extends SubCommand {
 
@@ -33,7 +33,7 @@ public class InviteSubCommand extends SubCommand {
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.isPlayer() && sender.hasPermission("is.command.addteam");
+        return sender.isPlayer() && sender.hasPermission("is.command.invite");
     }
 
     @Override
@@ -63,22 +63,22 @@ public class InviteSubCommand extends SubCommand {
         }
         Player p = sender.getServer().getPlayer(sender.getName());
         if (!getPlugin().getIsland().checkIsland(p)) {
-            sender.sendMessage(getPrefix() + getMsg(p).errorNoIsland);
+            sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
         }
         Player invite = sender.getServer().getPlayer(args[1]);
         if (invite == null) {
-            sender.sendMessage(getPrefix() + getMsg(p).errorOfflinePlayer);
+            sender.sendMessage(getPrefix() + getLocale(p).errorOfflinePlayer);
             return true;
         }
         PlayerData pdinv = ASkyBlock.get().getDatabase().getPlayerData(invite);
         PlayerData pd = ASkyBlock.get().getDatabase().getPlayerData(p);
         if (pdinv.inTeam) {
-            sender.sendMessage(getPrefix() + getMsg(p).errorInTeam.replace("[player]", args[1]));
+            sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
             return false;
         }
         if (pd.members.contains(invite.getName())) {
-            sender.sendMessage(getPrefix() + getMsg(p).errorInTeam.replace("[player]", args[1]));
+            sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
             return false;
         }
         getPlugin().getInvitationHandler().addInvitation(p, invite, pd);

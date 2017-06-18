@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ public class TeleportLogic implements Listener {
         if (player.hasPermission("is.bypass.wait") || (teleportDelay == 0) || force) {
             player.teleport(targetLoc);
         } else {
-            player.sendMessage(plugin.getPrefix() +plugin.getMsg(player).teleportDelay.replace("{0}", "" + teleportDelay));
+            player.sendMessage(plugin.getPrefix() +plugin.getLocale(player).teleportDelay.replace("{0}", "" + teleportDelay));
             TaskHandler task = plugin.getServer().getScheduler().scheduleDelayedTask(() -> {
                 pendingTPs.remove(player.getUniqueId());
                 Location loc = targetLoc.clone();
@@ -108,7 +108,7 @@ public class TeleportLogic implements Listener {
                 if (distance > cancelDistance) {
                     task.cancel();
                     pendingTPs.remove(player.getUniqueId());
-                    player.sendMessage(plugin.getPrefix() +plugin.getMsg(player).teleportCancelled);
+                    player.sendMessage(plugin.getPrefix() +plugin.getLocale(player).teleportCancelled);
                 }
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,28 +26,17 @@ import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import com.larryTheCoder.command.generic.AGenerateSubCommand;
-import com.larryTheCoder.command.generic.AKickSubCommand;
-import com.larryTheCoder.command.island.CreateISubCommand;
+import com.larryTheCoder.command.generic.*;
+import com.larryTheCoder.command.island.*;
+import com.larryTheCoder.command.management.*;
+import com.larryTheCoder.command.chat.*;
 import com.larryTheCoder.command.SubCommand;
-import com.larryTheCoder.command.generic.ExpelSubCommand;
-import com.larryTheCoder.command.generic.VGamemodeSubCommand;
-import com.larryTheCoder.command.generic.LeaveSubCommand;
-import com.larryTheCoder.command.island.DeleteSubCommand;
-import com.larryTheCoder.command.generic.SetSpawnSubCommand;
-import com.larryTheCoder.command.management.EditSubCommand;
-import com.larryTheCoder.command.management.AcceptSubCommand;
-import com.larryTheCoder.command.management.DenySubCommand;
-import com.larryTheCoder.command.island.HomeSubCommand;
-import com.larryTheCoder.command.island.InfoSubCommand;
-import com.larryTheCoder.command.management.InviteSubCommand;
-import com.larryTheCoder.command.island.TeleportSubCommand;
 import com.larryTheCoder.locales.ASlocales;
 
 /**
  * Commands v2.0 [SkyBlock]
  *
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class Commands extends PluginCommand<ASkyBlock> {
 
@@ -63,22 +52,22 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.setDescription("SkyBlock main command");
         this.plugin = plugin;
 
-        
-        this.loadSubCommand(new AGenerateSubCommand(getPlugin()));
+        // A-Z
         this.loadSubCommand(new AcceptSubCommand(getPlugin()));
-        this.loadSubCommand(new AKickSubCommand(getPlugin()));
-        this.loadSubCommand(new SetSpawnSubCommand(getPlugin()));
+        this.loadSubCommand(new ChatSubCommand(getPlugin()));
         this.loadSubCommand(new CreateISubCommand(getPlugin()));
-        this.loadSubCommand(new DenySubCommand(getPlugin()));
         this.loadSubCommand(new DeleteSubCommand(getPlugin()));
+        this.loadSubCommand(new DenySubCommand(getPlugin()));
+        this.loadSubCommand(new EditSubCommand(getPlugin()));
+        this.loadSubCommand(new ExpelSubCommand(getPlugin()));
+        this.loadSubCommand(new HomeSubCommand(getPlugin()));
         this.loadSubCommand(new InfoSubCommand(getPlugin()));
         this.loadSubCommand(new InviteSubCommand(getPlugin()));
-        this.loadSubCommand(new ExpelSubCommand(getPlugin()));
         this.loadSubCommand(new LeaveSubCommand(getPlugin()));
+        this.loadSubCommand(new MessageSubCommand(getPlugin()));
+        this.loadSubCommand(new SetSpawnSubCommand(getPlugin()));
         this.loadSubCommand(new TeleportSubCommand(getPlugin()));
-        this.loadSubCommand(new EditSubCommand(getPlugin()));
-        this.loadSubCommand(new VGamemodeSubCommand(getPlugin()));
-        this.loadSubCommand(new HomeSubCommand(getPlugin()));
+        
     }
 
     private void loadSubCommand(SubCommand cmd) {
@@ -92,9 +81,13 @@ public class Commands extends PluginCommand<ASkyBlock> {
 
     @Override
     public boolean execute(CommandSender sender, String label, String[] args) {
+        Player p = sender.isPlayer() ? getPlugin().getServer().getPlayer(sender.getName()) : null;
+        if(sender.hasPermission("is.command")){
+            sender.sendMessage(getLocale(p).errorNoPermission);
+            return true;
+        }
         if (args.length == 0) {
-            if (sender.isPlayer() && sender.hasPermission("is.create")) {
-                Player p = getPlugin().getServer().getPlayer(sender.getName());
+            if (p != null && sender.hasPermission("is.create")) {
                 plugin.getIsland().handleIslandCommand(p);
             } else if (!(sender instanceof Player)) {
                 return this.sendHelp(sender, args);
@@ -109,12 +102,13 @@ public class Commands extends PluginCommand<ASkyBlock> {
             boolean canUse = command.canUse(sender);
             if (canUse) {
                 if (!command.execute(sender, args)) {
+                    // Whops! There no translation for this!
                     sender.sendMessage(ASkyBlock.get().getPrefix() + TextFormat.RED + "Usage:" + TextFormat.GRAY + " /is " + command.getName() + " " + command.getUsage().replace("&", "§"));
                 }
-            } else if (!(sender instanceof Player)) {
-                sender.sendMessage(TextFormat.RED + "Please run this command in-game.");
+            } else if (p == null) {
+                sender.sendMessage(plugin.getLocale(p).errorUseInGame);
             } else {
-                sender.sendMessage(TextFormat.RED + "You do not have permissions to run this command");
+                sender.sendMessage(plugin.getLocale(p).errorNoPermission);
             }
         } else {
             return this.sendHelp(sender, args);
@@ -122,13 +116,13 @@ public class Commands extends PluginCommand<ASkyBlock> {
         return true;
     }
 
-    public ASlocales getMsg(Player key) {
-        return getPlugin().getMsg(key);
+    public ASlocales getLocale(Player key) {
+        return plugin.getLocale(key);
     }
 
     private boolean sendHelp(CommandSender sender, String[] args) {
         if (args.length != 0) {
-            if(!args[0].equalsIgnoreCase("help")){
+            if (!args[0].equalsIgnoreCase("help")) {
                 sender.sendMessage(TextFormat.RED + "Unknown command use /is help for a list of commands");
                 return true;
             }

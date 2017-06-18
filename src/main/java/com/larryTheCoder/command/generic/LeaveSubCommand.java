@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
-import com.larryTheCoder.utils.Settings;
+import com.larryTheCoder.utils.Utils;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class LeaveSubCommand extends SubCommand {
 
@@ -61,18 +61,25 @@ public class LeaveSubCommand extends SubCommand {
         Player pt = getPlugin().getServer().getPlayer(sender.getName());
         for (String level : getPlugin().level) {
             if (!pt.getLevel().getName().equalsIgnoreCase(level)) {
-                sender.sendMessage(getPrefix() + getMsg(pt).errorWrongWorld);
+                sender.sendMessage(getPrefix() + getLocale(pt).errorWrongWorld);
                 return true;
             }
         }
         // Check if sender is in gamemode 1
         if(!pt.isOp()){
-            if(pt.getGamemode() == 1){
+            if(pt.getGamemode() != 0){
                 pt.setGamemode(0);
             }
         }
         getPlugin().getInventory().loadPlayerInventory(pt);
-        pt.teleport(Settings.stclock);
+        // default spawn world
+        if(getPlugin().getDatabase().getSpawn() != null){
+            pt.teleport(getPlugin().getDatabase().getSpawn().getCenter());
+        } else {
+            Utils.ConsoleMsg("The default spawn world not found. Please use /is "
+                    + "setspawn in-game. Using default world");
+            pt.teleport(getPlugin().getServer().getDefaultLevel().getSafeSpawn());
+        }
         return true;
     }
 

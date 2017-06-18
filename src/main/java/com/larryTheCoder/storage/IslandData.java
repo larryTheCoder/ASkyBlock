@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class IslandData implements Cloneable {
 
@@ -53,6 +53,10 @@ public class IslandData implements Cloneable {
 
     public Vector3 getCenter() {
         return new Vector3(X, Y, Z);
+    }
+    
+    public Location getLocation(){
+        return new Location(X, Y, Z, Server.getInstance().getLevelByName(levelName));
     }
 
     public boolean isSpawn() {

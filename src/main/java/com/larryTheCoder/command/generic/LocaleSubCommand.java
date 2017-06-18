@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * @author larryTheCoder
+ * 
+ * @author Adam Matthew
  */
 public class LocaleSubCommand extends SubCommand {
 
@@ -83,7 +84,7 @@ public class LocaleSubCommand extends SubCommand {
                 for (ASlocales locale : getPlugin().getAvailableLocales().values()) {
                     if (locale.getIndex() == index) {
                         getPlugin().getPlayerInfo(p).setLocale(locale.getLocaleName());
-                        p.sendMessage(TextFormat.GREEN + getPlugin().getMsg(p).generalSuccess);
+                        p.sendMessage(TextFormat.GREEN + getLocale(p).generalSuccess);
                         return true;
                     }
                 }

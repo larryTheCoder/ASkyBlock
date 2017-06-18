@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class EditSubCommand extends SubCommand {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class StringMan {
     public static String replaceFromMap(String string, Map<String, String> replacements) {

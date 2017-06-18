@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,14 +18,16 @@ package com.larryTheCoder.utils;
 
 import cn.nukkit.Server;
 import cn.nukkit.item.Item;
-import cn.nukkit.level.Location;
 import cn.nukkit.level.generator.biome.Biome;
+import cn.nukkit.plugin.Plugin;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
+import com.intellectiualcrafters.TaskManager;
 import java.io.File;
 import java.util.ArrayList;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.economy.EconomyAPI;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.locales.FileLister;
 import com.larryTheCoder.storage.IslandData.SettingsFlag;
@@ -35,12 +37,12 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class ConfigManager {
 
-    public static final String CONFIG_VERSION = "Alpha091215";
-    
+    public static final String CONFIG_VERSION = "FVMPlsartel0";
+
     /**
      * Loads the various settings from the config.yml file into the plugin
      */
@@ -51,6 +53,7 @@ public class ConfigManager {
         // ********************** Island settings **************************
         Settings.maxHome = cfg.getInt("maxhome", 10);
         Settings.updater = cfg.getBoolean("updater");
+        Settings.useEconomy = scheduleCheck(cfg.getBoolean("economy.enable"), cfg);
         Settings.islandDistance = cfg.getInt("island.islandSize", 200);
         Settings.islandHieght = cfg.getInt("island.islandHieght", 100);
         Settings.protectionrange = cfg.getInt("island.protectionRange", 100);
@@ -82,7 +85,7 @@ public class ConfigManager {
             Settings.islandZOffset = Settings.islandDistance;
             Utils.ConsoleMsg("Setting maximum island Z Offset to " + Settings.islandDistance);
         }
-        Settings.facebook = cfg.getBoolean("chat.teamChat", true);
+        Settings.teamChat = cfg.getBoolean("chat.teamChat", true);
         Settings.islandMaxNameLong = cfg.getInt("island.nameLimit", 20);
         Settings.cleanrate = cfg.getInt("island.chunkResetPerBlocks", 256);
         Settings.seaLevel = cfg.getInt("island.seaLevel", 3);
@@ -150,8 +153,8 @@ public class ConfigManager {
             // Nothing in the chest
             Settings.chestItems = new Item[0];
         }
+        Settings.stopTime = cfg.getBoolean("island.stopTime");
         Settings.saveInventory = cfg.getBoolean("island.saveInventory");
-        Settings.stclock = new Location(cfg.getInt("lobby.lobbyX"), cfg.getInt("lobby.lobbyY"), cfg.getInt("lobby.lobbyZ"), Server.getInstance().getLevelByName(cfg.getString("lobby.world")));
         // Challenges
         Settings.broadcastMessages = cfg.getBoolean("general.broadcastmessages", true);
         // ******************** Biome Settings *********************
@@ -190,15 +193,15 @@ public class ConfigManager {
                 Utils.ConsoleMsg("Unknown setting in config.yml:protection.world " + setting.toUpperCase() + " skipping...");
             }
         }
-                // Get the default language
+        // Get the default language
         Settings.defaultLanguage = cfg.getString("general.defaultlanguage", "en-US");
-        
+
         // Load languages
-        HashMap<String,ASlocales> availableLocales = new HashMap<>();
+        HashMap<String, ASlocales> availableLocales = new HashMap<>();
         FileLister fl = new FileLister(ASkyBlock.get());
         try {
             int index = 1;
-            for (String code: fl.list()) {
+            for (String code : fl.list()) {
                 //plugin.getLogger().info("DEBUG: lang file = " + code);
                 availableLocales.put(code, new ASlocales(ASkyBlock.get(), code, index++));
             }
@@ -212,5 +215,31 @@ public class ConfigManager {
         }
         ASkyBlock.get().setAvailableLocales(availableLocales);
         Utils.ConsoleMsg(TextFormat.YELLOW + "Seccessfully checked config.yml");
+    }
+
+    private static boolean scheduleCheck(boolean flag, Config cfg) {
+        if (flag) {
+            Plugin plugin = ASkyBlock.get().getServer().getPluginManager()
+                    .getPlugin("EconomyAPI");
+            if (plugin != null && !plugin.isEnabled()) {
+                Utils.ConsoleMsg("&eScheduling Economy instance due to 'plugin not enabled'");
+                // schedule another delayed task
+                TaskManager.runTaskLater(() -> {
+                    scheduleCheck(true, cfg);
+                }, 3); // 3 sec
+            } else if (plugin != null && plugin.isEnabled()) {
+                Utils.ConsoleMsg("&eSeccessfully created an instance with Economy plugin");
+                ASkyBlock.econ = new EconomyAPI();
+                Settings.useEconomy = true;
+            } else {
+                Utils.ConsoleMsg("&eError: No economy plugin were found!");
+                Settings.useEconomy = false;
+            }
+            if(Settings.useEconomy){
+                Settings.islandCost = cfg.getDouble("economy.islandCost", 5);
+                Settings.firstIslandFree = !cfg.getBoolean("economy.payNewIsland", false);
+            }
+        }
+        return false;
     }
 }

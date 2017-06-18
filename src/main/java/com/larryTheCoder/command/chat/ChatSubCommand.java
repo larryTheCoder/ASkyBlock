@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class ChatSubCommand extends SubCommand {
 
@@ -60,7 +60,7 @@ public class ChatSubCommand extends SubCommand {
     public boolean execute(CommandSender sender, String[] args) {
         Player p = Server.getInstance().getPlayer(sender.getName());
         if (getPlugin().getIsland().checkIsland(p)) {
-            sender.sendMessage(getPrefix() + getMsg(p).errorNoIsland);
+            sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
         }
         if (getPlugin().getTManager().hasTeam(p)) {
@@ -70,21 +70,21 @@ public class ChatSubCommand extends SubCommand {
                 if (!teamMember.equals(p.getName()) && getPlugin().getServer().getPlayer(teamMember) != null) {
                     online = true;
                 }
-            }    
-//            if (!online) {
-//                player.sendMessage(getPrefix() +ChatColor.RED + getPlugin().myLocale(playerUUID).teamChatNoTeamAround);
-//                player.sendMessage(getPrefix() +ChatColor.GREEN + getPlugin().myLocale(playerUUID).teamChatStatusOff);
-//                getPlugin().getChatListener().unSetPlayer(playerUUID);
-//                return true;
-//            }
-//            if (getPlugin().getChatListener().isTeamChat(playerUUID)) {
-//                // Toggle
-//                player.sendMessage(getPrefix() +ChatColor.GREEN + getPlugin().myLocale(playerUUID).teamChatStatusOff);
-//                getPlugin().getChatListener().unSetPlayer(playerUUID);
-//            } else {
-//                player.sendMessage(getPrefix() +ChatColor.GREEN + getPlugin().myLocale(playerUUID).teamChatStatusOn);
-//                getPlugin().getChatListener().setPlayer(playerUUID);
-//            }            
+            }
+            if (!online) {
+                p.sendMessage(getPrefix() + getLocale(p).teamChatNoTeamAround);
+                p.sendMessage(getPrefix() + getLocale(p).teamChatStatusOff);
+                getPlugin().getChatHandlers().unSetPlayer(p);
+                return true;
+            }
+            if (getPlugin().getChatHandlers().isTeamChat(p)) {
+                // Toggle
+                p.sendMessage(getPrefix() + getLocale(p).teamChatStatusOff);
+                getPlugin().getChatHandlers().unSetPlayer(p);
+            } else {
+                p.sendMessage(getPrefix() + getLocale(p).teamChatStatusOn);
+                getPlugin().getChatHandlers().setPlayer(p);
+            }   
         }
         return false;
     }

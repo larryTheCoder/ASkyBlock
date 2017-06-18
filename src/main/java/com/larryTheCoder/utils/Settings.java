@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
 package com.larryTheCoder.utils;
 
 import cn.nukkit.item.Item;
-import cn.nukkit.level.Location;
 import cn.nukkit.level.generator.biome.Biome;
 import com.larryTheCoder.storage.IslandData.SettingsFlag;
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class Settings {
 
@@ -58,16 +57,17 @@ public class Settings {
     public static boolean broadcastMessages;
     public static double biomeCost;
     public static Biome defaultBiome;
-    public static boolean facebook;
+    public static boolean teamChat;
     public static boolean saveInventory;
-    public static Location stclock;
+    public static String defaultLanguage;
+    public static boolean stopTime;
     
     // default variables
     public static String islandCompanion = "COW";
     public static Set<String> challengeList = new HashSet<>();
     public static List<String> freeLevels = new ArrayList<>();
     public static int waiverAmount = 0;
-    public static boolean useEconomy = false;
+    
 
     /**
      * Default world protection settings
@@ -86,10 +86,14 @@ public class Settings {
      * Visitors settings to show in the GUI
      */
     public static HashMap<SettingsFlag, Boolean> visitorSettings = new HashMap<SettingsFlag, Boolean>();
+    
     public static boolean allowTNTDamage;
     public static boolean allowChestDamage;
     public static boolean allowCreeperGriefing;
     public static boolean allowCreeperDamage;
-    public static String defaultLanguage;
+    
+    public static boolean useEconomy = false;
+    public static double islandCost = 10D;
+    public static boolean firstIslandFree = true;
     
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheCoder
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  */
 package com.larryTheCoder.player;
 
-import cn.nukkit.Player;
+import cn.nukkit.level.Location;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
@@ -25,7 +25,7 @@ import java.util.HashMap;
 
 /**
  *
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class PlayerData implements Cloneable {
 
@@ -44,6 +44,8 @@ public class PlayerData implements Cloneable {
     public ArrayList<String> members = new ArrayList<>();
     public String name;
     public String leader;
+    // The location where island will created
+    public String defaultLevel;
 
     public PlayerData(String playerName, int homes, int resetleft) {
         this.playerName = playerName;
@@ -52,7 +54,7 @@ public class PlayerData implements Cloneable {
         this.pubLocale = Settings.defaultLanguage;
     }
 
-    public PlayerData(String playerName, int homes, ArrayList<String> members, HashMap<String, Boolean> list, HashMap<String, Integer> times, int islandlvl, boolean inTeam, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList, String locale) {
+    public PlayerData(String playerName, int homes, ArrayList<String> members, HashMap<String, Boolean> list, HashMap<String, Integer> times, int islandlvl, boolean inTeam, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList, String locale, String defaultLevel) {
         this.homes = homes;
         this.members = members;
         this.inTeam = inTeam;
@@ -165,8 +167,20 @@ public class PlayerData implements Cloneable {
         ASkyBlock.get().getDatabase().savePlayerData(this);
     }
 
+    /**
+     * @param locale the locale to set
+     */
     public void setLocale(String locale) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.pubLocale = locale;
+        ASkyBlock.get().getDatabase().savePlayerData(this);
+    }
+
+    public Location getTeamIslandLocation() {
+        if (teamIslandLocation == null || teamIslandLocation.isEmpty()) {
+            return null;
+        }
+        Location l = Utils.getLocationString(teamIslandLocation);
+        return l;
     }
 
 }

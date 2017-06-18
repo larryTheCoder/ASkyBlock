@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheCoder
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ import org.w3c.dom.Document;
 
 /**
  *
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class JDBCUtilities {
         public static void getWarningsFromResultSet(ResultSet rs) throws SQLException {

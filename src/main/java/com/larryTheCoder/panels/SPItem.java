@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import com.larryTheCoder.utils.Utils;
 /**
  * Schematic Panel Item
  *
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class SPItem {
 

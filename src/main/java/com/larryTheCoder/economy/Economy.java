@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheHarry
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,17 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.larryTheCoder.economyHandler;
+package com.larryTheCoder.economy;
 
 import cn.nukkit.Player;
 
 /**
  *
- * @author larryTheHarry
+ * @author Adam Matthew
  */
 public interface Economy {
     
     public boolean reduceMoney(Player p, double amount);
     
     public boolean addMoney(Player p, double amount);
+
+    public double getMoney(Player p);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheHarry
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * This event is fired when a player completes a challenge level
  * 
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class ChallengeLevelCompleteEvent extends Event {
     

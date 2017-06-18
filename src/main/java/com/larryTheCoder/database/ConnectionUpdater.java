@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheCoder
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,30 +16,35 @@
  */
 package com.larryTheCoder.database;
 
+import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
+import com.larryTheCoder.utils.Utils;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * Renew the old sql database
  *
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class ConnectionUpdater {
 
     private final Connection con;
-    private final HashMap<Integer, IndependantIsland> pd = new HashMap<>();
+    private final ArrayList<IndependantIsland> pd = new ArrayList<>();
 
     public ConnectionUpdater(Connection cone) {
         this.con = cone;
     }
 
-    public void updateRow() {
-        int count = 0;
+    /**
+     *
+     */
+    public void checkStatement() {
         try (Statement stmt = con.createStatement()) {
             ResultSet set = stmt.executeQuery("SELECT * FROM `island`");
             if (set.isClosed()) {
@@ -47,30 +52,60 @@ public class ConnectionUpdater {
             }
             while (set.next()) {
                 IndependantIsland ipd = new IndependantIsland();
-                // try to check if the ROW exsits
-                if (set.getRowId("id") == null) {
+                try {
+                    ipd.id = set.getInt("id");
+                } catch (SQLException ex) {
                     ipd.id = 1;
                 }
-                if (set.getRowId("isSpawn") == null) {
+                try {
+                    ipd.isSpawn = set.getBoolean("isSpawn");
+                } catch (SQLException ex) {
                     ipd.isSpawn = false;
                 }
-                if(set.getRowId("psize") == null){
+                try {
+                    ipd.islandId = set.getInt("islandId");
+                } catch (SQLException ex) {
+                    ipd.islandId = ASkyBlock.get().getIsland().generateIslandKey(set.getInt("x"), set.getInt("z"));
+                }
+                try {
+                    ipd.protectionRange = set.getInt("psize");
+                } catch (SQLException ex) {
                     ipd.protectionRange = Settings.protectionrange;
                 }
-                pd.put(count, ipd);
-                count++;
+                try {
+                    ipd.name = set.getString("name");
+                } catch (SQLException ex) {
+                    ipd.name = "My Island";
+                }
+                try {
+                    ipd.biome = set.getString("biome");
+                } catch (SQLException ex) {
+                    ipd.biome = Settings.defaultBiome.getName();
+                }
+                try {
+                    ipd.locked = set.getBoolean("locked");
+                } catch (SQLException ex) {
+                    ipd.locked = false;
+                }
+                try {
+                    ipd.reloadSettings(set.getString("protection"));
+                } catch (SQLException ex) {
+                    ipd.setIgsDefaults();
+                }
+                pd.add(ipd);
             }
         } catch (SQLException ex) {
         }
-
     }
 
     private class IndependantIsland {
 
+        // This is how new island data is.
         public int islandId;
         public int id;
         public String levelName;
         // Coordinates of the island area
+        // This should have before 1.0.3 commit
         public int X = 0;
         public int Y = 0;
         public int Z = 0;
@@ -95,6 +130,62 @@ public class ConnectionUpdater {
          */
         private void prepareStatement() {
 
+        }
+
+        private void reloadSettings(String string) {
+            if (isSpawn) {
+                setSpawnDefaults();
+            } else {
+                setIgsDefaults();
+            }
+            boolean value;
+            ArrayList<String> bool = Utils.stringToArray(string, ", ");
+            for (int i = 0; i < IslandData.SettingsFlag.values().length; i++) {
+                String pool = bool.get(i);
+                value = Boolean.parseBoolean(pool);
+                IslandData.SettingsFlag[] set = IslandData.SettingsFlag.values();
+                igs.put(set[i], value);
+            }
+
+        }
+
+        /**
+         * Resets the protection settings to their default as set in config.yml
+         * for this island
+         */
+        public void setIgsDefaults() {
+            for (IslandData.SettingsFlag flag : IslandData.SettingsFlag.values()) {
+                if (!Settings.defaultIslandSettings.containsKey(flag)) {
+                    // Default default
+                    this.igs.put(flag, false);
+                } else {
+                    if (Settings.defaultIslandSettings.get(flag) == null) {
+                        //plugin.getLogger().info("DEBUG: null flag " + flag);
+                        this.igs.put(flag, false);
+                    } else {
+                        this.igs.put(flag, Settings.defaultIslandSettings.get(flag));
+                    }
+                }
+            }
+        }
+
+        /**
+         * Reset spawn protection settings to their default as set in config.yml
+         * for this island
+         */
+        public void setSpawnDefaults() {
+            for (IslandData.SettingsFlag flag : IslandData.SettingsFlag.values()) {
+                if (!Settings.defaultSpawnSettings.containsKey(flag)) {
+                    // Default default
+                    this.igs.put(flag, false);
+                } else {
+                    if (Settings.defaultSpawnSettings.get(flag) == null) {
+                        this.igs.put(flag, false);
+                    } else {
+                        this.igs.put(flag, Settings.defaultSpawnSettings.get(flag));
+                    }
+                }
+            }
         }
     }
 }

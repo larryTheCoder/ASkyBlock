@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public final class ChallangesCMD extends Command {
 
@@ -58,6 +58,10 @@ public final class ChallangesCMD extends Command {
     @Override
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
         Player p = sender.getServer().getPlayer(sender.getName());
+        if(!sender.isPlayer()){
+            sender.sendMessage(plugin.getLocale(p).errorUseInGame);
+            return true;
+        }
         if (args.length == 0) {
             p.sendMessage(plugin.getPrefix() + "§cfew parameters, /c help for a list of commands");
             return true;
@@ -879,7 +883,7 @@ public final class ChallangesCMD extends Command {
                             TextFormat.GOLD + "[name] just completed a challange: [challenge] !".replace("[name]", player.getDisplayName()).replace("[challenge]", challengeName));
                 });
             }
-            plugin.getMessages().tellOfflineTeam(player.getUniqueId(),
+            plugin.getMessages().tellOfflineTeam(player.getName(),
                     TextFormat.GOLD + "[name] just completed a challange: [challenge] !".replace("[name]", player.getName()).replace("[challenge]", challengeName));
             itemRewards = getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".itemReward", "").split(" ");
             moneyReward = getChallengeConfig().getDouble("challenges.challengeList." + challenge.toLowerCase() + ".moneyReward", 0D);

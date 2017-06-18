@@ -16,7 +16,7 @@ public class TaskManager {
     public static TaskManager IMP;
 
     public static final HashSet<String> TELEPORT_QUEUE = new HashSet<>();
-    public static final HashMap<Integer, Integer> tasks = new HashMap<>();
+    public static final HashMap<Integer, Integer> TASK = new HashMap<>();
     public static AtomicInteger index = new AtomicInteger(0);
 
     public <T> T sync(final RunnableVal<T> function) {
@@ -157,13 +157,13 @@ public class TaskManager {
     }
 
     public int taskRepeat(Runnable r, int interval) {
-        TaskHandler task = ASkyBlock.get().getServer().getScheduler().scheduleRepeatingTask(r, interval, false);
+        TaskHandler task = ASkyBlock.get().getServer().getScheduler().scheduleRepeatingTask(ASkyBlock.get(), r, interval, false);
         return task.getTaskId();
     }
 
     @SuppressWarnings("deprecation")
     public int taskRepeatAsync(Runnable r, int interval) {
-        TaskHandler task = ASkyBlock.get().getServer().getScheduler().scheduleRepeatingTask(r, interval, true);
+        TaskHandler task = ASkyBlock.get().getServer().getScheduler().scheduleRepeatingTask(ASkyBlock.get(), r, interval, true);
         return task.getTaskId();
     }
 
@@ -171,25 +171,25 @@ public class TaskManager {
         if (r == null) {
             return;
         }
-        ASkyBlock.get().getServer().getScheduler().scheduleTask(r, true);
+        ASkyBlock.get().getServer().getScheduler().scheduleTask(ASkyBlock.get(), r, true);
     }
 
     public void task(Runnable r) {
         if (r == null) {
             return;
         }
-        ASkyBlock.get().getServer().getScheduler().scheduleTask(r, false);
+        ASkyBlock.get().getServer().getScheduler().scheduleTask(ASkyBlock.get(), r, false);
     }
 
     public void taskLater(Runnable r, int delay) {
         if (r == null) {
             return;
         }
-        ASkyBlock.get().getServer().getScheduler().scheduleDelayedTask(r, delay);
+        ASkyBlock.get().getServer().getScheduler().scheduleDelayedTask(ASkyBlock.get(), r, delay);
     }
 
     public void taskLaterAsync(Runnable r, int delay) {
-        ASkyBlock.get().getServer().getScheduler().scheduleDelayedTask(r, delay, true);
+        ASkyBlock.get().getServer().getScheduler().scheduleDelayedTask(ASkyBlock.get(), r, delay, true);
     }
 
     public void cancelTask(int task) {

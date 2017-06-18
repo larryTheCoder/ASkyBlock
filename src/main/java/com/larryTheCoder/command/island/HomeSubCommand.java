@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ package com.larryTheCoder.command.island;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.storage.IslandData;
@@ -26,7 +25,7 @@ import com.larryTheCoder.utils.Utils;
 import java.util.List;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class HomeSubCommand extends SubCommand {
 
@@ -72,11 +71,11 @@ public class HomeSubCommand extends SubCommand {
         Player p = sender.getServer().getPlayer(sender.getName());
         List<IslandData> island = getPlugin().getDatabase().getIslands(sender.getName());
         if (island == null) {
-            sender.sendMessage(getPrefix() + getMsg(p).errorNoIsland);
+            sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
         }
         if (island.size() != islandNumber) {
-            sender.sendMessage(getPrefix() +TextFormat.RED + "You don't have an island with home number " + islandNumber);
+            sender.sendMessage(getPrefix() + getLocale(p).errorNoIslandExsits + islandNumber);
             return true;
         }
         getPlugin().getGrid().homeTeleport(p, islandNumber);

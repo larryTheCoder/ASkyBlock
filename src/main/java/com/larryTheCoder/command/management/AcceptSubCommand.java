@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class AcceptSubCommand extends SubCommand {
 
@@ -61,7 +61,7 @@ public class AcceptSubCommand extends SubCommand {
         Player p = sender.getServer().getPlayer(sender.getName());
         InvitationHandler pd = ASkyBlock.get().getInvitationHandler();
         if (pd.getInvitation(p) == null) {
-            sender.sendMessage(getPrefix() + getMsg(p).errorNotPending);
+            sender.sendMessage(getPrefix() + getLocale(p).errorNotPending);
             return false;
         }
         pd.getInvitation(p).accept();

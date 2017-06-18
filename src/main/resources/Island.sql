@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017 larryTheHarry
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * Author:  larryTheHarry
+ * Author:  Adam Matthew
  * Created: Feb 5, 2017
  */
 CREATE TABLE IF NOT EXISTS `player` (`player` VARCHAR NOT NULL , 

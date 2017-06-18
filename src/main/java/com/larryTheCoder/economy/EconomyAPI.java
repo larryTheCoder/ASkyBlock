@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheHarry
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.larryTheCoder.economyHandler;
+package com.larryTheCoder.economy;
 
 import cn.nukkit.Player;
 
+/**
+ * symbols
+ */
 public class EconomyAPI implements Economy {
 
     @Override
@@ -35,5 +38,10 @@ public class EconomyAPI implements Economy {
     @Override
     public boolean addMoney(Player p, double amount) {
         return me.onebone.economyapi.EconomyAPI.getInstance().addMoney(p, amount, true) == me.onebone.economyapi.EconomyAPI.RET_SUCCESS;
+    }
+
+    @Override
+    public double getMoney(Player p) {
+        return me.onebone.economyapi.EconomyAPI.getInstance().myMoney(p);
     }
 }

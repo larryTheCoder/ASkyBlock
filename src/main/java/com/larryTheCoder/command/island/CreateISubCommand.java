@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class CreateISubCommand extends SubCommand {
 
@@ -86,10 +86,10 @@ public class CreateISubCommand extends SubCommand {
         }
         List<IslandData> maxPlotsOfPlayers = getPlugin().getDatabase().getIslands(sender.getName());
         if (Settings.maxHome >= 0 && maxPlotsOfPlayers.size() >= Settings.maxHome) {
-            sender.sendMessage(getPrefix() +getPlugin().getMsg(p).errorMaxIsland.replace("[maxplot]", "" + Settings.maxHome));
+            sender.sendMessage(getPrefix() +getLocale(p).errorMaxIsland.replace("[maxplot]", "" + Settings.maxHome));
             return true;
         }
-        getPlugin().getIsland().createIsland(p.getName(), smt, name);
+        getPlugin().getIsland().createIsland(p, smt, name);
         return true;
     }
 

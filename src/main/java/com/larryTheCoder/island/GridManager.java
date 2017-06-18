@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ import java.util.Set;
 import static cn.nukkit.math.BlockFace.*;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class GridManager {
 
@@ -139,7 +139,7 @@ public class GridManager {
      */
     public Location getSafeHomeLocation(Player p, int number) {
         IslandData pd = ASkyBlock.get().getDatabase().getIsland(p.getName(), number);
-        Level world = Server.getInstance().getLevelByName("SkyBlock");
+        Level world = Server.getInstance().getLevelByName(pd.levelName);
         int px = pd.X;
         int pz = pd.Z;
         int py = pd.Y;

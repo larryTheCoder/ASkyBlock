@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,63 +14,63 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.larryTheCoder.command.generic;
+package com.larryTheCoder.command.chat;
 
+import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.SkyBlockGenerator;
 import com.larryTheCoder.command.SubCommand;
+import java.util.List;
 
 /**
- * @author larryTheCoder
+ * The default command of messages
+ * 
+ * @author Adam Matthew
  */
-public class AGenerateSubCommand extends SubCommand {
+public class MessageSubCommand extends SubCommand {
 
-    public AGenerateSubCommand(ASkyBlock plugin) {
+    public MessageSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.admin.generate");
+        return sender.hasPermission("is.command.message") && sender.isPlayer();
     }
 
     @Override
     public String getUsage() {
-        return "<level>";
+        return "";
     }
 
     @Override
     public String getName() {
-        return "generate";
+        return "messages";
     }
 
     @Override
     public String getDescription() {
-        return "create a new Island Level";
+        return "The inbox messages while you offline";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{"gen", "migrate"};
+        return new String[]{"mesge"};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        if (args.length != 2) {
-            return false;
+        Player p = Server.getInstance().getPlayer(sender.getName());
+        List<String> list = getPlugin().getMessages().getMessages(p.getName());
+        if (!list.isEmpty()) {
+            p.sendMessage(getPrefix() + getPlugin().getLocale(p).newsHeadline);
+            list.forEach((alist) -> {
+                p.sendMessage(alist);
+            });
+        } else {
+            p.sendMessage(getPrefix() + getPlugin().getLocale(p).newsEmpty);
         }
-        if (getPlugin().level.contains(args[1])) {
-            sender.sendMessage(getPrefix() + "The level has already generated!");
-            return true;
-        } else if (!getPlugin().getServer().isLevelGenerated(args[1])) {
-            getPlugin().getServer().generateLevel(args[1], System.currentTimeMillis(), SkyBlockGenerator.class);
-            getPlugin().getServer().loadLevel(args[1]);
-            getPlugin().level.add(args[1]);
-            sender.sendMessage(getPrefix() + "The level has already generated!");
-            return true;
-        }
-        sender.sendMessage(getPrefix() + "The level has already generated!");
         return true;
     }
 

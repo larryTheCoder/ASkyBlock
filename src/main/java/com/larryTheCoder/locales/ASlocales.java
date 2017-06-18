@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
 package com.larryTheCoder.locales;
 
 import cn.nukkit.utils.Config;
-import cn.nukkit.utils.TextFormat;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -28,8 +27,11 @@ import com.larryTheCoder.ASkyBlock;
 /**
  * All the text strings in the game sent to players This version enables
  * different players to have different locales.
+ * <p>
+ * If the player are null such as Console. The 'default' will be used as main
+ * language.
  *
- * @author larryTheHarry
+ * @author Adam Matthew
  */
 public final class ASlocales {
 
@@ -63,10 +65,16 @@ public final class ASlocales {
     public String acidBottle;
     public String drankAcidAndDied;
     public String drankAcid;
+    // Help defaults
+    public String adminHelpCommand = "§eShow a list of admin commands.";
+    public String adminHelpGenerate = "§eAttempt to create a new level.";
+    public String adminHelpKick = "§eTo kick player from island worlds.";
+    public String adminHelpRename = "§eAttempt to rename other player's island.";
     // Errors defaults
     public String errorUnknownPlayer = "§cThat player is unknown.";
     public String errorNoPermission = "§cYou don't have permission to use that command!";
     public String errorNoIsland = "§cYou do not have an island!";
+    public String errorNoIslandExsits = "§cYou don't have an island with home number ";
     public String errorNoIslandOther = "§cThat player does not have an island!";
     public String errorCommandNotReady = "§cYou can't use that command right now.";
     public String errorOfflinePlayer = "§cThat player is offline or doesn't exist.";
@@ -74,29 +82,47 @@ public final class ASlocales {
     public String errorNoTeam = "§cPlayer is not in a team.";
     public String errorMaxIslands = "§cThe world is full of islands! Try again later!";
     public String errorNotABlock = "§cThat is not a block";
-    public String errorNotOnIsland = "§cYou are not in an island space!";
+    public String errorNotOnIsland = "§cYou are not in your/other's island space!";
     public String errorTooLong = "§cToo long. Maximum size is [length].";
     public String errorTooShort = "§cToo short. Minimum size is [length].";
     public String errorUseInGame = "§cThis command must be used in-game.";
     public String errorWrongWorld = "§cYou cannot do that in this world.";
+    public String errorWrongWorld2 = "§cUnknown world. Possible worlds are:";
     public String errorMaxIsland = "§cYou reached the limit of [maxplot] Island per player";
     public String errorNotPending = "§cNo invintation pending! Try again later";
     public String errorInTeam = "§cThe player [player] are already in team!";
+    public String errorBlockedByAPI = "§cA plugin using the API blocked this action.";
+    public String errorKickOwner = "§cYou cant kick yourself out your own island!";
+    public String errorAdminOnly = "§cYou cant kick admins from your island!";
+    public String errorFailed = "§cFailed to attempt this command. Contact admin!";
+    public String errorLevelGenerated = "§cThe level has already generated";
+    public String errorNotEnoughMoney = "§cYou don't have enough money! Default price: $[price]";
     // Commands messages
     public String kickSeccess = "§aKicked [player] from SkyBlock world!";
     public String createSeccess = "§aSeccesfully created you an island!";
-    public String resetSeccess = "§aSeccesfully cleared your island";
+    public String resetSeccess = "§aSeccesfully cleared your island!";
+    public String renameSeccess = "§aSeccessfully renamed island!";
+    public String setworldSeccess = "§aSeccessfully changed island location!";
+    public String generalSuccess = "§aSeccess!";
+    public String helpMessage = "§aNeed help? Use: /[com] help."; 
     // Teleport messages
     public String teleportDelay = "§aYou will be teleported in {0} seconds.";
     public String teleportCancelled = "§cTeleport cancelled";
     // Admin commands message
     public String adminOverride = "You override this command";
+    // Team messages
     public String teamChatStatusOff = "§aTeam chat is off";
     public String teamChatStatusOn = "§aTeam chat is on";
     public String teamChatNoTeamAround = "§cNone of your team are online!";
+    // Others
+    public String kickedFromOwner = "&eYou were kicked from island owned by [name].";
+    public String kickedFromAdmin = "&eYou were kicked by Admin on duty.";
+    public String kickedFromTeam = "&eYou were kicked from [name]'s team";
+    public String newsHeadline = "&aWhile you were offline:";
+    public String newsEmpty = "&aThere no messages for you today. Check back later!";
     private String localeName;
     private int index;
-    public String generalSuccess;
+    
 
     /**
      * Creates a locale object full of localized strings for a language
@@ -166,6 +192,9 @@ public final class ASlocales {
         }
     }
 
+    /**
+     * Reloads the locale file
+     */
     private void loadLocale() {
 
     }

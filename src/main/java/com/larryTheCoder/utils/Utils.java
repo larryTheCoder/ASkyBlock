@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class Utils {
 
@@ -70,10 +70,10 @@ public class Utils {
         } else {
             // Create the missing file
             config = new Config();
-            Utils.ConsoleMsg("No " + file + " found. Creating it...");
+            Utils.ConsoleMsg("&cNo " + file + " found. Creating it...");
             try {
                 if (ASkyBlock.get().getResource(file) != null) {
-                    ConsoleMsg("Using default found in jar file.");
+                    ConsoleMsg("&cUsing default found in jar file.");
                     ASkyBlock.get().saveResource(file, false);
                     config = new Config();
                     config.load(file);
@@ -81,7 +81,7 @@ public class Utils {
                     config.save(yamlFile);
                 }
             } catch (Exception e) {
-                ConsoleMsg("Could not create the " + file + " file!");
+                ConsoleMsg("&cCould not create the " + file + " file!");
             }
         }
         return config;

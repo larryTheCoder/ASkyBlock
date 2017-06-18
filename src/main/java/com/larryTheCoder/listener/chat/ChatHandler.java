@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import com.larryTheCoder.utils.Settings;
 import java.util.UUID;
 
 /**
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class ChatHandler implements Listener {
 
@@ -59,12 +59,12 @@ public class ChatHandler implements Listener {
         }
         String format = event.getFormat().replace("{ISLAND_LEVEL}", level);
         event.setFormat(format);
-        if (Settings.facebook && teamChatUsers.containsKey(event.getPlayer())) {
+        if (Settings.teamChat && teamChatUsers.containsKey(event.getPlayer())) {
             // Cancel the event
             event.setCancelled(true);
             // Queue the sync task because you cannot use HashMaps asynchronously. Delaying to the next tick
             // won't be a major issue for synch events either.
-            Server.getInstance().getScheduler().scheduleTask(() -> {
+            Server.getInstance().getScheduler().scheduleTask(plugin, () -> {
                 teamChat(event, event.getMessage());
             });
         }
@@ -76,8 +76,8 @@ public class ChatHandler implements Listener {
         // Is team chat on for this player
         // Find out if this player is in a team (should be if team chat is on)
         // TODO: remove when player resets or leaves team
-        if ((plugin.getTManager().getPlayerMembers(player).isEmpty()) == false) {
-            ArrayList<String> teams = plugin.getTManager().getPlayerMembers(player);
+        if ((plugin.getTManager().getPlayerMembers(player.getName()).isEmpty()) == false) {
+            ArrayList<String> teams = plugin.getTManager().getPlayerMembers(player.getName());
             // Tell only the team members if they are online
             boolean online = false;
             for (String teamMembers : teams) {
@@ -91,13 +91,13 @@ public class ChatHandler implements Listener {
             }
             // todo spy function
             if (!online) {
-                player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg(player).teamChatNoTeamAround);
-                player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg(player).teamChatStatusOff);
+                player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getLocale(player).teamChatNoTeamAround);
+                player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getLocale(player).teamChatStatusOff);
                 teamChatUsers.remove(player);
             }
         } else {
-            player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg(player).teamChatNoTeamAround);
-            player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getMsg(player).teamChatStatusOff);
+            player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getLocale(player).teamChatNoTeamAround);
+            player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getLocale(player).teamChatStatusOff);
             // Not in a team any more so delete   
             teamChatUsers.remove(player);
         }

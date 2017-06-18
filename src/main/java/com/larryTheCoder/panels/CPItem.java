@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import java.util.List;
  * This class is for a control panel button that has an icon, a command to run
  * if pressed or a link to another control panel.
  *
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class CPItem {
 

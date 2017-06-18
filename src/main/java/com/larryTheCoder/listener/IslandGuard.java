@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 larryTheCoder
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,16 +21,13 @@ import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityLiving;
 import cn.nukkit.entity.item.EntityMinecartTNT;
-import cn.nukkit.entity.item.EntityPainting;
 import cn.nukkit.entity.item.EntityPrimedTNT;
 import cn.nukkit.entity.mob.EntityCreeper;
-import cn.nukkit.entity.mob.EntityMob;
 import cn.nukkit.entity.projectile.EntityProjectile;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBurnEvent;
-import cn.nukkit.event.block.BlockPlaceEvent;
 import cn.nukkit.event.block.BlockSpreadEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityExplodeEvent;
@@ -62,7 +59,7 @@ import java.util.Set;
 /**
  * Provides full protection to islands
  *
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public class IslandGuard implements Listener {
 
@@ -110,7 +107,7 @@ public class IslandGuard implements Listener {
      * @return true if in the island world
      */
     protected static boolean inWorld(Location loc) {
-        return loc.getLevel().getName().equalsIgnoreCase("SkyBlock");
+        return ASkyBlock.get().level.contains(loc.getLevel().getName());
     }
 
     /**
@@ -1102,7 +1099,7 @@ public class IslandGuard implements Listener {
         if (inWorld(player)) {
             if (event.getRecipe().getResult().getId() == ENDER_CHEST) {
                 if (!(player.hasPermission("is.craft.enderchest"))) {
-                    player.sendMessage(plugin.getMsg(player).errorNoPermission);
+                    player.sendMessage(plugin.getLocale(player).errorNoPermission);
                     event.setCancelled(true);
                 }
             }
@@ -1121,7 +1118,7 @@ public class IslandGuard implements Listener {
             if (event.getAction() == PlayerInteractEvent.RIGHT_CLICK_BLOCK) {
                 if (event.getBlock().getId() == ENDER_CHEST) {
                     if (!(event.getPlayer().hasPermission("is.craft.enderchest"))) {
-                        player.sendMessage(plugin.getMsg(player).errorNoPermission);
+                        player.sendMessage(plugin.getLocale(player).errorNoPermission);
                         event.setCancelled(true);
                     }
                 }

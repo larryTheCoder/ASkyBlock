@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ package com.larryTheCoder.database;
 
 import cn.nukkit.Player;
 import cn.nukkit.level.Position;
-import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.database.variables.AbstractDatabase;
 import com.larryTheCoder.player.PlayerData;
@@ -38,7 +37,7 @@ import java.util.HashMap;
 /**
  * Full sql database
  *
- * @author larryTheCoder
+ * @author Adam Matthew
  */
 public final class ASConnection {
 
@@ -96,7 +95,8 @@ public final class ASConnection {
                         + "`challengelist` VARCHAR,"
                         + "`challengelisttimes` VARCHAR,"
                         + "`name` VARCHAR,"
-                        + "`locale` VARCHAR NOT NULL)");
+                        + "`locale` VARCHAR NOT NULL,"
+                        + "`deflvl` VARCHAR NOT NULL)");
                 set.executeBatch();
                 set.clearBatch();
             }
@@ -329,10 +329,13 @@ public final class ASConnection {
     public boolean saveWorlds(ArrayList<String> pd) {
         // safeblock
         try (PreparedStatement set = con.prepareStatement("INSERT INTO `worlds` (`world`) VALUES (?);")) {
+            ArrayList<String> second = getWorlds();
             for (String pd2 : pd) {
-                set.setString(1, pd2);
-                set.addBatch();
-                set.executeBatch();
+                if (!second.contains(pd2)) {
+                    set.setString(1, pd2);
+                    set.addBatch();
+                    set.executeBatch();
+                }
             }
             set.close();
             return true;
@@ -362,7 +365,8 @@ public final class ASConnection {
                     set.getString("teamIslandLocation"),
                     set.getInt("resetleft"),
                     Utils.stringToArray(set.getString("banList"), ", "),
-                    set.getString("locale"));
+                    set.getString("locale"),
+                    set.getString("deflvl"));
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
@@ -376,7 +380,7 @@ public final class ASConnection {
 
     public boolean createPlayer(String p) {
         // TESTED SECCESS
-        try (PreparedStatement set = con.prepareStatement("INSERT INTO `players` (`player`, `homes`, `resetleft`, `banlist`, `teamleader`, `teamislandlocation`, `inteam` , `islandlvl`, `members`,`challengelist` ,`challengelisttimes` , `name`, `locale`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
+        try (PreparedStatement set = con.prepareStatement("INSERT INTO `players` (`player`, `homes`, `resetleft`, `banlist`, `teamleader`, `teamislandlocation`, `inteam` , `islandlvl`, `members`,`challengelist` ,`challengelisttimes` , `name`, `locale`, `deflvl`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
             PlayerData pd = new PlayerData(p, 0, Settings.reset);
             set.setString(1, pd.playerName);
             set.setInt(2, pd.homes);
@@ -391,6 +395,7 @@ public final class ASConnection {
             set.setString(11, Utils.hashToString(pd.challengeListTimes));
             set.setString(12, pd.name);
             set.setString(13, pd.pubLocale);
+            set.setString(14, "SkyBlock");
             set.addBatch();
 
             set.executeBatch();
@@ -410,7 +415,7 @@ public final class ASConnection {
 
     public boolean savePlayerData(PlayerData pd) {
         // TESTED SECCESS
-        try (PreparedStatement stmt = con.prepareStatement("UPDATE `players` SET `homes` = ?, `resetleft` = ?, `banlist` = ?, `teamleader` = ?, `teamislandlocation` = ?, `inteam` = ?, `islandlvl` = ?, `members` = ?, `challengelist` = ?, `challengelisttimes` = ?, `name` = ?, `locale` = ? WHERE `player` = '" + pd.playerName + "'")) {
+        try (PreparedStatement stmt = con.prepareStatement("UPDATE `players` SET `homes` = ?, `resetleft` = ?, `banlist` = ?, `teamleader` = ?, `teamislandlocation` = ?, `inteam` = ?, `islandlvl` = ?, `members` = ?, `challengelist` = ?, `challengelisttimes` = ?, `name` = ?, `locale` = ?, `deflvl` = ? WHERE `player` = '" + pd.playerName + "'")) {
             stmt.setInt(1, pd.homes);
             stmt.setInt(2, pd.resetleft);
             stmt.setString(3, Utils.arrayToString(pd.banList));
@@ -423,6 +428,7 @@ public final class ASConnection {
             stmt.setString(10, Utils.hashToString(pd.challengeListTimes));
             stmt.setString(11, pd.name);
             stmt.setString(12, pd.pubLocale);
+            stmt.setString(13, pd.defaultLevel);
             stmt.addBatch();
             stmt.executeBatch();
 

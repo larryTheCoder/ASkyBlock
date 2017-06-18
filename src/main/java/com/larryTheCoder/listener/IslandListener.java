@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 larryTheHarry 
+ * Copyright (C) 2017 Adam Matthew 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,11 +36,12 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+import java.util.List;
 
 /**
  * Basic island listener
- * 
- * @author larryTheCoder
+ *
+ * @author Adam Matthew
  */
 public class IslandListener implements Listener {
 
@@ -64,11 +65,11 @@ public class IslandListener implements Listener {
         for (final String restrictedCmd : Settings.bannedCommands) {
             if (umsg.startsWith(restrictedCmd.toUpperCase())) {
                 if (!p.isOp()) {
-                    p.sendMessage(plugin.getPrefix() +plugin.getPrefix()  + plugin.getMsg(p).errorCommandNotReady);
+                    p.sendMessage(plugin.getPrefix() + plugin.getPrefix() + plugin.getLocale(p).errorCommandNotReady);
                     event.setCancelled(true);
                     return;
                 }
-                p.sendMessage(plugin.getPrefix() +plugin.getPrefix() + plugin.getMsg(p).adminOverride);
+                p.sendMessage(plugin.getPrefix() + plugin.getPrefix() + plugin.getLocale(p).adminOverride);
                 break;
             }
         }
@@ -80,7 +81,7 @@ public class IslandListener implements Listener {
         Location breakLoc = blk.getLocation();
         Player p = e.getPlayer();
         if (!plugin.getIsland().CanPlayerAccess(p, breakLoc)) {
-            p.sendMessage(plugin.getPrefix() +plugin.getMsg(p).errorNoPermission);
+            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNoPermission);
             e.setCancelled(true);
         }
     }
@@ -89,7 +90,7 @@ public class IslandListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent e) {
         Player p = e.getPlayer();
         if (!plugin.getIsland().CanPlayerAccess(p, e.getBlock().getLocation())) {
-            p.sendMessage(plugin.getPrefix() +plugin.getMsg(p).errorNoPermission);
+            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNoPermission);
             e.setCancelled(true);
         }
     }
@@ -147,7 +148,7 @@ public class IslandListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent ex) {
         // load player inventory if exsits
         plugin.getInventory().loadPlayerInventory(ex.getPlayer());
-        if(plugin.getDatabase().getPlayerData(ex.getPlayer()) == null){
+        if (plugin.getDatabase().getPlayerData(ex.getPlayer()) == null) {
             Utils.ConsoleMsg(ex.getPlayer().getName() + " data doesn`t exsits. Creating new ones");
             plugin.getDatabase().createPlayer(ex.getPlayer());
         }
