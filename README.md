@@ -61,7 +61,7 @@ Pre-releases are considered **unsafe** for production servers.
 
 Releases have a clean version number, has been tested, and should be safe for production servers.
 
-**Circle CI**: [Download link](https://circleci.com/gh/larryTheCoder/ASkyBlock-Nukkit/target)
+**Circle CI**: [Download link](https://circleci.com/gh/larryTheCoder/ASkyBlock-Nukkit)
 
 ## Config-files
 
