@@ -1,5 +1,5 @@
 # ASkyBlock-Nukkit
-[![PayPayl donate button](https://img.shields.io/badge/paypal-donate-yellow.svg)](paypal.me/DoubleCheese)
+[![PayPayl donate button](https://img.shields.io/badge/paypal-donate-yellow.svg)](http://www.paypal.me/DoubleCheese)
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Lesser General Public License as published by
@@ -22,14 +22,14 @@ Build specially for Nukkit__
 
 Default command parameters and permissions:
 
-| Command | Parameters | Info | Permission | Default |
-| :-----: | :-------: | :---------: | :-------: | :-------: |
-| `/is` | `args` | `Main island command` | `is.command` | `All` |
-| `/is help` | `command` | `show help for island's command` | `none` | `All` |
-| `/is generate` | `world name` | `Create a new island world` | `is.admin.generate` | `admin` |
-| `/is accept` | `none` | `Accept an invitation from other player` | `is.command.accept` | `All` |
-| `/is expel` | `player` | `Kick a player from your island` | `is.command.expel` | `All` |
-| `/is kick` | `player` | `Kick a player from island world` | `is.admin.kick` | `admin` |
+| Command | Parameters | Info | Permission | 
+| :-----: | :-------: | :---------: | :-------: |
+| `/is` | `args` | `Main island command` | `is.command` | 
+| `/is help` | `command` | `show help for island's command` | `none` |
+| `/is generate` | `world name` | `Create a new island world` | `is.admin.generate` |
+| `/is accept` | `none` | `Accept an invitation from other player` | `is.command.accept` |
+| `/is expel` | `player` | `Kick a player from your island` | `is.command.expel` |
+| `/is kick` | `player` | `Kick a player from island world` | `is.admin.kick` |
 
 # API
 This plugin has an api for an example:
