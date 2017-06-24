@@ -24,8 +24,8 @@ Default command parameters and permissions:
 | Command | Parameters | Info | Permission | Default |
 | :-----: | :-------: | :---------: | :-------: | :-------: |
 | `/is` | `args` | `Main island command` | `is.command` | `All` |
-| `/is help | `command` | `show help for island's command` | `none` | `All` |
-| `/is generate | `world name` | `Create a new island world` | `is.admin.generate` | `admin` |
+| `/is help` | `command` | `show help for island's command` | `none` | `All` |
+| `/is generate` | `world name` | `Create a new island world` | `is.admin.generate` | `admin` |
 | `/is accept` | `none` | `Accept an invitation from other player` | `is.command.accept` | `All` |
 | `/is expel` | `player` | `Kick a player from your island` | `is.command.expel` | `All` |
 | `/is kick` | `player` | `Kick a player from island world` | `is.admin.kick` | `admin` |
@@ -61,7 +61,7 @@ Pre-releases are considered **unsafe** for production servers.
 
 Releases have a clean version number, has been tested, and should be safe for production servers.
 
-**Circle CI**: [Download link](https://circleci.com/gh/larryTheCoder/ASkyBlock-Nukkit/target)
+**Circle CI**: [Download link](https://circleci.com/gh/larryTheCoder/ASkyBlock-Nukkit)
 
 ## Config-files
 
