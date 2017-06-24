@@ -1,4 +1,5 @@
 # ASkyBlock-Nukkit
+[![PayPayl donate button](https://img.shields.io/badge/paypal-donate-yellow.svg)](paypal.me/DoubleCheese)
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Lesser General Public License as published by
