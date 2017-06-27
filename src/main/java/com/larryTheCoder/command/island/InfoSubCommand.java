@@ -47,7 +47,7 @@ public class InfoSubCommand extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "get the Island information";
+        return "Get the island info where you standing at";
     }
 
     @Override

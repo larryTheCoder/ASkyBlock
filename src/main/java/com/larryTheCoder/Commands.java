@@ -82,7 +82,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
     @Override
     public boolean execute(CommandSender sender, String label, String[] args) {
         Player p = sender.isPlayer() ? getPlugin().getServer().getPlayer(sender.getName()) : null;
-        if(sender.hasPermission("is.command")){
+        if(!sender.hasPermission("is.command")){
             sender.sendMessage(getLocale(p).errorNoPermission);
             return true;
         }

@@ -37,7 +37,7 @@ public class ResetIslandSubCommand extends SubCommand {
 
     @Override
     public String getUsage() {
-        return "<homes>";
+        return "";
     }
 
     @Override
@@ -57,15 +57,13 @@ public class ResetIslandSubCommand extends SubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        if(args.length != 2){
-            return false;
-        }
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if (getPlugin().getIsland().isPlayerIsland(p, p.getLocation())) {
-            sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
+        if (!getPlugin().getIsland().isPlayerIsland(p, p.getLocation())) {
+            sender.sendMessage(getPrefix() + getLocale(p).errorNotOnIsland);
             return true;
         }
-        getPlugin().getIsland().reset(p, true, getPlugin().getIslandInfo(p.getLocation()));
+        // safe
+        getPlugin().getIsland().reset(p, false, getPlugin().getIslandInfo(p.getLocation()));
         return true;
     }
 

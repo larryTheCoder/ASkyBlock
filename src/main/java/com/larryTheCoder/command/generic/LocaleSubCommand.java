@@ -53,7 +53,7 @@ public class LocaleSubCommand extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "Select Language";
+        return "Select your main language";
     }
 
     @Override

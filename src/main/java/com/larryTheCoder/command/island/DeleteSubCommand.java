@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.larryTheCoder.command.island;
 
 import cn.nukkit.Player;
@@ -25,7 +24,7 @@ import com.larryTheCoder.command.SubCommand;
 /**
  * @author Adam Matthew
  */
-public class DeleteSubCommand extends SubCommand{
+public class DeleteSubCommand extends SubCommand {
 
     public DeleteSubCommand(ASkyBlock plugin) {
         super(plugin);
@@ -38,7 +37,7 @@ public class DeleteSubCommand extends SubCommand{
 
     @Override
     public String getUsage() {
-        return "<homes>";
+        return "";
     }
 
     @Override
@@ -53,17 +52,14 @@ public class DeleteSubCommand extends SubCommand{
 
     @Override
     public String[] getAliases() {
-        return new String[]{"reset","del"};
+        return new String[]{"reset", "del"};
     }
 
     @Override
-    public boolean execute(CommandSender sender, String[] args) {        
-        if(args.length != 2){
-            return false;
-        }
+    public boolean execute(CommandSender sender, String[] args) {
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if(!getPlugin().getIsland().isPlayerIsland(p, p.getLocation())){
-            sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
+        if (!getPlugin().getIsland().isPlayerIsland(p, p.getLocation())) {
+            sender.sendMessage(getPrefix() + getLocale(p).errorNotOnIsland);
             return true;
         }
         // safe

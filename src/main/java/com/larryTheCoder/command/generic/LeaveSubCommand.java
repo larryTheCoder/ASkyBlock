@@ -48,7 +48,7 @@ public class LeaveSubCommand extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "return to main world";
+        return "Return to world's spawn";
     }
 
     @Override

@@ -51,7 +51,7 @@ public class MessageSubCommand extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "The inbox messages while you offline";
+        return "Get new messages while you offline";
     }
 
     @Override

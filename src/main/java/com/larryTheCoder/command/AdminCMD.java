@@ -131,7 +131,9 @@ public class AdminCMD extends Command {
                             sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorFailed);
                             break;
                         }
+                        
                 }
+                break;
             default:
                 sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).helpMessage.replace("[com]", commandLabel));
                 return true;
