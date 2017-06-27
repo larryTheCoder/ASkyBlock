@@ -1,5 +1,60 @@
-# ASkyBlock-Nukkit
+## ASkyBlock ##
 [![PayPayl donate button](https://img.shields.io/badge/paypal-donate-yellow.svg)](http://www.paypal.me/DoubleCheese)
+[![Circle-CI](https://circleci.com/gh/larryTheCoder/ASkyBlock-Nukkit.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/larryTheCoder/ASkyBlock-Nukkit)
+
+__Special SkyBlock minigame build specially for Nukkit.__
+
+## API
+This plugin has an API for an example:
+
+    public boolean openAPI(){
+    	Plugin plugin = this.getServer().getPluginManager().getPlugin("ASkyBlock");
+    	// Get the plugin
+    	if (plugin == null) {
+    		// Report here
+    		return false;
+   		}
+    	// Get the plugin instance
+    	ASkyBlock block = (Plugin) ASkyBlock.get();
+    	this.instance = block;
+    	// Place the things you want to
+    	return true;
+    }
+
+## Commands Help
+
+There a lot of command to list here but you can use `/is help` in console or in game! But make sure you install this plugin first!
+
+## Features
+This plugin is best for `Single-world` production server.
+
+Current features are:
+
+* Schematic loader (Which paste and load schematic file)
+* Island chest (Depends on your island schematic)
+* Island team (Teammate are best than alone)
+* Safe teleport (Afraid to teleport into void? don't worry!)
+* Better Math (No collided island generated)
+* Better config (Never get bored to see my config all day 24/7)
+* Database (Implementation of MySql and Sqlite)
+* More colorful (Nice and cozy)
+
+## Installation
+This plugin version support Nukkit Server v1.0.8.
+This plugin also depends on these plugins:
+
+* DbLib 0.2.x
+* EconomyAPI
+
+Please take attention, this plugin support Nukkit v1.0.8 (API 1.0.0) 
+Due to getSide(I) API changes. This plugin no longer support lower than v1.0.8
+
+### Releases
+Pre-releases are considered **unsafe** for production servers.
+
+Releases have a clean version number, has been tested, and should be safe for production servers.
+
+### License
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Lesser General Public License as published by
@@ -13,61 +68,3 @@
 
 	You should have received a copy of the GNU Lesser General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
-__Welcome developers to this Magic SkyBlock plugin builded by me! 
-Its still in development but I really need your help to complete this plugin.
-Build specially for Nukkit__
-
-## Commands Help
-
-Default command parameters and permissions:
-
-| Command | Parameters | Info | Permission | 
-| :-----: | :-------: | :---------: | :-------: |
-| `/is` | `args` | `Main island command` | `is.command` | 
-| `/is help` | `command` | `show help for island's command` | `none` |
-| `/is generate` | `world name` | `Create a new island world` | `is.admin.generate` |
-| `/is accept` | `none` | `Accept an invitation from other player` | `is.command.accept` |
-| `/is expel` | `player` | `Kick a player from your island` | `is.command.expel` |
-| `/is kick` | `player` | `Kick a player from island world` | `is.admin.kick` |
-
-# API
-This plugin has an api for an example:
-
-    public void openAPI(){
-        Plugin plugin = this.getServer().getPluginManager().getPlugin("ASkyBlock");
-        // Get the plugin
-        if (plugin == null) {
-            // Disable this plugin
-            return null;
-        }
-        // Get the plugin instance
-        ASkyBlock block = (Plugin) ASkyBlock.get();
-        this.instance = block;
-        // Place the things you want to
-    }
-
-# Installation
-
-This version depends on the following plugins:
-
-* Nukkit MCPE v1.0.8++
-* DbLib 0.2.x
-
-**Note:** This plugin had been tested on Nukkit v1.0.4. The server under this MC version might not
-supported due to *API implementation*
-
-### Releases
-Pre-releases are considered **unsafe** for production servers.
-
-Releases have a clean version number, has been tested, and should be safe for production servers.
-
-**Circle CI**: [Download link](https://circleci.com/gh/larryTheCoder/ASkyBlock-Nukkit)
-
-## Config-files
-
-*For experts only*
-
-The plugin folder is a variables that contains DB, YAML, SQL. Please be informed that this plugin 
-will try to re-update the old file into new one. The case is the player data might be gone, replaced
-and corrupted. It is recommended to not using this procedure.
