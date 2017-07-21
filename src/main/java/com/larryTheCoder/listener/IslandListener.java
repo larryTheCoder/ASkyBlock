@@ -57,7 +57,7 @@ public class IslandListener implements Listener {
         if (p == null) {
             return;
         }
-        if (!plugin.getIsland().checkIslandAt(p.getLocation())) {
+        if (!plugin.getIsland().checkIslandAt(p.getLevel())) {
             return;
         }
         String msg = event.getMessage();
@@ -99,7 +99,7 @@ public class IslandListener implements Listener {
     public void onEntityExplode(EntityExplodeEvent ev) {
         ArrayList<Block> blocksToSkip = new ArrayList<>();
         Location rootLoc = (Location) ev.getPosition();
-        if (!plugin.getIsland().checkIslandAt(rootLoc)) {
+        if (!plugin.getIsland().checkIslandAt(rootLoc.getLevel())) {
             return;
         }
         ev.getBlockList().stream().forEach((b2) -> {
@@ -118,7 +118,7 @@ public class IslandListener implements Listener {
     public void onBlockFromTo(BlockFromToEvent e) {
         Block b = e.getTo();
         Location loc = b.getLocation();
-        if (!plugin.getIsland().checkIslandAt(loc)) {
+        if (!plugin.getIsland().checkIslandAt(loc.getLevel())) {
             return;
         }
         if (plugin.getGrid().onGrid(loc)) {
@@ -134,7 +134,7 @@ public class IslandListener implements Listener {
             return;
         }
         Location loc = p.getLocation();
-        if (plugin.getIsland().checkIslandAt(loc)) {
+        if (plugin.getIsland().checkIslandAt(loc.getLevel())) {
             if ((item.getId()) == Item.BLAZE_ROD) {
                 plugin.getIsland().islandInfo(p, loc);
             }

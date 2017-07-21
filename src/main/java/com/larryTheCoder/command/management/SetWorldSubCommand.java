@@ -66,7 +66,7 @@ public class SetWorldSubCommand extends SubCommand {
         }
         Player p = Server.getInstance().getPlayer(sender.getName());
         if(!getPlugin().level.contains(args[1])){
-            sender.sendMessage(getLocale(p).errorWrongWorld);
+            sender.sendMessage(getLocale(p).errorUnknownWorld);
             sender.sendMessage(Utils.arrayToString(getPlugin().level));
             return true;
         }
@@ -76,7 +76,7 @@ public class SetWorldSubCommand extends SubCommand {
         if(result){
             sender.sendMessage(getLocale(p).setworldSeccess);
         } else {
-            sender.sendMessage(getLocale(p).errorFailed);
+            sender.sendMessage(getLocale(p).errorFailedNormal);
         }
         return true;
     }

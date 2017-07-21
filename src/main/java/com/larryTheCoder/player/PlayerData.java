@@ -65,6 +65,7 @@ public class PlayerData implements Cloneable {
         this.playerName = playerName;
         this.banList = banList;
         this.pubLocale = locale;
+        this.defaultLevel = defaultLevel;
     }
 
     /**

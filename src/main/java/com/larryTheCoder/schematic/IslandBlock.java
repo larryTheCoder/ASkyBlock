@@ -104,7 +104,7 @@ public class IslandBlock {
         WETOME.put("GOLDEN_HOE", Item.GOLD_HOE);
         WETOME.put("GOLDEN_AXE", Item.GOLD_AXE);
         WETOME.put("GOLDEN_BOOTS", Item.GOLD_BOOTS);
-        WETOME.put("HARDENED_CLAY", Item.HARDENED_CLAY);
+        WETOME.put("HARDENED_CLAY", Item.TERRACOTTA); // TODO: get rip this out
         WETOME.put("HEAVY_WEIGHTED_PRESSURE_PLATE", Item.HEAVY_WEIGHTED_PRESSURE_PLATE);
         WETOME.put("IRON_BARS", Item.IRON_BARS);
         WETOME.put("IRON_HORSE_ARMOR", Item.IRON_HORSE_ARMOR);
@@ -432,7 +432,7 @@ public class IslandBlock {
         // Only paste air if it is below the sea level and in the overworld
         // found the problem why blocks didnt shows up
         // prevent the block to show up
-        blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), usePhysics, true);
+        blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, usePhysics);
 
         // DO NOT MAKE THIS RUN!
         if (signText != null) {

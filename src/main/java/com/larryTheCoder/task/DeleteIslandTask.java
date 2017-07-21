@@ -25,7 +25,6 @@ import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 
 /**
- *
  * @author Adam Matthew
  */
 public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> {

@@ -65,11 +65,15 @@ public final class ASlocales {
     public String acidBottle;
     public String drankAcidAndDied;
     public String drankAcid;
+    public String firstIslandFree = "§aYour first island are free!";
+    public String nextIslandPrice = "§aNext time you may need $§e[price] to buy other island";
     // Help defaults
     public String adminHelpCommand = "§eShow a list of admin commands.";
     public String adminHelpGenerate = "§eAttempt to create a new level.";
     public String adminHelpKick = "§eTo kick player from island worlds.";
     public String adminHelpRename = "§eAttempt to rename other player's island.";
+    public String adminHelpSpawn = "§eSet the island's spawn point!";
+    public String adminHelpDelete = "§eDelete other player island";
     // Errors defaults
     public String errorUnknownPlayer = "§cThat player is unknown.";
     public String errorNoPermission = "§cYou don't have permission to use that command!";
@@ -87,14 +91,15 @@ public final class ASlocales {
     public String errorTooShort = "§cToo short. Minimum size is [length].";
     public String errorUseInGame = "§cThis command must be used in-game.";
     public String errorWrongWorld = "§cYou cannot do that in this world.";
-    public String errorWrongWorld2 = "§cUnknown world. Possible worlds are:";
+    public String errorUnknownWorld = "§cUnknown world. Possible worlds are:";
     public String errorMaxIsland = "§cYou reached the limit of [maxplot] Island per player";
     public String errorNotPending = "§cNo invintation pending! Try again later";
     public String errorInTeam = "§cThe player [player] are already in team!";
     public String errorBlockedByAPI = "§cA plugin using the API blocked this action.";
     public String errorKickOwner = "§cYou cant kick yourself out your own island!";
     public String errorAdminOnly = "§cYou cant kick admins from your island!";
-    public String errorFailed = "§cFailed to attempt this command. Contact admin!";
+    public String errorFailedNormal = "§cInvilad or wrong parameters";
+    public String errorFailedCritical = "§cFailed to attempt this command. Contact admin!";
     public String errorLevelGenerated = "§cThe level has already generated";
     public String errorNotEnoughMoney = "§cYou don't have enough money! Default price: $[price]";
     // Commands messages
@@ -104,22 +109,38 @@ public final class ASlocales {
     public String renameSeccess = "§aSeccessfully renamed island!";
     public String setworldSeccess = "§aSeccessfully changed island location!";
     public String generalSuccess = "§aSeccess!";
-    public String helpMessage = "§aNeed help? Use: /[com] help."; 
+    public String helpMessage = "§aNeed help? Use: /[com] help.";
     // Teleport messages
     public String teleportDelay = "§aYou will be teleported in {0} seconds.";
     public String teleportCancelled = "§cTeleport cancelled";
     // Admin commands message
-    public String adminOverride = "You override this command";
+    public String adminOverride = "§aYou override this command";
+    public String adminDeleteIslandError = "§cUse §ldeleteisland confirm §r§cto delete the island you are on.";
+    public String adminDeleteIslandnoid  = "§cCannot identify island.";
+    public String adminDeleteIslandUse = "§rUse §ldelete [name] §r§cto delete the player instead.";
+    public String adminSetSpawnOwnedBy = "§cThis island space is owned by [name]";
     // Team messages
     public String teamChatStatusOff = "§aTeam chat is off";
     public String teamChatStatusOn = "§aTeam chat is on";
     public String teamChatNoTeamAround = "§cNone of your team are online!";
     // Others
-    public String kickedFromOwner = "&eYou were kicked from island owned by [name].";
-    public String kickedFromAdmin = "&eYou were kicked by Admin on duty.";
-    public String kickedFromTeam = "&eYou were kicked from [name]'s team";
-    public String newsHeadline = "&aWhile you were offline:";
-    public String newsEmpty = "&aThere no messages for you today. Check back later!";
+    public String deleteRemoving = "§cRemoving [name]'s island.";
+    public String kickedFromOwner = "§eYou were kicked from island owned by [name].";
+    public String kickedFromAdmin = "§eYou were kicked by Admin on duty.";
+    public String kickedFromTeam = "§eYou were kicked from [name]'s team";
+    public String newsHeadline = "§aWhile you were offline:";
+    public String newsEmpty = "§aThere no messages for you today. Check back later!";
+    // Titles
+    public String islandSubTitle = "by larryTheCoder";
+    public String islandDonate = "§aSource code made by §e@larryTheCoder";
+    public String islandURL = "§aLink: http://paypal.me/DoubleCheese";
+    public String islandSupport = "§aLove it? Support us by §eDonating!";
+    public String islandSubTitleColor = "blue";
+    public String islandDonateColor = "aqua";
+    public String islandTitleColor = "gold";
+    public String islandTitle = "A SkyBlock";
+    
+    
     private String localeName;
     private int index;
     
@@ -205,7 +226,6 @@ public final class ASlocales {
      * @param string
      * @return color
      */
-    @SuppressWarnings("AssignmentToMethodParameter")
     private String colorCheck(String string) {
         string = string.toLowerCase();
         if (TITLE_COLORS.contains(string)) {

@@ -66,7 +66,7 @@ public class IslandManager {
             if (pd == null || pd.owner == null) {
                 // check whether the error message has sended or not
                 if (!message) {
-                    p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorFailed);
+                    p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorFailedCritical);
                 }
                 return;
             }
@@ -76,6 +76,7 @@ public class IslandManager {
             }
             // teleport to grid
             plugin.getGrid().homeTeleport(p, homes);
+            showFancyTitle(p);
             // Teleport in default gamemode
             if (Settings.gamemode != -1) {
                 p.setGamemode(Settings.gamemode);
@@ -84,6 +85,25 @@ public class IslandManager {
             createIsland(p);
         }
 
+    }
+
+    private void showFancyTitle(Player p) {
+        plugin.getServer().getScheduler().scheduleDelayedTask(plugin, () -> {
+            // Show fancy titles!
+            if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
+                plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
+                        "title " + p.getName() + " subtitle {\"text\":\"" + plugin.getLocale(p).islandSubTitle.replace("[player]", p.getName()) + "\", \"color\":\"" + plugin.getLocale(p).islandSubTitleColor + "\"}");
+            }
+            if (!plugin.getLocale(p).islandTitle.isEmpty()) {
+                plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
+                        "title " + p.getName() + " title {\"text\":\"" + plugin.getLocale(p).islandTitle.replace("[player]", p.getName()) + "\", \"color\":\"" + plugin.getLocale(p).islandTitleColor + "\"}");
+            }
+            if (!plugin.getLocale(p).islandDonate.isEmpty() && !plugin.getLocale(p).islandURL.isEmpty()) {
+                p.sendMessage(plugin.getLocale(p).islandDonate.replace("[player]", p.getName()));
+                p.sendMessage(plugin.getLocale(p).islandSupport);
+                p.sendMessage(plugin.getLocale(p).islandURL);
+            }
+        }, 10);
     }
 
     public void kickPlayerByName(final Player pOwner, final String victimName) {
@@ -145,7 +165,7 @@ public class IslandManager {
             }
         }
         sender.sendMessage(plugin.getPrefix() + plugin.getLocale(kicker).kickSeccess.replace("[player]", arg));
-        p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).kickedFromAdmin); //TextFormat.RED + "You were kicked from island owned by " + TextFormat.YELLOW + pOwner.getName());
+        p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).kickedFromAdmin);
         // Teleport
         if (plugin.getDatabase().getSpawn() != null) {
             p.teleport(plugin.getDatabase().getSpawn().getCenter());
@@ -176,7 +196,8 @@ public class IslandManager {
             } else {
                 // check if the starting island is FREE
                 if (plugin.getIslandInfo(p) == null && Settings.firstIslandFree) {
-                    // do nothing
+                    p.sendMessage(plugin.getLocale(p).firstIslandFree);
+                    p.sendMessage(plugin.getLocale(p).nextIslandPrice.replace("[price]", Double.toString(Settings.islandCost)));
                 } else {
                     p.sendMessage(plugin.getLocale(p).errorNotEnoughMoney.replace("[price]", Double.toString(Settings.islandCost)));
                     return true;
@@ -212,7 +233,7 @@ public class IslandManager {
                     p.sendMessage(plugin.getLocale(p).createSeccess);
                     return true;
                 } else {
-                    p.sendMessage(plugin.getLocale(p).errorFailed);
+                    p.sendMessage(plugin.getLocale(p).errorFailedCritical);
                     return false;
                 }
 
@@ -234,7 +255,7 @@ public class IslandManager {
     private IslandData claim(Player p, Location loc, String home) {
         int x = loc.getFloorX();
         int z = loc.getFloorZ();
-        if (!checkIslandAt(loc)) {
+        if (!checkIslandAt(loc.getLevel())) {
             return null;
         }
 
@@ -275,8 +296,8 @@ public class IslandManager {
         }
     }
 
-    public boolean checkIslandAt(Location loc) {
-        return plugin.level.contains(loc.level.getName());
+    public boolean checkIslandAt(Level level) {
+        return plugin.level.contains(level.getName());
     }
 
     public boolean CanPlayerAccess(Player p, Location loc) {
@@ -284,7 +305,7 @@ public class IslandManager {
         if (p.isOp()) {
             return true;
         }
-        if (!checkIslandAt(loc)) {
+        if (!checkIslandAt(loc.getLevel())) {
             return true;
         }
         IslandData pd = GetIslandAt(loc);
@@ -302,7 +323,7 @@ public class IslandManager {
     }
 
     public IslandData GetIslandAt(Location loc) {
-        if (!checkIslandAt(loc)) {
+        if (!checkIslandAt(loc.getLevel())) {
             return null;
         }
         int iKey = generateIslandKey(loc);
@@ -317,7 +338,7 @@ public class IslandManager {
     }
 
     public void islandInfo(Player p, Location loc) {
-        if (!checkIslandAt(loc)) {
+        if (!checkIslandAt(loc.getLevel())) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorWrongWorld);
             return;
         }

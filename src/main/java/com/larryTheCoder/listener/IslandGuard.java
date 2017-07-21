@@ -1115,7 +1115,7 @@ public class IslandGuard implements Listener {
     public void onEnderChestEvent(PlayerInteractEvent event) {
         Player player = (Player) event.getPlayer();
         if (inWorld(player)) {
-            if (event.getAction() == PlayerInteractEvent.RIGHT_CLICK_BLOCK) {
+            if (event.getAction() == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) {
                 if (event.getBlock().getId() == ENDER_CHEST) {
                     if (!(event.getPlayer().hasPermission("is.craft.enderchest"))) {
                         player.sendMessage(plugin.getLocale(player).errorNoPermission);
@@ -1301,7 +1301,7 @@ public class IslandGuard implements Listener {
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onPlateStep(PlayerInteractEvent e) {
         if (!inWorld(e.getPlayer())
-                || e.getAction() != PlayerInteractEvent.PHYSICAL
+                || e.getAction() != PlayerInteractEvent.Action.PHYSICAL
                 || e.getPlayer().isOp()
                 || e.getPlayer().hasPermission("is.mod.bypassprotect")
                 || plugin.getGrid().playerIsOnIsland(e.getPlayer())) {

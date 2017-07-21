@@ -484,6 +484,17 @@ public class Schematic {
         islandBlocks.stream().forEach((b) -> {
             b.paste(blockLoc, true);
         });
+        
+        // Find the grass spot
+        final Location grass;
+        if (topGrass != null) {
+            Location gr = new Location().add(topGrass).subtract(bedrock);
+            gr.add(loc.normalize());
+            gr.add(new Vector3(0.5D, 1.1D, 0.5D)); // Center of block and a bit up so the animal drops a bit
+            grass = gr;
+        } else {
+            grass = null;
+        }	
     }
 
     /**

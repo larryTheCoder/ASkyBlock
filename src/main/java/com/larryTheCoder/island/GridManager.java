@@ -92,7 +92,7 @@ public class GridManager {
             // Note that getWorld can return null if a world has been deleted on the server
             if (islandTestLocation != null && islandTestLocation.getLevel() != null && islandTestLocation.getLevel().equals(loc.getLevel())) {
                 int protectionRange = Settings.protectionrange;
-                if (plugin.getIsland().checkIslandAt(islandTestLocation) == true) {
+                if (plugin.getIsland().checkIslandAt(islandTestLocation.getLevel()) == true) {
                     // Get the protection range for this location if possible
                     IslandData island = plugin.getIsland().GetIslandAt(islandTestLocation);
                     if (island != null) {

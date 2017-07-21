@@ -34,6 +34,7 @@ import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
+import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
 import com.intellectiualcrafters.updater.Updater;
 import com.larryTheCoder.command.AdminCMD;
@@ -67,7 +68,10 @@ import com.larryTheCoder.utils.Settings;
 import java.sql.SQLException;
 
 /**
- * @author Adam Matthew
+ * Author: Adam Matthew
+ * <p>
+ * Main class of SkyBlock Framework! Complete with API and Events. May contains
+ * Nuts!
  */
 public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
@@ -269,11 +273,13 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     }
 
     public String getDefaultWorld(Player p) {
-        // Used for testing
-        if (p == null) {
+        PlayerData pd = getPlayerInfo(p);
+        // Sometimes default level are null
+        if (level.contains(pd.defaultLevel)) {
+            pd.defaultLevel = "SkyBlock";
+            getDatabase().savePlayerData(pd);
             return "SkyBlock";
         }
-        PlayerData pd = getPlayerInfo(p);
         return pd.defaultLevel;
     }
 
@@ -325,7 +331,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         getServer().getPluginManager().registerEvents(chatHandler, this);
         pm.registerEvents(new IslandListener(this), this);
         ServerScheduler pd = getServer().getScheduler();
-        pd.scheduleRepeatingTask(new PluginTask(this), 1200);
+        pd.scheduleRepeatingTask(new PluginTask(this), 20); // tick every 1 sec
     }
 
     /**
@@ -846,5 +852,5 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
             }
         }
     }
-
+    
 }

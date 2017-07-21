@@ -17,6 +17,7 @@
 package com.larryTheCoder.database;
 
 import cn.nukkit.Player;
+import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.database.variables.AbstractDatabase;
@@ -96,7 +97,7 @@ public final class ASConnection {
                         + "`challengelisttimes` VARCHAR,"
                         + "`name` VARCHAR,"
                         + "`locale` VARCHAR NOT NULL,"
-                        + "`deflvl` VARCHAR NOT NULL)");
+                        + "`defaultlevel` VARCHAR NOT NULL)");
                 set.executeBatch();
                 set.clearBatch();
             }
@@ -366,7 +367,7 @@ public final class ASConnection {
                     set.getInt("resetleft"),
                     Utils.stringToArray(set.getString("banList"), ", "),
                     set.getString("locale"),
-                    set.getString("deflvl"));
+                    set.getString("defaultlevel"));
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
@@ -380,7 +381,21 @@ public final class ASConnection {
 
     public boolean createPlayer(String p) {
         // TESTED SECCESS
-        try (PreparedStatement set = con.prepareStatement("INSERT INTO `players` (`player`, `homes`, `resetleft`, `banlist`, `teamleader`, `teamislandlocation`, `inteam` , `islandlvl`, `members`,`challengelist` ,`challengelisttimes` , `name`, `locale`, `deflvl`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
+        try (PreparedStatement set = con.prepareStatement("INSERT INTO `players` ("
+                + "`player`, "
+                + "`homes`, "
+                + "`resetleft`, "
+                + "`banlist`, "
+                + "`teamleader`, "
+                + "`teamislandlocation`, "
+                + "`inteam` , "
+                + "`islandlvl`, "
+                + "`members`,"
+                + "`challengelist`, "
+                + "`challengelisttimes`, "
+                + "`name`, "
+                + "`locale`, "
+                + "`defaultlevel`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
             PlayerData pd = new PlayerData(p, 0, Settings.reset);
             set.setString(1, pd.playerName);
             set.setInt(2, pd.homes);
@@ -415,7 +430,22 @@ public final class ASConnection {
 
     public boolean savePlayerData(PlayerData pd) {
         // TESTED SECCESS
-        try (PreparedStatement stmt = con.prepareStatement("UPDATE `players` SET `homes` = ?, `resetleft` = ?, `banlist` = ?, `teamleader` = ?, `teamislandlocation` = ?, `inteam` = ?, `islandlvl` = ?, `members` = ?, `challengelist` = ?, `challengelisttimes` = ?, `name` = ?, `locale` = ?, `deflvl` = ? WHERE `player` = '" + pd.playerName + "'")) {
+        try (PreparedStatement stmt = con.prepareStatement(
+                "UPDATE `players` SET "
+                        + "`homes` = ?, "
+                        + "`resetleft` = ?, "
+                        + "`banlist` = ?, "
+                        + "`teamleader` = ?, "
+                        + "`teamislandlocation` = ?, "
+                        + "`inteam` = ?, "
+                        + "`islandlvl` = ?, "
+                        + "`members` = ?, "
+                        + "`challengelist` = ?, "
+                        + "`challengelisttimes` = ?, "
+                        + "`name` = ?, "
+                        + "`locale` = ?, "
+                        + "`defaultlevel` = ? "
+                        + "WHERE `player` = '" + pd.playerName + "'")) {
             stmt.setInt(1, pd.homes);
             stmt.setInt(2, pd.resetleft);
             stmt.setString(3, Utils.arrayToString(pd.banList));
