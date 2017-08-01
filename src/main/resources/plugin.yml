@@ -6,7 +6,16 @@ main: com.larryTheCoder.ASkyBlock
 load: POSTWORLD
 website: http://github.com/larryTheCoder/ASkyBlock-Nukkit
 author: "Adam Matthew"
-depends: ["DbLib"]
+description: "Advanced minecraft PE SkyBlock plugin!"
+authors:
+  - PikyCZ
+  - Skull3x
+  - Adam1609
+depend: 
+  - DbLib
+softdepend:
+  - EconomyAPI
+
 permissions:
     # Island create perm
     is.create:
