@@ -19,6 +19,7 @@ package com.larryTheCoder;
 import com.larryTheCoder.utils.Settings;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.ChunkManager;
+import cn.nukkit.level.Level;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.biome.Biome;
@@ -40,6 +41,11 @@ public class SkyBlockGenerator extends Generator {
         this.options = options;
     }
 
+    @Override
+    public int getDimension() {
+        return Level.DIMENSION_OVERWORLD;
+    }
+    
     @Override
     public int getId() {
         return TYPE_SKYBLOCK;
