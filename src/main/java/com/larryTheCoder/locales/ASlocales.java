@@ -133,8 +133,8 @@ public final class ASlocales {
     // Titles
     public String islandSubTitle = "by larryTheCoder";
     public String islandDonate = "§aSource code made by §e@larryTheCoder";
-    public String islandURL = "§aLink: http://paypal.me/DoubleCheese";
-    public String islandSupport = "§aLove it? Support us by §eDonating!";
+    public String islandURL = "§aLink: http://github.com/larryTheCoder/ASkyBlock-Nukkit";
+    public String islandSupport = "§aLove it? Give us a star on GitHub!";
     public String islandSubTitleColor = "blue";
     public String islandDonateColor = "aqua";
     public String islandTitleColor = "gold";

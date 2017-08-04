@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static cn.nukkit.math.BlockFace.*;
+import java.util.Iterator;
 
 /**
  * @author Adam Matthew
@@ -63,12 +64,10 @@ public class GridManager {
     }
 
     /**
-     * Checks if a location is within the home boundaries of a player. If coop
-     * is true, this check includes coop players.
+     * Checks if a location is within the home boundaries of a player. 
      *
-     * @param player
-     * @param coop
-     * @param loc
+     * @param player  The player 
+     * @param loc     The geo location of 
      * @return true if the location is within home boundaries
      */
     public boolean locationIsAtHome(final Player player, Location loc) {
@@ -87,7 +86,8 @@ public class GridManager {
             return false;
         }
         // Run through all the locations
-        for (Location islandTestLocation : islandTestLocations) {
+        for (Iterator<Location> it = islandTestLocations.iterator(); it.hasNext();) {
+            Location islandTestLocation = it.next();
             // Must be in the same world as the locations being checked
             // Note that getWorld can return null if a world has been deleted on the server
             if (islandTestLocation != null && islandTestLocation.getLevel() != null && islandTestLocation.getLevel().equals(loc.getLevel())) {
@@ -126,7 +126,9 @@ public class GridManager {
         final Block ground = l.getLevelBlock().getSide(DOWN);
         final Block space1 = l.getLevelBlock();
         final Block space2 = l.getLevelBlock().getSide(UP);
-        return ground.isSolid() && BlockUtil.isBreathable(space1) && BlockUtil.isBreathable(space2);
+        return ground.isSolid()
+                && BlockUtil.isBreathable(space1)
+                && BlockUtil.isBreathable(space2);
     }
 
     /**
@@ -143,9 +145,10 @@ public class GridManager {
         int px = pd.X;
         int pz = pd.Z;
         int py = pd.Y;
-        for (int dy = 1; dy <= 30; dy++) {
-            for (int dx = 1; dx <= 30; dx++) {
-                for (int dz = 1; dz <= 30; dz++) {
+        // Recommended SafeSpawn settings
+        for (int dy = 1; dy <= pd.getProtectionSize(); dy++) {
+            for (int dx = 1; dx <= pd.getProtectionSize(); dx++) {
+                for (int dz = 1; dz <= pd.getProtectionSize(); dz++) {
                     int x = px + (dx % 2 == 0 ? dx / 2 : -dx / 2);
                     int z = pz + (dz % 2 == 0 ? dz / 2 : -dz / 2);
                     int y = py + (dy % 2 == 0 ? dy / 2 : -dy / 2);
@@ -154,12 +157,40 @@ public class GridManager {
                         // look at the old location
                         spawnLocation.yaw = 0;
                         spawnLocation.pitch = 0;
+                        // Adjust spawn from nearby void
+                        if (adjacentNearbyVoid(spawnLocation) != null) {
+                            spawnLocation = adjacentNearbyVoid(spawnLocation);
+                        }
                         return spawnLocation;
                     }
                 }
             }
         }
         // Unsuccessful
+        return null;
+    }
+
+    public Location adjacentNearbyVoid(Location loc) {
+        // Handle if the player nearby void... (Death)
+        Block block1 = loc.getLevelBlock();
+        // Type Positive
+        Block block2 = loc.getLevelBlock().east(1);
+        if (block1.getId() != 0 && block2.getId() != 0) {
+            return loc;
+        }
+        block2 = loc.getLevelBlock().west(1);
+        if (block1.getId() != 0 && block2.getId() != 0) {
+            return loc;
+        }
+        // Type Negative
+        block2 = loc.getLevelBlock().east(-1);
+        if (block1.getId() != 0 && block2.getId() != 0) {
+            return loc;
+        }
+        block2 = loc.getLevelBlock().west(-1);
+        if (block1.getId() != 0 && block2.getId() != 0) {
+            return loc;
+        }
         return null;
     }
 

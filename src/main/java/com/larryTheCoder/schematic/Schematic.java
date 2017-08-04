@@ -29,6 +29,7 @@ import cn.nukkit.level.Position;
 import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
 
 import java.io.File;
@@ -98,6 +99,8 @@ public class Schematic {
     private List<String> islandCompanion;
     private Item[] defaultChestItems;
     public int count = 0;
+    // DEBUG
+    private MainLogger debug = Server.getInstance().getLogger();
 
     @SuppressWarnings("deprecation")
 
@@ -478,8 +481,14 @@ public class Schematic {
             return;
         }
         Level world = loc.getLevel();
-        Location blockLoc = new Location(loc.getX(), loc.getY(), loc.getZ(), 0, 0, world);
-        blockLoc.subtract(bedrock);
+        debug.debug("Paste: XYZ: " + loc.x + " " + loc.y + " " + loc.z);
+        // Stop using the substract method... Its return false value
+        Location blockLoc = new Location(loc.getX() + bedrock.getX(), 
+                loc.getY() + bedrock.getY(), 
+                loc.getZ() + bedrock.getZ(), 
+                0, 0, world);
+        debug.debug("After paste: XYZ: " + blockLoc.x + " " + blockLoc.y + " " + blockLoc.z);
+        
         // Paste the island blocks
         islandBlocks.stream().forEach((b) -> {
             b.paste(blockLoc, true);

@@ -102,4 +102,8 @@ public class SkyBlockGenerator extends Generator {
         return level;
     }
 
+    @Override
+    public int getDimension() {
+        return Level.DIMENSION_OVERWORLD;
+    }
 }

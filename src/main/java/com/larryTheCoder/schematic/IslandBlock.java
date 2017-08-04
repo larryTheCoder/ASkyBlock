@@ -17,11 +17,12 @@
 package com.larryTheCoder.schematic;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.blockentity.BlockEntityChest;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
-import com.intellectiualcrafters.TaskManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.task.ChestPopulateTask;
 import com.larryTheCoder.utils.Utils;
 import static com.larryTheCoder.utils.Utils.*;
 
@@ -452,7 +452,17 @@ public class IslandBlock {
         } else if (pot != null) {
             //pot.set(blockLoc, block);
         } else if (Block.get(typeId, data).getId() == Block.CHEST) {
-            TaskManager.runTaskLater(new ChestPopulateTask(loc, chestContents), 10);
+            // Sorry got some outbreak (Task error)
+            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                    .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
+                    .putString("id", BlockEntity.CHEST)
+                    .putInt("x", x)
+                    .putInt("y", y)
+                    .putInt("z", z);
+            BlockEntity.createBlockEntity(BlockEntity.CHEST, loc.level.getChunk(x >> 4, z >> 4), nbt);
+            BlockEntityChest e = new BlockEntityChest(loc.level.getChunk(x >> 4, z >> 4), nbt);
+            e.getInventory().setContents(chestContents);
+            e.spawnToAll();
         }
     }
 

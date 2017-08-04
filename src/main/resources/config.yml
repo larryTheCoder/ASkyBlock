@@ -8,8 +8,8 @@ Prefix: "&d[&eASkyBlock&d] &e"
 # You will have to set this as digit and will be used
 # On island!
 maxhome: 1
-## Allow debugging - Remember this is for Developers only!
-debug: false
+## Allow debugging
+debug: true
 ## Allow to get Updates 
 updater: false
 ## Locale language

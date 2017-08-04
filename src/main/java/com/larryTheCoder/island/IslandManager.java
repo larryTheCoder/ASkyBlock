@@ -90,13 +90,14 @@ public class IslandManager {
     private void showFancyTitle(Player p) {
         plugin.getServer().getScheduler().scheduleDelayedTask(plugin, () -> {
             // Show fancy titles!
+            // Hmmm cant use JSON...
             if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
                 plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
-                        "title " + p.getName() + " subtitle {\"text\":\"" + plugin.getLocale(p).islandSubTitle.replace("[player]", p.getName()) + "\", \"color\":\"" + plugin.getLocale(p).islandSubTitleColor + "\"}");
+                        "title " + p.getName() + " subtitle " + TextFormat.BLUE + plugin.getLocale(p).islandSubTitle.replace("[player]", p.getName()));
             }
             if (!plugin.getLocale(p).islandTitle.isEmpty()) {
                 plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
-                        "title " + p.getName() + " title {\"text\":\"" + plugin.getLocale(p).islandTitle.replace("[player]", p.getName()) + "\", \"color\":\"" + plugin.getLocale(p).islandTitleColor + "\"}");
+                        "title " + p.getName() + " title " + TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", p.getName()));
             }
             if (!plugin.getLocale(p).islandDonate.isEmpty() && !plugin.getLocale(p).islandURL.isEmpty()) {
                 p.sendMessage(plugin.getLocale(p).islandDonate.replace("[player]", p.getName()));
@@ -204,7 +205,8 @@ public class IslandManager {
                 }
             }
         }
-        for (int i = 0; i < 1000000; ++i) {
+        
+        for (int i = 0; i < Integer.MAX_VALUE; ++i) {
             int width = i * Settings.islandDistance * 2;
             int wx = (int) (Math.random() * width);
             int wz = (int) (Math.random() * width);
@@ -249,7 +251,8 @@ public class IslandManager {
     }
 
     public int generateIslandKey(int x, int z) {
-        return x / Settings.islandDistance + z / Settings.islandDistance * 10000;
+        // NEW: Key upgrade need to delete island database
+        return x / Settings.islandDistance + z / Settings.islandDistance * Integer.MAX_VALUE;
     }
 
     private IslandData claim(Player p, Location loc, String home) {
@@ -279,7 +282,8 @@ public class IslandManager {
         if (!plugin.level.contains(loc.getLevel().getName())) {
             return false;
         }
-        return !plugin.getIslandInfo(loc).owner.equalsIgnoreCase(p.getName());
+        // WHatT!!? WHAT!? wHAt?!! OH MY GOD!
+        return plugin.getIslandInfo(loc).owner.equalsIgnoreCase(p.getName());
     }
 
     public void reset(Player p, boolean reset, IslandData pd) {

@@ -22,6 +22,7 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityLiving;
 import cn.nukkit.entity.item.EntityMinecartTNT;
 import cn.nukkit.entity.item.EntityPrimedTNT;
+import cn.nukkit.entity.item.EntityVehicle;
 import cn.nukkit.entity.mob.EntityCreeper;
 import cn.nukkit.entity.projectile.EntityProjectile;
 import cn.nukkit.event.EventHandler;
@@ -191,17 +192,7 @@ public class IslandGuard implements Listener {
                         && !p.hasPermission("is.mod.bypassprotect")
                         && !p.hasPermission("is.mod.bypasslock")) {
 
-                    // Get the vector away from this island
-                    if (p.isImmobile()) {
-                        if (p.riding instanceof EntityLiving) {
-                            // Dismount
-                            p.riding.despawnFrom(p);
-                            e.setCancelled(true);
-                        }
-
-                    } else {
-                        e.setCancelled(true);
-                    }
+                    e.setCancelled(true);
                     return;
                 }
             }

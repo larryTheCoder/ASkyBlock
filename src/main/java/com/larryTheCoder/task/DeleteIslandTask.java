@@ -53,6 +53,7 @@ public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> 
         int maxZ = pd.Z + (pd.getProtectionSize() / 2);
         int minX = pd.X - (pd.getProtectionSize() / 2);
         int minZ = pd.X - (pd.getProtectionSize() / 2);
+        int size = 0;
         for (; minX < maxX; minX++) {
             for (int y = 0; y < 257; y++) {
                 for (; minZ < maxZ; minZ++) {
@@ -61,9 +62,11 @@ public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> 
                         block = Block.WATER;
                     }
                     level.setBlock(new Vector3(minX, y, minZ), Block.get(block), true, true);
+                    size += 1;
                 }
             }
         }
+        
         Player p = getOwner().getServer().getPlayer(pd.owner);
         p.sendMessage(getOwner().getPrefix() +"Seccessfully cleared your island");
         ASkyBlock.get().getDatabase().deleteIsland(pd);
