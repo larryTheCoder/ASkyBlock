@@ -27,20 +27,19 @@ import com.larryTheCoder.utils.Settings;
 /**
  * @author Adam Matthew
  */
-public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> {
+public class DeleteIslandTask implements Runnable {
 
     private final IslandData pd;
 
     private Level level = null;
 
-    public DeleteIslandTask(ASkyBlock owner, IslandData ps) {
-        super(owner);
+    public DeleteIslandTask(ASkyBlock plugin, IslandData ps) {
         this.pd = ps;
-        level = getOwner().getServer().getLevelByName(pd.levelName);
+        level = plugin.getServer().getLevelByName(pd.levelName);
     }
 
     @Override
-    public void onRun(int currentTick) {
+    public void run() {
         // Check code
         // maxX = 50 + (200 / 2) = 150
         // maxZ = 50 + (200 / 2) = 150
@@ -67,8 +66,6 @@ public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> 
             }
         }
 
-        Player p = getOwner().getServer().getPlayer(pd.owner);
-        p.sendMessage(getOwner().getPrefix() + "Seccessfully cleared your island");
         ASkyBlock.get().getDatabase().deleteIsland(pd);
     }
 }

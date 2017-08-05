@@ -7,19 +7,21 @@ __Special SkyBlock minigame build specially for Nukkit.__
 ## API
 This plugin has an API for an example:
 
-    public boolean openAPI(){
-    	Plugin plugin = this.getServer().getPluginManager().getPlugin("ASkyBlock");
-    	// Get the plugin
-    	if (plugin == null) {
-    		// Report here
-    		return false;
-   		}
-    	// Get the plugin instance
-    	ASkyBlock block = (Plugin) ASkyBlock.get();
-    	this.instance = block;
-    	// Place the things you want to
-    	return true;
-    }
+```java
+public boolean openAPI(){
+    Plugin plugin = this.getServer().getPluginManager().getPlugin("ASkyBlock");
+    // Get the plugin
+    if (plugin == null) {
+    	// Report here
+    	return false;
+   	}
+    // Get the plugin instance
+    ASkyBlock block = (Plugin) ASkyBlock.get();
+    this.instance = block;
+    // Place the things you want to
+    return true;
+}
+```
 
 ## Commands Help
 

@@ -104,11 +104,11 @@ public final class ASlocales {
     public String errorNotEnoughMoney = "§cYou don't have enough money! Default price: $[price]";
     // Commands messages
     public String kickSeccess = "§aKicked [player] from SkyBlock world!";
-    public String createSeccess = "§aSeccesfully created you an island!";
-    public String resetSeccess = "§aSeccesfully cleared your island!";
-    public String renameSeccess = "§aSeccessfully renamed island!";
-    public String setworldSeccess = "§aSeccessfully changed island location!";
-    public String generalSuccess = "§aSeccess!";
+    public String createSeccess = "§aSuccesfully created you an island!";
+    public String resetSeccess = "§aSuccesfully cleared your island!";
+    public String renameSeccess = "§aSuccesfully renamed island!";
+    public String setworldSeccess = "§aSuccesfully changed island location!";
+    public String generalSuccess = "§aSucces!";
     public String helpMessage = "§aNeed help? Use: /[com] help.";
     // Teleport messages
     public String teleportDelay = "§aYou will be teleported in {0} seconds.";

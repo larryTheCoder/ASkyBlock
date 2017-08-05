@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static cn.nukkit.math.BlockFace.*;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -64,10 +65,10 @@ public class GridManager {
     }
 
     /**
-     * Checks if a location is within the home boundaries of a player. 
+     * Checks if a location is within the home boundaries of a player.
      *
-     * @param player  The player 
-     * @param loc     The geo location of 
+     * @param player The player
+     * @param loc The geo location of
      * @return true if the location is within home boundaries
      */
     public boolean locationIsAtHome(final Player player, Location loc) {
@@ -135,8 +136,8 @@ public class GridManager {
      * Determines a safe teleport spot on player's island or the team island
      * they belong to.
      *
-     * @param p UUID of player
-     * @param number - starting home location e.g., 1
+     * @param p       The player
+     * @param number  Starting home location e.g., 1
      * @return Location of a safe teleport spot or null if one cannot be found
      */
     public Location getSafeHomeLocation(Player p, int number) {
@@ -146,26 +147,34 @@ public class GridManager {
         int pz = pd.Z;
         int py = pd.Y;
         // Recommended SafeSpawn settings
+        ArrayList<Location> predictedList = new ArrayList<>();
         for (int dy = 1; dy <= pd.getProtectionSize(); dy++) {
             for (int dx = 1; dx <= pd.getProtectionSize(); dx++) {
                 for (int dz = 1; dz <= pd.getProtectionSize(); dz++) {
                     int x = px + (dx % 2 == 0 ? dx / 2 : -dx / 2);
                     int z = pz + (dz % 2 == 0 ? dz / 2 : -dz / 2);
                     int y = py + (dy % 2 == 0 ? dy / 2 : -dy / 2);
-                    Location spawnLocation = new Location(x, y, z, world);
-                    if (isSafeLocation(spawnLocation)) {
+                    Location loc = new Location(x, y, z, world);
+                    if (isSafeLocation(loc)) {
                         // look at the old location
-                        spawnLocation.yaw = 0;
-                        spawnLocation.pitch = 0;
-                        // Adjust spawn from nearby void
-                        if (adjacentNearbyVoid(spawnLocation) != null) {
-                            spawnLocation = adjacentNearbyVoid(spawnLocation);
-                        }
-                        return spawnLocation;
+                        loc.yaw = 0;
+                        loc.pitch = 0;
+                        predictedList.add(loc);
                     }
                 }
             }
         }
+
+        // Recommended nearby void settings
+        if (!predictedList.isEmpty()) {
+            Location spawnLocation = predictedList.get(1);
+            for (int i = 0; i < predictedList.size(); i++) {
+                if (adjacentNearbyVoid(predictedList.get(i)) != null) {
+                    return adjacentNearbyVoid(spawnLocation);
+                }
+            }
+        }
+        
         // Unsuccessful
         return null;
     }
@@ -196,11 +205,9 @@ public class GridManager {
 
     /**
      * This teleports player to their island. If not safe place can be found
-     * then the player is sent to spawn via /spawn command
+     * then the player is sent to spawn via /is command
      *
-     * @param player
-     * @param type
-     * @param typeo
+     * @param player The target
      * @return true if the home teleport is successful
      */
     public boolean homeTeleport(final Player player) {
@@ -211,8 +218,8 @@ public class GridManager {
      * Teleport player to a home location. If one cannot be found a search is
      * done to find a safe place.
      *
-     * @param player
-     * @param number home location to do to
+     * @param player The target
+     * @param number Starting home location e.g., 1
      * @return true if successful, false if not
      */
     public boolean homeTeleport(Player player, int number) {
@@ -221,7 +228,7 @@ public class GridManager {
         //if the home null
         if (home == null) {
             player.sendMessage(plugin.getPrefix() + TextFormat.RED + "Your island could not be found! Error?");
-            return true;
+            return false;
         }
         plugin.getTeleportLogic().safeTeleport(player, home, false, number);
         return true;

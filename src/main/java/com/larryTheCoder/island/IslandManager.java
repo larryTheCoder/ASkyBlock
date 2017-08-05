@@ -23,6 +23,7 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
+import com.intellectiualcrafters.TaskManager;
 
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.IslandCreateEvent;
@@ -291,7 +292,7 @@ public class IslandManager {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNoIsland);
             return;
         }
-        new DeleteIslandTask(plugin, pd).onRun(0);
+        TaskManager.runTaskLater(new DeleteIslandTask(plugin, pd), 5);
         if (reset) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).resetSeccess.replace("[mili]", "30"));
             handleIslandCommand(p, true, pd.id);
@@ -362,13 +363,6 @@ public class IslandManager {
         p.sendMessage(TextFormat.LIGHT_PURPLE + "- Flags: " + TextFormat.GOLD + "Allow Teleport: " + pd.locked);
     }
 
-    public String GetFlagString(final boolean b) {
-        if (b) {
-            return TextFormat.RED + "false";
-        }
-        return TextFormat.GREEN + "true";
-    }
-
     public void teleportPlayer(Player p, String arg) {
         IslandData pd = ASkyBlock.get().getDatabase().getIsland(arg, 1);
         if (pd.owner != null) {
@@ -399,7 +393,7 @@ public class IslandManager {
         }
         // Not in the grid, so do it the old way
         // Make a list of test locations and test them
-        Set<Location> islandTestLocations = new HashSet<Location>();
+        Set<Location> islandTestLocations = new HashSet<>();
         if (checkIsland(player)) {
             islandTestLocations.add(plugin.getIslandInfo(player).getLocation());
         } else if (plugin.getTManager().hasTeam(player)) {
