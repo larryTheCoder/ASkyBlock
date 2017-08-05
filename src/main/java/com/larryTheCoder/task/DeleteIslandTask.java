@@ -68,7 +68,7 @@ public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> 
         }
 
         Player p = getOwner().getServer().getPlayer(pd.owner);
-        p.sendMessage(getOwner().getPrefix() + "Seccessfully cleared your island");
+        p.sendMessage(getOwner().getPrefix() + "Seccesfully cleared your island");
         ASkyBlock.get().getDatabase().deleteIsland(pd);
     }
 }
