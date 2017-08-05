@@ -48,7 +48,7 @@ public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> 
         // minZ = 50 - (200 / 2) = 50
         // 150 - 50 = 100 [Island Primeter = 100]
         // Island Square/blocks
-        
+
         int maxX = pd.X + (pd.getProtectionSize() / 2);
         int maxZ = pd.Z + (pd.getProtectionSize() / 2);
         int minX = pd.X - (pd.getProtectionSize() / 2);
@@ -66,9 +66,9 @@ public class DeleteIslandTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> 
                 }
             }
         }
-        
+
         Player p = getOwner().getServer().getPlayer(pd.owner);
-        p.sendMessage(getOwner().getPrefix() +"Seccessfully cleared your island");
+        p.sendMessage(getOwner().getPrefix() + "Seccessfully cleared your island");
         ASkyBlock.get().getDatabase().deleteIsland(pd);
     }
 }

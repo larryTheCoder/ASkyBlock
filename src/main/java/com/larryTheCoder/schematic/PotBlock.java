@@ -17,8 +17,11 @@
 package com.larryTheCoder.schematic;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.blockentity.BlockEntityFlowerPot;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Position;
+import cn.nukkit.nbt.tag.CompoundTag;
 import java.util.HashMap;
 import java.util.Map;
 import org.jnbt.IntTag;
@@ -51,10 +54,17 @@ public class PotBlock {
         potItemList.put("minecraft:tallgrass", Item.TALL_GRASS);
     }
 
-    public boolean set(Position pos, Block block) {
-        if (potItem != Block.get(Item.AIR)) {
-            pos.getLevel().setBlock(block, Block.get(potItem.getId(), potItemData));
-        }
+    public boolean set(Position pos) {
+        CompoundTag nbt = new CompoundTag()
+                .putString("id", BlockEntity.FLOWER_POT)
+                .putInt("x", (int) pos.x)
+                .putInt("y", (int) pos.y)
+                .putInt("z", (int) pos.z)
+                .putShort("item", potItem.getId())
+                .putInt("data", potItemData);
+        
+        BlockEntityFlowerPot potBlock = new BlockEntityFlowerPot(pos.level.getChunk((int) pos.x >> 4, (int) pos.z >> 4), nbt);
+        potBlock.spawnToAll();
         return true;
     }
 

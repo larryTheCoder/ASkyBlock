@@ -19,10 +19,12 @@ package com.larryTheCoder.schematic;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntityChest;
+import cn.nukkit.blockentity.BlockEntitySign;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
+import com.intellectiualcrafters.TaskManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -364,7 +366,6 @@ public class IslandBlock {
         Utils.ConsoleMsg(tileData.toString());
     }
 
-    @SuppressWarnings("deprecation")
     public void setChest(Map<String, Tag> tileData) {
         try {
             ListTag chestItems = (ListTag) tileData.get("Items");
@@ -434,35 +435,12 @@ public class IslandBlock {
         // prevent the block to show up
         blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, usePhysics);
 
-        // DO NOT MAKE THIS RUN!
         if (signText != null) {
-//            blockLoc.getLevel().setBlock(loc, Block.get(Block.SIGN_POST), usePhysics, true);
-//            //some time the sign wont appear
-//            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-//                    .putString("id", BlockEntity.SIGN)
-//                    .putInt("x", (int) x)
-//                    .putInt("y", (int) y)
-//                    .putInt("z", (int) z)
-//                    .putString("Text1", signText.get(0))
-//                    .putString("Text2", signText.get(1))
-//                    .putString("Text3", signText.get(2))
-//                    .putString("Text4", signText.get(3));
-//            BlockEntitySign sign = new BlockEntitySign(blockLoc.getLevel().getChunk((int) x >> 4, (int) z >> 4), nbt);
-//            sign.spawnToAll();
+            scheduleTextPlacement(loc);
         } else if (pot != null) {
-            //pot.set(blockLoc, block);
+            schedulePotPlacement(loc);
         } else if (Block.get(typeId, data).getId() == Block.CHEST) {
-            // Sorry got some outbreak (Task error)
-            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                    .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
-                    .putString("id", BlockEntity.CHEST)
-                    .putInt("x", x)
-                    .putInt("y", y)
-                    .putInt("z", z);
-            BlockEntity.createBlockEntity(BlockEntity.CHEST, loc.level.getChunk(x >> 4, z >> 4), nbt);
-            BlockEntityChest e = new BlockEntityChest(loc.level.getChunk(x >> 4, z >> 4), nbt);
-            e.getInventory().setContents(chestContents);
-            e.spawnToAll();
+            scheduleChestPlacement(loc);
         }
     }
 
@@ -472,4 +450,49 @@ public class IslandBlock {
     public Vector3 getVector() {
         return new Vector3(x, y, z);
     }
+
+    // --- Task Scheduling --- // 
+
+    private void scheduleChestPlacement(Location loc) {
+        TaskManager.runTaskLater(() -> {
+            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                    .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
+                    .putString("id", BlockEntity.CHEST)
+                    .putInt("x", (int) loc.x)
+                    .putInt("y", (int) loc.y)
+                    .putInt("z", (int) loc.z);
+            BlockEntityChest e = (BlockEntityChest) BlockEntity.createBlockEntity(
+                    BlockEntity.CHEST,
+                    loc.level.getChunk((int) loc.x >> 4, (int) loc.z >> 4),
+                    nbt);
+            e.getInventory().setContents(chestContents);
+            e.spawnToAll();
+        }, 5);
+    }
+
+    private void schedulePotPlacement(Location loc){
+        TaskManager.runTaskLater(() -> {
+            pot.set(loc);
+        }, 5);
+    }
+    
+    private void scheduleTextPlacement(Location loc) {
+        TaskManager.runTaskLater(() -> {
+            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                    .putString("id", BlockEntity.SIGN)
+                    .putInt("x", (int) loc.x)
+                    .putInt("y", (int) loc.y)
+                    .putInt("z", (int) loc.z)
+                    .putString("Text1", signText.get(0))
+                    .putString("Text2", signText.get(1))
+                    .putString("Text3", signText.get(2))
+                    .putString("Text4", signText.get(3));
+            BlockEntitySign sign = (BlockEntitySign) BlockEntity.createBlockEntity(
+                    BlockEntity.SIGN,
+                    loc.getLevel().getChunk((int) loc.x >> 4, (int) loc.z >> 4),
+                    nbt);
+            sign.spawnToAll();
+        }, 5);
+    }
+
 }

@@ -131,14 +131,14 @@ public final class ASlocales {
     public String newsHeadline = "§aWhile you were offline:";
     public String newsEmpty = "§aThere no messages for you today. Check back later!";
     // Titles
-    public String islandSubTitle = "by larryTheCoder";
+    public String islandSubTitle = "by_larryTheCoder";
     public String islandDonate = "§aSource code made by §e@larryTheCoder";
     public String islandURL = "§aLink: http://github.com/larryTheCoder/ASkyBlock-Nukkit";
     public String islandSupport = "§aLove it? Give us a star on GitHub!";
     public String islandSubTitleColor = "blue";
     public String islandDonateColor = "aqua";
     public String islandTitleColor = "gold";
-    public String islandTitle = "A SkyBlock";
+    public String islandTitle = "SkyBlock_Map";
     
     
     private String localeName;

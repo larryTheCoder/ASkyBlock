@@ -381,7 +381,7 @@ public class Schematic {
         if (countBlocks != 0) {
             Server.getInstance().getLogger().info(TextFormat.YELLOW + " - " + schematicFolder.getName().toUpperCase().replace(".SCHEMATIC", "") + " Info:");
             Server.getInstance().getLogger().info(TextFormat.GRAY + "   - Blocks: " + TextFormat.GREEN + countBlocks + " ");
-            Server.getInstance().getLogger().info(TextFormat.GRAY + "   - SafeSpot: " + TextFormat.GREEN + spot.size() + " SafeSpot found");
+            Server.getInstance().getLogger().info(TextFormat.GRAY + "   - SafeSpot: " + TextFormat.RED + "Currently deprecated");
         }
         facingList.put((byte) 0, SOUTH);
         facingList.put((byte) 1, WEST);
@@ -481,14 +481,8 @@ public class Schematic {
             return;
         }
         Level world = loc.getLevel();
-        debug.debug("Paste: XYZ: " + loc.x + " " + loc.y + " " + loc.z);
-        // Stop using the substract method... Its return false value
-        Location blockLoc = new Location(loc.getX() + bedrock.getX(), 
-                loc.getY() + bedrock.getY(), 
-                loc.getZ() + bedrock.getZ(), 
-                0, 0, world);
-        debug.debug("After paste: XYZ: " + blockLoc.x + " " + blockLoc.y + " " + blockLoc.z);
-        
+        Location blockLoc = new Location(loc.getX(), loc.getY(), loc.getZ(), 0, 0, world);
+        blockLoc.subtract(bedrock);
         // Paste the island blocks
         islandBlocks.stream().forEach((b) -> {
             b.paste(blockLoc, true);
