@@ -40,11 +40,6 @@ public class SkyBlockGenerator extends Generator {
     public SkyBlockGenerator(Map<String, Object> options) {
         this.options = options;
     }
-
-    @Override
-    public int getDimension() {
-        return Level.DIMENSION_OVERWORLD;
-    }
     
     @Override
     public int getId() {
