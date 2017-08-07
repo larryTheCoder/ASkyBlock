@@ -36,7 +36,6 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
-import java.util.List;
 
 /**
  * Basic island listener
@@ -148,9 +147,9 @@ public class IslandListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent ex) {
         // load player inventory if exsits
         plugin.getInventory().loadPlayerInventory(ex.getPlayer());
-        if (plugin.getDatabase().getPlayerData(ex.getPlayer()) == null) {
-            Utils.ConsoleMsg(ex.getPlayer().getName() + " data doesn`t exsits. Creating new ones");
-            plugin.getDatabase().createPlayer(ex.getPlayer());
+        if (plugin.getPlayerInfo(ex.getPlayer()) == null) {
+            Utils.ConsoleMsg(ex.getPlayer().getName() + " &adata doesn`t exsits. Creating new ones");
+            plugin.getDatabase().createPlayer(ex.getPlayer().getName());
         }
     }
 }

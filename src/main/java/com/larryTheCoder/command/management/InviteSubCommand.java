@@ -71,8 +71,8 @@ public class InviteSubCommand extends SubCommand {
             sender.sendMessage(getPrefix() + getLocale(p).errorOfflinePlayer);
             return true;
         }
-        PlayerData pdinv = ASkyBlock.get().getDatabase().getPlayerData(invite);
-        PlayerData pd = ASkyBlock.get().getDatabase().getPlayerData(p);
+        PlayerData pdinv = ASkyBlock.get().getPlayerInfo(invite);
+        PlayerData pd = ASkyBlock.get().getPlayerInfo(p);
         if (pdinv.inTeam) {
             sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
             return false;

@@ -17,7 +17,6 @@
  */
 package com.larryTheCoder;
 
-import com.larryTheCoder.task.PluginTask;
 import cn.nukkit.Player;
 import com.larryTheCoder.utils.Utils;
 import com.larryTheCoder.utils.ConfigManager;
@@ -165,7 +164,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     @Override
     public PlayerData getPlayerInfo(Player player) {
-        return getDatabase().getPlayerData(player);
+        return getDatabase().getPlayerData(player.getName());
     }
 
 //  #################################### NON-API ####################################
@@ -798,9 +797,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
             pd.name = "WALK my PRANK!";
             pd.islandId = getIsland().generateIslandKey(50, 50);
             pd.owner = p;
-            pd.X = 50;
-            pd.Y = 50;
-            pd.Z = 50;
+            pd.setCenter(50, 50, 50);
             pd.levelName = "SkyBlock";
             pd.locked = false;
             boolean result = con.createIsland(pd);

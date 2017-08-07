@@ -43,12 +43,12 @@ public class TeamManager {
      * @return {@code true} if {@link #getIsland} not null
      */
     public boolean hasTeam(Player p) {
-        return plugin.getDatabase().getPlayerData(p).inTeam;
+        return plugin.getPlayerInfo(p).inTeam;
     }
 
     public boolean addTeam(Player leader, Player member) {
         boolean done = false;
-        PlayerData te = plugin.getDatabase().getPlayerData(leader);
+        PlayerData te = plugin.getPlayerInfo(leader);
         te.members.add(member.getName());
         for (String members : te.members) {
             if (members.equalsIgnoreCase(member.getName())) {
@@ -65,7 +65,7 @@ public class TeamManager {
         if (!message.isEmpty()) {
             kickMessage = message;
         }
-        PlayerData te = plugin.getDatabase().getPlayerData(leader);
+        PlayerData te = plugin.getPlayerInfo(leader);
         if (!te.members.contains(member.getName())) {
             leader.sendMessage(plugin.getPrefix() + plugin.getLocale(leader).errorOfflinePlayer);
             return true;

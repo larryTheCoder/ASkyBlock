@@ -1,5 +1,5 @@
 name: "ASkyBlock"
-version: "0.3.0"
+version: "0.3.1"
 author: Adam Matthew
 api: ["1.0.0"]
 main: com.larryTheCoder.ASkyBlock

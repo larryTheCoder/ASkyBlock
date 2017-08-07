@@ -19,6 +19,7 @@ package com.larryTheCoder.schematic;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.item.EntityPainting.Motive; // Art
 import static cn.nukkit.entity.item.EntityPainting.motives;
 import static cn.nukkit.math.BlockFace.*;
@@ -28,6 +29,7 @@ import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.math.BlockFace;
+import cn.nukkit.math.BlockVector3;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
@@ -43,17 +45,19 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Random;
 
-
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
 import org.jnbt.ByteArrayTag;
+import org.jnbt.ByteTag;
 import org.jnbt.CompoundTag;
+import org.jnbt.FloatTag;
 import org.jnbt.IntTag;
 import org.jnbt.ListTag;
 import org.jnbt.NBTInputStream;
 import org.jnbt.ShortTag;
+import org.jnbt.StringTag;
 import org.jnbt.Tag;
 
 /**
@@ -262,6 +266,161 @@ public class Schematic {
                     blocks[index] = (short) (((addId[index >> 1] & 0xF0) << 4) + (blockId[index] & 0xFF));
                 }
             }
+
+            List<Tag> entities = getChildTag(schematic, "Entities", ListTag.class).getValue();
+            for (Tag tag : entities) {
+                if (!(tag instanceof CompoundTag)) {
+                    continue;
+                }
+
+                CompoundTag t = (CompoundTag) tag;
+                EntityObject ent = new EntityObject();
+                for (Map.Entry<String, Tag> entry : t.getValue().entrySet()) {
+                    if (entry.getKey().equals("id")) {
+                        String id = ((StringTag) entry.getValue()).getValue().toUpperCase();
+                        //Bukkit.getLogger().info("DEBUG: ID is '" + id + "'");
+                        // The mob type might be prefixed with "Minecraft:"
+                        if (id.startsWith("MINECRAFT:")) {
+                            id = id.substring(10);
+                        }
+                        // todo
+                    }
+                    
+                    switch (entry.getKey()) {
+                        case "Pos":
+                            //Bukkit.getLogger().info("DEBUG Pos fond");
+                            if (entry.getValue() instanceof ListTag) {
+                                //Bukkit.getLogger().info("DEBUG coord found");
+                                List<Tag> pos = new ArrayList<>();
+                                pos = ((ListTag) entry.getValue()).getValue();
+                                //Bukkit.getLogger().info("DEBUG pos: " + pos);
+                                double x = (double) pos.get(0).getValue() - origin.getX();
+                                double y = (double) pos.get(1).getValue() - origin.getY();
+                                double z = (double) pos.get(2).getValue() - origin.getZ();
+                                ent.setLocation(new Vector3(x, y, z));
+                            }
+                            break;
+                        case "Motion":
+                            //Bukkit.getLogger().info("DEBUG Pos fond");
+                            if (entry.getValue() instanceof ListTag) {
+                                //Bukkit.getLogger().info("DEBUG coord found");
+                                List<Tag> pos = new ArrayList<>();
+                                pos = ((ListTag) entry.getValue()).getValue();
+                                //Bukkit.getLogger().info("DEBUG pos: " + pos);
+                                ent.setMotion(new Vector3((double) pos.get(0).getValue(), (double) pos.get(1).getValue(),
+                                        (double) pos.get(2).getValue()));
+                            }
+                            break;
+                        case "Rotation":
+                            //Bukkit.getLogger().info("DEBUG Pos fond");
+                            if (entry.getValue() instanceof ListTag) {
+                                //Bukkit.getLogger().info("DEBUG coord found");
+                                List<Tag> pos = new ArrayList<>();
+                                pos = ((ListTag) entry.getValue()).getValue();
+                                //Bukkit.getLogger().info("DEBUG pos: " + pos);
+                                ent.setYaw((float) pos.get(0).getValue());
+                                ent.setPitch((float) pos.get(1).getValue());
+                            }
+                            break;
+                        case "Color":
+                            if (entry.getValue() instanceof ByteTag) {
+                                ent.setColor(((ByteTag) entry.getValue()).getValue());
+                            }
+                            break;
+                        case "Sheared":
+                            if (entry.getValue() instanceof ByteTag) {
+                                if (((ByteTag) entry.getValue()).getValue() != (byte) 0) {
+                                    ent.setSheared(true);
+                                } else {
+                                    ent.setSheared(false);
+                                }
+                            }
+                            break;
+                        case "RabbitType":
+                            if (entry.getValue() instanceof IntTag) {
+                                ent.setRabbitType(((IntTag) entry.getValue()).getValue());
+                            }
+                            break;
+                        case "Profession":
+                            if (entry.getValue() instanceof IntTag) {
+                                ent.setProfession(((IntTag) entry.getValue()).getValue());
+                            }
+                            break;
+                        case "CarryingChest":
+                            if (entry.getValue() instanceof ByteTag) {
+                                ent.setCarryingChest(((ByteTag) entry.getValue()).getValue());
+                            }
+                            break;
+                        case "OwnerUUID":
+                            ent.setOwned(true);
+                            break;
+                        case "CollarColor":
+                            if (entry.getValue() instanceof ByteTag) {
+                                ent.setCollarColor(((ByteTag) entry.getValue()).getValue());
+                            }
+                            break;
+                        case "Facing":
+                            if (entry.getValue() instanceof ByteTag) {
+                                ent.setFacing(((ByteTag) entry.getValue()).getValue());
+                            }
+                            break;
+                        case "Motive":
+                            if (entry.getValue() instanceof StringTag) {
+                                ent.setMotive(((StringTag) entry.getValue()).getValue());
+                            }
+                            break;
+                        case "ItemDropChance":
+                            if (entry.getValue() instanceof FloatTag) {
+                                ent.setItemDropChance(((FloatTag) entry.getValue()).getValue());
+                            }
+                            break;
+                        case "ItemRotation":
+                            if (entry.getValue() instanceof ByteTag) {
+                                ent.setItemRotation(((ByteTag) entry.getValue()).getValue());
+                            }
+                            break;
+                        case "Item":
+                            if (entry.getValue() instanceof CompoundTag) {
+                                CompoundTag itemTag = (CompoundTag) entry.getValue();
+                                for (Map.Entry<String, Tag> itemEntry : itemTag.getValue().entrySet()) {
+                                    if (itemEntry.getKey().equals("Count")) {
+                                        if (itemEntry.getValue() instanceof ByteTag) {
+                                            ent.setCount(((ByteTag) itemEntry.getValue()).getValue());
+                                        }
+                                    } else if (itemEntry.getKey().equals("Damage")) {
+                                        if (itemEntry.getValue() instanceof ShortTag) {
+                                            ent.setDamage(((ShortTag) itemEntry.getValue()).getValue());
+                                        }
+                                    } else if (itemEntry.getKey().equals("id")) {
+                                        if (itemEntry.getValue() instanceof StringTag) {
+                                            ent.setId(((StringTag) itemEntry.getValue()).getValue());
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        case "TileX":
+                            if (entry.getValue() instanceof IntTag) {
+                                ent.setTileX((double) ((IntTag) entry.getValue()).getValue() - origin.getX());
+                            }
+                            break;
+                        case "TileY":
+                            if (entry.getValue() instanceof IntTag) {
+                                ent.setTileY((double) ((IntTag) entry.getValue()).getValue() - origin.getY());
+                            }
+                            break;
+                        case "TileZ":
+                            if (entry.getValue() instanceof IntTag) {
+                                ent.setTileZ((double) ((IntTag) entry.getValue()).getValue() - origin.getZ());
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+            }
+
             // to-do An animal
             List<Tag> tileEntities = getChildTag(schematic, "TileEntities", ListTag.class).getValue();
             for (Tag tag : tileEntities) {
@@ -487,7 +646,7 @@ public class Schematic {
         islandBlocks.stream().forEach((b) -> {
             b.paste(blockLoc, true);
         });
-        
+
         // Find the grass spot
         final Location grass;
         if (topGrass != null) {
@@ -497,7 +656,7 @@ public class Schematic {
             grass = gr;
         } else {
             grass = null;
-        }	
+        }
     }
 
     /**

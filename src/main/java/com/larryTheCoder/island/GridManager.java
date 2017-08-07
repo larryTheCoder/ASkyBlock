@@ -31,7 +31,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static cn.nukkit.math.BlockFace.*;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -76,7 +75,7 @@ public class GridManager {
         Set<Location> islandTestLocations = new HashSet<>();
         if (plugin.getIsland().checkIsland(player)) {
             IslandData pd = plugin.getIslandInfo(player);
-            islandTestLocations.add(new Location(pd.X, pd.Y, pd.Z, 0, 0, plugin.getServer().getLevelByName(pd.levelName)));
+            islandTestLocations.add(new Location(0, 0, 0, 0, 0, plugin.getServer().getLevelByName(pd.levelName)).add(pd.getCenter()));
         } else if (plugin.getTManager().hasTeam(player)) {
 //            islandTestLocations.add(plugin.getPlayers().getTeamIslandLocation(player.getUniqueId()));
 //            if (Settings.createNether && Settings.newNether && ASkyBlock.getNetherWorld() != null) {
@@ -140,14 +139,17 @@ public class GridManager {
      * @param number  Starting home location e.g., 1
      * @return Location of a safe teleport spot or null if one cannot be found
      */
-    public Location getSafeHomeLocation(Player p, int number) {
-        IslandData pd = ASkyBlock.get().getDatabase().getIsland(p.getName(), number);
+    public Location getSafeHomeLocation(String p, int number) {
+        IslandData pd = ASkyBlock.get().getDatabase().getIsland(p, number);
+        if (pd.isSpawn()) {
+            return pd.getLocation();
+        }
         Level world = Server.getInstance().getLevelByName(pd.levelName);
-        int px = pd.X;
-        int pz = pd.Z;
-        int py = pd.Y;
+        int px = pd.getCenter().getFloorX();
+        int pz = pd.getCenter().getFloorZ();
+        int py = pd.getCenter().getFloorY();
+
         // Recommended SafeSpawn settings
-        ArrayList<Location> predictedList = new ArrayList<>();
         for (int dy = 1; dy <= pd.getProtectionSize(); dy++) {
             for (int dx = 1; dx <= pd.getProtectionSize(); dx++) {
                 for (int dz = 1; dz <= pd.getProtectionSize(); dz++) {
@@ -159,22 +161,14 @@ public class GridManager {
                         // look at the old location
                         loc.yaw = 0;
                         loc.pitch = 0;
-                        predictedList.add(loc);
+
+                        pd.setHomeLocation(loc); // Set the home location
+                        return loc;
                     }
                 }
             }
         }
 
-        // Recommended nearby void settings
-        if (!predictedList.isEmpty()) {
-            Location spawnLocation = predictedList.get(1);
-            for (int i = 0; i < predictedList.size(); i++) {
-                if (adjacentNearbyVoid(predictedList.get(i)) != null) {
-                    return adjacentNearbyVoid(spawnLocation);
-                }
-            }
-        }
-        
         // Unsuccessful
         return null;
     }
@@ -224,7 +218,7 @@ public class GridManager {
      */
     public boolean homeTeleport(Player player, int number) {
         Location home;
-        home = getSafeHomeLocation(player, number);
+        home = getSafeHomeLocation(player.getName(), number);
         //if the home null
         if (home == null) {
             player.sendMessage(plugin.getPrefix() + TextFormat.RED + "Your island could not be found! Error?");
@@ -232,7 +226,6 @@ public class GridManager {
         }
         plugin.getTeleportLogic().safeTeleport(player, home, false, number);
         return true;
-
     }
 
     public IslandData getProtectedIslandAt(Location location) {

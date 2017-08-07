@@ -65,7 +65,7 @@ public class IslandCreateEvent extends Event implements Cancellable {
      * @return the island
      */
     public Location getIslandLocation() {
-        return new Location(island.X, island.Y, island.Z, 0, 0, Server.getInstance().getLevelByName(island.levelName));
+        return new Location(0, 0, 0, 0, 0, Server.getInstance().getLevelByName(island.levelName)).add(island.getCenter());
     }
 
     /**

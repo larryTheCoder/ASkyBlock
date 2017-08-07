@@ -36,9 +36,13 @@ public class IslandData implements Cloneable {
     public int id;
     public String levelName;
     // Coordinates of the island area
-    public int X = 0;
-    public int Y = 0;
-    public int Z = 0;
+    private int centerX = 0;
+    private int centerY = 0;
+    private int centerZ = 0;
+    // Coordinates of the home spawn location
+    public int homeX = 0;
+    public int homeY = 0;
+    public int homeZ = 0;
     // Island information
     public String name;
     public String owner;
@@ -48,24 +52,28 @@ public class IslandData implements Cloneable {
     private boolean isSpawn = false;
     // Protection size
     private int protectionRange = 0; //Unaccessable
-    // Disable safe spawn
-    // Used for Island's spawn only!
-    public boolean safeTeleport = false;
 
     private final HashMap<SettingsFlag, Boolean> igs = new HashMap<>();
 
     public Vector3 getCenter() {
-        return new Vector3(X, Y, Z);
+        return new Vector3(centerX, centerY, centerZ);
     }
 
-    public void setHomeLocation(Vector3 vector){
-        this.X = vector.getFloorX();
-        this.Y = vector.getFloorY();
-        this.Z = vector.getFloorZ();
+    public void setCenter(int centerX, int centerY, int centerZ) {
+        this.centerX = centerX;
+        this.centerY = centerY;
+        this.centerZ = centerZ;
     }
-    
+
+    public void setHomeLocation(Vector3 vector) {
+        this.homeX = vector.getFloorX();
+        this.homeY = vector.getFloorY();
+        this.homeZ = vector.getFloorZ();
+        ASkyBlock.get().getDatabase().setSpawnPosition(getLocation());
+    }
+
     public Location getLocation() {
-        return new Location(X, Y, Z, Server.getInstance().getLevelByName(levelName));
+        return new Location(homeX, homeY, homeZ, Server.getInstance().getLevelByName(levelName));
     }
 
     public boolean isSpawn() {
@@ -91,17 +99,12 @@ public class IslandData implements Cloneable {
 
     public void setSpawn(boolean b) {
         isSpawn = b;
-        if(b){
-            safeTeleport = false;
-        } else {
-            safeTeleport = true;
-        }
     }
 
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public IslandData(String levelName, int X, int Z, int PSize) {
-        this.X = X;
-        this.Z = Z;
+        this.centerX = X;
+        this.centerZ = Z;
         this.levelName = levelName;
         this.protectionRange = PSize;
         // Island Guard Settings
@@ -109,14 +112,17 @@ public class IslandData implements Cloneable {
     }
 
     @SuppressWarnings({"AssignmentToMethodParameter", "OverridableMethodCallInConstructor"})
-    public IslandData(String levelName, int X, int Y, int Z, int PSize, String name, String owner, String biome, int id, int islandId, boolean locked, String defaultvalue, boolean isSpawn) {
+    public IslandData(String levelName, int X, int Y, int Z, int homeX, int homeY, int homeZ, int PSize, String name, String owner, String biome, int id, int islandId, boolean locked, String defaultvalue, boolean isSpawn) {
         if (biome.isEmpty()) {
             biome = "PLAINS";
         }
         this.levelName = levelName;
-        this.X = X;
-        this.Y = Y;
-        this.Z = Z;
+        this.centerX = X;
+        this.centerY = Y;
+        this.centerZ = Z;
+        this.homeX = homeX;
+        this.homeY = homeY;
+        this.homeZ = homeZ;
         this.protectionRange = PSize;
         this.name = name;
         this.owner = owner;
@@ -126,9 +132,6 @@ public class IslandData implements Cloneable {
         this.locked = locked;
         this.serilizeIgs(defaultvalue);
         this.isSpawn = isSpawn;
-        if(this.isSpawn){
-            safeTeleport = false;
-        }
     }
 
     /* (non-Javadoc)
@@ -145,11 +148,11 @@ public class IslandData implements Cloneable {
     }
 
     public int getMinProtectedZ() {
-        return (Z - protectionRange / 2);
+        return (centerZ - protectionRange / 2);
     }
 
     public int getMinProtectedX() {
-        return (X - protectionRange / 2);
+        return (centerX - protectionRange / 2);
     }
 
     public int getProtectionSize() {
@@ -277,6 +280,14 @@ public class IslandData implements Cloneable {
                 }
             }
         }
+    }
+
+    public boolean inIslandSpace(int x, int z) {
+        if (x >= getCenter().getFloorX() - protectionRange / 2 && x < getCenter().getFloorX() + protectionRange / 2 && z >= getCenter().getFloorZ() - protectionRange / 2
+                && z < getCenter().getFloorZ() + protectionRange / 2) {
+            return true;
+        }
+        return false;
     }
 
     /**

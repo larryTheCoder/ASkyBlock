@@ -18,12 +18,13 @@ package com.larryTheCoder.island;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.block.Block;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.utils.TextFormat;
-import com.intellectiualcrafters.TaskManager;
 
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.IslandCreateEvent;
@@ -33,8 +34,9 @@ import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
 import com.larryTheCoder.schematic.Schematic;
-import com.larryTheCoder.task.DeleteIslandTask;
+import com.larryTheCoder.utils.Pair;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -89,23 +91,24 @@ public class IslandManager {
     }
 
     private void showFancyTitle(Player p) {
-        plugin.getServer().getScheduler().scheduleDelayedTask(plugin, () -> {
-            // Show fancy titles!
-            // Hmmm cant use JSON...
-            if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
-                plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
-                        "title " + p.getName() + " subtitle " + TextFormat.BLUE + plugin.getLocale(p).islandSubTitle.replace("[player]", p.getName()));
+        new NukkitRunnable() {
+            @Override
+            public void run() {
+                // Show fancy titles!
+                // Hmmm cant use JSON...
+                if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
+                    p.setSubtitle(TextFormat.BLUE + plugin.getLocale(p).islandSubTitle.replace("[player]", p.getName()));
+                }
+                if (!plugin.getLocale(p).islandTitle.isEmpty()) {
+                    p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", p.getName()));
+                }
+                if (!plugin.getLocale(p).islandDonate.isEmpty() && !plugin.getLocale(p).islandURL.isEmpty()) {
+                    p.sendMessage(plugin.getLocale(p).islandDonate.replace("[player]", p.getName()));
+                    p.sendMessage(plugin.getLocale(p).islandSupport);
+                    p.sendMessage(plugin.getLocale(p).islandURL);
+                }
             }
-            if (!plugin.getLocale(p).islandTitle.isEmpty()) {
-                plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
-                        "title " + p.getName() + " title " + TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", p.getName()));
-            }
-            if (!plugin.getLocale(p).islandDonate.isEmpty() && !plugin.getLocale(p).islandURL.isEmpty()) {
-                p.sendMessage(plugin.getLocale(p).islandDonate.replace("[player]", p.getName()));
-                p.sendMessage(plugin.getLocale(p).islandSupport);
-                p.sendMessage(plugin.getLocale(p).islandURL);
-            }
-        }, 10);
+        }.runTaskLater(plugin, 60); // The level seems like to slow down
     }
 
     public void kickPlayerByName(final Player pOwner, final String victimName) {
@@ -206,7 +209,7 @@ public class IslandManager {
                 }
             }
         }
-        
+
         for (int i = 0; i < Integer.MAX_VALUE; ++i) {
             int width = i * Settings.islandDistance * 2;
             int wx = (int) (Math.random() * width);
@@ -271,9 +274,7 @@ public class IslandManager {
         pd.name = home;
         pd.islandId = iKey;
         pd.owner = p.getName();
-        pd.X = x;
-        pd.Y = loc.getFloorY();
-        pd.Z = z;
+        pd.setCenter(x, loc.getFloorY(), z);
         pd.levelName = loc.getLevel().getName();
         pd.locked = false;
         return pd;
@@ -289,15 +290,94 @@ public class IslandManager {
 
     public void reset(Player p, boolean reset, IslandData pd) {
         if (pd == null || pd.owner == null) {
-            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNoIsland);
+            Utils.ConsoleMsg(plugin.getPrefix() + plugin.getLocale(p).errorNoIsland);
             return;
         }
-        TaskManager.runTaskLater(new DeleteIslandTask(plugin, pd), 5);
+        Level level = plugin.getServer().getLevelByName(pd.levelName);
+
+        // Determine if blocks need to be cleaned up or not
+        boolean cleanUpBlocks = false;
+        if (Settings.islandDistance - pd.getProtectionSize() < 16) {
+            cleanUpBlocks = true;
+        }
+
+        int minX = pd.getMinProtectedX();
+        int minZ = pd.getMinProtectedZ();
+        int maxX = pd.getMinProtectedX() + pd.getProtectionSize();
+        int maxZ = pd.getMinProtectedZ() + pd.getProtectionSize();
+
+        Set<Pair> blocksToClear = new HashSet<>();
+
+        // Find out what blocks are within the island protection range
+        while (minX < maxX | minZ < maxZ) {
+            // Add to clear up list if requested
+            if (cleanUpBlocks) {
+                blocksToClear.add(new Pair(minX, minZ));
+            }
+            // The blocks and protection size are same... or is they?
+            if (minX < maxX) {
+                minX++;
+            }
+            if (minZ < maxZ) {
+                minZ++;
+            }
+
+        }
+
+        // Remove from database
+        ASkyBlock.get().getDatabase().deleteIsland(pd);
+
+        // Clear up any blocks
+        if (!blocksToClear.isEmpty()) {
+            Utils.ConsoleMsg("Island delete: There are " + blocksToClear.size() + " blocks that need to be cleared up.");
+            Utils.ConsoleMsg("Clean rate is " + Settings.cleanrate + " blocks per second. Should take ~" + Math.round(blocksToClear.size() / Settings.cleanrate) + "s");
+            new NukkitRunnable() {
+                @Override
+                public void run() {
+                    Iterator<Pair> it = blocksToClear.iterator();
+                    int count = 0;
+                    while (it.hasNext() && count++ < Settings.cleanrate) {
+                        Pair pair = it.next();
+                        // Check if coords are in island space
+                        for (int x = 0; x < 16; x++) {
+                            for (int z = 0; z < 16; z++) {
+                                int xCoord = pair.getLeft() * 16 + x;
+                                int zCoord = pair.getRight() * 16 + z;
+                                if (pd.inIslandSpace(xCoord, zCoord)) {
+                                    //plugin.getLogger().info(xCoord + "," + zCoord + " is in island space - deleting column");
+                                    // Delete all the blocks here
+                                    for (int y = 0; y < 257; y++) {
+                                        // Overworld
+                                        Vector3 vec = new Vector3(xCoord, y, zCoord);
+                                        int setTo = Block.AIR;
+                                        // Split depending on below or above water line
+                                        if (y < Settings.seaLevel) {
+                                            setTo = Block.WATER;
+                                        }
+
+                                        Utils.ConsoleMsg("Set block: x: " + vec.x + " y: " + vec.y + " z: " + vec.z);
+                                        level.setBlock(vec, Block.get(setTo), true, true);
+                                    }
+                                }
+                            }
+                        }
+                        it.remove();
+                    }
+                    if (blocksToClear.isEmpty()) {
+                        plugin.getLogger().info("Finished island deletion");
+                        this.cancel();
+                    }
+                }
+            }.runTaskTimer(plugin, 0, 20);
+        }
+
+        // Todo: reset limits
         if (reset) {
-            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).resetSeccess.replace("[mili]", "30"));
+            Utils.ConsoleMsg(plugin.getPrefix() + plugin.getLocale(p).resetSeccess.replace("[mili]", "30"));
             handleIslandCommand(p, true, pd.id);
         } else {
-            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).resetSeccess.replace("[mili]", "30"));
+            Utils.ConsoleMsg(plugin.getPrefix() + plugin.getLocale(p).resetSeccess.replace("[mili]", "30"));
+            //p.teleport(plugin.getServer().getDefaultLevel().getSafeSpawn());
         }
     }
 
@@ -323,7 +403,7 @@ public class IslandManager {
         if (pd.owner.equals(pName)) {
             return true;
         }
-        PlayerData pd2 = plugin.getDatabase().getPlayerData(p);
+        PlayerData pd2 = plugin.getPlayerInfo(p);
         return pd2.members.contains(pName);
     }
 
@@ -348,7 +428,7 @@ public class IslandManager {
             return;
         }
         final IslandData pd = GetIslandAt(loc);
-        PlayerData pd2 = plugin.getDatabase().getPlayerData(p);
+        PlayerData pd2 = plugin.getPlayerInfo(p);
         if (pd == null) {
             p.sendMessage(TextFormat.LIGHT_PURPLE + plugin.getLocale(p).errorNotOnIsland);
             return;
@@ -369,8 +449,8 @@ public class IslandManager {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorOfflinePlayer.replace("[player]", arg));
             return;
         }
-        Level lvl = ASkyBlock.get().getServer().getLevelByName(pd.levelName);
-        p.teleport(new Location(pd.X, pd.Y, pd.Z, 0, 0, lvl));
+        Location home = plugin.getGrid().getSafeHomeLocation(pd.owner, 0);
+        p.teleport(home);
     }
 
     public boolean locationIsOnIsland(Player player, Vector3 loc) {

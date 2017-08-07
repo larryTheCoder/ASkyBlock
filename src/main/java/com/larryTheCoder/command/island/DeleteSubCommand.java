@@ -62,7 +62,7 @@ public class DeleteSubCommand extends SubCommand {
             sender.sendMessage(getPrefix() + getLocale(p).errorNotOnIsland);
             return true;
         }
-        // safe
+        // Command works
         getPlugin().getIsland().reset(p, false, getPlugin().getIslandInfo(p.getLocation()));
         return true;
     }

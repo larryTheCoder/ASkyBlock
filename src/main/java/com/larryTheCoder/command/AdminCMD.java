@@ -19,12 +19,10 @@ package com.larryTheCoder.command;
 import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.SkyBlockGenerator;
 import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.task.DeleteIslandTask;
 
 /**
  * Admin command.
@@ -260,15 +258,7 @@ public class AdminCMD extends Command {
      * @param sender
      */
     private void deleteIslands(IslandData island, CommandSender sender) {
-        plugin.getDatabase().deleteIsland(island);
-        // Reset the biome
-        for (int x = island.X; x < island.getMinProtectedX(); x++) {
-            for (int z = island.Z; z < island.getMinProtectedZ(); z++) {
-                plugin.getServer().getLevelByName(island.levelName).setBiomeId(x, z, Biome.PLAINS);
-            }
-        }
-
-        new DeleteIslandTask(plugin, island);
+        // Todo
     }
 
 }

@@ -14,17 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.larryTheCoder.task;
-
-import com.intellectiualcrafters.updater.Updater;
-import com.larryTheCoder.ASkyBlock;
+package com.larryTheCoder;
 
 /**
  * @author Adam Matthew
  */
-public class PluginTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> implements TaskSkyBlock {
+public class PluginTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> {
 
-    private int nextUpdate = 0;
 
     public PluginTask(ASkyBlock plugin) {
         super(plugin);
@@ -32,13 +28,7 @@ public class PluginTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> implem
 
     @Override
     public void onRun(int currentTick) {
-        nextUpdate++;
         owner.getInvitationHandler().tick();
-        // Get updates in 4 hours
-        if (nextUpdate == 0x3840) {
-            nextUpdate = 0;
-            Updater.getUpdate();
-        }
     }
 
 }
