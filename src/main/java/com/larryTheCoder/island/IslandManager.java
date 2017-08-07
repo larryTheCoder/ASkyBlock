@@ -290,7 +290,11 @@ public class IslandManager {
 
     public void reset(Player p, boolean reset, IslandData pd) {
         if (pd == null || pd.owner == null) {
-            Utils.ConsoleMsg(plugin.getPrefix() + plugin.getLocale(p).errorNoIsland);
+            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNoIsland);
+            return;
+        }
+        if (!Utils.canBypassTimer(p, p.getName() + pd.islandId, 0)) {
+            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorTooSoon.replace("[secs]", Utils.getPlayerRTime(p, p.getName() + pd.islandId, 0)));
             return;
         }
         Level level = plugin.getServer().getLevelByName(pd.levelName);
@@ -373,10 +377,10 @@ public class IslandManager {
 
         // Todo: reset limits
         if (reset) {
-            Utils.ConsoleMsg(plugin.getPrefix() + plugin.getLocale(p).resetSeccess.replace("[mili]", "30"));
+            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).resetSeccess.replace("[mili]", "30"));
             handleIslandCommand(p, true, pd.id);
         } else {
-            Utils.ConsoleMsg(plugin.getPrefix() + plugin.getLocale(p).resetSeccess.replace("[mili]", "30"));
+            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).resetSeccess.replace("[mili]", "30"));
             //p.teleport(plugin.getServer().getDefaultLevel().getSafeSpawn());
         }
     }

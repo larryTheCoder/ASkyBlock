@@ -87,9 +87,9 @@ public class Utils {
         return config;
     }
 
-    public static boolean TooSoon(Player p, String what, int seconds) {
+    public static boolean canBypassTimer(Player p, String what, int seconds) {
         if (p.hasPermission("is.bypass.wait")) {
-            return false;
+            return true;
         }
         String key = String.valueOf(what) + "." + p.getName();
         Long msBefore = tooSoon.get(key);
@@ -98,15 +98,15 @@ public class Utils {
             Long msDelta = curMS - msBefore;
             Long msWaitTime = 1000 * (long) seconds;
             if (msDelta < msWaitTime) {
-                p.sendMessage(ASkyBlock.get().getPrefix() + TextFormat.RED + "[" + what + "] Too soon, you must wait: " + TextFormat.AQUA + Utils.TimeDeltaString_JustMinutesSecs(msWaitTime - msDelta));
-                return true;
+                //p.sendMessage(ASkyBlock.get().getPrefix() + TextFormat.RED + "[" + what + "] Too soon, you must wait: " + TextFormat.AQUA + Utils.TimeDeltaString_JustMinutesSecs(msWaitTime - msDelta));
+                return false;
             }
         }
         tooSoon.put(key, curMS);
-        return false;
+        return true;
     }
 
-    public static String getPlayerResetTime(Player p, String what, int seconds) {
+    public static String getPlayerRTime(Player p, String what, int seconds) {
         String key = String.valueOf(what) + "." + p.getName();
         Long msBefore = tooSoon.get(key);
         Long curMS = System.currentTimeMillis();

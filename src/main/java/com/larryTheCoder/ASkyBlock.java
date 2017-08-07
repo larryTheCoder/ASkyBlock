@@ -295,6 +295,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     @Override
     public void onEnable() {
         initConfig();
+        initDatabase(); // Load the database before others (Avoid crash during startup)
         getServer().getLogger().info(getPrefix() + "§aLoading source §eASkyBlock §av" + getPluginVersionString());
         getServer().getLogger().info(TextFormat.YELLOW + "------------------------------------------------------------");
         initIslands();
@@ -315,6 +316,26 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         Utils.ConsoleMsg(TextFormat.RED + "ASkyBlock ~ Disabled seccessfully");
     }
 
+    private void initDatabase() {
+        if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {
+            try {
+                db = new ASConnection(new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")), true);
+            } catch (SQLException ex) {
+                JDBCUtilities.printSQLException(ex);
+            } catch (ClassNotFoundException | InterruptedException ex) {
+                Utils.ConsoleMsg("Unable to create MySql database");
+            }
+        } else {
+            try {
+                db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
+            } catch (SQLException ex) {
+                JDBCUtilities.printSQLException(ex);
+            } catch (ClassNotFoundException | InterruptedException ex) {
+                Utils.ConsoleMsg("Unable to create MySql database");
+            }
+        }
+    }
+    
     /**
      * Load every islands Components
      */
@@ -352,23 +373,6 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         getServer().getCommandMap().register("ASkyBlock", new Commands(this));
         getServer().getCommandMap().register("ASkyBlock", this.cmds = new ChallangesCMD(this));
         getServer().getCommandMap().register("ASkyBlock", new AdminCMD(this));
-        if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {
-            try {
-                db = new ASConnection(new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")), true);
-            } catch (SQLException ex) {
-                JDBCUtilities.printSQLException(ex);
-            } catch (ClassNotFoundException | InterruptedException ex) {
-                Utils.ConsoleMsg("Unable to create MySql database");
-            }
-        } else {
-            try {
-                db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
-            } catch (SQLException ex) {
-                JDBCUtilities.printSQLException(ex);
-            } catch (ClassNotFoundException | InterruptedException ex) {
-                Utils.ConsoleMsg("Unable to create MySql database");
-            }
-        }
         generateLevel();
     }
 
