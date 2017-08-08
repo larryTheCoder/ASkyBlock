@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
 /**
@@ -53,19 +54,29 @@ public class TeleportLogic implements Listener {
         if (player.hasPermission("is.bypass.wait") || (teleportDelay == 0) || force) {
             player.teleport(targetLoc);
         } else {
-            player.sendMessage(plugin.getPrefix() +plugin.getLocale(player).teleportDelay.replace("{0}", "" + teleportDelay));
+            player.sendMessage(plugin.getPrefix() + plugin.getLocale(player).teleportDelay.replace("{0}", "" + teleportDelay));
             TaskHandler task = plugin.getServer().getScheduler().scheduleDelayedTask(() -> {
+                // Save player inventory
+                if (Settings.saveInventory) {
+                    plugin.getInventory().savePlayerInventory(player);
+                }
                 pendingTPs.remove(player.getUniqueId());
                 Location loc = targetLoc.clone();
                 if (loc != null && !loc.getLevel().isChunkLoaded((int) loc.getX() >> 4, (int) loc.getZ() >> 4)) {
                     loc.getLevel().loadChunk((int) loc.getX() >> 4, (int) loc.getZ() >> 4);
                 }
                 if (home == 1) {
-                    player.sendMessage(plugin.getPrefix() +TextFormat.GREEN + "Teleported to your island");
+                    player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Teleported to your island");
                 } else {
-                    player.sendMessage(plugin.getPrefix() +TextFormat.GREEN + "Teleported to your island #" + home);
+                    player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Teleported to your island #" + home);
                 }
                 player.teleport(targetLoc);
+                plugin.getIsland().showFancyTitle(player);
+                // Teleport in default gamemode
+                if (Settings.gamemode != -1) {
+                    // BETA Testing: Add this later
+                    //player.setGamemode(Settings.gamemode);
+                }
             }, (int) Utils.secondsAsMillis(teleportDelay));
             pendingTPs.put(player.getUniqueId(), new PendingTeleport(player.getLocation(), task));
         }
@@ -108,7 +119,7 @@ public class TeleportLogic implements Listener {
                 if (distance > cancelDistance) {
                     task.cancel();
                     pendingTPs.remove(player.getUniqueId());
-                    player.sendMessage(plugin.getPrefix() +plugin.getLocale(player).teleportCancelled);
+                    player.sendMessage(plugin.getPrefix() + plugin.getLocale(player).teleportCancelled);
                 }
             }
         }

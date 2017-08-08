@@ -73,42 +73,27 @@ public class IslandManager {
                 }
                 return;
             }
-            // Save player inventory
-            if (Settings.saveInventory) {
-                plugin.getInventory().savePlayerInventory(p);
-            }
             // teleport to grid
             plugin.getGrid().homeTeleport(p, homes);
-            showFancyTitle(p);
-            // Teleport in default gamemode
-            if (Settings.gamemode != -1) {
-                p.setGamemode(Settings.gamemode);
-            }
         } else {
             createIsland(p);
         }
-
     }
 
-    private void showFancyTitle(Player p) {
-        new NukkitRunnable() {
-            @Override
-            public void run() {
-                // Show fancy titles!
-                // Hmmm cant use JSON...
-                if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
-                    p.setSubtitle(TextFormat.BLUE + plugin.getLocale(p).islandSubTitle.replace("[player]", p.getName()));
-                }
-                if (!plugin.getLocale(p).islandTitle.isEmpty()) {
-                    p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", p.getName()));
-                }
-                if (!plugin.getLocale(p).islandDonate.isEmpty() && !plugin.getLocale(p).islandURL.isEmpty()) {
-                    p.sendMessage(plugin.getLocale(p).islandDonate.replace("[player]", p.getName()));
-                    p.sendMessage(plugin.getLocale(p).islandSupport);
-                    p.sendMessage(plugin.getLocale(p).islandURL);
-                }
-            }
-        }.runTaskLater(plugin, 60); // The level seems like to slow down
+    public void showFancyTitle(Player p) {
+        // Show fancy titles!
+        // Hmmm cant use JSON...
+        if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
+            p.setSubtitle(TextFormat.BLUE + plugin.getLocale(p).islandSubTitle.replace("[player]", p.getName()));
+        }
+        if (!plugin.getLocale(p).islandTitle.isEmpty()) {
+            p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", p.getName()));
+        }
+        if (!plugin.getLocale(p).islandDonate.isEmpty() && !plugin.getLocale(p).islandURL.isEmpty()) {
+            p.sendMessage(plugin.getLocale(p).islandDonate.replace("[player]", p.getName()));
+            p.sendMessage(plugin.getLocale(p).islandSupport);
+            p.sendMessage(plugin.getLocale(p).islandURL);
+        }
     }
 
     public void kickPlayerByName(final Player pOwner, final String victimName) {
@@ -299,12 +284,6 @@ public class IslandManager {
         }
         Level level = plugin.getServer().getLevelByName(pd.levelName);
 
-        // Determine if blocks need to be cleaned up or not
-        boolean cleanUpBlocks = false;
-        if (Settings.islandDistance - pd.getProtectionSize() < 16) {
-            cleanUpBlocks = true;
-        }
-
         int minX = pd.getMinProtectedX();
         int minZ = pd.getMinProtectedZ();
         int maxX = pd.getMinProtectedX() + pd.getProtectionSize();
@@ -314,10 +293,7 @@ public class IslandManager {
 
         // Find out what blocks are within the island protection range
         while (minX < maxX | minZ < maxZ) {
-            // Add to clear up list if requested
-            if (cleanUpBlocks) {
-                blocksToClear.add(new Pair(minX, minZ));
-            }
+            blocksToClear.add(new Pair(minX, minZ));
             // The blocks and protection size are same... or is they?
             if (minX < maxX) {
                 minX++;
