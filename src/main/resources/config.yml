@@ -50,7 +50,10 @@ island:
    # IF YOU ARE UPGRADING YOU MUST USE YOUR OLD VALUE EXACTLY, E.G., 110
    # OR RESET YOUR WORLD
    # Value must be an even number
-   islandSize: 200
+   # ---
+   # Warning: Make sure that island size are not MORE THAN 150 (Unless you got high speed CPU)
+   #          More island size = time to delete island blocks are higher
+   islandSize: 100
    # Level Information
    #  Stop the time in island world
    #  Recommended to not set this to 'true' because it will chage the game

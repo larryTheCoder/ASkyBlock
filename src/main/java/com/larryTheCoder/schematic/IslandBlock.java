@@ -460,10 +460,8 @@ public class IslandBlock {
                 .putInt("x", (int) loc.x)
                 .putInt("y", (int) loc.y)
                 .putInt("z", (int) loc.z);
-        BlockEntityChest e = (BlockEntityChest) BlockEntity.createBlockEntity(
-                BlockEntity.CHEST,
-                loc.level.getChunk((int) loc.x >> 4, (int) loc.z >> 4),
-                nbt);
+        BlockEntityChest e = new BlockEntityChest(loc.level.getChunk((int) loc.x >> 4, (int) loc.z >> 4), nbt);
+        loc.level.addBlockEntity(e);
         e.getInventory().setContents(chestContents);
         e.spawnToAll();
     }
@@ -486,6 +484,7 @@ public class IslandBlock {
                 BlockEntity.SIGN,
                 loc.getLevel().getChunk((int) loc.x >> 4, (int) loc.z >> 4),
                 nbt);
+        loc.level.addBlockEntity(sign);
         sign.spawnToAll();
     }
 

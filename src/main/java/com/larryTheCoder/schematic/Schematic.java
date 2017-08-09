@@ -19,7 +19,6 @@ package com.larryTheCoder.schematic;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.item.EntityPainting.Motive; // Art
 import static cn.nukkit.entity.item.EntityPainting.motives;
 import static cn.nukkit.math.BlockFace.*;
@@ -29,7 +28,6 @@ import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.math.BlockFace;
-import cn.nukkit.math.BlockVector3;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;

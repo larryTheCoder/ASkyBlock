@@ -35,6 +35,7 @@ import com.larryTheCoder.utils.Utils;
 
 import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.utils.Pair;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -289,28 +290,19 @@ public class IslandManager {
         int maxX = pd.getMinProtectedX() + pd.getProtectionSize();
         int maxZ = pd.getMinProtectedZ() + pd.getProtectionSize();
 
-        Set<Pair> blocksToClear = new HashSet<>();
+        List<Pair> blocksToClear = new ArrayList<>();
 
         // Find out what blocks are within the island protection range
-        while (minX < maxX | minZ < maxZ) {
-            blocksToClear.add(new Pair(minX, minZ));
-            // The blocks and protection size are same... or is they?
-            if (minX < maxX) {
-                minX++;
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                blocksToClear.add(new Pair(x, z));
             }
-            if (minZ < maxZ) {
-                minZ++;
-            }
-
         }
-
-        // Remove from database
-        ASkyBlock.get().getDatabase().deleteIsland(pd);
 
         // Clear up any blocks
         if (!blocksToClear.isEmpty()) {
-            Utils.ConsoleMsg("Island delete: There are " + blocksToClear.size() + " blocks that need to be cleared up.");
-            Utils.ConsoleMsg("Clean rate is " + Settings.cleanrate + " blocks per second. Should take ~" + Math.round(blocksToClear.size() / Settings.cleanrate) + "s");
+            Utils.ConsoleMsg("&aIsland delete: There are &e" + blocksToClear.size() + " &ablocks that need to be cleared up.");
+            Utils.ConsoleMsg("&aClean rate is &e" + Settings.cleanrate + " &ablocks per second. Should take ~" + Math.round(blocksToClear.size() / Settings.cleanrate) + "s");
             new NukkitRunnable() {
                 @Override
                 public void run() {
@@ -319,37 +311,35 @@ public class IslandManager {
                     while (it.hasNext() && count++ < Settings.cleanrate) {
                         Pair pair = it.next();
                         // Check if coords are in island space
-                        for (int x = 0; x < 16; x++) {
-                            for (int z = 0; z < 16; z++) {
-                                int xCoord = pair.getLeft() * 16 + x;
-                                int zCoord = pair.getRight() * 16 + z;
-                                if (pd.inIslandSpace(xCoord, zCoord)) {
-                                    //plugin.getLogger().info(xCoord + "," + zCoord + " is in island space - deleting column");
-                                    // Delete all the blocks here
-                                    for (int y = 0; y < 257; y++) {
-                                        // Overworld
-                                        Vector3 vec = new Vector3(xCoord, y, zCoord);
-                                        int setTo = Block.AIR;
-                                        // Split depending on below or above water line
-                                        if (y < Settings.seaLevel) {
-                                            setTo = Block.WATER;
-                                        }
-
-                                        Utils.ConsoleMsg("Set block: x: " + vec.x + " y: " + vec.y + " z: " + vec.z);
-                                        level.setBlock(vec, Block.get(setTo), true, true);
-                                    }
+                        int xCoord = pair.getLeft();
+                        int zCoord = pair.getRight();
+                        if (pd.inIslandSpace(xCoord, zCoord)) {
+                            //plugin.getLogger().info(xCoord + "," + zCoord + " is in island space - deleting column");
+                            // Delete all the blocks here
+                            for (int y = 0; y < 257; y++) {
+                                // Overworld
+                                Vector3 vec = new Vector3(xCoord, y, zCoord);
+                                int setTo = Block.AIR;
+                                // Split depending on below or above water line
+                                if (y < Settings.seaLevel) {
+                                    setTo = Block.WATER;
                                 }
+
+                                level.setBlock(vec, Block.get(setTo), true, true);
                             }
                         }
                         it.remove();
                     }
                     if (blocksToClear.isEmpty()) {
-                        plugin.getLogger().info("Finished island deletion");
+                        plugin.getLogger().info("&aFinished island deletion");
                         this.cancel();
                     }
                 }
             }.runTaskTimer(plugin, 0, 20);
         }
+
+        // Remove from database
+        ASkyBlock.get().getDatabase().deleteIsland(pd);
 
         // Todo: reset limits
         if (reset) {

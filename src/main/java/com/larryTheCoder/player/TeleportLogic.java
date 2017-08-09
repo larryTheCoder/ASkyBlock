@@ -70,7 +70,7 @@ public class TeleportLogic implements Listener {
                 } else {
                     player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Teleported to your island #" + home);
                 }
-                player.teleport(targetLoc);
+                player.teleport(targetLoc.add(0, 1)); // Adjust spawn hieght
                 plugin.getIsland().showFancyTitle(player);
                 // Teleport in default gamemode
                 if (Settings.gamemode != -1) {

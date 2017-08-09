@@ -43,8 +43,10 @@ public final class ASConnection {
     private final AbstractDatabase db;
     private final Connection con;
     private boolean closed = true;
+    private ArrayList<IslandData> islandCache = new ArrayList<>();
 
     public ASConnection(AbstractDatabase database, boolean debug) throws SQLException, ClassNotFoundException, InterruptedException {
+        // Performace upgrade: Cache
         this.db = database;
         this.con = database.openConnection();
         this.createTables(true);
@@ -136,12 +138,17 @@ public final class ASConnection {
     }
 
     public IslandData getIslandLocation(String levelName, int X, int Z) {
-        // create a variables
+        int id = ASkyBlock.get().getIsland().generateIslandKey(X, Z);
         IslandData database = new IslandData(levelName, X, Z, Settings.protectionrange);
+        // Get a list of island data on cache
+//        for (IslandData pd : islandCache) {
+//            if (pd.islandId == id && pd.levelName.equalsIgnoreCase(levelName)) {
+//                return pd;
+//            }
+//        }
         try (Statement stmt = con.createStatement()) {
             String l = levelName;
-            int z = ASkyBlock.get().getIsland().generateIslandKey(X, Z);
-            ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE(`world` = '" + l + "' AND `islandId` = '" + z + "')");
+            ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE(`world` = '" + l + "' AND `islandId` = '" + id + "')");
             if (set.isClosed()) {
                 return database;
             }
@@ -157,8 +164,13 @@ public final class ASConnection {
     }
 
     public ArrayList<IslandData> getIslands(String owner) {
-        // safe block
-        ArrayList<IslandData> pd = new ArrayList<>();
+        // safe block        
+        ArrayList<IslandData> pd = new ArrayList<>();       
+//        for (IslandData pd3 : islandCache) {
+//            if (pd3.owner.equalsIgnoreCase(owner)) {
+//                return pd;
+//            }
+//        }
         try (Statement stmt = con.createStatement()) {
             ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE `owner` = '" + owner + "'");
             if (set.isClosed()) {
@@ -423,20 +435,20 @@ public final class ASConnection {
         // TESTED SECCESS
         try (PreparedStatement stmt = con.prepareStatement(
                 "UPDATE `players` SET "
-                        + "`homes` = ?, "
-                        + "`resetleft` = ?, "
-                        + "`banlist` = ?, "
-                        + "`teamleader` = ?, "
-                        + "`teamislandlocation` = ?, "
-                        + "`inteam` = ?, "
-                        + "`islandlvl` = ?, "
-                        + "`members` = ?, "
-                        + "`challengelist` = ?, "
-                        + "`challengelisttimes` = ?, "
-                        + "`name` = ?, "
-                        + "`locale` = ?, "
-                        + "`defaultlevel` = ? "
-                        + "WHERE `player` = '" + pd.playerName + "'")) {
+                + "`homes` = ?, "
+                + "`resetleft` = ?, "
+                + "`banlist` = ?, "
+                + "`teamleader` = ?, "
+                + "`teamislandlocation` = ?, "
+                + "`inteam` = ?, "
+                + "`islandlvl` = ?, "
+                + "`members` = ?, "
+                + "`challengelist` = ?, "
+                + "`challengelisttimes` = ?, "
+                + "`name` = ?, "
+                + "`locale` = ?, "
+                + "`defaultlevel` = ? "
+                + "WHERE `player` = '" + pd.playerName + "'")) {
             stmt.setInt(1, pd.homes);
             stmt.setInt(2, pd.resetleft);
             stmt.setString(3, Utils.arrayToString(pd.banList));
