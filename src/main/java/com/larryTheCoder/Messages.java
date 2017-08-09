@@ -185,7 +185,7 @@ public class Messages {
         // Check if player is online
         if (player != null) {
             if (player.isOnline()) {
-                // player.sendMessage(message);
+                player.sendMessage(message);
                 return false;
             }
         }

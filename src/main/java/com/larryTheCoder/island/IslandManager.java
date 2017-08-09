@@ -47,6 +47,8 @@ import java.util.Set;
 public class IslandManager {
 
     private final ASkyBlock plugin;
+    // Block players who was attempt /is delete and deleting command doesn't fully cleared island location
+    private final ArrayList<Player> blockedCIsland = new ArrayList<>();
 
     public IslandManager(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -61,6 +63,10 @@ public class IslandManager {
     }
 
     public void handleIslandCommand(Player p, boolean reset, int homes) {
+        if (blockedCIsland.contains(p)) {
+            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorTooSoon.replace("[secs]", "1 minute").replace("[cmd]", "create"));
+            return;
+        }
         if (!reset) {
             boolean message = false;
             if (!checkIsland(p, homes)) {
@@ -74,6 +80,7 @@ public class IslandManager {
                 }
                 return;
             }
+            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).hangInThere);
             // teleport to grid
             plugin.getGrid().homeTeleport(p, homes);
         } else {
@@ -84,17 +91,23 @@ public class IslandManager {
     public void showFancyTitle(Player p) {
         // Show fancy titles!
         // Hmmm cant use JSON...
-        if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
-            p.setSubtitle(TextFormat.BLUE + plugin.getLocale(p).islandSubTitle.replace("[player]", p.getName()));
-        }
-        if (!plugin.getLocale(p).islandTitle.isEmpty()) {
-            p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", p.getName()));
-        }
-        if (!plugin.getLocale(p).islandDonate.isEmpty() && !plugin.getLocale(p).islandURL.isEmpty()) {
-            p.sendMessage(plugin.getLocale(p).islandDonate.replace("[player]", p.getName()));
-            p.sendMessage(plugin.getLocale(p).islandSupport);
-            p.sendMessage(plugin.getLocale(p).islandURL);
-        }
+        new NukkitRunnable(){
+            @Override
+            public void run(){
+                if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
+                    p.setSubtitle(TextFormat.BLUE + plugin.getLocale(p).islandSubTitle.replace("[player]", p.getName()));
+                }
+                if (!plugin.getLocale(p).islandTitle.isEmpty()) {
+                    p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", p.getName()));
+                }
+                if (!plugin.getLocale(p).islandDonate.isEmpty() && !plugin.getLocale(p).islandURL.isEmpty()) {
+                    p.sendMessage(plugin.getLocale(p).islandDonate.replace("[player]", p.getName()));
+                    p.sendMessage(plugin.getLocale(p).islandSupport);
+                    p.sendMessage(plugin.getLocale(p).islandURL);
+                }                
+            }
+        }.runTaskLater(plugin, 50);
+
     }
 
     public void kickPlayerByName(final Player pOwner, final String victimName) {
@@ -280,9 +293,10 @@ public class IslandManager {
             return;
         }
         if (!Utils.canBypassTimer(p, p.getName() + pd.islandId, 0)) {
-            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorTooSoon.replace("[secs]", Utils.getPlayerRTime(p, p.getName() + pd.islandId, 0)));
+            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorTooSoon.replace("[secs]", Utils.getPlayerRTime(p, p.getName() + pd.islandId, 0)).replace("[cmds]", "delete"));
             return;
         }
+        Server.getInstance().dispatchCommand(p, "is leave"); // Easy
         Level level = plugin.getServer().getLevelByName(pd.levelName);
 
         int minX = pd.getMinProtectedX();
@@ -303,6 +317,7 @@ public class IslandManager {
         if (!blocksToClear.isEmpty()) {
             Utils.ConsoleMsg("&aIsland delete: There are &e" + blocksToClear.size() + " &ablocks that need to be cleared up.");
             Utils.ConsoleMsg("&aClean rate is &e" + Settings.cleanrate + " &ablocks per second. Should take ~" + Math.round(blocksToClear.size() / Settings.cleanrate) + "s");
+            blockedCIsland.add(p);
             new NukkitRunnable() {
                 @Override
                 public void run() {
@@ -331,7 +346,8 @@ public class IslandManager {
                         it.remove();
                     }
                     if (blocksToClear.isEmpty()) {
-                        plugin.getLogger().info("&aFinished island deletion");
+                        Utils.ConsoleMsg("&aFinished island deletion");
+                        blockedCIsland.remove(p);
                         this.cancel();
                     }
                 }
@@ -347,7 +363,6 @@ public class IslandManager {
             handleIslandCommand(p, true, pd.id);
         } else {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).resetSeccess.replace("[mili]", "30"));
-            //p.teleport(plugin.getServer().getDefaultLevel().getSafeSpawn());
         }
     }
 
@@ -419,8 +434,13 @@ public class IslandManager {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorOfflinePlayer.replace("[player]", arg));
             return;
         }
-        Location home = plugin.getGrid().getSafeHomeLocation(pd.owner, 0);
-        p.teleport(home);
+        Location home = plugin.getGrid().getSafeHomeLocation(pd.owner, pd.id);
+        //if the home null
+        if (home == null) {
+            p.sendMessage(plugin.getPrefix() + TextFormat.RED + "Failed to find your island safe spawn");
+            return;
+        }
+        plugin.getTeleportLogic().safeTeleport(p, home, false, pd.id);
     }
 
     public boolean locationIsOnIsland(Player player, Vector3 loc) {

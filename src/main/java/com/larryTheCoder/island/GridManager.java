@@ -31,7 +31,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static cn.nukkit.math.BlockFace.*;
+import cn.nukkit.math.Vector3;
+import com.larryTheCoder.utils.Pair;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Adam Matthew
@@ -140,60 +144,80 @@ public class GridManager {
      * @return Location of a safe teleport spot or null if one cannot be found
      */
     public Location getSafeHomeLocation(String p, int number) {
-        IslandData pd = ASkyBlock.get().getDatabase().getIsland(p, number);
-        if (pd.isSpawn()) {
-            return pd.getLocation();
+        IslandData pd = plugin.getDatabase().getIsland(p, number);
+        if (pd == null) {
+            // Get the default home, which may be null too, but that's okay
+            number = 1;
+            pd = plugin.getDatabase().getIsland(p, number);
         }
-        Level world = Server.getInstance().getLevelByName(pd.levelName);
-        int px = pd.getCenter().getFloorX();
-        int pz = pd.getCenter().getFloorZ();
-        int py = pd.getCenter().getFloorY();
 
-        // Recommended SafeSpawn settings
-        for (int dy = 1; dy <= pd.getProtectionSize(); dy++) {
-            for (int dx = 1; dx <= pd.getProtectionSize(); dx++) {
-                for (int dz = 1; dz <= pd.getProtectionSize(); dz++) {
-                    int x = px + (dx % 2 == 0 ? dx / 2 : -dx / 2);
-                    int z = pz + (dz % 2 == 0 ? dz / 2 : -dz / 2);
-                    int y = py + (dy % 2 == 0 ? dy / 2 : -dy / 2);
-                    Location loc = new Location(x, y, z, world);
-                    if (isSafeLocation(loc)) {
-                        // look at the old location
-                        loc.yaw = 0;
-                        loc.pitch = 0;
+        if (pd != null) {
+            if (pd.isSpawn()) {
+                return pd.getLocation();
+            }
 
-                        pd.setHomeLocation(loc); // Set the home location
-                        return loc;
+            Location locationSafe;
+            if (pd.homeX != 0 && pd.homeY != 0 && pd.homeZ != 0) {
+                locationSafe = pd.getLocation();
+            } else {
+                locationSafe = new Location(0, 0, 0, 0, 0, plugin.getServer().getLevelByName(pd.levelName)).add(pd.getCenter());
+            }
+
+            // Check if it is safe
+            if (locationSafe != null) {
+                // Homes are stored as integers and need correcting to be more central
+                if (isSafeLocation(locationSafe)) {
+                    return locationSafe;
+                }
+                
+                // To cover slabs, stairs and other half blocks, try one block above
+                Location locPlusOne = locationSafe.clone();
+                locPlusOne.add(new Vector3(0, 1, 0));
+                if (isSafeLocation(locPlusOne)) {
+                    // Adjust the home location accordingly
+                    pd.setHomeLocation(locPlusOne);
+                    return locPlusOne;
+                }
+                
+                // Try to find all the way up
+                int y = 0;
+                while (y++ < 256) {
+                    Position locPlusY = locPlusOne.setComponents(locationSafe.getX(), y, locationSafe.getZ());
+                    if (isSafeLocation(locPlusY)) {
+                        // Adjust the home location accordingly
+                        pd.setHomeLocation(locPlusY);
+                        return locPlusY.getLocation();
+                    }
+                }
+                
+                // Try to find the island area (Default: 25 length Squared)
+                List<Pair> listBlocks = new ArrayList<>();
+                int minX = (int) pd.getCenter().getX() - 25;
+                int minZ = (int) pd.getCenter().getZ() - 25;
+                int maxX = (int) pd.getCenter().getX() + 25;
+                int maxZ = (int) pd.getCenter().getZ() + 25;
+                for(int dx = minX; dx <= maxX; dx++){
+                    for(int dz = minZ; dz <= maxZ; dz++){
+                        listBlocks.add(new Pair(dx, dz));
+                    }
+                }
+                
+                Iterator<Pair> iter = listBlocks.iterator();
+                while (iter.hasNext()) {
+                    Pair pair = iter.next();
+                    for (y = 0; y <= 257; y++) {
+                        Position pos = locPlusOne.setComponents(pair.getLeft(), y, pair.getRight());
+                        if (isSafeLocation(pos)) {
+                            // Adjust the home location accordingly
+                            pd.setHomeLocation(pos);
+                            return pos.getLocation();
+                        }
                     }
                 }
             }
         }
 
         // Unsuccessful
-        return null;
-    }
-
-    public Location adjacentNearbyVoid(Location loc) {
-        // Handle if the player nearby void... (Death)
-        Block block1 = loc.getLevelBlock();
-        // Type Positive
-        Block block2 = loc.getLevelBlock().east(1);
-        if (block1.getId() != 0 && block2.getId() != 0) {
-            return loc;
-        }
-        block2 = loc.getLevelBlock().west(1);
-        if (block1.getId() != 0 && block2.getId() != 0) {
-            return loc;
-        }
-        // Type Negative
-        block2 = loc.getLevelBlock().east(-1);
-        if (block1.getId() != 0 && block2.getId() != 0) {
-            return loc;
-        }
-        block2 = loc.getLevelBlock().west(-1);
-        if (block1.getId() != 0 && block2.getId() != 0) {
-            return loc;
-        }
         return null;
     }
 
@@ -217,11 +241,10 @@ public class GridManager {
      * @return true if successful, false if not
      */
     public boolean homeTeleport(Player player, int number) {
-        Location home;
-        home = getSafeHomeLocation(player.getName(), number);
+        Location home = getSafeHomeLocation(player.getName(), number);
         //if the home null
         if (home == null) {
-            player.sendMessage(plugin.getPrefix() + TextFormat.RED + "Your island could not be found! Error?");
+            player.sendMessage(plugin.getPrefix() + TextFormat.RED + "Failed to find your island safe spawn");
             return false;
         }
         plugin.getTeleportLogic().safeTeleport(player, home, false, number);

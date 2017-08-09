@@ -74,7 +74,7 @@ public class EditSubCommand extends SubCommand {
             case "?":
             case "help":
                 sender.sendMessage("§d--- §aToggle SubCommand §d---");
-                sender.sendMessage("§5- §a/is edit tp §7<boolean>§e: §eEnable teleport to your island");
+                sender.sendMessage("§5- §a/is edit tp §7<true|false>§e: §eEnable teleport to your island");
                 sender.sendMessage("§5- §a/is edit name §7<string>§e: §eRename your island");
                 break;
             case "tp":

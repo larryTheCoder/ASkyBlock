@@ -81,6 +81,7 @@ public class SetSpawnSubCommand extends SubCommand {
         // Save this island
         IslandData pd = getPlugin().getIslandInfo(p.getLocation());
         pd.setSpawn(true);
+        pd.setHomeLocation(p);
         getPlugin().getDatabase().saveIsland(pd);
         sender.sendMessage(TextFormat.GREEN + getLocale(p).generalSuccess);
         return true;

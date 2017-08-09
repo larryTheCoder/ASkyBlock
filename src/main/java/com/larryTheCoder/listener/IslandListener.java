@@ -30,12 +30,12 @@ import cn.nukkit.event.player.PlayerItemHeldEvent;
 import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
-//import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+import java.util.List;
 
 /**
  * Basic island listener
@@ -146,10 +146,17 @@ public class IslandListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerJoin(PlayerJoinEvent ex) {
         // load player inventory if exsits
-        plugin.getInventory().loadPlayerInventory(ex.getPlayer());
-        if (plugin.getPlayerInfo(ex.getPlayer()) == null) {
-            Utils.ConsoleMsg(ex.getPlayer().getName() + " &adata doesn`t exsits. Creating new ones");
-            plugin.getDatabase().createPlayer(ex.getPlayer().getName());
+        Player p = ex.getPlayer();
+        plugin.getInventory().loadPlayerInventory(p);
+        // Load player datatatatata tadaaaa
+        if (plugin.getPlayerInfo(p) == null) {
+            Utils.ConsoleMsg(p.getName() + " &adata doesn`t exsits. Creating new ones");
+            plugin.getDatabase().createPlayer(p.getName());
+        }
+        // Load messages
+        List<String> news = plugin.getMessages().getMessages(p.getName());
+        if(!news.isEmpty()){
+            p.sendMessage(plugin.getLocale(p).newNews.replace("[count]", Integer.toString(news.size())));
         }
     }
 }

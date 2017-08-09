@@ -14,29 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.larryTheCoder.command.chat;
+
+package com.larryTheCoder.command.island;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
-import java.util.List;
+import com.larryTheCoder.storage.IslandData;
 
 /**
- * The default command of messages
- * 
- * @author Adam Matthew
+ * Author: Adam Matthew
+ * <p>
+ * SetHomeSubCommand class
  */
-public class MessageSubCommand extends SubCommand {
+public class SetHomeSubCommand extends SubCommand {
 
-    public MessageSubCommand(ASkyBlock plugin) {
+    public SetHomeSubCommand(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.command.message") && sender.isPlayer();
+        return sender.isPlayer() && sender.hasPermission("is.command.home");
     }
 
     @Override
@@ -46,32 +47,29 @@ public class MessageSubCommand extends SubCommand {
 
     @Override
     public String getName() {
-        return "messages";
+        return "sethome";
     }
 
     @Override
     public String getDescription() {
-        return "Get new messages while you offline";
+        return "Set your island home spawn position";
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{"msg"};
+        return new String[]{"shome"};
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = Server.getInstance().getPlayer(sender.getName());
-        List<String> list = getPlugin().getMessages().getMessages(p.getName());
-        if (!list.isEmpty()) {
-            p.sendMessage(getPlugin().getLocale(p).newsHeadline);
-            list.forEach((alist) -> {
-                p.sendMessage("- §e" + alist);
-                
-            });
-            getPlugin().getMessages().clearMessages(p.getName());
+        IslandData pd = getPlugin().getIslandInfo(p.getLocation());
+        // Check if the player on their own island or not
+        if(pd != null && pd.owner.equalsIgnoreCase(sender.getName())){
+            pd.setHomeLocation(p.getLocation());
+            p.sendMessage(getLocale(p).setHomeSucess);
         } else {
-            p.sendMessage(getPrefix() + getPlugin().getLocale(p).newsEmpty);
+            p.sendMessage(getLocale(p).errorNotOnIsland);
         }
         return true;
     }

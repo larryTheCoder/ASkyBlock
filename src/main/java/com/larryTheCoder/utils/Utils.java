@@ -61,7 +61,7 @@ public class Utils {
         if (yamlFile.exists()) {
             try {
                 config = new Config();
-                config.load(file);
+                config.load(ASkyBlock.get().getDataFolder() + file, Config.YAML);
             } catch (Exception e) {
                 if (ASkyBlock.get().isDebug()) {
                     e.printStackTrace();
@@ -76,7 +76,7 @@ public class Utils {
                     ConsoleMsg("&cUsing default found in jar file.");
                     ASkyBlock.get().saveResource(file, false);
                     config = new Config();
-                    config.load(file);
+                    config.load(ASkyBlock.get().getDataFolder() + file, Config.YAML);
                 } else {
                     config.save(yamlFile);
                 }

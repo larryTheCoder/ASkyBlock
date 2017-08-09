@@ -108,7 +108,8 @@ public final class ASlocales {
     public String createSeccess = "§aSuccesfully created you an island!";
     public String resetSeccess = "§aSuccesfully cleared your island!";
     public String renameSeccess = "§aSuccesfully renamed island!";
-    public String setworldSeccess = "§aSuccesfully changed island location!";
+    public String setworldSeccess = "§aSuccesfully changed island world location!";
+    public String setHomeSucess = "§aSuccesfully changed island home location!";
     public String generalSuccess = "§aSucces!";
     public String helpMessage = "§aNeed help? Use: /[com] help.";
     // Teleport messages
@@ -117,7 +118,7 @@ public final class ASlocales {
     // Admin commands message
     public String adminOverride = "§aYou override this command";
     public String adminDeleteIslandError = "§cUse §ldeleteisland confirm §r§cto delete the island you are on.";
-    public String adminDeleteIslandnoid  = "§cCannot identify island.";
+    public String adminDeleteIslandnoid = "§cCannot identify island.";
     public String adminDeleteIslandUse = "§rUse §ldelete [name] §r§cto delete the player instead.";
     public String adminSetSpawnOwnedBy = "§cThis island space is owned by [name]";
     // Team messages
@@ -125,12 +126,14 @@ public final class ASlocales {
     public String teamChatStatusOn = "§aTeam chat is on";
     public String teamChatNoTeamAround = "§cNone of your team are online!";
     // Others
+    public String hangInThere = "§aHang in there. Finding your best safe teleport position...";
     public String deleteRemoving = "§cRemoving [name]'s island.";
     public String kickedFromOwner = "§eYou were kicked from island owned by [name].";
     public String kickedFromAdmin = "§eYou were kicked by Admin on duty.";
     public String kickedFromTeam = "§eYou were kicked from [name]'s team";
-    public String newsHeadline = "§aWhile you were offline:";
+    public String newsHeadline = "§aWhile you were §eOffline§a:";
     public String newsEmpty = "§aThere no messages for you today. Check back later!";
+    public String newNews = "§eWelcome back! There's [count] news today! Use /is messages to see all messages";
     // Titles
     public String islandSubTitle = "code by larryTheCoder";
     public String islandDonate = "§aSource code made by §e@larryTheCoder";
@@ -140,11 +143,9 @@ public final class ASlocales {
     public String islandDonateColor = "aqua";
     public String islandTitleColor = "gold";
     public String islandTitle = "[player]'s island";
-    
-    
+
     private String localeName;
     private int index;
-    
 
     /**
      * Creates a locale object full of localized strings for a language
