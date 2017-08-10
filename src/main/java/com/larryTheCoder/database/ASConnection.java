@@ -87,8 +87,8 @@ public final class ASConnection {
                         + "`world` VARCHAR NOT NULL,"
                         + "`protection` VARCHAR NOT NULL,"
                         + "`biome` VARCHAR NOT NULL,"
-                        + "`locked` INTEGER NOT NULL, "
-                        + "`active` INTEGER NOT NULL)");
+                        + "`locked` INTEGER NOT NULL");
+                        //+ "`active` INTEGER NOT NULL)");
                 set.addBatch("CREATE TABLE IF NOT EXISTS `worlds` (`world` VARCHAR)");
                 set.addBatch("CREATE TABLE IF NOT EXISTS `players` (`player` VARCHAR NOT NULL,"
                         + "`homes` INTEGER NOT NULL,"
