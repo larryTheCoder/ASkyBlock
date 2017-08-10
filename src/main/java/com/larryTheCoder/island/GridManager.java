@@ -205,7 +205,7 @@ public class GridManager {
                 Iterator<Pair> iter = listBlocks.iterator();
                 while (iter.hasNext()) {
                     Pair pair = iter.next();
-                    for (y = 0; y <= 257; y++) {
+                    for (y = 0; y <= 255; y++) {
                         Position pos = locPlusOne.setComponents(pair.getLeft(), y, pair.getRight());
                         if (isSafeLocation(pos)) {
                             // Adjust the home location accordingly

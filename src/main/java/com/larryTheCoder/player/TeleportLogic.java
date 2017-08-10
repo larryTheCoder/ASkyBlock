@@ -55,7 +55,7 @@ public class TeleportLogic implements Listener {
             player.teleport(targetLoc);
         } else {
             player.sendMessage(plugin.getPrefix() + plugin.getLocale(player).teleportDelay.replace("{0}", "" + teleportDelay));
-            TaskHandler task = plugin.getServer().getScheduler().scheduleDelayedTask(() -> {
+            TaskHandler task = plugin.getServer().getScheduler().scheduleDelayedTask(plugin, () -> {
                 // Save player inventory
                 if (Settings.saveInventory) {
                     plugin.getInventory().savePlayerInventory(player);

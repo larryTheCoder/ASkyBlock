@@ -42,12 +42,15 @@ public class ChatHandler implements Listener {
     public ChatHandler(ASkyBlock plugin) {
         this.plugin = plugin;
         this.playerLevels = new ConcurrentHashMap<>();
+        this.teamChatUsers = new ConcurrentHashMap<>();
         this.playerChallengeLevels = new ConcurrentHashMap<>();
         // Add all online player Levels
-        for (Player player : plugin.getServer().getOnlinePlayers().values()) {
+        plugin.getServer().getOnlinePlayers().values().stream().map((player) -> {
             playerLevels.put(player, String.valueOf(plugin.getIslandLevel(player)));
+            return player;
+        }).forEachOrdered((player) -> {
             playerChallengeLevels.put(player.getUniqueId(), plugin.getChallenges().getChallengeLevel(player));
-        }
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

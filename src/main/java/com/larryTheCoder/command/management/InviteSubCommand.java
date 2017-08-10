@@ -81,7 +81,7 @@ public class InviteSubCommand extends SubCommand {
             sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
             return false;
         }
-        getPlugin().getInvitationHandler().addInvitation(p, invite, pd);
+        getPlugin().getInvitationHandler().addInvitation(p, invite);
         return true;
     }
 

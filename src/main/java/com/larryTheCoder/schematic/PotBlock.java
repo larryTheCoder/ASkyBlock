@@ -65,7 +65,6 @@ public class PotBlock {
         
         BlockEntityFlowerPot potBlock = new BlockEntityFlowerPot(pos.level.getChunk((int) pos.x >> 4, (int) pos.z >> 4), nbt);
         pos.level.addBlockEntity(potBlock);
-        potBlock.spawnToAll();
         return true;
     }
 

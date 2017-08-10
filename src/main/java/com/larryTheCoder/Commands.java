@@ -65,9 +65,9 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.loadSubCommand(new InviteSubCommand(getPlugin()));
         this.loadSubCommand(new LeaveSubCommand(getPlugin()));
         this.loadSubCommand(new MessageSubCommand(getPlugin()));
+        this.loadSubCommand(new SetHomeSubCommand(getPlugin()));
         this.loadSubCommand(new SetSpawnSubCommand(getPlugin()));
         this.loadSubCommand(new TeleportSubCommand(getPlugin()));
-        
     }
 
     private void loadSubCommand(SubCommand cmd) {

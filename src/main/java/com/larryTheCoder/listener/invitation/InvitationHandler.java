@@ -75,8 +75,10 @@ public class InvitationHandler {
      * @param receiver
      * @param island
      */
-    public void addInvitation(Player sender, Player receiver, PlayerData island) {
-        invitation.put(sender, new Invitation(this, sender, receiver, island));
+    public void addInvitation(Player sender, Player receiver) {
+        sender.sendMessage(plugin.getPrefix() + plugin.getLocale(sender).generalSuccess);
+        receiver.sendMessage(plugin.getPrefix() + plugin.getLocale(receiver).newInvintation.replace("[player]", sender.getName()));
+        invitation.put(sender, new Invitation(this, sender, receiver));
     }
 
     public void tick() {

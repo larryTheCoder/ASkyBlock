@@ -94,14 +94,15 @@ public class IslandManager {
         new NukkitRunnable(){
             @Override
             public void run(){
+                IslandData ownership = plugin.getIslandInfo(p.getLocation());
                 if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
                     p.setSubtitle(TextFormat.BLUE + plugin.getLocale(p).islandSubTitle.replace("[player]", p.getName()));
                 }
                 if (!plugin.getLocale(p).islandTitle.isEmpty()) {
-                    p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", p.getName()));
+                    p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", ownership.owner));
                 }
                 if (!plugin.getLocale(p).islandDonate.isEmpty() && !plugin.getLocale(p).islandURL.isEmpty()) {
-                    p.sendMessage(plugin.getLocale(p).islandDonate.replace("[player]", p.getName()));
+                    //p.sendMessage(plugin.getLocale(p).islandDonate.replace("[player]", p.getName()));
                     p.sendMessage(plugin.getLocale(p).islandSupport);
                     p.sendMessage(plugin.getLocale(p).islandURL);
                 }                
@@ -267,7 +268,7 @@ public class IslandManager {
 
         int iKey = generateIslandKey(loc);
         IslandData pd = plugin.getDatabase().getIslandLocation(loc.getLevel().getName(), x, z);
-        List<IslandData> number = plugin.getDatabase().getIslands(p.getName());
+        List<IslandData> number = plugin.getDatabase().getIslands(p.getName(), loc.level.getName());
         pd.id = number.size() + 1;
         pd.biome = Settings.defaultBiome.getName();
         pd.name = home;
@@ -331,7 +332,7 @@ public class IslandManager {
                         if (pd.inIslandSpace(xCoord, zCoord)) {
                             //plugin.getLogger().info(xCoord + "," + zCoord + " is in island space - deleting column");
                             // Delete all the blocks here
-                            for (int y = 0; y < 257; y++) {
+                            for (int y = 0; y < 255; y++) {
                                 // Overworld
                                 Vector3 vec = new Vector3(xCoord, y, zCoord);
                                 int setTo = Block.AIR;

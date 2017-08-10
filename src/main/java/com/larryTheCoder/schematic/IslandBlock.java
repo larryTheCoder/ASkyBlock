@@ -463,7 +463,6 @@ public class IslandBlock {
         BlockEntityChest e = new BlockEntityChest(loc.level.getChunk((int) loc.x >> 4, (int) loc.z >> 4), nbt);
         loc.level.addBlockEntity(e);
         e.getInventory().setContents(chestContents);
-        e.spawnToAll();
     }
 
     private void schedulePotPlacement(Location loc) {
@@ -471,6 +470,7 @@ public class IslandBlock {
     }
 
     private void scheduleTextPlacement(Location loc) {
+        Utils.ConsoleMsg("Sorting CHEST: " + loc.x + " " + loc.y + " " + loc.z);
         cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
                 .putString("id", BlockEntity.SIGN)
                 .putInt("x", (int) loc.x)
@@ -485,7 +485,6 @@ public class IslandBlock {
                 loc.getLevel().getChunk((int) loc.x >> 4, (int) loc.z >> 4),
                 nbt);
         loc.level.addBlockEntity(sign);
-        sign.spawnToAll();
     }
 
 }

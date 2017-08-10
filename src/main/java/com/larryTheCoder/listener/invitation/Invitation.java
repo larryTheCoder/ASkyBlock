@@ -18,6 +18,7 @@ package com.larryTheCoder.listener.invitation;
 
 import cn.nukkit.Player;
 import cn.nukkit.utils.TextFormat;
+import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.utils.Settings;
 
@@ -27,12 +28,9 @@ import com.larryTheCoder.utils.Settings;
 public class Invitation {
 
     private final InvitationHandler handler;
-
     private final Player sender;
-
     private final Player receiver;
-
-    private final PlayerData island;
+    private final ASkyBlock plugin;
 
     private final int time;
 
@@ -42,14 +40,13 @@ public class Invitation {
      * @param member InvitationHandler
      * @param sender Player
      * @param receiver Player
-     * @param island Island
      */
-    public Invitation(InvitationHandler member, Player sender, Player receiver, PlayerData island) {
+    public Invitation(InvitationHandler member, Player sender, Player receiver) {
         this.handler = member;
         this.sender = sender;
         this.receiver = receiver;
-        this.island = island;
         this.time = Settings.memberTimeOut;
+        this.plugin = handler.getPlugin();
     }
 
     /**
@@ -71,16 +68,18 @@ public class Invitation {
     }
 
     public void accept() {
-        handler.getPlugin().getTManager().addTeam(sender, receiver);
+        sender.sendMessage(plugin.getPrefix() + plugin.getLocale(sender).acceptedTo.replace("[player]", receiver.getName()));
+        receiver.sendMessage(plugin.getPrefix() + plugin.getLocale(receiver).acceptedFrom.replace("[player]", sender.getName()));
+        plugin.getTManager().addTeam(sender, receiver);
     }
 
     public void deny() {
-        sender.sendMessage(this.handler.getPlugin().getPrefix() + TextFormat.YELLOW + this.receiver.getName() + " denied your invitation!");
-        receiver.sendMessage(this.handler.getPlugin().getPrefix() + TextFormat.YELLOW + "You denied " + this.sender.getName() + "'s invitation!");
+        sender.sendMessage(plugin.getPrefix() + TextFormat.YELLOW + receiver.getName() + " denied your invitation!");
+        receiver.sendMessage(plugin.getPrefix() + TextFormat.YELLOW + "You denied " + sender.getName() + "'s invitation!");
     }
 
     public void expire() {
-        sender.sendMessage(this.handler.getPlugin().getPrefix() + TextFormat.YELLOW + "The invitation to " + sender.getName() + " expired!");
+        sender.sendMessage(plugin.getPrefix() + TextFormat.YELLOW + "The invitation to " + sender.getName() + " expired!");
         handler.removeInvitation(this);
     }
 

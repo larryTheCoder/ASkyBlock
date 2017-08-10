@@ -69,12 +69,12 @@ public class HomeSubCommand extends SubCommand {
             return false;
         }
         Player p = sender.getServer().getPlayer(sender.getName());
-        List<IslandData> island = getPlugin().getDatabase().getIslands(sender.getName());
+        List<IslandData> island = getPlugin().getDatabase().getIslands(sender.getName(), getPlugin().getDefaultWorld(p));
         if (island == null) {
             sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
         }
-        if (island.size() != islandNumber) {
+        if (island.size() >= islandNumber) {
             sender.sendMessage(getPrefix() + getLocale(p).errorNoIslandExsits + islandNumber);
             return true;
         }

@@ -84,7 +84,7 @@ public class CreateISubCommand extends SubCommand {
                 }
                 break;
         }
-        List<IslandData> maxPlotsOfPlayers = getPlugin().getDatabase().getIslands(sender.getName());
+        List<IslandData> maxPlotsOfPlayers = getPlugin().getDatabase().getIslands(sender.getName(), getPlugin().getDefaultWorld(p));
         if (Settings.maxHome >= 0 && maxPlotsOfPlayers.size() >= Settings.maxHome) {
             sender.sendMessage(getPrefix() +getLocale(p).errorMaxIsland.replace("[maxplot]", "" + Settings.maxHome));
             return true;

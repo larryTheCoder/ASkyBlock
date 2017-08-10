@@ -300,6 +300,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         getServer().getLogger().info(TextFormat.YELLOW + "------------------------------------------------------------");
         initIslands();
         registerObject();
+        test();
         getServer().getLogger().info(TextFormat.YELLOW + "------------------------------------------------------------");
         getServer().getLogger().notice(TextFormat.colorize('&', "&eYou are using BETA-Builds of ASkyBlock!"));
         getServer().getLogger().notice(TextFormat.colorize('&', "&eWarning! You might experience some crash and errors while using this plugin"));
@@ -765,92 +766,8 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         return availableLocales;
     }
 
-    /**
-     * Debug tools
-     *
-     * Where I test database and commands
-     */
     private void test() {
-        // getIsland() == seccess
-        // deleteIsland() == seccess
-        // createIsland() == seccess
-        // getIslandLocation() == seccess
-        // getIslands() == seccess
-        // saveIsland() == seccess
-        // getSpawn() == seccess
-        // setSpawnPosition() == seccess
-        // Island Data debug
-        ASConnection con = getDatabase();
-        String p = "PFrankDebug";
-        IslandData pd = new IslandData(p, 50, 50, Settings.protectionrange);
-        Utils.ConsoleMsg("&aAttempting to test Connection on Islands [Target]: " + p);
-        int index = 1;
-        // delete island
-        if (con.getIsland(p, 1) != null) {
-            Utils.ConsoleMsg("Case " + index + " [Island Delete]:");
-            index++;
-            pd = con.getIsland(p, 1);
-            boolean result = con.deleteIsland(pd);
-            Utils.ConsoleMsg("&aDeleted: " + result);
-        }
-        // create island
-        if (con.getIsland(p, 1) == null) {
-            Utils.ConsoleMsg("Case " + index + " [Island Create]:");
-            pd.id = 1;
-            pd.biome = Settings.defaultBiome.getName();
-            pd.name = "WALK my PRANK!";
-            pd.islandId = getIsland().generateIslandKey(50, 50);
-            pd.owner = p;
-            pd.setCenter(50, 50, 50);
-            pd.levelName = "SkyBlock";
-            pd.locked = false;
-            boolean result = con.createIsland(pd);
-            index++;
-            Utils.ConsoleMsg("&aCreated: " + result);
-            // Find island getIslandLocation()
-            Utils.ConsoleMsg("Case " + index + " [Island cords XYZ]:");
-            pd = con.getIslandLocation("SkyBlock", 50, 50);
-            if (pd.biome.isEmpty()) {
-                Utils.ConsoleMsg("&cFailed to find island");
-            } else {
-                Utils.ConsoleMsg("&aSeccessfully find my island!");
-            }
-            index++;
-            Utils.ConsoleMsg("Case " + index + " [Island Find Array]:");
-            ArrayList<IslandData> pd2 = con.getIslands(p);
-            Utils.ConsoleMsg("&aSize of ArrayList: " + pd2.size());
-            boolean isOwnerIsland = false;
-            for (IslandData pda : pd2) {
-                if (pda.owner.equalsIgnoreCase(p)) {
-                    isOwnerIsland = true;
-                    break;
-                }
-            }
-            index++;
-            Utils.ConsoleMsg("&aIsland Ownership?: " + isOwnerIsland);
-            pd = con.getIsland(p, 1);
-            // Test on spawns
-            Utils.ConsoleMsg("Case " + index + " [Island Save]:");
-            pd.setSpawn(true);
-            result = con.saveIsland(pd);
-            index++;
-            Utils.ConsoleMsg("&aSeccess save island: " + result);
-            Utils.ConsoleMsg("Case " + index + " [Island Spawn]:");
-            pd = con.getSpawn();
-            if (pd == null) {
-                Utils.ConsoleMsg("&cFailed to detect island spawn!");
-            } else {
-                Utils.ConsoleMsg("&aSeccess! Found island spawn!");
-            }
-            index++;
-            Utils.ConsoleMsg("Case " + index + " [Island setSpawn]:");
-            Position pos = new Position(50, 50, 50, getServer().getLevelByName("SkyBlock"));
-            if (con.setSpawnPosition(pos)) {
-                Utils.ConsoleMsg("&aSeccess setSpawn on island spawn");
-            } else {
-                Utils.ConsoleMsg("&cFailed setSpawn on island spawn");
-            }
-        }
+        //getSchematic("default").pasteSchematic(new Location(50, 90, 50, getServer().getLevelByName("SkyBlock")));
     }
 
 }

@@ -93,7 +93,7 @@ public final class ASlocales {
     public String errorUseInGame = "§cThis command must be used in-game.";
     public String errorWrongWorld = "§cYou cannot do that in this world.";
     public String errorUnknownWorld = "§cUnknown world. Possible worlds are:";
-    public String errorMaxIsland = "§cYou reached the limit of [maxplot] Island per player";
+    public String errorMaxIsland = "§cYou reached the limit of [maxplot] Island per world";
     public String errorNotPending = "§cNo invintation pending! Try again later";
     public String errorInTeam = "§cThe player [player] are already in team!";
     public String errorBlockedByAPI = "§cA plugin using the API blocked this action.";
@@ -134,8 +134,11 @@ public final class ASlocales {
     public String newsHeadline = "§aWhile you were §eOffline§a:";
     public String newsEmpty = "§aThere no messages for you today. Check back later!";
     public String newNews = "§eWelcome back! There's [count] news today! Use /is messages to see all messages";
+    public String newInvintation = "§aNew invintation from [player]'s island";
+    public String acceptedFrom = "§eYou accepted [player]'s invintation.";
+    public String acceptedTo = "§e[player] has accepted your invintation!";
     // Titles
-    public String islandSubTitle = "code by larryTheCoder";
+    public String islandSubTitle = "Welcome back players!";
     public String islandDonate = "§aSource code made by §e@larryTheCoder";
     public String islandURL = "§aLink: http://github.com/larryTheCoder/ASkyBlock-Nukkit";
     public String islandSupport = "§aLove it? Give us a star on GitHub!";
@@ -143,7 +146,8 @@ public final class ASlocales {
     public String islandDonateColor = "aqua";
     public String islandTitleColor = "gold";
     public String islandTitle = "[player]'s island";
-
+    // Guard island
+    public String islandProtected = "§cThat island is protected";
     private String localeName;
     private int index;
 
