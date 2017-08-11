@@ -37,7 +37,7 @@ import com.larryTheCoder.utils.Utils;
 public class TeleportLogic implements Listener {
 
     private final ASkyBlock plugin;
-    private final int teleportDelay;
+    public static int teleportDelay;
     private final Map<UUID, PendingTeleport> pendingTPs = new ConcurrentHashMap<>();
     private final double cancelDistance;
 

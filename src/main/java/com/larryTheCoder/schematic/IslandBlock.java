@@ -23,6 +23,7 @@ import cn.nukkit.blockentity.BlockEntitySign;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.utils.TextFormat;
 import com.intellectiualcrafters.TaskManager;
 
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.utils.Utils;
 import static com.larryTheCoder.utils.Utils.*;
 
@@ -430,11 +432,9 @@ public class IslandBlock {
     public void paste(Location blockLoc, boolean usePhysics) {
         Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
         loadChunkAt(loc);
-        // Only paste air if it is below the sea level and in the overworld
-        // found the problem why blocks didnt shows up
-        // prevent the block to show up
         blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, usePhysics);
 
+        // BlockEntities
         if (signText != null) {
             scheduleTextPlacement(loc);
         } else if (pot != null) {
@@ -442,6 +442,7 @@ public class IslandBlock {
         } else if (Block.get(typeId, data).getId() == Block.CHEST) {
             scheduleChestPlacement(loc);
         }
+
     }
 
     /**
@@ -452,39 +453,54 @@ public class IslandBlock {
     }
 
     // --- Task Scheduling --- // 
-    
     private void scheduleChestPlacement(Location loc) {
-        cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
-                .putString("id", BlockEntity.CHEST)
-                .putInt("x", (int) loc.x)
-                .putInt("y", (int) loc.y)
-                .putInt("z", (int) loc.z);
-        BlockEntityChest e = new BlockEntityChest(loc.level.getChunk((int) loc.x >> 4, (int) loc.z >> 4), nbt);
-        loc.level.addBlockEntity(e);
-        e.getInventory().setContents(chestContents);
+        new NukkitRunnable() {
+            @Override
+            public void run() {
+                cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                        .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
+                        .putString("id", BlockEntity.CHEST)
+                        .putInt("x", (int) loc.x)
+                        .putInt("y", (int) loc.y)
+                        .putInt("z", (int) loc.z);
+                BlockEntityChest e = new BlockEntityChest(loc.level.getChunk((int) loc.x >> 4, (int) loc.z >> 4), nbt);
+                e.spawnToAll();
+                loc.level.addBlockEntity(e);
+                e.getInventory().setContents(chestContents);
+            }
+        }.runTaskLater(ASkyBlock.get(), (int) Utils.secondsAsMillis(TeleportLogic.teleportDelay + 5)); // Wait for 5 sec and then spawn them
     }
 
     private void schedulePotPlacement(Location loc) {
-        pot.set(loc);
+        new NukkitRunnable() {
+            @Override
+            public void run() {
+                pot.set(loc);
+            }
+        }.runTaskLater(ASkyBlock.get(), (int) Utils.secondsAsMillis(TeleportLogic.teleportDelay + 5)); // Wait for 5 sec and then spawn them
+
     }
 
     private void scheduleTextPlacement(Location loc) {
-        Utils.ConsoleMsg("Sorting CHEST: " + loc.x + " " + loc.y + " " + loc.z);
-        cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                .putString("id", BlockEntity.SIGN)
-                .putInt("x", (int) loc.x)
-                .putInt("y", (int) loc.y)
-                .putInt("z", (int) loc.z)
-                .putString("Text1", signText.get(0))
-                .putString("Text2", signText.get(1))
-                .putString("Text3", signText.get(2))
-                .putString("Text4", signText.get(3));
-        BlockEntitySign sign = (BlockEntitySign) BlockEntity.createBlockEntity(
-                BlockEntity.SIGN,
-                loc.getLevel().getChunk((int) loc.x >> 4, (int) loc.z >> 4),
-                nbt);
-        loc.level.addBlockEntity(sign);
+        new NukkitRunnable() {
+            @Override
+            public void run() {
+                cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                        .putString("id", BlockEntity.SIGN)
+                        .putInt("x", (int) loc.x)
+                        .putInt("y", (int) loc.y)
+                        .putInt("z", (int) loc.z)
+                        .putString("Text1", signText.get(0))
+                        .putString("Text2", signText.get(1))
+                        .putString("Text3", signText.get(2))
+                        .putString("Text4", signText.get(3));
+                BlockEntitySign sign = (BlockEntitySign) BlockEntity.createBlockEntity(
+                        BlockEntity.SIGN,
+                        loc.getLevel().getChunk((int) loc.x >> 4, (int) loc.z >> 4),
+                        nbt);
+                loc.level.addBlockEntity(sign);
+            }
+        }.runTaskLater(ASkyBlock.get(), (int) Utils.secondsAsMillis(TeleportLogic.teleportDelay + 5)); // Wait for 5 sec and then spawn them
     }
 
 }
