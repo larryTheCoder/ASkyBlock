@@ -20,11 +20,6 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
-import com.larryTheCoder.panels.SchematicPanel;
-import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.utils.Settings;
-
-import java.util.List;
 
 /**
  * @author Adam Matthew
@@ -63,7 +58,7 @@ public class CreateISubCommand extends SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = sender.getServer().getPlayer(sender.getName());
-        new SchematicPanel(p, getPlugin()); // Automatically decide which island the player wants
+        getPlugin().getPanel().addIslandFormOverlay(p);
         return true;
     }
 

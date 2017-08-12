@@ -24,6 +24,7 @@ import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
 import com.larryTheCoder.listener.ChatHandler;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
+import com.larryTheCoder.panels.Panel;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.player.TeleportLogic;
@@ -38,7 +39,9 @@ interface ASkyBlockAPI {
      *
      * @return ChatHandler
      */
-    ChatHandler getChatHandlers();
+    default ChatHandler getChatHandlers() {
+        return null;
+    }
 
 
     /**
@@ -46,35 +49,45 @@ interface ASkyBlockAPI {
      *
      * @return InvitationHandler
      */
-    InvitationHandler getInvitationHandler();
+    default InvitationHandler getInvitationHandler() {
+        return null;
+    }
 
     /**
      * Get the island Manager section
      *
      * @return IslandManager
      */
-    IslandManager getIsland();
+    default IslandManager getIsland() {
+        return null;
+    }
 
     /**
      * Get the GridManager Manager section
      *
      * @return GridManager
      */
-    GridManager getGrid();
+    default GridManager getGrid() {
+        return null;
+    }
 
     /**
      * Get the GridManager Manager section
      *
      * @return InventorySave
      */
-    InventorySave getInventory();
+    default InventorySave getInventory() {
+        return null;
+    }
 
     /**
      * Get the TeamManager section
      *
      * @return BaseEntity
      */
-    TeamManager getTManager();
+    default TeamManager getTManager() {
+        return null;
+    }
 
     /**
      * Return of IslandData class for a player
@@ -83,7 +96,9 @@ interface ASkyBlockAPI {
      * @param homeId The island home number
      * @return IslandData|null
      */
-    IslandData getIslandInfo(Player player, int homeId);
+    default IslandData getIslandInfo(Player player, int homeId) {
+        return null;
+    }
 
     /**
      * Return of IslandData class for a player name
@@ -91,7 +106,9 @@ interface ASkyBlockAPI {
      * @param player The player class parameters
      * @return IslandData|null
      */
-    IslandData getIslandInfo(String player);
+    default IslandData getIslandInfo(String player) {
+        return null;
+    }
 
     /**
      * Return of IslandData class for a player name and homeId
@@ -100,14 +117,18 @@ interface ASkyBlockAPI {
      * @param homeId The island home number
      * @return IslandData|null
      */
-    IslandData getIslandInfo(String player, int homeId);
+    default IslandData getIslandInfo(String player, int homeId) {
+        return null;
+    }
 
     /**
      * Get the default challenges module
      *
      * @return ChallangesCMD
      */
-    ChallangesCMD getChallenges();
+    default ChallangesCMD getChallenges() {
+        return null;
+    }
 
     /**
      * Retrieve if the player IN the island world
@@ -115,7 +136,9 @@ interface ASkyBlockAPI {
      * @param player The player class parameters
      * @return boolean
      */
-    boolean inIslandWorld(Player player);
+    default boolean inIslandWorld(Player player) {
+        return false;
+    }
 
     /**
      * Gets the player default island generation
@@ -123,7 +146,9 @@ interface ASkyBlockAPI {
      * @param player The player class parameters
      * @return Default world of player
      */
-    String getDefaultWorld(Player player);
+    default String getDefaultWorld(Player player) {
+        return "SkyBlock";
+    }
 
     /**
      * Gets the player info
@@ -131,16 +156,53 @@ interface ASkyBlockAPI {
      * @param player The player class parameters
      * @return PlayerData|null
      */
-    PlayerData getPlayerInfo(Player player);
+    default PlayerData getPlayerInfo(Player player) {
+        return null;
+    }
 
     /**
+     * Gets the island data from the location
      *
+     * @param location Target of a location
+     * @return IslandData|null
      */
-    IslandData getIslandInfo(Location location);
+    default IslandData getIslandInfo(Location location) {
+        return null;
+    }
 
-    TeleportLogic getTeleportLogic();
+    /**
+     * Gets the Player Panel Module
+     *
+     * @return Panel|null
+     */
+    default Panel getPanel() {
+        return null;
+    }
 
-    Integer getIslandLevel(Player player);
+    /**
+     * Get the teleportation logic for Player
+     *
+     * @return TeleportLogic|null
+     */
+    default TeleportLogic getTeleportLogic() {
+        return null;
+    }
 
+    /**
+     * Get the island level for player
+     *
+     * @param player The player class parameters
+     * @return Integer|null
+     */
+    default Integer getIslandLevel(Player player) {
+        return 0;
+    }
+
+    /**
+     * Get this island data for player
+     *
+     * @param player The player class parameters
+     * @return
+     */
     IslandData getIslandInfo(Player player);
 }

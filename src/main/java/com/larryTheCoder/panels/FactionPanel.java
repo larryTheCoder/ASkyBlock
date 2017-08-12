@@ -22,46 +22,38 @@ import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerFormRespondedEvent;
-import cn.nukkit.form.element.ElementDropdown;
 import cn.nukkit.form.element.ElementInput;
 import cn.nukkit.form.element.ElementLabel;
 import cn.nukkit.form.response.FormResponseCustom;
-import cn.nukkit.form.response.FormResponseData;
 import cn.nukkit.form.window.FormWindowCustom;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.schematic.SchematicHandler;
+import com.larryTheCoder.player.FactionModule;
 
-/**
- * Panel class for MCPE 1.2
- */
-public class SchematicPanel extends FormWindowCustom implements Listener {
+public class FactionPanel extends FormWindowCustom implements Listener {
 
-    private Player player;
-    private ASkyBlock plugin;
-    private SchematicHandler bindTo;
-    private boolean closed = false;
+    public static int PANEL_ID;
 
-    public SchematicPanel(Player player, ASkyBlock plugin) {
-        super("Schematic Menu");
-        this.player = player;
-        this.bindTo = ASkyBlock.schematics;
-        this.plugin = plugin;
+    public Player ownerFaction;
+    public FactionModule module;
 
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    public FactionPanel(Player owner, FactionModule module) {
+        super("SkyBlock Team-Settings");
+        this.ownerFaction = owner;
+        this.module = module;
+
+        ASkyBlock.get().getServer().getPluginManager().registerEvents(this, ASkyBlock.get());
 
         this.showInformation();
     }
 
     public void showInformation() {
-        // Show the elements for Panel 1.2
-        this.addElement(new ElementLabel("Welcome to the Schematic Panel. Please fill in these forms."));
-        this.addElement(new ElementInput("Your home name", "", "Home sweet Home"));
+        this.addElement(new ElementLabel("§aWelcome to the Schematic Panel. What can we do for help?"));
 
-        if (!bindTo.isUseDefaultGeneration()) {
-            this.addElement(new ElementDropdown("Island Templates", bindTo.getSchemaList(), bindTo.getDefaultIsland()));
-        }
+        this.addElement(new ElementInput("Rename your Team", module.name));
+        this.addElement(new ElementInput("Add your ally Team"));
+        this.addElement(new ElementInput("Add new members to your Team"));
 
-        player.showFormWindow(this);
+        ownerFaction.showFormWindow(this);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -74,32 +66,17 @@ public class SchematicPanel extends FormWindowCustom implements Listener {
         // Sometimes, there a lot of players in server making its harder to decide which
         // Player are opening Panel. Using Player UUID will making this easier to decide
         if (event.getResponse().equals(this)) {
+            // Get the response form from player
             FormResponseCustom response = getResponse();
-            String islandName = response.getInputResponse(1);
-            int id = -1;
-            if (!bindTo.isUseDefaultGeneration()) {
-                FormResponseData form = response.getDropdownResponse(2); // Dropdown respond
 
-                String schematicType = form.getElementContent();
+            String renameTeam = response.getInputResponse(1);
+            String addAlly = response.getInputResponse(2);
+            String addMembers = response.getInputResponse(3);
 
-                id = bindTo.getSchemaId(schematicType);
-            }
+            //float completed =
 
-            plugin.getIsland().createIsland(player, id, islandName);
         }
     }
 
-    public boolean isClosed() {
-        return closed;
-    }
 
-    @Override
-    public int hashCode() {
-        return player.getUniqueId().hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj.hashCode() == this.hashCode();
-    }
 }

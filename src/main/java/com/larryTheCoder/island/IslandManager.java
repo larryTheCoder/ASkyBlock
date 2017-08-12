@@ -23,13 +23,13 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
-import com.larryTheCoder.task.SimpleFancyTitle;
-import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.IslandCreateEvent;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.task.DeleteIslandTask;
+import com.larryTheCoder.task.SimpleFancyTitle;
+import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
@@ -60,7 +60,7 @@ public class IslandManager {
         if (!reset) {
             boolean message = false;
             if (!checkIsland(p, homes)) {
-                message = createIsland(p);
+                message = createIsland(p); // TODO: REPLACE THIS WITH FORM OVERLAY
             }
             IslandData pd = ASkyBlock.get().getDatabase().getIsland(p.getName(), homes);
             if (pd == null || pd.owner == null) {
@@ -218,17 +218,6 @@ public class IslandManager {
         return false;
     }
 
-    public int generateIslandKey(Location loc) {
-        int x = loc.getFloorX();
-        int z = loc.getFloorZ();
-        return generateIslandKey(x, z);
-    }
-
-    public int generateIslandKey(int x, int z) {
-        // NEW: Key upgrade need to delete island database
-        return x / Settings.islandDistance + z / Settings.islandDistance * Integer.MAX_VALUE;
-    }
-
     private IslandData claim(Player p, Location loc, String home) {
         int x = loc.getFloorX();
         int z = loc.getFloorZ();
@@ -250,11 +239,22 @@ public class IslandManager {
         return pd;
     }
 
+    public int generateIslandKey(Location loc) {
+        int x = loc.getFloorX();
+        int z = loc.getFloorZ();
+        return generateIslandKey(x, z);
+    }
+
+    public int generateIslandKey(int x, int z) {
+        // NEW: Key upgrade need to delete island database
+        return x / Settings.islandDistance + z / Settings.islandDistance * Integer.MAX_VALUE;
+    }
+
     public boolean isPlayerIsland(Player p, Location loc) {
         if (!plugin.level.contains(loc.getLevel().getName())) {
             return false;
         }
-        // WHatT!!? WHAT!? wHAt?!! OH MY GOD!
+
         return plugin.getIslandInfo(loc).owner.equalsIgnoreCase(p.getName());
     }
 

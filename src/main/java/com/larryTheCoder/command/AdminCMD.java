@@ -19,10 +19,15 @@ package com.larryTheCoder.command;
 import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.SkyBlockGenerator;
 import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Admin command.
@@ -36,29 +41,25 @@ public class AdminCMD extends Command {
     private final ASkyBlock plugin;
 
     public AdminCMD(ASkyBlock ev) {
-        super("asadmin", "Island admin command", "\u00a77<parameters>", new String[]{"as", "asc"});
+        super("isadmin", "Island admin command", "\u00a77<parameters>", new String[]{"isa"});
         this.plugin = ev;
+        // Set this command permission (This should not be known to players)
+        this.setPermission("is.admin.command");
+        this.setPermissionMessage(TextFormat.RED + "Unknown command. Try /help for a list of commands");
     }
 
     @Override
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
         Player p = sender.isPlayer() ? sender.getServer().getPlayer(sender.getName()) : null;
-        if (!sender.hasPermission("is.admin.command")) {
-            sender.sendMessage(plugin.getLocale(p).errorNoPermission);
-        }
+
         switch (args.length) {
             case 0:
-                sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).helpMessage.replace("[com]", commandLabel));
+                this.sendHelp(sender, commandLabel, args);
                 break;
             case 1:
                 switch (args[0].toLowerCase()) {
                     case "help":
-                        sender.sendMessage("§d--- §aAdmin command help page §e1 §aof §e1 §d---");
-                        sender.sendMessage("§a/" + commandLabel + " help: " + plugin.getLocale(p).adminHelpCommand);
-                        sender.sendMessage("§a/" + commandLabel + " generate <level>: " + plugin.getLocale(p).adminHelpGenerate);
-                        sender.sendMessage("§a/" + commandLabel + " kick <player>: " + plugin.getLocale(p).adminHelpKick);
-                        sender.sendMessage("§a/" + commandLabel + " rename <player> <name>: " + plugin.getLocale(p).adminHelpRename);
-                        sender.sendMessage("§6You also can use: /asc");
+                        this.sendHelp(sender, commandLabel, args);
                         break;
                     case "generate":
                         sender.sendMessage(plugin.getPrefix() + "§aUsage: /" + commandLabel + " generate <level>");
@@ -116,7 +117,7 @@ public class AdminCMD extends Command {
                     case "setspawn":
                         this.setSpawn(sender);
                         break;
-                    case "deleteisland":
+                    case "delete":
                         if (p == null) {
                             sender.sendMessage(plugin.getLocale(p).errorUseInGame);
                             break;
@@ -143,15 +144,8 @@ public class AdminCMD extends Command {
                             deleteIslands(island, sender);
                         }
                         break;
-                    case "delete":
-                        if (p == null) {
-                            sender.sendMessage(plugin.getLocale(p).errorUseInGame);
-                            break;
-                        }
-                        sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).adminDeleteIslandError);
-                        break;
                     default:
-                        sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).helpMessage.replace("[com]", "/asc"));
+                        this.sendHelp(sender, commandLabel, args);
                         return true;
                 }
                 break;
@@ -182,7 +176,7 @@ public class AdminCMD extends Command {
                 }
                 break;
             default:
-                sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).helpMessage.replace("[com]", commandLabel));
+                this.sendHelp(sender, commandLabel, args);
                 return true;
 
         }
@@ -222,34 +216,6 @@ public class AdminCMD extends Command {
         sender.sendMessage(TextFormat.GREEN + plugin.getLocale(p).generalSuccess);
     }
 
-    private void sendHelp(CommandSender sender, String commandLabel) {
-        Player p = sender.isPlayer() ? sender.getServer().getPlayer(sender.getName()) : null;
-        if (p == null) {
-            sender.sendMessage("§d--- §aAdmin command help page §e1 §aof §e1 §d---");
-            sender.sendMessage("§a/" + commandLabel + " help: " + plugin.getLocale(p).adminHelpCommand);
-            sender.sendMessage("§a/" + commandLabel + " generate <level>: " + plugin.getLocale(p).adminHelpGenerate);
-            sender.sendMessage("§a/" + commandLabel + " kick <player>: " + plugin.getLocale(p).adminHelpKick);
-            sender.sendMessage("§a/" + commandLabel + " rename <player> <name>: " + plugin.getLocale(p).adminHelpRename);
-            sender.sendMessage("§6You also can use: /asc");
-        } else {
-            if (sender.hasPermission("is.admin.setspawn")) {
-                sender.sendMessage("§a/" + commandLabel + " setSpawn: " + plugin.getLocale(p).adminHelpSpawn);
-            }
-            if (sender.hasPermission("is.admin.rename")) {
-                sender.sendMessage("§a/" + commandLabel + " rename <player> <name>: " + plugin.getLocale(p).adminHelpRename);
-            }
-            if (sender.hasPermission("is.admin.kick")) {
-                sender.sendMessage("§a/" + commandLabel + " kick <player>: " + plugin.getLocale(p).adminHelpKick);
-            }
-            if (sender.hasPermission("is.admin.generate")) {
-                sender.sendMessage("§a/" + commandLabel + " generate <level>: " + plugin.getLocale(p).adminHelpGenerate);
-            }
-            // todo
-            if (sender.hasPermission("is.admin.delete")) {
-                sender.sendMessage("§a/" + commandLabel + " delete <level>: " + plugin.getLocale(p).adminHelpDelete);
-            }
-        }
-    }
 
     /**
      * Deletes the overworld and nether islands together
@@ -259,6 +225,66 @@ public class AdminCMD extends Command {
      */
     private void deleteIslands(IslandData island, CommandSender sender) {
         // Todo
+    }
+
+    public void sendHelp(CommandSender sender, String label, String[] args) {
+        Player p = sender.isPlayer() ? sender.getServer().getPlayer(sender.getName()) : null;
+        int pageNumber = 1;
+
+        if (args.length == 2 && Utils.isNumeric(args[1])) {
+            pageNumber = Integer.parseInt(args[1]);
+        }
+        int pageHeight;
+        if (sender instanceof ConsoleCommandSender) {
+            pageHeight = Integer.MAX_VALUE;
+        } else {
+            pageHeight = 5;
+        }
+
+        List<String> helpList = new ArrayList<>();
+
+        helpList.add(""); // Really weird Java Machine bug (Usually this will be stored in List but not)
+
+        if (sender.hasPermission("is.admin.rename")) {
+            helpList.add("&e" + label + " rename &7=> &a" + plugin.getLocale(p).adminHelpRename);
+        }
+
+        if (sender.hasPermission("is.admin.kick")) {
+            helpList.add("&e" + label + " kick &7=> &a" + plugin.getLocale(p).adminHelpKick);
+        }
+
+        if (sender.hasPermission("is.admin.generate")) {
+            helpList.add("&e" + label + " generate &7=> &a" + plugin.getLocale(p).adminHelpGenerate);
+        }
+
+        if (sender.hasPermission("is.admin.setspawn")) {
+            helpList.add("&e" + label + " setspawn &7=> &a" + plugin.getLocale(p).adminHelpSpawn);
+        }
+
+        if (sender.hasPermission("is.admin.delete")) {
+            helpList.add("&e" + label + " delete &7=> &a" + plugin.getLocale(p).adminHelpDelete);
+        }
+
+        if (label.length() > 4) {
+            helpList.add("");
+            helpList.add("&eTired to use looooong commands of isadmin? You can use 'isa' for aliases!");
+        }
+
+        int totalPage = helpList.size() % pageHeight == 0 ? helpList.size() / pageHeight : helpList.size() / pageHeight + 1;
+        pageNumber = Math.min(pageNumber, totalPage);
+        if (pageNumber < 1) {
+            pageNumber = 1;
+        }
+
+        sender.sendMessage("§e--- §eAdmin SkyBlock Help Page §a" + pageNumber + " §eof §a" + totalPage + " §e---");
+
+        int i = 0;
+        for (String list : helpList) {
+            if (i >= (pageNumber - 1) * pageHeight + 1 && i <= Math.min(helpList.size(), pageNumber * pageHeight)) {
+                sender.sendMessage(list.replace("&", "§"));
+            }
+            i++;
+        }
     }
 
 }

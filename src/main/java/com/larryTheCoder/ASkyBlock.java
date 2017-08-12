@@ -40,6 +40,7 @@ import com.larryTheCoder.listener.ChatHandler;
 import com.larryTheCoder.listener.IslandGuard;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.locales.ASlocales;
+import com.larryTheCoder.panels.Panel;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.player.TeleportLogic;
@@ -67,7 +68,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     public static SchematicHandler schematics;
     public static Economy econ;
-    public static String moduleVersion = "0eb77aeB7";
+    public static String moduleVersion = "0eb81f61";
     private static ASkyBlock object;
 
     public int[] version;
@@ -86,13 +87,23 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     private TeleportLogic teleportLogic;
     private ChallangesCMD cmds;
     private Messages msgs;
+    private Panel panel;
+
     // Localization Strings
     private HashMap<String, ASlocales> availableLocales = new HashMap<>();
+
+    /**
+     * Return of ASkyBlock plug-in
+     *
+     * @return ASkyBlock
+     */
+    public static ASkyBlock get() {
+        return object;
+    }
 
     public ASConnection getDatabase() {
         return db;
     }
-
 
     public ChatHandler getChatHandlers() {
         return chatHandler;
@@ -116,6 +127,10 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     public TeamManager getTManager() {
         return managers;
+    }
+
+    public Panel getPanel() {
+        return panel;
     }
 
     public IslandData getIslandInfo(Player player, int homes) {
@@ -170,15 +185,6 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         return getIslandInfo(player.getName());
     }
 
-    /**
-     * Return of ASkyBlock plug-in
-     *
-     * @return ASkyBlock
-     */
-    public static ASkyBlock get() {
-        return object;
-    }
-
     public String getPluginVersionString() {
         return getDescription().getVersion();
     }
@@ -227,6 +233,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     @Override
     public void onEnable() {
+        // Wohooo! Fast! Unique and Colorful!
         generateLevel(); // Regenerate The world
         getServer().getLogger().info(getPrefix() + "§7Enabling ASkyBlock - Founders Edition");
         initIslands();
@@ -238,11 +245,11 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     @Override
     public void onDisable() {
-        Utils.send(TextFormat.GREEN + "Saving islands framework");
+        Utils.send("&7Saving islands framework");
         saveLevel();
         this.db.close();
         msgs.saveMessages();
-        Utils.send(TextFormat.RED + "ASkyBlock ~ Disabled seccessfully");
+        Utils.send("&cASkyBlock has successfully disabled. Goodbye");
     }
 
     private void initDatabase() {
@@ -276,6 +283,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         chatHandler = new ChatHandler(this);
         teleportLogic = new TeleportLogic(this);
         invitationHandler = new InvitationHandler(this);
+        panel = new Panel(this);
         // This should be loaded first
         msgs = new Messages(this);
         msgs.loadMessages();
@@ -289,6 +297,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
      * Reload every level that had generated
      */
     private void saveLevel() {
+        Utils.send("&7Saving worlds...");
         this.db.saveWorlds(level);
     }
 
@@ -352,6 +361,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
             file.renameTo(new File(ASkyBlock.get().getDataFolder(), "config.old"));
             ASkyBlock.get().saveResource("config.yml");
         }
+        cfg.reload(); // Reload the config
     }
 
     private void generateLevel() {

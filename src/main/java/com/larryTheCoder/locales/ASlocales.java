@@ -63,12 +63,11 @@ public final class ASlocales {
     public String firstIslandFree = "§aYour first island are free!";
     public String nextIslandPrice = "§aNext time you may need $§e[price] to buy other island";
     // Help defaults
-    public String adminHelpCommand = "§eShow a list of admin commands.";
-    public String adminHelpGenerate = "§eAttempt to create a new level.";
-    public String adminHelpKick = "§eTo kick player from island worlds.";
-    public String adminHelpRename = "§eAttempt to rename other player's island.";
-    public String adminHelpSpawn = "§eSet the island's spawn point!";
-    public String adminHelpDelete = "§eDelete other player island";
+    public String adminHelpGenerate = "§aAttempt to create a new level.";
+    public String adminHelpKick = "§aTo kick player from island worlds.";
+    public String adminHelpRename = "§aAttempt to rename other player's island.";
+    public String adminHelpSpawn = "§aSet the island's spawn point!";
+    public String adminHelpDelete = "§aDelete other player island";
     // Errors defaults
     public String errorUnknownPlayer = "§cThat player is unknown.";
     public String errorNoPermission = "§cYou don't have permission to use that command!";
@@ -112,7 +111,7 @@ public final class ASlocales {
     public String teleportCancelled = "§cTeleport cancelled";
     // Admin commands message
     public String adminOverride = "§aYou override this command";
-    public String adminDeleteIslandError = "§cUse §ldeleteisland confirm §r§cto delete the island you are on.";
+    public String adminDeleteIslandError = "§cUse §ldelete confirm §r§cto delete the island you are on.";
     public String adminDeleteIslandnoid = "§cCannot identify island.";
     public String adminDeleteIslandUse = "§rUse §ldelete [name] §r§cto delete the player instead.";
     public String adminSetSpawnOwnedBy = "§cThis island space is owned by [name]";

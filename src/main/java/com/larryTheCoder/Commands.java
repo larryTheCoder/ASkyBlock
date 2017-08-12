@@ -76,8 +76,6 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.loadSubCommand(new SetHomeSubCommand(getPlugin()));
         this.loadSubCommand(new SetSpawnSubCommand(getPlugin()));
         this.loadSubCommand(new TeleportSubCommand(getPlugin()));
-
-        // TODO: restyle the command looking (Making it easy to see)
     }
 
     private void loadSubCommand(SubCommand cmd) {
@@ -105,7 +103,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
             } else if (!(sender instanceof Player)) {
                 return this.sendHelp(sender, args);
             } else {
-                sender.sendMessage("§eBefore creating island, Checkout §a/is templates §eto see some cool island templates");
+                sender.sendMessage("§eBefore creating island, Checkout §a/is create §eto see some cool island templates and settings");
                 sender.sendMessage("§eYou can also check out our new commands by using §/is help");
                 listOfPlayers.add(sender.getName());
             }
@@ -137,6 +135,10 @@ public class Commands extends PluginCommand<ASkyBlock> {
 
     public boolean sendHelp(CommandSender sender, String[] args) {
         if (args.length == 0 || !args[0].equalsIgnoreCase("help")) {
+            if (args.length == 0) {
+                sender.sendMessage("§cUnknown command use /is help for a list of commands");
+                return true;
+            }
             switch (args[0]) {
                 case "version":
                 case "ver":
@@ -205,7 +207,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
         if (sender instanceof ConsoleCommandSender) {
             pageHeight = Integer.MAX_VALUE;
         } else {
-            pageHeight = 5;
+            pageHeight = 9;
         }
 
         List<String> helpList = new ArrayList<>();
@@ -216,20 +218,24 @@ public class Commands extends PluginCommand<ASkyBlock> {
         helpList.add("");
 
         for (SubCommand cmd : commands) {
-            helpList.add("§eis " + cmd.getName() + TextFormat.GRAY + " => §a" + cmd.getDescription());
+            // Console can use this command (NOT PLAYER)
+            if (cmd.canUse(sender) || !sender.isPlayer()) {
+                helpList.add("§eis " + cmd.getName() + TextFormat.GRAY + " => §a" + cmd.getDescription());
+            }
         }
-
         helpList.add("§eis version" + TextFormat.GRAY + " => §aGets the current module version.");
         helpList.add("§eis about" + TextFormat.GRAY + " => §aListen to what this author say.");
         helpList.add("§eis author" + TextFormat.GRAY + " => §aThanks for your contributions.");
 
+        if (sender.hasPermission("is.admin.command")) {
+            helpList.add("§eisa" + TextFormat.GRAY + " => §aThe admin command Module");
+        }
 
         helpList.add("");
         helpList.add("§eHere is the another tips for your new island.");
         helpList.add("§eYou can break your island but not others island.");
         helpList.add("§eYou also can made an ally to able players come your island.");
-        helpList.add("§ePeople cannot enter your island, break, grief any blocks in your");
-        helpList.add("§eisland without permission.");
+        helpList.add("§ePeople cannot enter your island, break, grief any blocks in your island without permission.\"");
         helpList.add("");
         helpList.add("§eYou may not understand some commands but you will get it soon.");
         helpList.add("§eAdmin or OP can do anything on your island (Including deleting).");

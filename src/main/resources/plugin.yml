@@ -113,3 +113,9 @@ permissions:
     is.admin.rename:
      default: op
      description: "Rename other players island"
+    is.admin.setspawn:
+     default: op
+     description: "Set the world island location"
+    is.admin.delete:
+     default: op
+     desctiption: "Delete an island"

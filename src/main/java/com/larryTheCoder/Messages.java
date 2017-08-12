@@ -70,7 +70,7 @@ public class Messages {
         if (messageStore == null) {
             return;
         }
-        plugin.getLogger().info("Saving offline messages...");
+        Utils.send("&7Saving offline messages...");
         try {
             // Convert to a serialized string
             final HashMap<String, Object> offlineMessages = new HashMap<>();

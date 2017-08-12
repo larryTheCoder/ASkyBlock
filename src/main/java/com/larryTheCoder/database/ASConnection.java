@@ -27,6 +27,7 @@ import com.larryTheCoder.utils.Utils;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * Full sql database
@@ -300,6 +301,7 @@ public final class ASConnection {
     }
 
     public void close() {
+        Utils.send("&7Closing databases...");
         try {
             this.closed = true;
             this.con.close();
@@ -512,6 +514,28 @@ public final class ASConnection {
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
+        return false;
+    }
+
+    ///------------ FACTION DATA ------------
+
+    public int getFactionCount() {
+        int currentCount = 0;
+        try (Statement stmt = con.createStatement()) {
+            ResultSet set = stmt.executeQuery("SELECT * FROM `faction`");
+            if (set.isClosed()) return 0;
+            while (set.next()) currentCount++;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return currentCount;
+    }
+
+    public boolean createFaction(String player) {
+        int id = getFactionCount();
+        UUID uuid = UUID.fromString(Integer.toString(id) + player); // Most secure UUID Versions 5
+
         return false;
     }
 

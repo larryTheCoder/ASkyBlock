@@ -77,6 +77,8 @@ public final class SchematicHandler {
 
     public SchematicHandler(ASkyBlock plugin, File path) {
         Objects.requireNonNull(plugin, "ASkyBlock instance cannot be null");
+        Utils.send("&7Starting Schematic Resource Pack.");
+
         if (path == null) {
             useDefaultGeneration = true;
             Utils.send("&eYou are now using build-in island generation.");
@@ -84,6 +86,7 @@ public final class SchematicHandler {
             return;
         }
         if (!path.isDirectory()) {
+            useDefaultGeneration = true;
             Utils.send("&cThe directory cannot be a file or absolute folder");
             return;
         }
@@ -781,5 +784,15 @@ public final class SchematicHandler {
 
     public Integer getDefaultIsland() {
         return defaultIsland;
+    }
+
+    public enum Configuration {
+        BLOCK_SPAWN,
+        PERMISSION,
+        DESCRIPTION,
+        RATING,
+        USE_CONFIG_CHEST,
+        PASTE_ENTITIES,
+        BIOME
     }
 }

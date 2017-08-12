@@ -13,20 +13,26 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
-package com.larryTheCoder.schematic;
+package com.larryTheCoder.panels;
 
-/**
- * Author: Adam Matthew
- * <p>
- * Next generation of the schematic handler
- */
-public enum Configuration {
-    BLOCK_SPAWN,
-    PERMISSION,
-    DESCRIPTION,
-    RATING,
-    USE_CONFIG_CHEST,
-    PASTE_ENTITIES,
-    BIOME
+import cn.nukkit.form.element.ElementButton;
+import cn.nukkit.form.window.FormWindowSimple;
+
+import java.util.List;
+
+public class ChallengesPanel extends FormWindowSimple {
+
+    private List<String> challenges;
+
+    public ChallengesPanel(List<String> challenges) {
+        super("§aChallenges Menu", "§aChoose your toppings! All of these are your challenges to complete! You will be awarded with an amazing prize!");
+
+        this.challenges = challenges;
+        for (String toButton : challenges) {
+            this.addButton(new ElementButton(toButton));
+        }
+    }
+
 }

@@ -60,7 +60,7 @@ public final class ChallangesCMD extends Command {
             return true;
         }
         if (args.length == 0) {
-            p.sendMessage(plugin.getPrefix() + "§cfew parameters, /c help for a list of commands");
+            plugin.getPanel().addChallengesFormOverlay(p); // Easy breezy
             return true;
         }
         switch (args[0]) {
@@ -136,7 +136,7 @@ public final class ChallangesCMD extends Command {
                 }
                 break;
             default:
-                p.sendMessage(plugin.getPrefix() + "§cUnknown parameters, /c help for a list of commands");
+                plugin.getPanel().addChallengesFormOverlay(p);
                 break;
         }
         return true;
