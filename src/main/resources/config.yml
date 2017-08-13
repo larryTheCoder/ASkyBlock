@@ -1,7 +1,7 @@
 ## Default Config for ASkyBlock
 ---
 ## Do not change this
-version: "FVMPlsartel0"
+version: "MadeIn3D"
 ## Game Prefix.
 Prefix: "&d[&eASkyBlock&d] &e"
 ## Max islands homes
@@ -17,6 +17,14 @@ updater: false
 ##  Available locales are:
 ##    en-US.
 defaultlanguage: "en-US"
+# Team chatting
+teamChannels: true
+## GridProtection section
+grid:
+  # Should teleport player who in island world
+  # Into spawn or default spawn
+  teleportSpawn: true
+  
 ## Economy section
 economy:
   # Enable economys?
@@ -31,13 +39,6 @@ economy:
   # Island cost $$$
   #  You will NOT have to put '$' symbol
   islandCost: 10
-
-## Chat Formattin
-chat:
-  # Use chat formatting such as &7 will return to §7
-  UCFormatting: true
-  # Team chatting (Just like Facebook)
-  teamChat: true
 
 ##### Island Related Settings #####
 island:
@@ -100,14 +101,21 @@ island:
    #   Your passion to add this or nor
    #   Syantax: "&aFood?, &eEmergency Food?, &cYour Pet!"
    companionNames: "&aFood?, &eEmergency Food?, &cYour Pet!"
-   # Items that will be in the chest when the player starts an island
-   # Must be in Nukkit Item format. Format is <ID>:<Qty> or <ID>:<Data>:<Qty>
-   # Use <Data> to set the durability of a item or to select sub-items/colors.  
-   #
-   # Spawn EGGs is not available yet! do not put I warned you :P
-   #
-   # Check console for errors and guidance after reloading configuration
-   chestItems: 'ICE:2 MELON:1 TORCH:2 BONE:1 LAVA_BUCKET:1 PUMPKIN_SEEDS:1 SUGAR_CANE:1 RED_MUSHROOM:1 BROWN_MUSHROOM:1 CACTUS:1 BREAD:1 WHEAT:1 LEATHER_BOOTS:1 LEATHER_HELMET:1 LEATHER_CHESTPLATE:1 LEATHER_LEGGINGS:1'
+   # Items section
+   items:
+     # The usage of this function are to perform that chest's in the schematic
+     # Will be replaced with this items
+     #
+     # If the chest empty, it will use your chest items as items in the chest.
+     shouldOverride: false
+     # Items that will be in the chest when the player starts an island
+     # Must be in Nukkit Item format. Format is <ID>:<Qty> or <ID>:<Data>:<Qty>
+     # Use <Data> to set the durability of a item or to select sub-items/colors.  
+     #
+     # Spawn EGGs is not available yet! do not put I warned you :P
+     #
+     # Check console for errors and guidance after reloading configuration
+     chestItems: 'ICE:2 MELON:1 TORCH:2 BONE:1 LAVA_BUCKET:1 PUMPKIN_SEEDS:1 SUGAR_CANE:1 RED_MUSHROOM:1 BROWN_MUSHROOM:1 CACTUS:1 BREAD:1 WHEAT:1 LEATHER_BOOTS:1 LEATHER_HELMET:1 LEATHER_CHESTPLATE:1 LEATHER_LEGGINGS:1'
 
 # This section contains the biomes that can be bought or used
 biomesettings:

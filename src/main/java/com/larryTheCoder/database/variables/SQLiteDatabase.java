@@ -47,7 +47,7 @@ public class SQLiteDatabase implements AbstractDatabase {
             try {
                 file.createNewFile();
             } catch (IOException ignored) {
-                Utils.ConsoleMsg("&cUnable to create database!");
+                Utils.send("&cUnable to create database!");
             }
         }
         try {

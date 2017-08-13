@@ -157,7 +157,7 @@ public class IslandListener implements Listener {
         plugin.getInventory().loadPlayerInventory(p);
         // Load player datatatatata tadaaaa
         if (plugin.getPlayerInfo(p) == null) {
-            Utils.ConsoleMsg(p.getName() + " &adata doesn`t exsits. Creating new ones");
+            Utils.send(p.getName() + " &adata doesn`t exsits. Creating new ones");
             plugin.getDatabase().createPlayer(p.getName());
         }
         // Load messages

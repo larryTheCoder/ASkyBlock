@@ -25,7 +25,6 @@ import cn.nukkit.block.Block;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
-import cn.nukkit.level.Position;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.biome.Biome;
@@ -50,8 +49,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.larryTheCoder.storage.InventorySave;
-import com.larryTheCoder.listener.IslandListener;
-import com.larryTheCoder.listener.chat.ChatHandler;
+import com.larryTheCoder.listener.IslandGuard;
+import com.larryTheCoder.listener.ChatHandler;
 import com.larryTheCoder.economy.Economy;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.island.GridManager;
@@ -100,7 +99,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         try {
             ASkyBlock.schematics.put("default", new Schematic(this, schematic));
         } catch (IOException ex) {
-            Utils.ConsoleMsg("Unable to add " + schematic.getName() + " Schematic file.");
+            Utils.send("Unable to add " + schematic.getName() + " Schematic file.");
             if (isDebug()) {
                 ex.printStackTrace();
             }
@@ -310,11 +309,11 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     @Override
     public void onDisable() {
-        Utils.ConsoleMsg(TextFormat.GREEN + "Saving islands framework");
+        Utils.send(TextFormat.GREEN + "Saving islands framework");
         saveLevel();
         getDatabase().close();
         msgs.saveMessages();
-        Utils.ConsoleMsg(TextFormat.RED + "ASkyBlock ~ Disabled seccessfully");
+        Utils.send(TextFormat.RED + "ASkyBlock ~ Disabled seccessfully");
     }
 
     private void initDatabase() {
@@ -324,7 +323,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
             } catch (SQLException ex) {
                 JDBCUtilities.printSQLException(ex);
             } catch (ClassNotFoundException | InterruptedException ex) {
-                Utils.ConsoleMsg("Unable to create MySql database");
+                Utils.send("Unable to create MySql database");
             }
         } else {
             try {
@@ -332,7 +331,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
             } catch (SQLException ex) {
                 JDBCUtilities.printSQLException(ex);
             } catch (ClassNotFoundException | InterruptedException ex) {
-                Utils.ConsoleMsg("Unable to create MySql database");
+                Utils.send("Unable to create MySql database");
             }
         }
     }
@@ -349,7 +348,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         msgs = new Messages(this);
         msgs.loadMessages();
         getServer().getPluginManager().registerEvents(chatHandler, this);
-        pm.registerEvents(new IslandListener(this), this);
+        pm.registerEvents(new IslandGuard(this), this);
         ServerScheduler pd = getServer().getScheduler();
         pd.scheduleRepeatingTask(new PluginTask(this), 20); // tick every 1 sec
     }
@@ -362,7 +361,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     }
 
     private void registerObject() {
-        Utils.ConsoleMsg(TextFormat.GREEN + "Loading the Island Framework");
+        Utils.send(TextFormat.GREEN + "Loading the Island Framework");
         loadSchematic();
         if (cfg.getBoolean("updater")) {
             Updater.getUpdate();
@@ -387,8 +386,8 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         }
         PlayerData pd = this.getPlayerInfo(p);
         if (!this.getAvailableLocales().containsKey(pd.pubLocale)) {
-            Utils.ConsoleMsg("Unknown locale: " + pd.pubLocale);
-            Utils.ConsoleMsg("Using default: en-US");
+            Utils.send("Unknown locale: " + pd.pubLocale);
+            Utils.send("Using default: en-US");
             return getAvailableLocales().get(Settings.defaultLanguage);
         }
         return getAvailableLocales().get(pd.pubLocale);
@@ -417,8 +416,8 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         File file;
         Config cfgg = new Config(file = new File(ASkyBlock.get().getDataFolder(), "config.yml"), Config.YAML);
         if (!cfgg.getString("version").equalsIgnoreCase(ConfigManager.CONFIG_VERSION)) {
-            Utils.ConsoleMsg("&cOutdated config! Creating new one");
-            Utils.ConsoleMsg("&aYour old config will be renamed into config.old!");
+            Utils.send("&cOutdated config! Creating new one");
+            Utils.send("&aYour old config will be renamed into config.old!");
             update = true;
         }
         if (update) {
@@ -575,7 +574,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
                         biome = Biome.getBiome(biomeString);
                         newSchem.setBiome(biome);
                     } catch (Exception e) {
-                        Utils.ConsoleMsg("Could not parse biome " + biomeString + " using default instead.");
+                        Utils.send("Could not parse biome " + biomeString + " using default instead.");
                     }
                     // Use physics - overrides default if it exists
                     //newSchem.setUsePhysics(schemSection.getBoolean("schematics." + key + ".usephysics", Settings.usePhysics));

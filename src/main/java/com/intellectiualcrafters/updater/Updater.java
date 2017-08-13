@@ -36,7 +36,7 @@ public class Updater {
     public static URL getUpdate() {
         try{
         if(HttpUtil.readUrl("https://api.github.com/repos/larryTheCoder/ASkyBlock-Nukkit/releases/latest") == null){
-            Utils.ConsoleMsg("&eUnable to check update! Are you offline?");
+            Utils.send("&eUnable to check update! Are you offline?");
             return null;
         }
         String str = HttpUtil.readUrl("https://api.github.com/repos/larryTheCoder/ASkyBlock-Nukkit/releases/latest");
@@ -62,17 +62,17 @@ public class Updater {
                             return null;
                         }
                     }
-                    Utils.ConsoleMsg("&6 ASkyBlock " + StringMan.join(split, ".") + " is available:");
-                    Utils.ConsoleMsg("&8 - &3Download at: &7" + downloadURL);
+                    Utils.send("&6 ASkyBlock " + StringMan.join(split, ".") + " is available:");
+                    Utils.send("&8 - &3Download at: &7" + downloadURL);
                     return new URL(asset.getString("browser_download_url"));
                 } catch (MalformedURLException e) {
-                    Utils.ConsoleMsg("&dCould not check for updates (1)");
-                    Utils.ConsoleMsg("&7 - Manually check for updates: https://github.com/larryTheCoder/ASkyBlock-Nukkit/releases");
+                    Utils.send("&dCould not check for updates (1)");
+                    Utils.send("&7 - Manually check for updates: https://github.com/larryTheCoder/ASkyBlock-Nukkit/releases");
                 }
             }
         }
         } catch(JSONException | NumberFormatException ex){
-            Utils.ConsoleMsg("&aYou are running the latest version of ASkyBlock!");
+            Utils.send("&aYou are running the latest version of ASkyBlock!");
         }        
         return null;
     }

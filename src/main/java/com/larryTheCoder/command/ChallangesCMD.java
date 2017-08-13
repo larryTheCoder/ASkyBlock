@@ -90,15 +90,15 @@ public final class ChallangesCMD extends Command {
                     giveReward(p, args[1].toLowerCase());
                     int newLevel = getLevelDone(p);
                     // Fire an event if they are different
-                    //Utils.ConsoleMsg("DEBUG: " + oldLevel + " " + newLevel);
+                    //Utils.send("DEBUG: " + oldLevel + " " + newLevel);
                     if (oldLevel < newLevel) {
                         // Update chat
                         plugin.getChatHandlers().setPlayerChallengeLevel(p);
                         // Run commands and give rewards but only if they haven't done it below
-                        //Utils.ConsoleMsg("DEBUG: old level = " + oldLevel + " new level = " + newLevel);
+                        //Utils.send("DEBUG: old level = " + oldLevel + " new level = " + newLevel);
                         String level = Settings.challengeLevels.get(newLevel);
                         if (!level.isEmpty() && !checkChallenge(p, level)) {
-                            //Utils.ConsoleMsg("DEBUG: level name = " + level);
+                            //Utils.send("DEBUG: level name = " + level);
                             completeChallenge(p, level);
                             String message = TextFormat.colorize('&', getChallengeConfig().getString("challenges.levelUnlock." + level + ".message", ""));
                             if (!message.isEmpty()) {
@@ -125,7 +125,7 @@ public final class ChallangesCMD extends Command {
                             for (final String s : permList) {
                                 if (!s.isEmpty()) {
                                     p.addAttachment(plugin).setPermission(s, true);
-                                    Utils.ConsoleMsg("Added permission " + s + " to " + p.getName() + "");
+                                    Utils.send("Added permission " + s + " to " + p.getName() + "");
                                 }
                             }
                             List<String> commands = getChallengeConfig().getStringList("challenges.levelUnlock." + level + ".commands");
@@ -241,7 +241,7 @@ public final class ChallangesCMD extends Command {
                     challengeList.put(level, t);
                 }
             } else {
-                Utils.ConsoleMsg("&cLevel (" + level + ") for challenge " + s + " does not exist. Check challenges.yml.");
+                Utils.send("&cLevel (" + level + ") for challenge " + s + " does not exist. Check challenges.yml.");
             }
         });
     }
@@ -307,7 +307,7 @@ public final class ChallangesCMD extends Command {
      * @return challenge level
      */
     public String getChallengeLevel(Player player) {
-        //Utils.ConsoleMsg("DEBUG: getting challenge level for " + player.getName());
+        //Utils.send("DEBUG: getting challenge level for " + player.getName());
         if (Settings.challengeLevels.isEmpty()) {
             return "";
         }
@@ -321,8 +321,8 @@ public final class ChallangesCMD extends Command {
      * @return level number
      */
     private int getLevelDone(Player player) {
-        //Utils.ConsoleMsg("DEBUG: checking level completed");
-        //Utils.ConsoleMsg("DEBUG: getting challenge level for " + player.getName());
+        //Utils.send("DEBUG: checking level completed");
+        //Utils.send("DEBUG: getting challenge level for " + player.getName());
         for (int result = 0; result < Settings.challengeLevels.size(); result++) {
             if (checkLevelCompletion(player, Settings.challengeLevels.get(result)) > 0) {
                 return result;
@@ -339,9 +339,9 @@ public final class ChallangesCMD extends Command {
      * @return true if player can complete otherwise false
      */
     public boolean checkIfCanCompleteChallenge(final Player player, final String challenge) {
-        // Utils.ConsoleMsg("DEBUG: " + player.getDisplayName() + " " +
+        // Utils.send("DEBUG: " + player.getDisplayName() + " " +
         // challenge);
-        // Utils.ConsoleMsg("DEBUG: 1");
+        // Utils.send("DEBUG: 1");
         // Check if the challenge exists
         /*
         if (!isLevelAvailable(player, getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".level"))) {
@@ -372,14 +372,14 @@ public final class ChallangesCMD extends Command {
                 }
             }
         }
-        // Utils.ConsoleMsg("DEBUG: 2");
+        // Utils.send("DEBUG: 2");
         // Check if it is repeatable
         if (checkChallenge(player, challenge)
                 && !getChallengeConfig().getBoolean("challenges.challengeList." + challenge + ".repeatable")) {
             player.sendMessage(plugin.getPrefix() + TextFormat.RED + "This challange is not repeatable!");
             return false;
         }
-        // Utils.ConsoleMsg("DEBUG: 3");
+        // Utils.send("DEBUG: 3");
         // If the challenge is an island type and already done, then this too is
         // not repeatable
         if (checkChallenge(player, challenge)
@@ -387,7 +387,7 @@ public final class ChallangesCMD extends Command {
             player.sendMessage(plugin.getPrefix() + TextFormat.RED + "This challange is not repeatable!");
             return false;
         }
-        // Utils.ConsoleMsg("DEBUG: 4");
+        // Utils.send("DEBUG: 4");
         // Check if this is an inventory challenge
         if (getChallengeConfig().getString("challenges.challengeList." + challenge + ".type").equalsIgnoreCase("inventory")) {
             // Check if the player has the required items
@@ -407,10 +407,10 @@ public final class ChallangesCMD extends Command {
             }
             return true;
         }
-        // Utils.ConsoleMsg("DEBUG: 5");
+        // Utils.send("DEBUG: 5");
         // Check if this is an island-based challenge
         if (getChallengeConfig().getString("challenges.challengeList." + challenge + ".type").equalsIgnoreCase("island")) {
-            // Utils.ConsoleMsg("DEBUG: 6");
+            // Utils.send("DEBUG: 6");
             if (!plugin.getGrid().playerIsOnIsland(player)) {
                 player.sendMessage(TextFormat.RED + "You are not in island!");
                 return false;
@@ -435,7 +435,7 @@ public final class ChallangesCMD extends Command {
                 });
                 return false;
             }
-            // Utils.ConsoleMsg("DEBUG: 7");
+            // Utils.send("DEBUG: 7");
             return true;
         }
         // Island level check
@@ -449,9 +449,9 @@ public final class ChallangesCMD extends Command {
             return false;
         }
         player.sendMessage(TextFormat.RED + "Command not ready yet");
-        Utils.ConsoleMsg(TextFormat.RED
+        Utils.send(TextFormat.RED
                 + "The challenge " + challenge + " is of an unknown type " + getChallengeConfig().getString("challenges.challengeList." + challenge + ".type"));
-        Utils.ConsoleMsg(TextFormat.RED + "Types should be 'island', 'inventory' or 'level'");
+        Utils.send(TextFormat.RED + "Types should be 'island', 'inventory' or 'level'");
         return false;
     }
 
@@ -522,9 +522,9 @@ public final class ChallangesCMD extends Command {
                         }
                         reqAmount = Integer.parseInt(part[1]);
                         Item item = reqItem;
-                        // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: required item = " +
+                        // Utils.send(TextFormat.GREEN +"DEBUG: required item = " +
                         // reqItem.toString());
-                        // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: item amount = " +
+                        // Utils.send(TextFormat.GREEN +"DEBUG: item amount = " +
                         // reqAmount);
 
                         if (!player.getInventory().contains(reqItem)) {
@@ -532,7 +532,7 @@ public final class ChallangesCMD extends Command {
                         } else {
                             // check amount
                             int amount = 0;
-                            // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: Amount in inventory = "
+                            // Utils.send(TextFormat.GREEN +"DEBUG: Amount in inventory = "
                             // + player.getInventory().all(reqItem).size());
                             // Go through all the inventory and try to find
                             // enough required items
@@ -565,12 +565,12 @@ public final class ChallangesCMD extends Command {
                                         // original
                                         toBeRemoved.add(i.clone());
                                         amount += i.getCount();
-                                        // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: amount is <= req Remove "
+                                        // Utils.send(TextFormat.GREEN +"DEBUG: amount is <= req Remove "
                                         // + i.toString() + ":" +
                                         // i.getDurability() + " x " +
                                         // i.getCount());
                                     } else if ((amount + i.getCount()) == reqAmount) {
-                                        // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: amount is = req Remove "
+                                        // Utils.send(TextFormat.GREEN +"DEBUG: amount is = req Remove "
                                         // + i.toString() + ":" +
                                         // i.getDurability() + " x " +
                                         // i.getCount());
@@ -579,7 +579,7 @@ public final class ChallangesCMD extends Command {
                                         break;
                                     } else {
                                         // Remove a portion of this item
-                                        // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: amount is > req Remove "
+                                        // Utils.send(TextFormat.GREEN +"DEBUG: amount is > req Remove "
                                         // + i.toString() + ":" +
                                         // i.getDurability() + " x " +
                                         // i.getCount());
@@ -591,29 +591,29 @@ public final class ChallangesCMD extends Command {
                                     }
                                 }
                             }
-                            // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: amount "+
+                            // Utils.send(TextFormat.GREEN +"DEBUG: amount "+
                             // amount);
                             if (amount < reqAmount) {
                                 return false;
                             }
                         }
                     } catch (Exception e) {
-                        Utils.ConsoleMsg(TextFormat.RED + "Problem with " + s + " in challenges.yml!");
+                        Utils.send(TextFormat.RED + "Problem with " + s + " in challenges.yml!");
                         player.sendMessage(TextFormat.RED + "Error: challange error contact server admin");
                         String materialList = "";
                         boolean hint = false;
                         for (Item m : Item.getCreativeItems()) {
                             materialList += m.toString() + ",";
                             if (m.toString().contains(s.substring(0, 3).toUpperCase())) {
-                                Utils.ConsoleMsg(TextFormat.RED + "Did you mean " + m.toString() + "?");
+                                Utils.send(TextFormat.RED + "Did you mean " + m.toString() + "?");
                                 hint = true;
                             }
                         }
                         if (!hint) {
-                            Utils.ConsoleMsg(TextFormat.RED + "Sorry, I have no idea what " + s + " is. Pick from one of these:");
-                            Utils.ConsoleMsg(TextFormat.RED + materialList.substring(0, materialList.length() - 1));
+                            Utils.send(TextFormat.RED + "Sorry, I have no idea what " + s + " is. Pick from one of these:");
+                            Utils.send(TextFormat.RED + materialList.substring(0, materialList.length() - 1));
                         } else {
-                            Utils.ConsoleMsg(TextFormat.RED + "Correct challenges.yml with the correct material.");
+                            Utils.send(TextFormat.RED + "Correct challenges.yml with the correct material.");
                         }
                         return false;
                     }
@@ -669,7 +669,7 @@ public final class ChallangesCMD extends Command {
                                 // original
                                 toBeRemoved.add(i.clone());
                                 amount += i.getCount();
-                                // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: amount is <= req Remove "
+                                // Utils.send(TextFormat.GREEN +"DEBUG: amount is <= req Remove "
                                 // + i.toString() + ":" +
                                 // i.getDurability()
                                 // + " x " + i.getCount());
@@ -679,7 +679,7 @@ public final class ChallangesCMD extends Command {
                                 break;
                             } else {
                                 // Remove a portion of this item
-                                // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: amount is > req Remove "
+                                // Utils.send(TextFormat.GREEN +"DEBUG: amount is > req Remove "
                                 // + i.toString() + ":" +
                                 // i.getDurability()
                                 // + " x " + i.getCount());
@@ -692,19 +692,19 @@ public final class ChallangesCMD extends Command {
                             }
                         }
                     }
-                    // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: amount is " +
+                    // Utils.send(TextFormat.GREEN +"DEBUG: amount is " +
                     // amount);
-                    // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: req amount is " +
+                    // Utils.send(TextFormat.GREEN +"DEBUG: req amount is " +
                     // reqAmount);
                     if (amount < reqAmount) {
                         return false;
                     }
 
-                    // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: before set amount " +
+                    // Utils.send(TextFormat.GREEN +"DEBUG: before set amount " +
                     // item.toString() + ":" + item.getDurability() + " x "
                     // + item.getCount());
                     // item.setAmount(reqAmount);
-                    // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: after set amount " +
+                    // Utils.send(TextFormat.GREEN +"DEBUG: after set amount " +
                     // item.toString() + ":" + item.getDurability() + " x "
                     // + item.getCount());
                     // toBeRemoved.add(item);
@@ -714,16 +714,16 @@ public final class ChallangesCMD extends Command {
                     Map<Integer, Item> playerInv = player.getInventory().getContents();
                     try {
                         reqAmount = Integer.parseInt(part[5]);
-                        //Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: required amount is " + reqAmount);
+                        //Utils.send(TextFormat.GREEN +"DEBUG: required amount is " + reqAmount);
                     } catch (Exception e) {
-                        Utils.ConsoleMsg(TextFormat.RED + "Could not parse the quantity of the potion item " + s);
+                        Utils.send(TextFormat.RED + "Could not parse the quantity of the potion item " + s);
                         return false;
                     }
                     int count = reqAmount;
                     for (Item i : playerInv.values()) {
                         // Catches all POTION, LINGERING_POTION and SPLASH_POTION
                         if (i instanceof ItemPotion || i instanceof ItemPotionSplash) {
-                            //Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG:6 part potion check!");
+                            //Utils.send(TextFormat.GREEN +"DEBUG:6 part potion check!");
                             // POTION:NAME:<LEVEL>:<EXTENDED>:<SPLASH/LINGER>:QTY
                             // Test potion
                             Potion potionType = Potion.getPotion(i.getDamage());
@@ -740,7 +740,7 @@ public final class ChallangesCMD extends Command {
                                         // plugin.getLogger().info("DEBUG: name matches");
                                     }
                                 } else {
-                                    Utils.ConsoleMsg(TextFormat.RED + "Potion type is unknown");
+                                    Utils.send(TextFormat.RED + "Potion type is unknown");
                                     match = false;
                                 }
                             }
@@ -803,13 +803,13 @@ public final class ChallangesCMD extends Command {
                             }
                         }
                         if (count <= 0) {
-                            // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: Player has enough");
+                            // Utils.send(TextFormat.GREEN +"DEBUG: Player has enough");
                             break;
                         }
-                        // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: still need " + count + " to complete");
+                        // Utils.send(TextFormat.GREEN +"DEBUG: still need " + count + " to complete");
                     }
                     if (count > 0) {
-                        // Utils.ConsoleMsg(TextFormat.GREEN +"DEBUG: Player does not have enough");
+                        // Utils.send(TextFormat.GREEN +"DEBUG: Player does not have enough");
                         return false;
                     }
 
@@ -821,10 +821,10 @@ public final class ChallangesCMD extends Command {
                 for (Item i : toBeRemoved) {
                     Item[] leftOver = player.getInventory().removeItem(i);
                     if (leftOver.length != 0) {
-                        Utils.ConsoleMsg(TextFormat.RED
+                        Utils.send(TextFormat.RED
                                 + "Exploit? Could not remove the following in challenge " + challenge + " for player " + player.getName() + ":");
                         for (Item left : leftOver) {
-                            Utils.ConsoleMsg(TextFormat.GREEN + left.toString());
+                            Utils.send(TextFormat.GREEN + left.toString());
                         }
                         return false;
                     }
@@ -834,7 +834,7 @@ public final class ChallangesCMD extends Command {
                     boolean er = ASkyBlock.econ.reduceMoney(player, moneyReq);
                     if (!er) {
 
-                        Utils.ConsoleMsg(TextFormat.RED
+                        Utils.send(TextFormat.RED
                                 + "Exploit? Could not remove $" + moneyReq + " from " + player.getName()
                                 + " in challenge " + challenge);
                     }
@@ -910,8 +910,8 @@ public final class ChallangesCMD extends Command {
             if (ASkyBlock.econ.addMoney(player, moneyReward)) {
                 player.sendMessage(TextFormat.GOLD + "You retrived" + TextFormat.WHITE + " $" + moneyReward);
             } else {
-                Utils.ConsoleMsg(TextFormat.RED + "Error giving player " + player + " challenge money:");//) e.errorMessage);
-                Utils.ConsoleMsg(TextFormat.RED + "Reward was $" + moneyReward);
+                Utils.send(TextFormat.RED + "Error giving player " + player + " challenge money:");//) e.errorMessage);
+                Utils.send(TextFormat.RED + "Reward was $" + moneyReward);
             }
         }
         // Dole out permissions
@@ -919,7 +919,7 @@ public final class ChallangesCMD extends Command {
         for (final String s : permList) {
             if (!s.isEmpty()) {
                 player.addAttachment(plugin).setPermission(s, true);
-                Utils.ConsoleMsg("Added permission " + s + " to " + player.getName() + "");
+                Utils.send("Added permission " + s + " to " + player.getName() + "");
             }
         }
         // Give items
@@ -972,21 +972,21 @@ public final class ChallangesCMD extends Command {
                     }
                 } catch (Exception e) {
                     player.sendMessage(TextFormat.RED + "There a problem while executing your command");
-                    Utils.ConsoleMsg(TextFormat.RED + "Could not give " + element[0] + ":" + element[1] + " to " + player.getName() + " for challenge reward!");
+                    Utils.send(TextFormat.RED + "Could not give " + element[0] + ":" + element[1] + " to " + player.getName() + " for challenge reward!");
                     String materialList = "";
                     boolean hint = false;
                     for (Item m : Item.getCreativeItems()) {
                         materialList += m.toString() + ",";
                         if (element[0].length() > 3) {
                             if (m.toString().startsWith(element[0].substring(0, 3))) {
-                                Utils.ConsoleMsg(TextFormat.RED + "Did you mean " + m.toString() + "? If so, put that in challenges.yml.");
+                                Utils.send(TextFormat.RED + "Did you mean " + m.toString() + "? If so, put that in challenges.yml.");
                                 hint = true;
                             }
                         }
                     }
                     if (!hint) {
-                        Utils.ConsoleMsg(TextFormat.RED + "Sorry, I have no idea what " + element[0] + " is. Pick from one of these:");
-                        Utils.ConsoleMsg(TextFormat.RED + materialList.substring(0, materialList.length() - 1));
+                        Utils.send(TextFormat.RED + "Sorry, I have no idea what " + element[0] + " is. Pick from one of these:");
+                        Utils.send(TextFormat.RED + materialList.substring(0, materialList.length() - 1));
                     }
                 }
             } else if (element.length == 3) {
@@ -1009,7 +1009,7 @@ public final class ChallangesCMD extends Command {
                     }
                 } catch (Exception e) {
                     player.sendMessage(TextFormat.RED + "There was a problem giving your reward. Ask Admin to check log!");
-                    Utils.ConsoleMsg(TextFormat.RED + "Could not give " + element[0] + ":" + element[1] + " to " + player.getName() + " for challenge reward!");
+                    Utils.send(TextFormat.RED + "Could not give " + element[0] + ":" + element[1] + " to " + player.getName() + " for challenge reward!");
                     /*
                     if (element[0].equalsIgnoreCase("POTION")) {
                         String potionList = "";
@@ -1018,14 +1018,14 @@ public final class ChallangesCMD extends Command {
                             potionList += m.toString() + ",";
                             if (element[1].length() > 3) {
                                 if (m.toString().startsWith(element[1].substring(0, 3))) {
-                                    Utils.ConsoleMsg(TextFormat.RED + "Did you mean " + m.toString() + "?");
+                                    Utils.send(TextFormat.RED + "Did you mean " + m.toString() + "?");
                                     hint = true;
                                 }
                             }
                         }
                         if (!hint) {
-                            Utils.ConsoleMsg(TextFormat.RED + "Sorry, I have no idea what potion type " + element[1] + " is. Pick from one of these:");
-                            Utils.ConsoleMsg(TextFormat.RED + potionList.substring(0, potionList.length() - 1));
+                            Utils.send(TextFormat.RED + "Sorry, I have no idea what potion type " + element[1] + " is. Pick from one of these:");
+                            Utils.send(TextFormat.RED + potionList.substring(0, potionList.length() - 1));
                         }
 
                     } else {*/
@@ -1034,13 +1034,13 @@ public final class ChallangesCMD extends Command {
                     for (Item m : Item.getCreativeItems()) {
                         materialList += m.toString() + ",";
                         if (m.toString().startsWith(element[0].substring(0, 3))) {
-                            Utils.ConsoleMsg(TextFormat.RED + "Did you mean " + m.toString() + "? If so, put that in challenges.yml.");
+                            Utils.send(TextFormat.RED + "Did you mean " + m.toString() + "? If so, put that in challenges.yml.");
                             hint = true;
                         }
                     }
                     if (!hint) {
-                        Utils.ConsoleMsg(TextFormat.RED + "Sorry, I have no idea what " + element[0] + " is. Pick from one of these:");
-                        Utils.ConsoleMsg(TextFormat.RED + materialList.substring(0, materialList.length() - 1));
+                        Utils.send(TextFormat.RED + "Sorry, I have no idea what " + element[0] + " is. Pick from one of these:");
+                        Utils.send(TextFormat.RED + materialList.substring(0, materialList.length() - 1));
                     }
                     //}
                     return null;
@@ -1059,9 +1059,9 @@ public final class ChallangesCMD extends Command {
                 try {
                     plugin.getServer().dispatchCommand(player, cmd);
                 } catch (Exception e) {
-                    Utils.ConsoleMsg(TextFormat.RED + "Problem executing island command executed by player - skipping!");
-                    Utils.ConsoleMsg(TextFormat.RED + "Command was : " + cmd);
-                    Utils.ConsoleMsg(TextFormat.RED + "Error was: " + e.getMessage());
+                    Utils.send(TextFormat.RED + "Problem executing island command executed by player - skipping!");
+                    Utils.send(TextFormat.RED + "Command was : " + cmd);
+                    Utils.send(TextFormat.RED + "Error was: " + e.getMessage());
                     e.printStackTrace();
                 }
 
@@ -1070,13 +1070,13 @@ public final class ChallangesCMD extends Command {
             // Substitute in any references to player
             try {
                 if (!plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), cmd.replace("[player]", player.getName()))) {
-                    Utils.ConsoleMsg(TextFormat.RED + "Problem executing challenge reward commands - skipping!");
-                    Utils.ConsoleMsg(TextFormat.RED + "Command was : " + cmd);
+                    Utils.send(TextFormat.RED + "Problem executing challenge reward commands - skipping!");
+                    Utils.send(TextFormat.RED + "Command was : " + cmd);
                 }
             } catch (Exception e) {
-                Utils.ConsoleMsg(TextFormat.RED + "Problem executing challenge reward commands - skipping!");
-                Utils.ConsoleMsg(TextFormat.RED + "Command was : " + cmd);
-                Utils.ConsoleMsg(TextFormat.RED + "Error was: " + e.getMessage());
+                Utils.send(TextFormat.RED + "Problem executing challenge reward commands - skipping!");
+                Utils.send(TextFormat.RED + "Command was : " + cmd);
+                Utils.send(TextFormat.RED + "Error was: " + e.getMessage());
                 e.printStackTrace();
             }
         }

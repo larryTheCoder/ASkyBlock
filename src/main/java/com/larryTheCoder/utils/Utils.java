@@ -20,12 +20,10 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
-import cn.nukkit.potion.Effect;
-import cn.nukkit.potion.Potion;
+import cn.nukkit.level.Position;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,23 +33,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Utils functions
+ * 
  * @author Adam Matthew
  */
 public class Utils {
 
-    public static SimpleDateFormat shortDateFormat = new SimpleDateFormat("MM/dd/yyyy");
     public static String LOCALES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "locale";
     public static String DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator;
     public static ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap<>();
-
-    public static void ClearPotionEffects(Player p) {
-        try {
-            p.removeAllEffects();
-        } catch (Throwable exc) {
-            Utils.ConsoleMsg(TextFormat.RED + "Error removing potion effect from " + TextFormat.YELLOW + p.getName() + TextFormat.RED + ": " + exc.getMessage());
-        }
-
-    }
 
     public static Config loadYamlFile(String file) {
         File dataFolder = ASkyBlock.get().getDataFolder();
@@ -70,10 +60,10 @@ public class Utils {
         } else {
             // Create the missing file
             config = new Config();
-            Utils.ConsoleMsg("&cNo " + file + " found. Creating it...");
+            Utils.send("&cNo " + file + " found. Creating it...");
             try {
                 if (ASkyBlock.get().getResource(file) != null) {
-                    ConsoleMsg("&cUsing default found in jar file.");
+                    send("&cUsing default found in jar file.");
                     ASkyBlock.get().saveResource(file, false);
                     config = new Config();
                     config.load(ASkyBlock.get().getDataFolder() + file, Config.YAML);
@@ -81,7 +71,7 @@ public class Utils {
                     config.save(yamlFile);
                 }
             } catch (Exception e) {
-                ConsoleMsg("&cCould not create the " + file + " file!");
+                send("&cCould not create the " + file + " file!");
             }
         }
         return config;
@@ -98,7 +88,6 @@ public class Utils {
             Long msDelta = curMS - msBefore;
             Long msWaitTime = 1000 * (long) seconds;
             if (msDelta < msWaitTime) {
-                //p.sendMessage(ASkyBlock.get().getPrefix() + TextFormat.RED + "[" + what + "] Too soon, you must wait: " + TextFormat.AQUA + Utils.TimeDeltaString_JustMinutesSecs(msWaitTime - msDelta));
                 return false;
             }
         }
@@ -112,45 +101,62 @@ public class Utils {
         Long curMS = System.currentTimeMillis();
         Long msDelta = curMS - msBefore;
         Long msWaitTime = 1000 * (long) seconds;
-        String e = Utils.TimeDeltaString_JustMinutesSecs(msWaitTime - msDelta);
+        String e = Utils.millisToConvertedMin(msWaitTime - msDelta);
         return e;
     }
 
-    public static String ConcatArgs(String[] args, int startIdx) {
-        StringBuilder sb = new StringBuilder();
-        int i = startIdx;
-        while (i < args.length) {
-            if (sb.length() > 0) {
-                sb.append(" ");
-            }
-            sb.append(args[i]);
-            ++i;
+    /**
+     * Returns of the formatted date HH:mm:ss.
+     *
+     * @param times Milli seconds of the time
+     * @return String of the date
+     */
+    public static String convertTimer(long times) {
+        long seconds = times;
+        int minutes = 0;
+        int hour = 0;
+        int days = 0;
+        int week = 0;
+        // Sec -> Minutes
+        while (seconds >= 60) {
+            seconds -= 60;
+            minutes += 1;
         }
-        return sb.toString();
+        // Minutes -> Hour
+        while (minutes >= 60) {
+            minutes = 0;
+            hour += 1;
+        }
+        // Hour -> Day
+        while (hour >= 24) {
+            hour -= 24;
+            days += 1;
+        }
+        // Days -> Week
+        while (days >= 7) {
+            days -= 7;
+            week += 1;
+        }
+
+        if (week != 0) {
+            return week + "W " + days + "D " + hour + "H " + minutes + "M " + seconds + "S";
+        } else if (days != 0) {
+            return days + "D " + hour + "H " + minutes + "M " + seconds + "S";
+        } else if (hour != 0) {
+            return hour + "H " + minutes + "M " + seconds + "S";
+        } else if (minutes != 0) {
+            return minutes + "M " + seconds + "S";
+        } else {
+            return seconds + "S";
+        }
     }
 
-    public static String CamelCase(String str) {
-        if (str == null) {
-            return "";
-        }
-        if (str.length() <= 0) {
-            return "";
-        }
-        return String.valueOf(str.toUpperCase().charAt(0)) + str.substring(1).toLowerCase();
-    }
-
-    public static String GetDateStringFromLong(long dt) {
-        return shortDateFormat.format(dt);
-    }
-
-    public static String LocStringShort(Location loc) {
-        if (loc == null) {
-            return "NULL";
-        }
-        return String.valueOf(loc.getLevel().getName()) + "(" + loc.getFloorX() + "," + loc.getFloorY() + "," + loc.getFloorZ() + ")";
-    }
-
-    public static void loadChunkAt(Location loc) {
+    /**
+     * Loads the chunk in the certain area
+     *
+     * @param loc The location of chunks target
+     */
+    public static void loadChunkAt(Position loc) {
         if (loc != null && !loc.getLevel().isChunkLoaded(loc.getFloorX() >> 4, loc.getFloorZ() >> 4)) {
             loc.getLevel().loadChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
         }
@@ -164,7 +170,7 @@ public class Utils {
      * @return Location
      */
     public static Location getLocationString(final String s) {
-        if (s == null || s.trim() == "") {
+        if (s == null || s.trim().isEmpty()) {
             return null;
         }
         final String[] parts = s.split(":");
@@ -194,9 +200,11 @@ public class Utils {
 
     /**
      * Converts a location to a simple string representation If location is
-     * null, returns empty string
+     * null, returns empty string.
+     * <p>
+     * Format: x:y:z:yaw:pitch:level
      *
-     * @param l
+     * @param location
      * @return String of location
      */
     static public String getStringLocation(final Location location) {
@@ -206,13 +214,20 @@ public class Utils {
         return location.getFloorX() + ":" + location.getFloorY() + ":" + location.getFloorZ() + ":" + Float.floatToRawIntBits((float) location.getYaw()) + ":" + Float.floatToIntBits((float) location.getPitch()) + ":" + location.getLevel().getName();
     }
 
-    public static String LocStringShortNoWorld(Location loc) {
+    /**
+     * Returns of the shortened location
+     *
+     * @param loc The position of the location
+     * @return String parameters
+     */
+    public static String locationShorted(Position loc) {
         if (loc == null) {
-            return "NULL";
+            return "Unknown";
         }
         return "(" + loc.getFloorX() + "," + loc.getFloorY() + "," + loc.getFloorZ() + ")";
     }
 
+    // MAPPING STRINGS ---- Start ----
     public static Map stringToMap(String append) {
         if (append.isEmpty()) {
             return new HashMap<>();
@@ -264,6 +279,7 @@ public class Utils {
         atd.addAll(Arrays.asList(at));
         return atd;
     }
+    // MAPPING STRINGS ---- End ----
 
     public static boolean isNumeric(final String str) {
         if (str == null) {
@@ -283,99 +299,23 @@ public class Utils {
             return false;
         }
         try {
-            Server.getInstance().getLogger().info("Creating directory: " + dirName);
+            Utils.send("&aCreating directory: " + dirName);
             pDir.mkdir();
         } catch (Throwable exc) {
-            Server.getInstance().getLogger().error("EnsureDirectory " + dirName + ": " + exc.toString());
+            Utils.send("&eEnsureDirectory " + dirName + ": " + exc.toString());
         }
         return true;
     }
 
-    public static void ConsoleMsg(String msg) {
+    public static void send(String msg) {
         try {
-            Server.getInstance().getLogger().info(ASkyBlock.get().getPrefix() + TextFormat.WHITE + msg.replace("&", "§"));
+            Server.getInstance().getLogger().info(ASkyBlock.get().getPrefix() + TextFormat.GREEN + msg.replace("&", "§"));
         } catch (Throwable exc) {
-            System.out.println("SkyBlock: Failed to Write ConsoleMsg: " + msg);
+            System.out.println("ASkyBlock failed to send: " + msg);
         }
     }
 
-    static void DisableFlyForUser(Player p) {
-        //TO-DO
-    }
-
-    public static String RainbowString(String str) {
-        return Utils.RainbowString(str, "");
-    }
-
-    public static boolean IsPotionHarmful(Potion pe) {
-        if (pe == null) {
-            return false;
-        }
-        Effect pet = pe.getEffect();
-        if (pet.getId() == 18) {
-            return true;
-        }
-        if (pet.getId() == 19) {
-            return true;
-        }
-        if (pet.getId() == 2) {
-            return true;
-        }
-        return pet.getId() == 7;
-    }
-
-    public static String RainbowString(String str, String ctl) {
-        if (ctl.equalsIgnoreCase("x")) {
-            return str;
-        }
-        StringBuilder sb = new StringBuilder();
-        int idx = 0;
-        boolean useBold = ctl.indexOf(98) >= 0;
-        boolean useItalics = ctl.indexOf(105) >= 0;
-        boolean useUnderline = ctl.indexOf(117) >= 0;
-        int i = 0;
-        while (i < str.length()) {
-            switch (idx % 6) {
-                case 0:
-                    sb.append(TextFormat.RED);
-                    break;
-                case 1:
-                    sb.append(TextFormat.GOLD);
-                    break;
-                case 2:
-                    sb.append(TextFormat.YELLOW);
-                    break;
-                case 3:
-                    sb.append(TextFormat.GREEN);
-                    break;
-                case 4:
-                    sb.append(TextFormat.AQUA);
-                    break;
-                case 5:
-                    sb.append(TextFormat.LIGHT_PURPLE);
-                    break;
-                default:
-                    break;
-            }
-            if (useBold) {
-                sb.append(TextFormat.BOLD);
-            }
-            if (useItalics) {
-                sb.append(TextFormat.ITALIC);
-            }
-            if (useUnderline) {
-                sb.append(TextFormat.UNDERLINE);
-            }
-            sb.append(str.charAt(i));
-            if (str.charAt(i) != ' ') {
-                ++idx;
-            }
-            ++i;
-        }
-        return sb.toString();
-    }
-
-    public static String TimeDeltaString_JustMinutesSecs(long ms) {
+    public static String millisToConvertedMin(long ms) {
         int secs = (int) (ms / 1000 % 60);
         int mins = (int) (ms / 1000 / 60 % 60);
         return String.format("%02dm %02ds", mins, secs);
@@ -433,16 +373,5 @@ public class Utils {
             result.add(color + line);
         }
         return result;
-    }
-
-    public static String prettifyText(String toString) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public static String secureCheck(int i) {
-        int returner;
-        returner = Integer.rotateLeft(i, 3);
-        returner += Integer.reverse(returner);
-        return Integer.toHexString(returner);
     }
 }

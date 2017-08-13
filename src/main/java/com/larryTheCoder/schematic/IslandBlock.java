@@ -16,6 +16,7 @@
  */
 package com.larryTheCoder.schematic;
 
+import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntityChest;
@@ -25,7 +26,6 @@ import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.utils.TextFormat;
-import com.intellectiualcrafters.TaskManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +37,7 @@ import java.util.Map;
 
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.TeleportLogic;
+import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import static com.larryTheCoder.utils.Utils.*;
 
@@ -306,7 +307,7 @@ public class IslandBlock {
                                             try {
                                                 lineText += TextFormat.valueOf(value.toUpperCase());
                                             } catch (Exception noColor) {
-                                                Utils.ConsoleMsg("Unknown color " + value + " in sign when pasting schematic, skipping...");
+                                                Utils.send("Unknown color " + value + " in sign when pasting schematic, skipping...");
                                             }
                                         } else if (key.equalsIgnoreCase("text")) {
                                             lineText += value;
@@ -322,7 +323,7 @@ public class IslandBlock {
                                             } catch (Exception noFormat) {
                                                 // Ignore
                                                 //System.out.println("DEBUG3:" + key + "=>" + value);
-                                                Utils.ConsoleMsg("Unknown format " + value + " in sign when pasting schematic, skipping...");
+                                                Utils.send("Unknown format " + value + " in sign when pasting schematic, skipping...");
                                             }
                                         }
                                     }
@@ -361,11 +362,26 @@ public class IslandBlock {
             }
             signText.add(lineText);
         }
+
+        boolean change = true;
+        for (String texts : signText) {
+            if (!texts.isEmpty()) {
+                change = false;
+                break;
+            }
+        }
+
+        if (change) {
+            signText.clear();
+            signText.add("§aWelcome to");
+            signText.add("§e[player]'s");
+            signText.add("§aisland! Enjoy.");
+        }
     }
 
     public void setBook(Map<String, Tag> tileData) {
         //Bukkit.getLogger().info("DEBUG: Book data ");
-        Utils.ConsoleMsg(tileData.toString());
+        Utils.send(tileData.toString());
     }
 
     public void setChest(Map<String, Tag> tileData) {
@@ -404,7 +420,7 @@ public class IslandBlock {
                                 chestContents.put((int) itemSlot, Item.get(itemMaterial, (int) itemDamage, itemAmount));
                             }
                         } catch (Exception exx) {
-                            Utils.ConsoleMsg("Could not parse item [" + itemType.substring(10).toUpperCase() + "] in schematic");
+                            Utils.send("Could not parse item [" + itemType.substring(10).toUpperCase() + "] in schematic");
                             exx.printStackTrace();
                         }
                     }
@@ -416,7 +432,7 @@ public class IslandBlock {
                 // inventory
             }
         } catch (Exception e) {
-            Utils.ConsoleMsg("Could not parse schematic file item, skipping!");
+            Utils.send("Could not parse schematic file item, skipping!");
             if (ASkyBlock.get().isDebug()) {
                 e.printStackTrace();
             }
@@ -426,17 +442,18 @@ public class IslandBlock {
     /**
      * Paste this block at blockLoc
      *
+     * @param player
      * @param usePhysics
      * @param blockLoc
      */
-    public void paste(Location blockLoc, boolean usePhysics) {
+    public void paste(Player player, Location blockLoc, boolean usePhysics) {
         Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
         loadChunkAt(loc);
         blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, usePhysics);
 
         // BlockEntities
         if (signText != null) {
-            scheduleTextPlacement(loc);
+            scheduleTextPlacement(player, loc);
         } else if (pot != null) {
             schedulePotPlacement(loc);
         } else if (Block.get(typeId, data).getId() == Block.CHEST) {
@@ -466,9 +483,16 @@ public class IslandBlock {
                 BlockEntityChest e = new BlockEntityChest(loc.level.getChunk((int) loc.x >> 4, (int) loc.z >> 4), nbt);
                 e.spawnToAll();
                 loc.level.addBlockEntity(e);
+                if (chestContents.isEmpty() || Settings.chestInventoryOverride) {
+                    int count = 0;
+                    for (Item item : Settings.chestItems) {
+                        e.getInventory().setItem(count, item);
+                        count++;
+                    }
+                }
                 e.getInventory().setContents(chestContents);
             }
-        }.runTaskLater(ASkyBlock.get(), (int) Utils.secondsAsMillis(TeleportLogic.teleportDelay + 5)); // Wait for 5 sec and then spawn them
+        }.runTaskLater(ASkyBlock.get(), (int) Utils.secondsAsMillis(TeleportLogic.teleportDelay) + 10);
     }
 
     private void schedulePotPlacement(Location loc) {
@@ -477,11 +501,11 @@ public class IslandBlock {
             public void run() {
                 pot.set(loc);
             }
-        }.runTaskLater(ASkyBlock.get(), (int) Utils.secondsAsMillis(TeleportLogic.teleportDelay + 5)); // Wait for 5 sec and then spawn them
+        }.runTaskLater(ASkyBlock.get(), (int) Utils.secondsAsMillis(TeleportLogic.teleportDelay) + 10);
 
     }
 
-    private void scheduleTextPlacement(Location loc) {
+    private void scheduleTextPlacement(Player player, Location loc) {
         new NukkitRunnable() {
             @Override
             public void run() {
@@ -490,17 +514,17 @@ public class IslandBlock {
                         .putInt("x", (int) loc.x)
                         .putInt("y", (int) loc.y)
                         .putInt("z", (int) loc.z)
-                        .putString("Text1", signText.get(0))
-                        .putString("Text2", signText.get(1))
-                        .putString("Text3", signText.get(2))
-                        .putString("Text4", signText.get(3));
+                        .putString("Text1", signText.get(0).replace("[player]", player.getName()))
+                        .putString("Text2", signText.get(1).replace("[player]", player.getName()))
+                        .putString("Text3", signText.get(2).replace("[player]", player.getName()))
+                        .putString("Text4", signText.get(3).replace("[player]", player.getName()));
                 BlockEntitySign sign = (BlockEntitySign) BlockEntity.createBlockEntity(
                         BlockEntity.SIGN,
                         loc.getLevel().getChunk((int) loc.x >> 4, (int) loc.z >> 4),
                         nbt);
                 loc.level.addBlockEntity(sign);
             }
-        }.runTaskLater(ASkyBlock.get(), (int) Utils.secondsAsMillis(TeleportLogic.teleportDelay + 5)); // Wait for 5 sec and then spawn them
+        }.runTaskLater(ASkyBlock.get(), (int) Utils.secondsAsMillis(TeleportLogic.teleportDelay) + 10);
     }
 
 }

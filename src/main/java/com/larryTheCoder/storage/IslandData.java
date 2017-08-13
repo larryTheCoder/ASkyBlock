@@ -69,10 +69,10 @@ public class IslandData implements Cloneable {
         this.homeX = vector.getFloorX();
         this.homeY = vector.getFloorY();
         this.homeZ = vector.getFloorZ();
-        ASkyBlock.get().getDatabase().setSpawnPosition(getLocation());
+        ASkyBlock.get().getDatabase().setSpawnPosition(getHome());
     }
 
-    public Location getLocation() {
+    public Location getHome() {
         return new Location(homeX, homeY, homeZ, Server.getInstance().getLevelByName(levelName));
     }
 

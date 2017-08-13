@@ -85,7 +85,7 @@ public class Messages {
     }
 
     public boolean loadMessages() {
-        Utils.ConsoleMsg("&aLoading offline messages...");
+        Utils.send("&aLoading offline messages...");
         try {
             messageStore = Utils.loadYamlFile("messages.yml");
             if (messageStore.getSections("messages") == null) {

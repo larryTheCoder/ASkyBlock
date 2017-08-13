@@ -17,9 +17,7 @@
 package com.larryTheCoder.island;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.block.Block;
-import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.utils.TextFormat;
@@ -153,12 +151,12 @@ public class GridManager {
 
         if (pd != null) {
             if (pd.isSpawn()) {
-                return pd.getLocation();
+                return pd.getHome();
             }
 
             Location locationSafe;
             if (pd.homeX != 0 && pd.homeY != 0 && pd.homeZ != 0) {
-                locationSafe = pd.getLocation();
+                locationSafe = pd.getHome();
             } else {
                 locationSafe = new Location(0, 0, 0, 0, 0, plugin.getServer().getLevelByName(pd.levelName)).add(pd.getCenter());
             }

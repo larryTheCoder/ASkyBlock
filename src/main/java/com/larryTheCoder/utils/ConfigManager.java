@@ -41,7 +41,7 @@ import java.util.List;
  */
 public class ConfigManager {
 
-    public static final String CONFIG_VERSION = "FVMPlsartel0";
+    public static final String CONFIG_VERSION = "MadeIn3D";
 
     /**
      * Loads the various settings from the config.yml file into the plugin
@@ -53,16 +53,16 @@ public class ConfigManager {
         // ********************** Island settings **************************
         Settings.maxHome = cfg.getInt("maxhome", 10);
         Settings.updater = cfg.getBoolean("updater");
-        Settings.useEconomy = scheduleCheck(cfg.getBoolean("economy.enable"), cfg);
+        scheduleCheck(cfg.getBoolean("economy.enable"), cfg);
         Settings.islandDistance = cfg.getInt("island.islandSize", 200);
         Settings.islandHieght = cfg.getInt("island.islandHieght", 100);
         Settings.protectionrange = cfg.getInt("island.protectionRange", 100);
         if (Settings.protectionrange % 2 != 0) {
             Settings.protectionrange--;
-            Utils.ConsoleMsg("Protection range must be even, using " + Settings.protectionrange);
+            Utils.send("Protection range must be even, using " + Settings.protectionrange);
         }
         if (Settings.protectionrange > Settings.islandDistance) {
-            Utils.ConsoleMsg("Protection range cannot be > island distance. Setting them to be equal.");
+            Utils.send("Protection range cannot be > island distance. Setting them to be equal.");
             Settings.protectionrange = Settings.islandDistance;
         }
         if (Settings.protectionrange < 0) {
@@ -72,20 +72,20 @@ public class ConfigManager {
         Settings.islandXOffset = cfg.getInt("island.xoffset", 0);
         if (Settings.islandXOffset < 0) {
             Settings.islandXOffset = 0;
-            Utils.ConsoleMsg("Setting minimum island X Offset to 0");
+            Utils.send("Setting minimum island X Offset to 0");
         } else if (Settings.islandXOffset > Settings.islandDistance) {
             Settings.islandXOffset = Settings.islandDistance;
-            Utils.ConsoleMsg("Setting maximum island X Offset to " + Settings.islandDistance);
+            Utils.send("Setting maximum island X Offset to " + Settings.islandDistance);
         }
         Settings.islandZOffset = cfg.getInt("island.zoffset", 0);
         if (Settings.islandZOffset < 0) {
             Settings.islandZOffset = 0;
-            Utils.ConsoleMsg("Setting minimum island Z Offset to 0");
+            Utils.send("Setting minimum island Z Offset to 0");
         } else if (Settings.islandZOffset > Settings.islandDistance) {
             Settings.islandZOffset = Settings.islandDistance;
-            Utils.ConsoleMsg("Setting maximum island Z Offset to " + Settings.islandDistance);
+            Utils.send("Setting maximum island Z Offset to " + Settings.islandDistance);
         }
-        Settings.teamChat = cfg.getBoolean("chat.teamChat", true);
+        Settings.teamChat = cfg.getBoolean("teamChannels", true);
         Settings.islandMaxNameLong = cfg.getInt("island.nameLimit", 20);
         Settings.cleanrate = cfg.getInt("island.chunkResetPerBlocks", 256);
         Settings.seaLevel = cfg.getInt("island.seaLevel", 3);
@@ -110,7 +110,8 @@ public class ConfigManager {
             Settings.companionNames.add(TextFormat.colorize('&', name));
         });
         //Chest Items
-        String chestItems = cfg.getString("island.chestItems", "");
+        Settings.chestInventoryOverride = cfg.getBoolean("island.items.shouldOverride", false);
+        String chestItems = cfg.getString("island.items.chestItems", "");
         // Check chest items
         if (!chestItems.isEmpty()) {
             final String[] chestItemString = chestItems.split(" ");
@@ -161,14 +162,14 @@ public class ConfigManager {
         Settings.biomeCost = cfg.getDouble("biomesettings.defaultcost", 100D);
         if (Settings.biomeCost < 0D) {
             Settings.biomeCost = 0D;
-            Utils.ConsoleMsg("Biome default cost is < $0, so set to zero.");
+            Utils.send("Biome default cost is < $0, so set to zero.");
         }
         String defaultBiome = cfg.getString("biomesettings.defaultbiome", "PLAINS");
         try {
             // re-check if the biome exsits
             Settings.defaultBiome = Biome.getBiome(defaultBiome);
         } catch (Exception e) {
-            Utils.ConsoleMsg("Could not parse biome " + defaultBiome + " using PLAINS instead.");
+            Utils.send("Could not parse biome " + defaultBiome + " using PLAINS instead.");
             Settings.defaultBiome = Biome.getBiome(Biome.PLAINS);
         }
 
@@ -190,7 +191,7 @@ public class ConfigManager {
                 Settings.defaultSpawnSettings.put(flag, value);
                 Settings.defaultIslandSettings.put(flag, value);
             } catch (Exception e) {
-                Utils.ConsoleMsg("Unknown setting in config.yml:protection.world " + setting.toUpperCase() + " skipping...");
+                Utils.send("Unknown setting in config.yml:protection.world " + setting.toUpperCase() + " skipping...");
             }
         }
         // Get the default language
@@ -206,33 +207,35 @@ public class ConfigManager {
                 availableLocales.put(code, new ASlocales(ASkyBlock.get(), code, index++));
             }
         } catch (IOException e1) {
-            Utils.ConsoleMsg("&cCould not add locales!");
+            Utils.send("&cCould not add locales!");
         }
         if (!availableLocales.containsKey(Settings.defaultLanguage)) {
-            Utils.ConsoleMsg("&c'" + Settings.defaultLanguage + ".yml' not found in /locale folder. Using /locale/en-US.yml");
+            Utils.send("&c'" + Settings.defaultLanguage + ".yml' not found in /locale folder. Using /locale/en-US.yml");
             Settings.defaultLanguage = "en-US";
             availableLocales.put(Settings.defaultLanguage, new ASlocales(ASkyBlock.get(), Settings.defaultLanguage, 0));
         }
         ASkyBlock.get().setAvailableLocales(availableLocales);
-        Utils.ConsoleMsg(TextFormat.YELLOW + "Seccessfully checked config.yml");
+        // GridProtection
+        Settings.shouldTeleportSpawn = cfg.getBoolean("grid.teleportSpawn", false);
+        Utils.send(TextFormat.YELLOW + "Seccessfully checked config.yml");
     }
 
-    private static boolean scheduleCheck(boolean flag, Config cfg) {
+    private static void scheduleCheck(boolean flag, Config cfg) {
         if (flag) {
             Plugin plugin = ASkyBlock.get().getServer().getPluginManager()
                     .getPlugin("EconomyAPI");
             if (plugin != null && !plugin.isEnabled()) {
-                Utils.ConsoleMsg("&eScheduling Economy instance due to 'plugin not enabled'");
+                Utils.send("&eScheduling Economy instance due to 'plugin not enabled'");
                 // schedule another delayed task
                 TaskManager.runTaskLater(() -> {
                     scheduleCheck(true, cfg);
                 }, 3); // 3 sec
             } else if (plugin != null && plugin.isEnabled()) {
-                Utils.ConsoleMsg("&eSeccessfully created an instance with Economy plugin");
+                Utils.send("&eSeccessfully created an instance with Economy plugin");
                 ASkyBlock.econ = new EconomyAPI();
                 Settings.useEconomy = true;
             } else {
-                Utils.ConsoleMsg("&eError: No economy plugin were found!");
+                Utils.send("&eError: No economy plugin were found!");
                 Settings.useEconomy = false;
             }
             if(Settings.useEconomy){
@@ -240,6 +243,5 @@ public class ConfigManager {
                 Settings.firstIslandFree = !cfg.getBoolean("economy.payNewIsland", false);
             }
         }
-        return false;
     }
 }

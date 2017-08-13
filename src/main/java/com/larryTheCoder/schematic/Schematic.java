@@ -628,13 +628,14 @@ public class Schematic {
     /**
      * This method pastes a schematic
      *
+     * @param player
      * @param loc
      */
-    public void pasteSchematic(Location loc) {
+    public void pasteSchematic(Player player, Location loc) {
         // If this is not a file schematic, paste the default island
         if (this.schematicFolder == null) {
             //plugin.getFallback().createIsland(loc.getLevel(), loc.getFloorX() - 13, loc.getFloorY(), loc.getFloorZ() - 14, player);
-            Utils.ConsoleMsg(TextFormat.RED + "Missing schematic - using default block only");
+            Utils.send(TextFormat.RED + "Missing schematic - using default block only");
             return;
         }
         Level world = loc.getLevel();
@@ -642,7 +643,7 @@ public class Schematic {
         blockLoc.subtract(bedrock);
         // Paste the island blocks
         islandBlocks.stream().forEach((b) -> {
-            b.paste(blockLoc, true);
+            b.paste(player, blockLoc, true);
         });
 
         // Find the grass spot

@@ -112,13 +112,13 @@ public final class ASConnection {
             }
             closed = false;
         } else if (closed == true && db != null) {
-            Utils.ConsoleMsg("§cThis a problem. The SQLManager is closed but the Database is not...");
-            Utils.ConsoleMsg("§cYou might to stop server for this kind of problem to fix this error");
-            Utils.ConsoleMsg("&cError Code: 0x3f");
+            Utils.send("§cThis a problem. The SQLManager is closed but the Database is not...");
+            Utils.send("§cYou might to stop server for this kind of problem to fix this error");
+            Utils.send("&cError Code: 0x3f");
         } else if (closed == false && db == null) {
-            Utils.ConsoleMsg("§cThis a problem. The SQLManager is open but the Database is not...");
-            Utils.ConsoleMsg("§cYou might to stop server for this kind of problem to fix this error");
-            Utils.ConsoleMsg("&cError Code: 0x4f");
+            Utils.send("§cThis a problem. The SQLManager is open but the Database is not...");
+            Utils.send("§cYou might to stop server for this kind of problem to fix this error");
+            Utils.send("&cError Code: 0x4f");
         }
     }
     

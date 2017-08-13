@@ -76,7 +76,7 @@ public class LeaveSubCommand extends SubCommand {
         if(getPlugin().getDatabase().getSpawn() != null){
             pt.teleport(getPlugin().getDatabase().getSpawn().getCenter());
         } else {
-            Utils.ConsoleMsg("&c[READ ME] &eThe default spawn world not found. Please use /is "
+            Utils.send("&c[READ ME] &eThe default spawn world not found. Please use /is "
                     + "setspawn in-game. &aUsing default world");
             pt.teleport(getPlugin().getServer().getDefaultLevel().getSafeSpawn());
         }

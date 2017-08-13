@@ -29,17 +29,14 @@ import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.IslandCreateEvent;
 import com.larryTheCoder.player.PlayerData;
+import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
 import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.utils.Pair;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Adam Matthew
@@ -48,7 +45,7 @@ public class IslandManager {
 
     private final ASkyBlock plugin;
     // Block players who was attempt /is delete and deleting command doesn't fully cleared island location
-    private final ArrayList<Player> blockedCIsland = new ArrayList<>();
+    private final Map<Player, Integer> blockedCIsland = new HashMap<>();
 
     public IslandManager(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -63,8 +60,8 @@ public class IslandManager {
     }
 
     public void handleIslandCommand(Player p, boolean reset, int homes) {
-        if (blockedCIsland.contains(p)) {
-            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorTooSoon.replace("[secs]", "1 minute").replace("[cmd]", "create"));
+        if (blockedCIsland.containsKey(p)) {
+            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorTooSoon.replace("[secs]", Utils.convertTimer(blockedCIsland.get(p))).replace("[cmd]", "create"));
             return;
         }
         if (!reset) {
@@ -91,9 +88,9 @@ public class IslandManager {
     public void showFancyTitle(Player p) {
         // Show fancy titles!
         // Hmmm cant use JSON...
-        new NukkitRunnable(){
+        new NukkitRunnable() {
             @Override
-            public void run(){
+            public void run() {
                 IslandData ownership = plugin.getIslandInfo(p.getLocation());
                 if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
                     p.setSubtitle(TextFormat.BLUE + plugin.getLocale(p).islandSubTitle.replace("[player]", p.getName()));
@@ -105,9 +102,9 @@ public class IslandManager {
                     //p.sendMessage(plugin.getLocale(p).islandDonate.replace("[player]", p.getName()));
                     p.sendMessage(plugin.getLocale(p).islandSupport);
                     p.sendMessage(plugin.getLocale(p).islandURL);
-                }                
+                }
             }
-        }.runTaskLater(plugin, 50);
+        }.runTaskLater(plugin, (int) Utils.secondsAsMillis(TeleportLogic.teleportDelay + 3));
 
     }
 
@@ -140,16 +137,16 @@ public class IslandManager {
             pOwner.sendMessage(plugin.getPrefix() + plugin.getLocale(pOwner).errorOfflinePlayer);
             return;
         }
-        Utils.ConsoleMsg("&cAn island owner, " + pOwner.getName() + " attempt to "
+        Utils.send("&cAn island owner, " + pOwner.getName() + " attempt to "
                 + "execute kick command to " + pVictim.getName() + " At "
-                + Utils.LocStringShortNoWorld(locVict));
+                + Utils.locationShorted(locVict));
         pOwner.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Success! You send " + TextFormat.YELLOW + victimName + TextFormat.GREEN + " to spawn!");
         pVictim.sendMessage(plugin.getPrefix() + plugin.getLocale(pVictim).kickedFromOwner.replace("[name]", pOwner.getName())); //TextFormat.RED + "You were kicked from island owned by " + TextFormat.YELLOW + pOwner.getName());
         // Teleport
         if (plugin.getDatabase().getSpawn() != null) {
             pVictim.teleport(plugin.getDatabase().getSpawn().getCenter());
         } else {
-            Utils.ConsoleMsg("The default spawn world not found. Please use /is "
+            Utils.send("The default spawn world not found. Please use /is "
                     + "setspawn in-game. Using default world");
             pVictim.teleport(plugin.getServer().getDefaultLevel().getSafeSpawn());
         }
@@ -175,7 +172,7 @@ public class IslandManager {
         if (plugin.getDatabase().getSpawn() != null) {
             p.teleport(plugin.getDatabase().getSpawn().getCenter());
         } else {
-            Utils.ConsoleMsg("The default spawn world not found. Please use /is "
+            Utils.send("The default spawn world not found. Please use /is "
                     + "setspawn in-game. Using default world");
             p.teleport(plugin.getServer().getDefaultLevel().getSafeSpawn());
         }
@@ -230,9 +227,9 @@ public class IslandManager {
                     return true;
                 }
                 if (stmt != null) {
-                    stmt.pasteSchematic(locIsland);
+                    stmt.pasteSchematic(p, locIsland);
                 } else {
-                    plugin.getSchematic("default").pasteSchematic(locIsland);
+                    plugin.getSchematic("default").pasteSchematic(p, locIsland);
                 }
                 boolean result = plugin.getDatabase().createIsland(pd);
                 if (result) {
@@ -316,9 +313,9 @@ public class IslandManager {
 
         // Clear up any blocks
         if (!blocksToClear.isEmpty()) {
-            Utils.ConsoleMsg("&aIsland delete: There are &e" + blocksToClear.size() + " &ablocks that need to be cleared up.");
-            Utils.ConsoleMsg("&aClean rate is &e" + Settings.cleanrate + " &ablocks per second. Should take ~" + Math.round(blocksToClear.size() / Settings.cleanrate) + "s");
-            blockedCIsland.add(p);
+            Utils.send("&aIsland delete: There are &e" + blocksToClear.size() + " &ablocks that need to be cleared up.");
+            Utils.send("&aClean rate is &e" + Settings.cleanrate + " &ablocks per second. Should take ~" + Math.round(blocksToClear.size() / Settings.cleanrate) + "s");
+            blockedCIsland.put(p, Math.round(blocksToClear.size() / Settings.cleanrate));
             new NukkitRunnable() {
                 @Override
                 public void run() {
@@ -332,22 +329,16 @@ public class IslandManager {
                         if (pd.inIslandSpace(xCoord, zCoord)) {
                             //plugin.getLogger().info(xCoord + "," + zCoord + " is in island space - deleting column");
                             // Delete all the blocks here
-                            for (int y = 0; y < 255; y++) {
+                            for (int y = 0; y < 255 - Settings.seaLevel; y++) {
                                 // Overworld
-                                Vector3 vec = new Vector3(xCoord, y, zCoord);
-                                int setTo = Block.AIR;
-                                // Split depending on below or above water line
-                                if (y < Settings.seaLevel) {
-                                    setTo = Block.WATER;
-                                }
-
-                                level.setBlock(vec, Block.get(setTo), true, true);
+                                Vector3 vec = new Vector3(xCoord, y + Settings.seaLevel, zCoord);
+                                level.setBlock(vec, Block.get(Block.AIR), true, true);
                             }
                         }
                         it.remove();
                     }
                     if (blocksToClear.isEmpty()) {
-                        Utils.ConsoleMsg("&aFinished island deletion");
+                        Utils.send("&aFinished island deletion");
                         blockedCIsland.remove(p);
                         this.cancel();
                     }
@@ -466,7 +457,7 @@ public class IslandManager {
         // Make a list of test locations and test them
         Set<Location> islandTestLocations = new HashSet<>();
         if (checkIsland(player)) {
-            islandTestLocations.add(plugin.getIslandInfo(player).getLocation());
+            islandTestLocations.add(plugin.getIslandInfo(player).getHome());
         } else if (plugin.getTManager().hasTeam(player)) {
             islandTestLocations.add(plugin.getPlayerInfo(player).getTeamIslandLocation());
         }

@@ -53,12 +53,14 @@ public class Settings {
     public static int gamemode;
     public static int memberTimeOut;
     public static List<String> companionNames = new ArrayList<>();
+    public static boolean chestInventoryOverride;
     public static Item[] chestItems = new Item[0];
     public static boolean broadcastMessages;
     public static double biomeCost;
     public static Biome defaultBiome;
     public static boolean teamChat;
     public static boolean saveInventory;
+
     public static String defaultLanguage;
     public static boolean stopTime;
     
@@ -67,6 +69,9 @@ public class Settings {
     public static Set<String> challengeList = new HashSet<>();
     public static List<String> freeLevels = new ArrayList<>();
     public static int waiverAmount = 0;
+    
+    // GridProtection
+    public static boolean shouldTeleportSpawn = false;
     
 
     /**

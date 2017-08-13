@@ -69,7 +69,7 @@ public class MySQLDatabase implements AbstractDatabase{
             return this.connection;
         }
         Class.forName("com.mysql.jdbc.Driver");
-        Utils.ConsoleMsg("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database);
+        Utils.send("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database);
         this.connection =
                 DriverManager.getConnection("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
         return this.connection;

@@ -19,7 +19,6 @@ package com.larryTheCoder.listener.invitation;
 import cn.nukkit.Player;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.utils.Settings;
 
 /**
