@@ -444,13 +444,9 @@ public class IslandManager {
         IslandData island = GetIslandAt(local);
         if (island != null) {
             // On an island in the grid
-            if (island.onIsland(local) && island.getMembers().contains(player.getName())) {
-                // In a protected zone but is on the list of acceptable players
-                return true;
-            } else {
-                // Not allowed
-                return false;
-            }
+            // In a protected zone but is on the list of acceptable players
+            // Otherwise return false
+            return island.onIsland(local) || island.getMembers().contains(player.getName());
         } else {
         }
         // Not in the grid, so do it the old way
@@ -467,16 +463,10 @@ public class IslandManager {
 //            return false;
 //        }
         // Run through all the locations
-        for (Location islandTestLocation : islandTestLocations) {
-            if (local.getLevel().equals(islandTestLocation.getLevel())) {
-                if (loc.getX() >= islandTestLocation.getX() - Settings.protectionrange / 2
+        return islandTestLocations.stream().filter((islandTestLocation) -> (local.getLevel().getName().equalsIgnoreCase(islandTestLocation.level.getName())))
+                .anyMatch((islandTestLocation) -> (loc.getX() >= islandTestLocation.getX() - Settings.protectionrange / 2
                         && loc.getX() < islandTestLocation.getX() + Settings.protectionrange / 2
                         && loc.getZ() >= islandTestLocation.getZ() - Settings.protectionrange / 2
-                        && loc.getZ() < islandTestLocation.getZ() + Settings.protectionrange / 2) {
-                    return true;
-                }
-            }
-        }
-        return false;
+                        && loc.getZ() < islandTestLocation.getZ() + Settings.protectionrange / 2));
     }
 }

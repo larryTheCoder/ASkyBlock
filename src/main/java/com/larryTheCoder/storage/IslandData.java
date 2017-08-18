@@ -20,6 +20,7 @@ import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
+import com.google.common.collect.Lists;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.utils.Settings;
@@ -161,6 +162,9 @@ public class IslandData implements Cloneable {
 
     public ArrayList<String> getMembers() {
         PlayerData pd = ASkyBlock.get().getDatabase().getPlayerData(this.owner);
+        if(pd == null){
+            return Lists.newArrayList(new String());
+        }
         return pd.members;
     }
 
@@ -172,24 +176,19 @@ public class IslandData implements Cloneable {
      */
     public boolean onIsland(Location target) {
         Level level = Server.getInstance().getLevelByName(levelName);
-        if (level != null) {
+        if (level != null && levelName != null) {
             // If the new nether is being used, islands exist in the nether too
             //plugin.getLogger().info("DEBUG: target x = " + target.getBlockX() + " target z = " + target.getBlockZ());
             //plugin.getLogger().info("DEBUG: min prot x = " + getMinProtectedX() + " min z = " + minProtectedZ);
             //plugin.getLogger().info("DEBUG: max x = " + (getMinProtectedX() + protectionRange) + " max z = " + (minProtectedZ + protectionRange));
 
-            if (target.getLevel().equals(level)) {
-                if (target.getFloorX() >= getMinProtectedX() && target.getFloorX() < (getMinProtectedX() + protectionRange)
-                        && target.getFloorZ() >= getMinProtectedZ() && target.getFloorZ() < (getMinProtectedZ() + protectionRange)) {
+            if (target.getLevel().getName().equalsIgnoreCase(levelName)) {
+                if (target.getFloorX() >= getMinProtectedX() 
+                        && target.getFloorX() <= (getMinProtectedX() + protectionRange)
+                        && target.getFloorZ() >= getMinProtectedZ() 
+                        && target.getFloorZ() <= (getMinProtectedZ() + protectionRange)) {
                     return true;
                 }
-                /*
-                if (target.getX() >= center.getBlockX() - protectionRange / 2 && target.getX() < center.getBlockX() + protectionRange / 2
-                        && target.getZ() >= center.getBlockZ() - protectionRange / 2 && target.getZ() < center.getBlockZ() + protectionRange / 2) {
-
-                    return true;
-                }
-                 */
             }
         }
         return false;

@@ -283,7 +283,7 @@ public class Schematic {
                         }
                         // todo
                     }
-                    
+
                     switch (entry.getKey()) {
                         case "Pos":
                             //Bukkit.getLogger().info("DEBUG Pos fond");
@@ -508,10 +508,6 @@ public class Schematic {
                 }
             }
         }
-        if (bedrock == null) {
-            Server.getInstance().getLogger().error("Schematic must have at least one bedrock in it!");
-            throw new IOException();
-        }
         if (!grassBlocks.isEmpty()) {
             // Sort by height
             List<Vector3> sorted = new ArrayList<>();
@@ -539,6 +535,10 @@ public class Schematic {
             Server.getInstance().getLogger().info(TextFormat.YELLOW + " - " + schematicFolder.getName().toUpperCase().replace(".SCHEMATIC", "") + " Info:");
             Server.getInstance().getLogger().info(TextFormat.GRAY + "   - Blocks: " + TextFormat.GREEN + countBlocks + " ");
             Server.getInstance().getLogger().info(TextFormat.GRAY + "   - SafeSpot: " + TextFormat.RED + "Currently deprecated");
+            if (bedrock == null) {
+                Server.getInstance().getLogger().info("   - Schematic must have at least one bedrock in it!");
+                bedrock = new Vector3(0, 0, 0);
+            }
         }
         facingList.put((byte) 0, SOUTH);
         facingList.put((byte) 1, WEST);
@@ -750,7 +750,6 @@ public class Schematic {
     /**
      * @return the tileEntitiesMap
      */
-    @SuppressWarnings("ReturnOfCollectionOrArrayField")
     public Map<Vector3, Map<String, Tag>> getTileEntitiesMap() {
         return tileEntitiesMap;
     }

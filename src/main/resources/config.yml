@@ -107,7 +107,10 @@ island:
      # Will be replaced with this items
      #
      # If the chest empty, it will use your chest items as items in the chest.
-     shouldOverride: false
+     # Sometimes, this function is used to avoid crash during translating MC ID's
+     # Into MCPE ID's. They will cause crash, leak and glitch. So always set this
+     # to true;
+     shouldOverride: true
      # Items that will be in the chest when the player starts an island
      # Must be in Nukkit Item format. Format is <ID>:<Qty> or <ID>:<Data>:<Qty>
      # Use <Data> to set the durability of a item or to select sub-items/colors.  
@@ -115,7 +118,7 @@ island:
      # Spawn EGGs is not available yet! do not put I warned you :P
      #
      # Check console for errors and guidance after reloading configuration
-     chestItems: 'ICE:2 MELON:1 TORCH:2 BONE:1 LAVA_BUCKET:1 PUMPKIN_SEEDS:1 SUGAR_CANE:1 RED_MUSHROOM:1 BROWN_MUSHROOM:1 CACTUS:1 BREAD:1 WHEAT:1 LEATHER_BOOTS:1 LEATHER_HELMET:1 LEATHER_CHESTPLATE:1 LEATHER_LEGGINGS:1'
+     chestItems: 'ICE:2 MELON:1 TORCH:2 BONE:1 325:1:10 PUMPKIN_SEEDS:1 SUGAR_CANE:1 RED_MUSHROOM:1 BROWN_MUSHROOM:1 CACTUS:1 BREAD:1 WHEAT:1 LEATHER_BOOTS:1 LEATHER_HELMET:1 LEATHER_CHESTPLATE:1 LEATHER_LEGGINGS:1'
 
 # This section contains the biomes that can be bought or used
 biomesettings:

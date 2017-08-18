@@ -335,11 +335,14 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
             }
         }
     }
-    
+
     /**
      * Load every islands Components
      */
     private void initIslands() {
+        getServer().getCommandMap().register("ASkyBlock", new Commands(this));
+        getServer().getCommandMap().register("ASkyBlock", this.cmds = new ChallangesCMD(this));
+        getServer().getCommandMap().register("ASkyBlock", new AdminCMD(this));
         PluginManager pm = getServer().getPluginManager();
         chatHandler = new ChatHandler(this);
         teleportLogic = new TeleportLogic(this);
@@ -370,9 +373,6 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         grid = new GridManager(this);
         managers = new TeamManager(this);
         inventory = new InventorySave(this);
-        getServer().getCommandMap().register("ASkyBlock", new Commands(this));
-        getServer().getCommandMap().register("ASkyBlock", this.cmds = new ChallangesCMD(this));
-        getServer().getCommandMap().register("ASkyBlock", new AdminCMD(this));
         generateLevel();
     }
 
@@ -652,6 +652,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
                 }
             } catch (Exception ex) {
                 getServer().getLogger().info(TextFormat.YELLOW + "   - Error loading schematic in section " + key + ". Skipping...");
+                ex.printStackTrace();
             }
         }
         // Try to load schematic the default schematic
@@ -767,6 +768,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     private void test() {
         //getSchematic("default").pasteSchematic(new Location(50, 90, 50, getServer().getLevelByName("SkyBlock")));
+        
     }
 
 }

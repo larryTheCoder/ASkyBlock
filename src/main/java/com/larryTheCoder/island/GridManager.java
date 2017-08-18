@@ -17,6 +17,7 @@
 package com.larryTheCoder.island;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
@@ -30,6 +31,7 @@ import java.util.Set;
 
 import static cn.nukkit.math.BlockFace.*;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.utils.MainLogger;
 import com.larryTheCoder.utils.Pair;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -39,6 +41,8 @@ import java.util.List;
  * @author Adam Matthew
  */
 public class GridManager {
+
+    private MainLogger deb = Server.getInstance().getLogger();
 
     private ASkyBlock plugin;
 
@@ -137,8 +141,8 @@ public class GridManager {
      * Determines a safe teleport spot on player's island or the team island
      * they belong to.
      *
-     * @param p       The player
-     * @param number  Starting home location e.g., 1
+     * @param p The player
+     * @param number Starting home location e.g., 1
      * @return Location of a safe teleport spot or null if one cannot be found
      */
     public Location getSafeHomeLocation(String p, int number) {
@@ -167,51 +171,64 @@ public class GridManager {
                 if (isSafeLocation(locationSafe)) {
                     return locationSafe;
                 }
-                
+
                 // To cover slabs, stairs and other half blocks, try one block above
                 Location locPlusOne = locationSafe.clone();
                 locPlusOne.add(new Vector3(0, 1, 0));
+                deb.debug("Testing if the location is safe");
                 if (isSafeLocation(locPlusOne)) {
                     // Adjust the home location accordingly
                     pd.setHomeLocation(locPlusOne);
+                    deb.debug("Seccess");
                     return locPlusOne;
                 }
-                
+
                 // Try to find all the way up
+                deb.debug("Failed! Testing the way up");
                 int y = 0;
-                while (y++ < 256) {
+                for (; y < 255; y++) {
                     Position locPlusY = locPlusOne.setComponents(locationSafe.getX(), y, locationSafe.getZ());
                     if (isSafeLocation(locPlusY)) {
                         // Adjust the home location accordingly
                         pd.setHomeLocation(locPlusY);
+                        deb.debug("Seccess");
                         return locPlusY.getLocation();
                     }
                 }
-                
+
+                deb.debug("Failed! The square");
                 // Try to find the island area (Default: 25 length Squared)
                 List<Pair> listBlocks = new ArrayList<>();
                 int minX = (int) pd.getCenter().getX() - 25;
                 int minZ = (int) pd.getCenter().getZ() - 25;
+                int minY = (int) pd.getCenter().getY() - 25;
+                int maxY = (int) pd.getCenter().getY() + 25;
                 int maxX = (int) pd.getCenter().getX() + 25;
                 int maxZ = (int) pd.getCenter().getZ() + 25;
-                for(int dx = minX; dx <= maxX; dx++){
-                    for(int dz = minZ; dz <= maxZ; dz++){
+
+                for (int dx = minX; dx <= maxX; dx++) {
+                    for (int dz = minZ; dz <= maxZ; dz++) {
                         listBlocks.add(new Pair(dx, dz));
                     }
                 }
-                
+
                 Iterator<Pair> iter = listBlocks.iterator();
+                int count = 0;
                 while (iter.hasNext()) {
                     Pair pair = iter.next();
-                    for (y = 0; y <= 255; y++) {
+                    for (y = minY; y <= maxY; y++) {
                         Position pos = locPlusOne.setComponents(pair.getLeft(), y, pair.getRight());
                         if (isSafeLocation(pos)) {
                             // Adjust the home location accordingly
                             pd.setHomeLocation(pos);
+                            deb.debug("Seccess " + count);
                             return pos.getLocation();
                         }
+                        count++;
                     }
+                    iter.remove();
                 }
+                deb.debug("Failed: Counter " + count);
             }
         }
 

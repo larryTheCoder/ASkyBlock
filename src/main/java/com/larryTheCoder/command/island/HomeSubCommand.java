@@ -61,12 +61,17 @@ public class HomeSubCommand extends SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         int islandNumber;
+        Utils.send("" + args[0]);
+        Utils.send("" + args[1]);
         if (args.length != 2) {
             islandNumber = 1;
-        } else if (Utils.isNumeric(args[1]) && Integer.getInteger(args[1]) == 1) {
-            islandNumber = Integer.getInteger(args[1]);
+        } else if (Utils.isNumeric(args[1])) {
+            islandNumber = Integer.parseInt(args[1]);
         } else {
             return false;
+        }
+        if(islandNumber < 1){
+            
         }
         Player p = sender.getServer().getPlayer(sender.getName());
         List<IslandData> island = getPlugin().getDatabase().getIslands(sender.getName(), getPlugin().getDefaultWorld(p));

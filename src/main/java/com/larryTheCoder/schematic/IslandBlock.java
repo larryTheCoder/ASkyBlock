@@ -20,12 +20,14 @@ import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntityChest;
+import cn.nukkit.blockentity.BlockEntityFlowerPot;
 import cn.nukkit.blockentity.BlockEntitySign;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.utils.TextFormat;
+import com.intellectiualcrafters.TaskManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +44,7 @@ import com.larryTheCoder.utils.Utils;
 import static com.larryTheCoder.utils.Utils.*;
 
 import org.jnbt.CompoundTag;
+import org.jnbt.IntTag;
 import org.jnbt.ListTag;
 import org.jnbt.StringTag;
 import org.jnbt.Tag;
@@ -64,10 +67,27 @@ public class IslandBlock {
     private final int y;
     private final int z;
     private List<String> signText;
-    private PotBlock pot;
     // Chest contents
     private final HashMap<Integer, Item> chestContents;
     public static final HashMap<String, Integer> WETOME = new HashMap<>();
+    // Pot items
+    private Block potItem;
+    private int potItemData;
+
+    private static final HashMap<String, Integer> POT_ITEM_LISTS;
+
+    static {
+        POT_ITEM_LISTS = new HashMap<>();
+        POT_ITEM_LISTS.put("", Item.AIR);
+        POT_ITEM_LISTS.put("minecraft:red_flower", Item.ROSE);
+        POT_ITEM_LISTS.put("minecraft:yellow_flower", Item.FLOWER);
+        POT_ITEM_LISTS.put("minecraft:sapling", Item.SAPLING);
+        POT_ITEM_LISTS.put("minecraft:red_mushroom", Item.RED_MUSHROOM);
+        POT_ITEM_LISTS.put("minecraft:brown_mushroom", Item.BROWN_MUSHROOM);
+        POT_ITEM_LISTS.put("minecraft:cactus", Item.CACTUS);
+        POT_ITEM_LISTS.put("minecraft:deadbush", Item.DEAD_BUSH);
+        POT_ITEM_LISTS.put("minecraft:tallgrass", Item.TALL_GRASS);
+    }
 
     static {
         // Establish the World Edit to Material look up
@@ -172,7 +192,6 @@ public class IslandBlock {
         this.y = y;
         this.z = z;
         signText = null;
-        pot = null;
         chestContents = new HashMap<>();
     }
 
@@ -238,9 +257,75 @@ public class IslandBlock {
         //skull.prep(map, dataValue);
     }
 
-    public void setFlowerPot(Map<String, Tag> map) {
-        pot = new PotBlock();
-        pot.prep(map);
+    public void setFlowerPot(Map<String, Tag> tileData) {
+        // Initialize as default
+        potItem = Block.get(Item.AIR);
+        potItemData = 0;
+        try {
+            if (tileData.containsKey("Item")) {
+
+                // Get the item in the pot
+                if (tileData.get("Item") instanceof IntTag) {
+                    // Item is a number, not a material
+                    int id = ((IntTag) tileData.get("Item")).getValue();
+                    potItem = Block.get(id);
+                    // Check it's a viable pot item
+                    if (!POT_ITEM_LISTS.containsValue(id)) {
+                        // No, so reset to AIR
+                        potItem = Block.get(Item.AIR);
+                    }
+                } else if (tileData.get("Item") instanceof StringTag) {
+                    // Item is a material
+                    String itemName = ((StringTag) tileData.get("Item")).getValue();
+                    if (POT_ITEM_LISTS.containsKey(itemName)) {
+                        // Check it's a viable pot item
+                        if (POT_ITEM_LISTS.containsKey(itemName)) {
+                            potItem = Block.get(POT_ITEM_LISTS.get(itemName));
+                        }
+                    }
+                }
+
+                if (tileData.containsKey("Data")) {
+                    int dataTag = ((IntTag) tileData.get("Data")).getValue();
+                    // We should check data for each type of potItem 
+                    if (potItem == Block.get(Item.ROSE)) {
+                        if (dataTag >= 0 && dataTag <= 8) {
+                            potItemData = dataTag;
+                        } else {
+                            // Prevent hacks
+                            potItemData = 0;
+                        }
+                    } else if (potItem == Block.get(Item.FLOWER)
+                            || potItem == Block.get(Item.RED_MUSHROOM)
+                            || potItem == Block.get(Item.BROWN_MUSHROOM)
+                            || potItem == Block.get(Item.CACTUS)) {
+                        // Set to 0 anyway
+                        potItemData = 0;
+                    } else if (potItem == Block.get(Item.SAPLING)) {
+                        if (dataTag >= 0 && dataTag <= 4) {
+                            potItemData = dataTag;
+                        } else {
+                            // Prevent hacks
+                            potItemData = 0;
+                        }
+                    } else if (potItem == Block.get(Item.TALL_GRASS)) {
+                        // Only 0 or 2
+                        if (dataTag == 0 || dataTag == 2) {
+                            potItemData = dataTag;
+                        } else {
+                            potItemData = 0;
+                        }
+                    } else {
+                        // ERROR ?
+                        potItemData = 0;
+                    }
+                } else {
+                    potItemData = 0;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -376,6 +461,7 @@ public class IslandBlock {
             signText.add("§aWelcome to");
             signText.add("§e[player]'s");
             signText.add("§aisland! Enjoy.");
+            signText.add("");
         }
     }
 
@@ -446,18 +532,18 @@ public class IslandBlock {
      * @param usePhysics
      * @param blockLoc
      */
-    public void paste(Player player, Location blockLoc, boolean usePhysics) {
+    public void paste(Player p, Location blockLoc, boolean usePhysics) {
         Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
         loadChunkAt(loc);
         blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, usePhysics);
 
         // BlockEntities
         if (signText != null) {
-            scheduleTextPlacement(player, loc);
-        } else if (pot != null) {
-            schedulePotPlacement(loc);
+            scheduleTextPlacement(p, loc);
+        } else if (potItem != null) {
+            schedulePotPlacement(p, loc);
         } else if (Block.get(typeId, data).getId() == Block.CHEST) {
-            scheduleChestPlacement(loc);
+            scheduleChestPlacement(p, loc);
         }
 
     }
@@ -470,61 +556,101 @@ public class IslandBlock {
     }
 
     // --- Task Scheduling --- // 
-    private void scheduleChestPlacement(Location loc) {
+    private void scheduleChestPlacement(Player p, Location loc) {
         new NukkitRunnable() {
             @Override
             public void run() {
+                if (!p.chunk.isGenerated()
+                        && !p.chunk.getProvider().getLevel().getName().equalsIgnoreCase(loc.level.getName())
+                        && !p.chunk.isLoaded()
+                        && loc.level.isChunkGenerated(loc.getFloorX(), loc.getFloorZ())) {
+                    TaskManager.runTaskLater(this, 20); // It will not be a problem if the player use /is create
+                    return;
+                }
                 cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
                         .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
                         .putString("id", BlockEntity.CHEST)
                         .putInt("x", (int) loc.x)
                         .putInt("y", (int) loc.y)
                         .putInt("z", (int) loc.z);
-                BlockEntityChest e = new BlockEntityChest(loc.level.getChunk((int) loc.x >> 4, (int) loc.z >> 4), nbt);
-                e.spawnToAll();
+                BlockEntityChest e = (BlockEntityChest) BlockEntity.createBlockEntity(
+                        BlockEntity.CHEST,
+                        p.chunk,
+                        nbt);
                 loc.level.addBlockEntity(e);
-                if (chestContents.isEmpty() || Settings.chestInventoryOverride) {
+                if (Settings.chestInventoryOverride || chestContents.isEmpty()) {
                     int count = 0;
                     for (Item item : Settings.chestItems) {
                         e.getInventory().setItem(count, item);
                         count++;
                     }
+                } else {
+                    e.getInventory().setContents(chestContents);
                 }
-                e.getInventory().setContents(chestContents);
+                e.spawnToAll();
             }
-        }.runTaskLater(ASkyBlock.get(), (int) Utils.secondsAsMillis(TeleportLogic.teleportDelay) + 10);
+        }.runTaskLater(ASkyBlock.get(), Utils.secondsAsMillis(TeleportLogic.teleportDelay + 1));
     }
 
-    private void schedulePotPlacement(Location loc) {
+    private void schedulePotPlacement(Player p, Location loc) {
         new NukkitRunnable() {
             @Override
             public void run() {
-                pot.set(loc);
+                if (!p.chunk.isGenerated()
+                        && !p.chunk.getProvider().getLevel().getName().equalsIgnoreCase(loc.level.getName())
+                        && !p.chunk.isLoaded()
+                        && loc.level.isChunkGenerated(loc.getFloorX(), loc.getFloorZ())) {
+                    TaskManager.runTaskLater(this, 20); // It will not be a problem if the player use /is create
+                    return;
+                }
+                cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                        .putString("id", BlockEntity.FLOWER_POT)
+                        .putInt("x", (int) loc.x)
+                        .putInt("y", (int) loc.y)
+                        .putInt("z", (int) loc.z)
+                        .putShort("item", potItem.getId())
+                        .putInt("data", potItemData);
+
+                BlockEntityFlowerPot potBlock = (BlockEntityFlowerPot) BlockEntity.createBlockEntity(
+                        BlockEntity.FLOWER_POT,
+                        p.chunk,
+                        nbt);
+
+                loc.level.addBlockEntity(potBlock);
+                potBlock.spawnToAll();
             }
-        }.runTaskLater(ASkyBlock.get(), (int) Utils.secondsAsMillis(TeleportLogic.teleportDelay) + 10);
+        }.runTaskLater(ASkyBlock.get(), Utils.secondsAsMillis(TeleportLogic.teleportDelay + 1));
 
     }
 
-    private void scheduleTextPlacement(Player player, Location loc) {
+    private void scheduleTextPlacement(Player p, Location loc) {
         new NukkitRunnable() {
             @Override
             public void run() {
+                if (!p.chunk.isGenerated()
+                        && !p.chunk.getProvider().getLevel().getName().equalsIgnoreCase(loc.level.getName())
+                        && !p.chunk.isLoaded()
+                        && loc.level.isChunkGenerated(loc.getFloorX(), loc.getFloorZ())) {
+                    TaskManager.runTaskLater(this, 20); // It will not be a problem if the player use /is create
+                    return;
+                }
                 cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
                         .putString("id", BlockEntity.SIGN)
                         .putInt("x", (int) loc.x)
                         .putInt("y", (int) loc.y)
                         .putInt("z", (int) loc.z)
-                        .putString("Text1", signText.get(0).replace("[player]", player.getName()))
-                        .putString("Text2", signText.get(1).replace("[player]", player.getName()))
-                        .putString("Text3", signText.get(2).replace("[player]", player.getName()))
-                        .putString("Text4", signText.get(3).replace("[player]", player.getName()));
+                        .putString("Text1", signText.get(0).replace("[player]", p.getName()))
+                        .putString("Text2", signText.get(1).replace("[player]", p.getName()))
+                        .putString("Text3", signText.get(2).replace("[player]", p.getName()))
+                        .putString("Text4", signText.get(3).replace("[player]", p.getName()));
                 BlockEntitySign sign = (BlockEntitySign) BlockEntity.createBlockEntity(
                         BlockEntity.SIGN,
-                        loc.getLevel().getChunk((int) loc.x >> 4, (int) loc.z >> 4),
+                        p.chunk,
                         nbt);
                 loc.level.addBlockEntity(sign);
+                sign.spawnToAll();
             }
-        }.runTaskLater(ASkyBlock.get(), (int) Utils.secondsAsMillis(TeleportLogic.teleportDelay) + 10);
+        }.runTaskLater(ASkyBlock.get(), Utils.secondsAsMillis(TeleportLogic.teleportDelay + 1));
     }
 
 }

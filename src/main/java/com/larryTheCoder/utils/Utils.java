@@ -321,8 +321,8 @@ public class Utils {
         return String.format("%02dm %02ds", mins, secs);
     }
 
-    public static long secondsAsMillis(long sec) {
-        long ms = (sec * 60);
+    public static int secondsAsMillis(int sec) {
+        int ms = (sec * 60);
         return ms;
     }
 
