@@ -73,12 +73,12 @@ public final class SchematicHandler extends SchematicInterport {
             return;
         }
         // Start the schematic handler
-        islandBlocks = Maps.newHashMap();
-        bedrock = Maps.newHashMap();
-        chest = Maps.newHashMap();
-        welcomeSign = Maps.newHashMap();
-        tileEntitiesMap = Maps.newHashMap();
-        schemaConfiguration = Maps.newHashMap();
+        islandBlocks        =   Maps.newHashMap();
+        bedrock             =   Maps.newHashMap();
+        chest               =   Maps.newHashMap();
+        welcomeSign         =   Maps.newHashMap();
+        tileEntitiesMap     =   Maps.newHashMap();
+        schemaConfiguration =   Maps.newHashMap();
         // List all of the files
         File[] listes = path.listFiles();
         List<File> list = new ArrayList<>();
@@ -386,6 +386,9 @@ public final class SchematicHandler extends SchematicInterport {
     public void handleSchematic(short[] blocks, byte[] data, int id) {
         List blockToAdded = new ArrayList<>();
         Vector3 bedloc = this.bedrock.get(id).get();
+        if(bedloc == null){
+            bedloc = new Vector3();
+        }
         Map<Vector3, Map<String, Tag>> TileEntities = tileEntitiesMap;
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; ++y) {
@@ -425,6 +428,7 @@ public final class SchematicHandler extends SchematicInterport {
             }
         }
 
+        islandBlocks.get(id).clear(); // Clear all of the island blocks (API)
         islandBlocks.put(id, new SoftReference(blockToAdded));
         setDefaultValue(id);
     }

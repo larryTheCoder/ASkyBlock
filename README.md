@@ -56,6 +56,9 @@ Pre-releases are considered **unsafe** for production servers.
 
 Releases have a clean version number, has been tested, and should be safe for production servers.
 
+### Note for developers
+This is an actively developed project. Pull requests are accepted if they address a specific issue and are of high enough quality. The best way to do a pull request is to file an issue, then say that you'll fix it so we know it's coming and can coordinate with you.
+
 ### License
 
 	This program is free software: you can redistribute it and/or modify

@@ -44,7 +44,7 @@ public class GridManager {
 
     private MainLogger deb = Server.getInstance().getLogger();
 
-    private ASkyBlock plugin;
+    private final ASkyBlock plugin;
 
     public GridManager(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -165,71 +165,56 @@ public class GridManager {
                 locationSafe = new Location(0, 0, 0, 0, 0, plugin.getServer().getLevelByName(pd.levelName)).add(pd.getCenter());
             }
 
+            deb.debug(locationSafe.toString());
             // Check if it is safe
-            if (locationSafe != null) {
-                // Homes are stored as integers and need correcting to be more central
-                if (isSafeLocation(locationSafe)) {
-                    return locationSafe;
-                }
+            // Homes are stored as integers and need correcting to be more central
+            if (isSafeLocation(locationSafe)) {
+                return locationSafe;
+            }
 
-                // To cover slabs, stairs and other half blocks, try one block above
-                Location locPlusOne = locationSafe.clone();
-                locPlusOne.add(new Vector3(0, 1, 0));
-                deb.debug("Testing if the location is safe");
-                if (isSafeLocation(locPlusOne)) {
+            // To cover slabs, stairs and other half blocks, try one block above
+            Location locPlusOne = locationSafe.clone();
+            locPlusOne.add(new Vector3(0, 1, 0));
+            deb.debug("Testing if the location is safe");
+            if (isSafeLocation(locPlusOne)) {
+                // Adjust the home location accordingly
+                pd.setHomeLocation(locPlusOne);
+                deb.debug("Seccess");
+                return locPlusOne;
+            }
+
+            // Try to find all the way up
+            deb.debug("Failed! Testing the way up");
+            for (int y = 0; y < 255; y++) {
+                Position locPlusY = locPlusOne.setComponents(locationSafe.getX(), y, locationSafe.getZ());
+                if (isSafeLocation(locPlusY)) {
                     // Adjust the home location accordingly
-                    pd.setHomeLocation(locPlusOne);
+                    pd.setHomeLocation(locPlusY);
                     deb.debug("Seccess");
-                    return locPlusOne;
+                    return locPlusY.getLocation();
                 }
+            }
 
-                // Try to find all the way up
-                deb.debug("Failed! Testing the way up");
-                int y = 0;
-                for (; y < 255; y++) {
-                    Position locPlusY = locPlusOne.setComponents(locationSafe.getX(), y, locationSafe.getZ());
-                    if (isSafeLocation(locPlusY)) {
-                        // Adjust the home location accordingly
-                        pd.setHomeLocation(locPlusY);
-                        deb.debug("Seccess");
-                        return locPlusY.getLocation();
-                    }
-                }
-
-                deb.debug("Failed! The square");
-                // Try to find the island area (Default: 25 length Squared)
-                List<Pair> listBlocks = new ArrayList<>();
-                int minX = (int) pd.getCenter().getX() - 25;
-                int minZ = (int) pd.getCenter().getZ() - 25;
-                int minY = (int) pd.getCenter().getY() - 25;
-                int maxY = (int) pd.getCenter().getY() + 25;
-                int maxX = (int) pd.getCenter().getX() + 25;
-                int maxZ = (int) pd.getCenter().getZ() + 25;
-
-                for (int dx = minX; dx <= maxX; dx++) {
-                    for (int dz = minZ; dz <= maxZ; dz++) {
-                        listBlocks.add(new Pair(dx, dz));
-                    }
-                }
-
-                Iterator<Pair> iter = listBlocks.iterator();
-                int count = 0;
-                while (iter.hasNext()) {
-                    Pair pair = iter.next();
-                    for (y = minY; y <= maxY; y++) {
-                        Position pos = locPlusOne.setComponents(pair.getLeft(), y, pair.getRight());
+            deb.debug("Failed! The square");
+            int count = 0;
+            for (int dy = 1; dy <= pd.getProtectionSize(); dy++) {
+                for (int dx = 1; dx <= pd.getProtectionSize(); dx++) {
+                    for (int dz = 1; dz <= pd.getProtectionSize(); dz++) {
+                        int x = locationSafe.getFloorX() + (dx % 2 == 0 ? dx / 2 : -dx / 2);
+                        int z = locationSafe.getFloorZ() + (dz % 2 == 0 ? dz / 2 : -dz / 2);
+                        int y = locationSafe.getFloorY() + (dy % 2 == 0 ? dy / 2 : -dy / 2);
+                        Position pos = locPlusOne.setComponents(x, y, z);
                         if (isSafeLocation(pos)) {
-                            // Adjust the home location accordingly
                             pd.setHomeLocation(pos);
                             deb.debug("Seccess " + count);
+                            deb.debug(pos.toString());
                             return pos.getLocation();
                         }
                         count++;
                     }
-                    iter.remove();
                 }
-                deb.debug("Failed: Counter " + count);
             }
+            deb.debug("Failed: Counter " + count);
         }
 
         // Unsuccessful
@@ -267,10 +252,8 @@ public class GridManager {
     }
 
     public IslandData getProtectedIslandAt(Location location) {
-        //plugin.getLogger().info("DEBUG: getProtectedIslandAt " + location);
         IslandData island = plugin.getIslandInfo(location);
         if (island == null) {
-            //plugin.getLogger().info("DEBUG: no island at this location");
             return null;
         }
         if (island.onIsland(location)) {

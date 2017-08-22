@@ -24,17 +24,31 @@ import cn.nukkit.event.player.PlayerMoveEvent;
 import cn.nukkit.level.Location;
 import cn.nukkit.scheduler.TaskHandler;
 import cn.nukkit.utils.TextFormat;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+import java.util.List;
 
 /**
  * Responsible for teleporting (and canceling teleporting) of players.
  */
 public class TeleportLogic implements Listener {
+
+    public static List<String> list = Lists.newArrayList();
+    public static Map<String, Integer> time = Maps.newHashMap();
+
+    public static boolean isPlayerMoved(String p) {
+        return list.contains(p);
+    }
+
+    public static int getPlayerTeleport(String p) {
+        return time.get(p);
+    }
 
     private final ASkyBlock plugin;
     public static int teleportDelay;
@@ -77,7 +91,9 @@ public class TeleportLogic implements Listener {
                     // BETA Testing: Add this later
                     //player.setGamemode(Settings.gamemode);
                 }
+                list.remove(player.getName());
             }, (int) Utils.secondsAsMillis(teleportDelay));
+            time.put(player.getName(), Utils.secondsAsMillis(teleportDelay));
             pendingTPs.put(player.getUniqueId(), new PendingTeleport(player.getLocation(), task));
         }
     }
@@ -120,6 +136,7 @@ public class TeleportLogic implements Listener {
                     task.cancel();
                     pendingTPs.remove(player.getUniqueId());
                     player.sendMessage(plugin.getPrefix() + plugin.getLocale(player).teleportCancelled);
+                    list.add(player.getName());
                 }
             }
         }

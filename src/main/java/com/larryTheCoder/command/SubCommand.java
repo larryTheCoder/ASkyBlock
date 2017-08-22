@@ -20,6 +20,7 @@ package com.larryTheCoder.command;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.utils.MainLogger;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.locales.ASlocales;
 
@@ -32,6 +33,7 @@ import com.larryTheCoder.locales.ASlocales;
 public abstract class SubCommand {
 
     private final ASkyBlock plugin;
+    public final MainLogger deb = Server.getInstance().getLogger();
 
     public SubCommand(ASkyBlock plugin){
         if(plugin == null){

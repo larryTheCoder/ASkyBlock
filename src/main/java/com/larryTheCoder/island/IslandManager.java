@@ -294,60 +294,7 @@ public class IslandManager {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorTooSoon.replace("[secs]", Utils.getPlayerRTime(p, p.getName() + pd.islandId, 0)).replace("[cmds]", "delete"));
             return;
         }
-        Server.getInstance().dispatchCommand(p, "is leave"); // Easy
-        Level level = plugin.getServer().getLevelByName(pd.levelName);
-
-        int minX = pd.getMinProtectedX();
-        int minZ = pd.getMinProtectedZ();
-        int maxX = pd.getMinProtectedX() + pd.getProtectionSize();
-        int maxZ = pd.getMinProtectedZ() + pd.getProtectionSize();
-
-        List<Pair> blocksToClear = new ArrayList<>();
-
-        // Find out what blocks are within the island protection range
-        for (int x = minX; x <= maxX; x++) {
-            for (int z = minZ; z <= maxZ; z++) {
-                blocksToClear.add(new Pair(x, z));
-            }
-        }
-
-        // Clear up any blocks
-        if (!blocksToClear.isEmpty()) {
-            Utils.send("&aIsland delete: There are &e" + blocksToClear.size() + " &ablocks that need to be cleared up.");
-            Utils.send("&aClean rate is &e" + Settings.cleanrate + " &ablocks per second. Should take ~" + Math.round(blocksToClear.size() / Settings.cleanrate) + "s");
-            blockedCIsland.put(p, Math.round(blocksToClear.size() / Settings.cleanrate));
-            new NukkitRunnable() {
-                @Override
-                public void run() {
-                    Iterator<Pair> it = blocksToClear.iterator();
-                    int count = 0;
-                    while (it.hasNext() && count++ < Settings.cleanrate) {
-                        Pair pair = it.next();
-                        // Check if coords are in island space
-                        int xCoord = pair.getLeft();
-                        int zCoord = pair.getRight();
-                        if (pd.inIslandSpace(xCoord, zCoord)) {
-                            //plugin.getLogger().info(xCoord + "," + zCoord + " is in island space - deleting column");
-                            // Delete all the blocks here
-                            for (int y = 0; y < 255 - Settings.seaLevel; y++) {
-                                // Overworld
-                                Vector3 vec = new Vector3(xCoord, y + Settings.seaLevel, zCoord);
-                                level.setBlock(vec, Block.get(Block.AIR), true, true);
-                            }
-                        }
-                        it.remove();
-                    }
-                    if (blocksToClear.isEmpty()) {
-                        Utils.send("&aFinished island deletion");
-                        blockedCIsland.remove(p);
-                        this.cancel();
-                    }
-                }
-            }.runTaskTimer(plugin, 0, 20);
-        }
-
-        // Remove from database
-        ASkyBlock.get().getDatabase().deleteIsland(pd);
+        
 
         // Todo: reset limits
         if (reset) {

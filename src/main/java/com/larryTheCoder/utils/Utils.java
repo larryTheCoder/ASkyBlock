@@ -40,12 +40,11 @@ import java.util.Map;
 public class Utils {
 
     public static String LOCALES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "locale";
-    public static String DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator;
+    public static String DIRECTORY = ASkyBlock.get().getDataFolder() + File.separator;
     public static ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap<>();
 
     public static Config loadYamlFile(String file) {
-        File dataFolder = ASkyBlock.get().getDataFolder();
-        File yamlFile = new File(dataFolder, file);
+        File yamlFile = new File(DIRECTORY + file);
 
         Config config = null;
         if (yamlFile.exists()) {
@@ -299,16 +298,19 @@ public class Utils {
             return false;
         }
         try {
-            Utils.send("&aCreating directory: " + dirName);
+            Server.getInstance().getLogger().info("§aCreating directory: " + dirName);
             pDir.mkdir();
         } catch (Throwable exc) {
-            Utils.send("&eEnsureDirectory " + dirName + ": " + exc.toString());
+            Server.getInstance().getLogger().info("§eEnsureDirectory " + dirName + ": " + exc.toString());
         }
         return true;
     }
 
     public static void send(String msg) {
         try {
+            if(ASkyBlock.get().getPrefix() == null){
+                
+            }
             Server.getInstance().getLogger().info(ASkyBlock.get().getPrefix() + TextFormat.GREEN + msg.replace("&", "§"));
         } catch (Throwable exc) {
             System.out.println("ASkyBlock failed to send: " + msg);
@@ -333,8 +335,7 @@ public class Utils {
      * @param fileLocation
      */
     public static void saveYamlFile(Config yamlFile, String fileLocation) {
-        File dataFolder = ASkyBlock.get().getDataFolder();
-        File file = new File(dataFolder, fileLocation);
+        File file = new File(DIRECTORY + fileLocation);
 
         try {
             yamlFile.save(file);
