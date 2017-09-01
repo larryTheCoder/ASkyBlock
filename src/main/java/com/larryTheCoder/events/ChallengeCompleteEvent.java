@@ -20,14 +20,15 @@ import cn.nukkit.Player;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.HandlerList;
 import cn.nukkit.item.Item;
+
 import java.util.List;
 
 /**
  * This event is fired when a player completes a challenge
- *
  */
 public class ChallengeCompleteEvent extends Event {
 
+    private static final HandlerList HANDLERS = new HandlerList();
     private final Player player;
     private final String challengeName;
     private final String[] permList;
@@ -36,12 +37,7 @@ public class ChallengeCompleteEvent extends Event {
     private final int expReward;
     private final String rewardText;
     private final List<Item> rewardedItems;
-    private static final HandlerList HANDLERS = new HandlerList();
 
-    public static HandlerList getHandlers(){
-        return HANDLERS;
-    }
-    
     /**
      * @param player
      * @param challengeName
@@ -53,7 +49,7 @@ public class ChallengeCompleteEvent extends Event {
      * @param rewardedItems
      */
     public ChallengeCompleteEvent(Player player, String challengeName, String[] permList, String[] itemRewards, double moneyReward, int expReward,
-            String rewardText, List<Item> rewardedItems) {
+                                  String rewardText, List<Item> rewardedItems) {
         this.player = player;
         this.challengeName = challengeName;
         this.permList = permList;
@@ -62,6 +58,10 @@ public class ChallengeCompleteEvent extends Event {
         this.expReward = expReward;
         this.rewardText = rewardText;
         this.rewardedItems = rewardedItems;
+    }
+
+    public static HandlerList getHandlers() {
+        return HANDLERS;
     }
 
     /**

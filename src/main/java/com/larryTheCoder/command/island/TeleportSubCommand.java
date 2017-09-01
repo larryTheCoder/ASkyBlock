@@ -25,7 +25,7 @@ import com.larryTheCoder.command.SubCommand;
 /**
  * @author Adam Matthew
  */
-public class TeleportSubCommand extends SubCommand{
+public class TeleportSubCommand extends SubCommand {
 
     public TeleportSubCommand(ASkyBlock plugin) {
         super(plugin);
@@ -58,7 +58,7 @@ public class TeleportSubCommand extends SubCommand{
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        if(args.length != 2){
+        if (args.length != 2) {
             return false;
         }
         Player p = getPlugin().getServer().getPlayer(sender.getName());

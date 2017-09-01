@@ -23,24 +23,25 @@ import com.larryTheCoder.storage.IslandData;
 
 /**
  * Fired when a player exits an island's protected area
- * @author Adam Matthew
  *
+ * @author Adam Matthew
  */
 public class IslandExitEvent extends ASkyBlockEvent {
     private final Location location;
 
     /**
      * @param player
-     * @param island that the player is leaving
+     * @param island   that the player is leaving
      * @param location - Location of where the player exited the island's protected area
      */
     public IslandExitEvent(Player player, IslandData island, Location location) {
-        super(player,island);
+        super(player, island);
         this.location = location;
     }
 
     /**
      * Location of where the player exited the island's protected area
+     *
      * @return the location
      */
     public Location getLocation() {

@@ -23,12 +23,12 @@ import com.larryTheCoder.storage.IslandData;
 /**
  * @author Adam Matthew
  */
-public class IslandJoinEvent extends ASkyBlockEvent{
+public class IslandJoinEvent extends ASkyBlockEvent {
     /**
      * @param player
      * @param island
      */
     public IslandJoinEvent(Player player, IslandData island) {
-        super(player,island);
+        super(player, island);
     }
 }

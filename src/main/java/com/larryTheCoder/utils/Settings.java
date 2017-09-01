@@ -19,11 +19,8 @@ package com.larryTheCoder.utils;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.generator.biome.Biome;
 import com.larryTheCoder.storage.IslandData.SettingsFlag;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
 
 /**
  * @author Adam Matthew
@@ -31,12 +28,12 @@ import java.util.Set;
 public class Settings {
 
     public static GameType GAMETYPE = GameType.SKYBLOCK;
-    
+
     // system variables
     public static boolean useSchematicPanel;
     public static boolean chooseIslandRandomly;
     public static List<String> challengeLevels = new ArrayList<>();
-    
+
     // config variables
     public static int maxHome;
     public static boolean updater;
@@ -60,19 +57,20 @@ public class Settings {
     public static Biome defaultBiome;
     public static boolean teamChat;
     public static boolean saveInventory;
+    public static int resetTime;
 
     public static String defaultLanguage;
     public static boolean stopTime;
-    
+
     // default variables
     public static String islandCompanion = "COW";
     public static Set<String> challengeList = new HashSet<>();
     public static List<String> freeLevels = new ArrayList<>();
     public static int waiverAmount = 0;
-    
+
     // GridProtection
     public static boolean shouldTeleportSpawn = false;
-    
+
 
     /**
      * Default world protection settings
@@ -91,14 +89,14 @@ public class Settings {
      * Visitors settings to show in the GUI
      */
     public static HashMap<SettingsFlag, Boolean> visitorSettings = new HashMap<SettingsFlag, Boolean>();
-    
+
     public static boolean allowTNTDamage;
     public static boolean allowChestDamage;
     public static boolean allowCreeperGriefing;
     public static boolean allowCreeperDamage;
-    
+
     public static boolean useEconomy = false;
     public static double islandCost = 10D;
     public static boolean firstIslandFree = true;
-    
+
 }

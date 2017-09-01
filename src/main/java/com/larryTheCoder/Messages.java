@@ -17,8 +17,9 @@
 package com.larryTheCoder;
 
 import cn.nukkit.Player;
-import com.larryTheCoder.utils.Utils;
 import cn.nukkit.utils.Config;
+import com.larryTheCoder.utils.Utils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,9 +34,9 @@ import java.util.List;
  */
 public class Messages {
 
-    private ASkyBlock plugin;
     // Offline Messages
     private final HashMap<String, List<String>> messages = new HashMap<>();
+    private ASkyBlock plugin;
     private Config messageStore;
 
     /**

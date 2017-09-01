@@ -17,12 +17,13 @@
 package com.larryTheCoder.locales;
 
 import cn.nukkit.utils.Config;
+import com.larryTheCoder.ASkyBlock;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import com.larryTheCoder.ASkyBlock;
 
 /**
  * All the text strings in the game sent to players This version enables
@@ -53,12 +54,6 @@ public final class ASlocales {
             "yellow",
             "white"
     ));
-    // Localization Strings
-    private Config locale = null;
-    private File localeFile = null;
-    private ASkyBlock plugin;
-    private Locale localeObject;
-
     public String changingObsidiantoLava;
     public String acidLore;
     public String acidBucket;
@@ -148,6 +143,11 @@ public final class ASlocales {
     public String islandTitle = "[player]'s island";
     // Guard island
     public String islandProtected = "§cThat island is protected";
+    // Localization Strings
+    private Config locale = null;
+    private File localeFile = null;
+    private ASkyBlock plugin;
+    private Locale localeObject;
     private String localeName;
     private int index;
 
@@ -198,25 +198,25 @@ public final class ASlocales {
             //plugin.getLogger().info("DEBUG: File exists!");
             locale = new Config(localeFile, Config.YAML);
         } else // Look for defaults in the jar
-        if (plugin.getResource("locale/" + localeName + ".yml") != null) {
-            plugin.saveResource("locale/" + localeName + ".yml", true);
-            localeFile = new File(plugin.getDataFolder() + File.separator + "locale", localeName + ".yml");
-            locale = new Config(localeFile, Config.YAML);
-            //locale.setDefaults(defLocale);
-        } else {
-            // Use the default file
-            localeFile = new File(plugin.getDataFolder() + File.separator + "locale", "locale.yml");
-            if (localeFile.exists()) {
+            if (plugin.getResource("locale/" + localeName + ".yml") != null) {
+                plugin.saveResource("locale/" + localeName + ".yml", true);
+                localeFile = new File(plugin.getDataFolder() + File.separator + "locale", localeName + ".yml");
                 locale = new Config(localeFile, Config.YAML);
-            } else // Look for defaults in the jar                    
-            if (plugin.getResource("locale/locale.yml") != null) {
-                plugin.saveResource("locale/locale.yml", true);
-                localeFile = new File(plugin.getDataFolder() + File.separator + "locale", "locale.yml");
-                locale = new Config(localeFile, Config.YAML);
+                //locale.setDefaults(defLocale);
             } else {
-                plugin.getLogger().emergency("Could not find any locale file!");
+                // Use the default file
+                localeFile = new File(plugin.getDataFolder() + File.separator + "locale", "locale.yml");
+                if (localeFile.exists()) {
+                    locale = new Config(localeFile, Config.YAML);
+                } else // Look for defaults in the jar
+                    if (plugin.getResource("locale/locale.yml") != null) {
+                        plugin.saveResource("locale/locale.yml", true);
+                        localeFile = new File(plugin.getDataFolder() + File.separator + "locale", "locale.yml");
+                        locale = new Config(localeFile, Config.YAML);
+                    } else {
+                        plugin.getLogger().emergency("Could not find any locale file!");
+                    }
             }
-        }
     }
 
     /**

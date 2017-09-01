@@ -17,13 +17,15 @@
 package com.larryTheCoder.utils;
 
 import cn.nukkit.block.Block;
+
 import java.util.Arrays;
 import java.util.Collection;
 
 /**
  * @author Adam Matthew
  */
-public enum BlockUtil {;
+public enum BlockUtil {
+    ;
     private static final Collection<Integer> FLUIDS = Arrays.asList(Block.STILL_WATER, Block.WATER, Block.LAVA, Block.STILL_LAVA);
 
     public static boolean isBreathable(Block block) {

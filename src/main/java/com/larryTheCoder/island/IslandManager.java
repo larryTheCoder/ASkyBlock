@@ -18,25 +18,26 @@ package com.larryTheCoder.island;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
-import cn.nukkit.block.Block;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.utils.TextFormat;
-
+import com.intellectiualcrafters.TaskManager;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.IslandCreateEvent;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.player.TeleportLogic;
+import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.task.DeleteIslandTask;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
-import com.larryTheCoder.schematic.Schematic;
-import com.larryTheCoder.utils.Pair;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Adam Matthew
@@ -44,8 +45,6 @@ import java.util.*;
 public class IslandManager {
 
     private final ASkyBlock plugin;
-    // Block players who was attempt /is delete and deleting command doesn't fully cleared island location
-    private final Map<Player, Integer> blockedCIsland = new HashMap<>();
 
     public IslandManager(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -60,10 +59,6 @@ public class IslandManager {
     }
 
     public void handleIslandCommand(Player p, boolean reset, int homes) {
-        if (blockedCIsland.containsKey(p)) {
-            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorTooSoon.replace("[secs]", Utils.convertTimer(blockedCIsland.get(p))).replace("[cmd]", "create"));
-            return;
-        }
         if (!reset) {
             boolean message = false;
             if (!checkIsland(p, homes)) {
@@ -91,6 +86,7 @@ public class IslandManager {
         new NukkitRunnable() {
             @Override
             public void run() {
+
                 IslandData ownership = plugin.getIslandInfo(p.getLocation());
                 if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
                     p.setSubtitle(TextFormat.BLUE + plugin.getLocale(p).islandSubTitle.replace("[player]", p.getName()));
@@ -104,7 +100,7 @@ public class IslandManager {
                     p.sendMessage(plugin.getLocale(p).islandURL);
                 }
             }
-        }.runTaskLater(plugin, (int) Utils.secondsAsMillis(TeleportLogic.teleportDelay + 3));
+        }.runTaskLater(plugin, Utils.secondsAsMillis(TeleportLogic.teleportDelay + 3));
 
     }
 
@@ -290,18 +286,17 @@ public class IslandManager {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNoIsland);
             return;
         }
-        if (!Utils.canBypassTimer(p, p.getName() + pd.islandId, 0)) {
+        if (!Utils.canBypassTimer(p, p.getName() + pd.islandId, Settings.resetTime)) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorTooSoon.replace("[secs]", Utils.getPlayerRTime(p, p.getName() + pd.islandId, 0)).replace("[cmds]", "delete"));
             return;
         }
-        
 
-        // Todo: reset limits
+        // Reset then wait :P
+        TaskManager.runTask(new DeleteIslandTask(plugin, pd, p));
+
+        p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).resetSeccess.replace("[mili]", "" + Settings.resetTime));
         if (reset) {
-            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).resetSeccess.replace("[mili]", "30"));
             handleIslandCommand(p, true, pd.id);
-        } else {
-            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).resetSeccess.replace("[mili]", "30"));
         }
     }
 

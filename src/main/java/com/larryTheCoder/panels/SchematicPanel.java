@@ -17,11 +17,12 @@
 package com.larryTheCoder.panels;
 
 import cn.nukkit.Player;
-import java.util.ArrayList;
-import java.util.List;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Adam Matthew

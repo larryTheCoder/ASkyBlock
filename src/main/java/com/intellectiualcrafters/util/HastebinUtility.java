@@ -9,14 +9,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class HastebinUtility {
-    
+
     public static final String BIN_URL = "http://hastebin.com/documents", USER_AGENT = "Mozilla/5.0";
     public static final Pattern PATTERN = Pattern.compile("\\{\"key\":\"([\\S\\s]*)\"\\}");
-    
+
     public static String upload(final String string) throws IOException {
         final URL url = new URL(BIN_URL);
         final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        
+
         connection.setRequestMethod("POST");
         connection.setRequestProperty("User-Agent", USER_AGENT);
         connection.setDoOutput(true);
@@ -43,7 +43,7 @@ public class HastebinUtility {
             throw new RuntimeException("Couldn't read response!");
         }
     }
-    
+
     public static String upload(final File file) throws IOException {
         final StringBuilder content = new StringBuilder();
         List<String> lines = new ArrayList<>();
@@ -59,5 +59,5 @@ public class HastebinUtility {
         }
         return upload(content.toString());
     }
-    
+
 }

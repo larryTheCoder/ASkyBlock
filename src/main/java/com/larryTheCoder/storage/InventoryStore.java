@@ -18,6 +18,7 @@
 package com.larryTheCoder.storage;
 
 import cn.nukkit.item.Item;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,9 +31,17 @@ class InventoryStore {
     private ArrayList<Item[]> armor = new ArrayList<>();
     private Map<Integer, Item> inventory = new HashMap<>();
 
+    public InventoryStore(Map<Integer, Item> contents, Item[] armorContents) {
+        this.inventory = contents;
+        this.armor.add(armorContents);
+    }
+
+    public Map<Integer, Item> getInventory() {
+        return Collections.unmodifiableMap(inventory);
+    }
+
     /**
-     * @param inventory
-     *            the inventory to set
+     * @param inventory the inventory to set
      */
     public void setInventory(Map<Integer, Item> inventory) {
         inventory.entrySet().stream().forEach((ev) -> {
@@ -40,26 +49,16 @@ class InventoryStore {
         });
     }
 
-    /**
-     * @param armor
-     *            the armor to set
-     */
-    public void setArmor(Item[] armor) {
-        this.armor.add(armor);
-    }
-    
-    public InventoryStore(Map<Integer, Item> contents, Item[] armorContents) {
-        this.inventory = contents;
-        this.armor.add(armorContents);
-    }
-
-   public Map<Integer, Item> getInventory() {
-       return Collections.unmodifiableMap(inventory);
-    }
-
     @SuppressWarnings("ReturnOfCollectionOrArrayField")
     public ArrayList<Item[]> getArmor() {
         return armor;
+    }
+
+    /**
+     * @param armor the armor to set
+     */
+    public void setArmor(Item[] armor) {
+        this.armor.add(armor);
     }
 
 }

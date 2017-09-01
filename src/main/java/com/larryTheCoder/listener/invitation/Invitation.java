@@ -36,8 +36,8 @@ public class Invitation {
     /**
      * Invitation constructor.
      *
-     * @param member InvitationHandler
-     * @param sender Player
+     * @param member   InvitationHandler
+     * @param sender   Player
      * @param receiver Player
      */
     public Invitation(InvitationHandler member, Player sender, Player receiver) {

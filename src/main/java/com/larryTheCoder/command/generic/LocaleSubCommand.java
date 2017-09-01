@@ -23,11 +23,11 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.utils.Utils;
+
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * 
  * @author Adam Matthew
  */
 public class LocaleSubCommand extends SubCommand {

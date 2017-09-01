@@ -19,9 +19,10 @@ package com.larryTheCoder.storage;
 
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
+import com.larryTheCoder.ASkyBlock;
+
 import java.util.HashMap;
 import java.util.UUID;
-import com.larryTheCoder.ASkyBlock;
 
 /**
  * @author Adam Matthew
@@ -32,32 +33,41 @@ public class InventorySave {
 
     /**
      * Saves the inventory of a player
+     *
      * @param plugin
      */
     public InventorySave(ASkyBlock plugin) {
         inventories = new HashMap<>();
     }
 
-    /** Save player's inventory
+    public static InventorySave getInstance() {
+        return object;
+    }
+
+    /**
+     * Save player's inventory
+     *
      * @param player
      */
     public void savePlayerInventory(Player player) {
         //plugin.getLogger().info("DEBUG: Saving inventory");
         // Save the player's armor and things
-        inventories.put(player.getUniqueId(),new InventoryStore(player.getInventory().getContents(), player.getInventory().getArmorContents()));
+        inventories.put(player.getUniqueId(), new InventoryStore(player.getInventory().getContents(), player.getInventory().getArmorContents()));
     }
 
     /**
      * Clears any saved inventory
+     *
      * @param player
      */
     public void clearSavedInventory(Player player) {
         //plugin.getLogger().info("DEBUG: Clearing inventory");
         inventories.remove(player.getUniqueId());
     }
+
     /**
      * Load the player's inventory
-     * 
+     *
      * @param player
      */
     public void loadPlayerInventory(Player player) {
@@ -67,15 +77,11 @@ public class InventorySave {
             InventoryStore inv = inventories.get(player.getUniqueId());
             //plugin.getLogger().info("DEBUG: player is known");
             player.getInventory().setContents(inv.getInventory());
-            for(Item[] ec : inv.getArmor()){
+            for (Item[] ec : inv.getArmor()) {
                 player.getInventory().setArmorContents(ec);
-            }           
+            }
             inventories.remove(player.getUniqueId());
         }
-    }
-
-    public static InventorySave getInstance() {
-        return object;
     }
 
 }

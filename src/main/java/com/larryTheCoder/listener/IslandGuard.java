@@ -18,27 +18,41 @@ package com.larryTheCoder.listener;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
-import cn.nukkit.block.*;
-import cn.nukkit.entity.*;
-import cn.nukkit.entity.item.*;
-import cn.nukkit.entity.mob.*;
-import cn.nukkit.entity.projectile.*;
-import cn.nukkit.event.*;
+import cn.nukkit.block.Block;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.item.EntityMinecartTNT;
+import cn.nukkit.entity.item.EntityPrimedTNT;
+import cn.nukkit.entity.item.EntityVehicle;
+import cn.nukkit.entity.mob.EntityCreeper;
+import cn.nukkit.entity.projectile.EntityProjectile;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.*;
-import cn.nukkit.event.entity.*;
-import cn.nukkit.event.inventory.*;
+import cn.nukkit.event.entity.EntityDamageByEntityEvent;
+import cn.nukkit.event.entity.EntityExplodeEvent;
+import cn.nukkit.event.inventory.CraftItemEvent;
 import cn.nukkit.event.player.*;
-import cn.nukkit.event.potion.*;
+import cn.nukkit.event.potion.PotionCollideEvent;
 import cn.nukkit.event.vehicle.VehicleMoveEvent;
-import cn.nukkit.item.*;
-import cn.nukkit.level.*;
-import cn.nukkit.math.*;
-import cn.nukkit.utils.*;
-import com.larryTheCoder.*;
-import com.larryTheCoder.events.*;
-import com.larryTheCoder.storage.*;
-import com.larryTheCoder.utils.*;
-import java.util.*;
+import cn.nukkit.item.Item;
+import cn.nukkit.level.Level;
+import cn.nukkit.level.Location;
+import cn.nukkit.math.Vector3;
+import cn.nukkit.utils.BlockIterator;
+import cn.nukkit.utils.MainLogger;
+import cn.nukkit.utils.TextFormat;
+import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.events.IslandEnterEvent;
+import com.larryTheCoder.events.IslandExitEvent;
+import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.utils.BlockUtil;
+import com.larryTheCoder.utils.Settings;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 import static cn.nukkit.item.Item.*;
 
@@ -402,7 +416,7 @@ public class IslandGuard implements Listener {
         if (e.getBlock() != null) {
             // Look along player's sight line to see if any blocks are fire
             try {
-                //Level level, Vector3 start, Vector3 direction, double yOffset, 
+                //Level level, Vector3 start, Vector3 direction, double yOffset,
                 BlockIterator iter = new BlockIterator(p.getLevel(), p.getLocation(), p.getDirectionVector(), p.getEyeHeight(), 10);
                 Block lastBlock;
                 while (iter.hasNext()) {
@@ -1052,7 +1066,7 @@ public class IslandGuard implements Listener {
             return;
         }
         // Self damage
-        if (e.getEntity() instanceof Player && attacker.equals((Player) e.getEntity())) {
+        if (e.getEntity() instanceof Player && attacker.equals(e.getEntity())) {
             deb.debug("Self damage!");
             return;
         }
@@ -1132,7 +1146,7 @@ public class IslandGuard implements Listener {
      */
     @EventHandler(priority = EventPriority.LOW)
     public void onCraft(CraftItemEvent event) {
-        Player player = (Player) event.getPlayer();
+        Player player = event.getPlayer();
         if (inWorld(player)) {
             if (event.getRecipe().getResult().getId() == ENDER_CHEST) {
                 if (!(player.hasPermission("is.craft.enderchest"))) {
@@ -1150,7 +1164,7 @@ public class IslandGuard implements Listener {
      */
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onEnderChestEvent(PlayerInteractEvent event) {
-        Player player = (Player) event.getPlayer();
+        Player player = event.getPlayer();
         if (inWorld(player)) {
             if (event.getAction() == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) {
                 if (event.getBlock().getId() == ENDER_CHEST) {

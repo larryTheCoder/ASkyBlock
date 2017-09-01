@@ -27,16 +27,16 @@ import com.larryTheCoder.locales.ASlocales;
 /**
  * A class that define a command parameters.
  * Requires an ASkyBlock instance.
- * 
+ *
  * @author Adam Matthew
  */
 public abstract class SubCommand {
 
-    private final ASkyBlock plugin;
     public final MainLogger deb = Server.getInstance().getLogger();
+    private final ASkyBlock plugin;
 
-    public SubCommand(ASkyBlock plugin){
-        if(plugin == null){
+    public SubCommand(ASkyBlock plugin) {
+        if (plugin == null) {
             Server.getInstance().getLogger().error("plugin cant be null");
         }
         this.plugin = plugin;
@@ -45,17 +45,18 @@ public abstract class SubCommand {
     /**
      * @return Adam Matthew\ASkyBlock
      */
-    public ASkyBlock getPlugin(){
+    public ASkyBlock getPlugin() {
         return plugin;
     }
 
-    public ASlocales getLocale(Player key){
+    public ASlocales getLocale(Player key) {
         return plugin.getLocale(key);
     }
-    
-    public String getPrefix(){
+
+    public String getPrefix() {
         return plugin.getPrefix();
     }
+
     /**
      * @param sender CommandSender
      * @return boolean
@@ -64,7 +65,7 @@ public abstract class SubCommand {
 
     /**
      * @return string
-     */    
+     */
     public abstract String getUsage();
 
     /**
@@ -74,7 +75,7 @@ public abstract class SubCommand {
 
     /**
      * @return string
-     */ 
+     */
     public abstract String getDescription();
 
     /**
@@ -84,9 +85,9 @@ public abstract class SubCommand {
 
     /**
      * @param sender the sender      - CommandSender
-     * @param args The arrugements      - String[]
+     * @param args   The arrugements      - String[]
      * @return true if true
      */
-    
-    public abstract boolean execute(CommandSender sender ,String[] args);
+
+    public abstract boolean execute(CommandSender sender, String[] args);
 }

@@ -25,7 +25,7 @@ import com.larryTheCoder.command.SubCommand;
 /**
  * @author Adam Matthew
  */
-public class ExpelSubCommand extends SubCommand{
+public class ExpelSubCommand extends SubCommand {
 
     public ExpelSubCommand(ASkyBlock plugin) {
         super(plugin);
@@ -59,13 +59,13 @@ public class ExpelSubCommand extends SubCommand{
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if(getPlugin().getIsland().checkIsland(p)){
+        if (getPlugin().getIsland().checkIsland(p)) {
             sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
-        } else if(args.length != 2){
+        } else if (args.length != 2) {
             return false;
         }
-        if(getPlugin().getServer().getPlayer(args[1]) == null){
+        if (getPlugin().getServer().getPlayer(args[1]) == null) {
             sender.sendMessage(getPrefix() + getLocale(p).errorOfflinePlayer);
             return true;
         }

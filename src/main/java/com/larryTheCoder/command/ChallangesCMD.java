@@ -19,24 +19,21 @@ package com.larryTheCoder.command;
 import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.utils.Config;
-import cn.nukkit.utils.TextFormat;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemPotion;
 import cn.nukkit.item.ItemPotionSplash;
 import cn.nukkit.potion.Potion;
+import cn.nukkit.utils.Config;
+import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.ChallengeCompleteEvent;
 import com.larryTheCoder.events.ChallengeLevelCompleteEvent;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Adam Matthew
@@ -58,7 +55,7 @@ public final class ChallangesCMD extends Command {
     @Override
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
         Player p = sender.getServer().getPlayer(sender.getName());
-        if(!sender.isPlayer()){
+        if (!sender.isPlayer()) {
             sender.sendMessage(plugin.getLocale(p).errorUseInGame);
             return true;
         }
@@ -81,7 +78,7 @@ public final class ChallangesCMD extends Command {
                 }
                 break;
             case "complete":
-                if(args.length != 2){
+                if (args.length != 2) {
                     p.sendMessage(plugin.getPrefix() + "§eUsage: /c complete [challenge name]");
                     break;
                 }
@@ -445,7 +442,7 @@ public final class ChallangesCMD extends Command {
             }
             player.sendMessage(TextFormat.RED
                     + "Your island must be level [level] to complete this challenge!".replace("[level]",
-                            String.valueOf(getChallengeConfig().getInt("challenges.challengeList." + challenge + ".requiredItems"))));
+                    String.valueOf(getChallengeConfig().getInt("challenges.challengeList." + challenge + ".requiredItems"))));
             return false;
         }
         player.sendMessage(TextFormat.RED + "Command not ready yet");
@@ -966,7 +963,7 @@ public final class ChallangesCMD extends Command {
                     rewardQty = Integer.parseInt(element[1]);
                     Item item = new Item(rewardItem.getId(), rewardQty);
                     rewardedItems.add(item);
-                    Item[] leftOvers = player.getInventory().addItem(new Item[]{item});
+                    Item[] leftOvers = player.getInventory().addItem(item);
                     if (leftOvers.length != 0) {
                         player.getLevel().dropItem(player.getLocation(), leftOvers[0]);
                     }

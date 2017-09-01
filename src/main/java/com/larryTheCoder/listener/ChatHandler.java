@@ -23,11 +23,12 @@ import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.utils.TextFormat;
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
+
+import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Adam Matthew
@@ -36,8 +37,8 @@ public class ChatHandler implements Listener {
 
     private final ASkyBlock plugin;
     private final ConcurrentHashMap<Player, String> playerLevels;
-    private ConcurrentHashMap<Player, Boolean> teamChatUsers;
     private final ConcurrentHashMap<UUID, String> playerChallengeLevels;
+    private ConcurrentHashMap<Player, Boolean> teamChatUsers;
 
     public ChatHandler(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -101,7 +102,7 @@ public class ChatHandler implements Listener {
         } else {
             player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getLocale(player).teamChatNoTeamAround);
             player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getLocale(player).teamChatStatusOff);
-            // Not in a team any more so delete   
+            // Not in a team any more so delete
             teamChatUsers.remove(player);
         }
     }

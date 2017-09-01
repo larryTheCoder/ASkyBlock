@@ -31,30 +31,19 @@ import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
 import com.intellectiualcrafters.TaskManager;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
-import static com.larryTheCoder.utils.Utils.*;
-
-import org.jnbt.CompoundTag;
-import org.jnbt.IntTag;
-import org.jnbt.ListTag;
-import org.jnbt.StringTag;
-import org.jnbt.Tag;
+import org.jnbt.*;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ContainerFactory;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import java.util.*;
+
+import static com.larryTheCoder.utils.Utils.loadChunkAt;
 
 /**
  * The package will rules every object in Schematic without this, the schematic
@@ -64,21 +53,7 @@ import org.json.simple.parser.ParseException;
  */
 public class IslandBlock {
 
-    private short typeId;
-    private int data;
-    private final int x;
-    private final int y;
-    private final int z;
-    private List<String> signText;
-    // Chest contents
-    private final HashMap<Integer, Item> chestContents;
     public static final HashMap<String, Integer> WETOME = new HashMap<>();
-    // Pot items
-    private Block potItem;
-    private int potItemData;
-    // Debugging
-    private MainLogger deb = Server.getInstance().getLogger();
-
     private static final HashMap<String, Integer> POT_ITEM_LISTS;
 
     static {
@@ -185,6 +160,20 @@ public class IslandBlock {
         WETOME.put("WOODEN_SWORD", Item.WOODEN_SWORD);
     }
 
+    private final int x;
+    private final int y;
+    private final int z;
+    // Chest contents
+    private final HashMap<Integer, Item> chestContents;
+    private short typeId;
+    private int data;
+    private List<String> signText;
+    // Pot items
+    private Block potItem;
+    private int potItemData;
+    // Debugging
+    private MainLogger deb = Server.getInstance().getLogger();
+
     /**
      * @param x
      * @param y
@@ -290,7 +279,7 @@ public class IslandBlock {
 
                 if (tileData.containsKey("Data")) {
                     int dataTag = ((IntTag) tileData.get("Data")).getValue();
-                    // We should check data for each type of potItem 
+                    // We should check data for each type of potItem
                     if (potItem == Block.get(Item.ROSE)) {
                         if (dataTag >= 0 && dataTag <= 8) {
                             potItemData = dataTag;
@@ -400,20 +389,20 @@ public class IslandBlock {
                                         } else if (key.equalsIgnoreCase("text")) {
                                             lineText += value;
                                         } else // Formatting - usually the value is always true, but check just in case
-                                        if (key.equalsIgnoreCase("obfuscated") && value.equalsIgnoreCase("true")) {
-                                            lineText += TextFormat.OBFUSCATED;
-                                        } else if (key.equalsIgnoreCase("underlined") && value.equalsIgnoreCase("true")) {
-                                            lineText += TextFormat.UNDERLINE;
-                                        } else {
-                                            // The rest of the formats
-                                            try {
-                                                lineText += TextFormat.valueOf(key.toUpperCase());
-                                            } catch (Exception noFormat) {
-                                                // Ignore
-                                                //System.out.println("DEBUG3:" + key + "=>" + value);
-                                                Utils.send("Unknown format " + value + " in sign when pasting schematic, skipping...");
+                                            if (key.equalsIgnoreCase("obfuscated") && value.equalsIgnoreCase("true")) {
+                                                lineText += TextFormat.OBFUSCATED;
+                                            } else if (key.equalsIgnoreCase("underlined") && value.equalsIgnoreCase("true")) {
+                                                lineText += TextFormat.UNDERLINE;
+                                            } else {
+                                                // The rest of the formats
+                                                try {
+                                                    lineText += TextFormat.valueOf(key.toUpperCase());
+                                                } catch (Exception noFormat) {
+                                                    // Ignore
+                                                    //System.out.println("DEBUG3:" + key + "=>" + value);
+                                                    Utils.send("Unknown format " + value + " in sign when pasting schematic, skipping...");
+                                                }
                                             }
-                                        }
                                     }
                                 } else// This is unformatted text. It is included in "". A reset is required to clear
                                 // any previous formatting
@@ -435,17 +424,17 @@ public class IslandBlock {
                         e.printStackTrace();
                     }
                 } else // This is unformatted text (not JSON). It is included in "".
-                if (text.get(line).length() > 1) {
-                    try {
-                        lineText = text.get(line).substring(text.get(line).indexOf('"') + 1, text.get(line).lastIndexOf('"'));
-                    } catch (Exception e) {
-                        //There may not be those "'s, so just use the raw line
+                    if (text.get(line).length() > 1) {
+                        try {
+                            lineText = text.get(line).substring(text.get(line).indexOf('"') + 1, text.get(line).lastIndexOf('"'));
+                        } catch (Exception e) {
+                            //There may not be those "'s, so just use the raw line
+                            lineText = text.get(line);
+                        }
+                    } else {
+                        // just in case it isn't - show the raw line
                         lineText = text.get(line);
                     }
-                } else {
-                    // just in case it isn't - show the raw line
-                    lineText = text.get(line);
-                }
                 //Bukkit.getLogger().info("Line " + line + " is " + lineText);
             }
             signText.add(lineText);
@@ -558,7 +547,7 @@ public class IslandBlock {
         return new Vector3(x, y, z);
     }
 
-    // --- Task Scheduling --- // 
+    // --- Task Scheduling --- //
     private void scheduleChestPlacement(Player p, Location loc) {
         new NukkitRunnable() {
             @Override
@@ -575,8 +564,8 @@ public class IslandBlock {
                     // Fast blockEntity spawning (Not too fast and not too slow)
                     TaskManager.runTaskLater(this,
                             timer != Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName()) + 1)
-                            ? timer
-                            : Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName())) + 1);
+                                    ? timer
+                                    : Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName())) + 1);
                     return;
                 }
                 deb.debug("Spawned block entity");
@@ -622,8 +611,8 @@ public class IslandBlock {
                     // Fast blockEntity spawning (Not too fast and not too slow)
                     TaskManager.runTaskLater(this,
                             timer != Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName()) + 1)
-                            ? timer
-                            : Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName())) + 1);
+                                    ? timer
+                                    : Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName())) + 1);
                     return;
                 }
                 deb.debug("Spawned block entity");
@@ -664,11 +653,11 @@ public class IslandBlock {
                     // Fast blockEntity spawning (Not too fast and not too slow)
                     TaskManager.runTaskLater(this,
                             timer != Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName()) + 1)
-                            ? timer
-                            : Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName())) + 1);
+                                    ? timer
+                                    : Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName())) + 1);
                     return;
                 }
-                
+
                 deb.debug("Spawned block entity");
                 cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
                         .putString("id", BlockEntity.SIGN)
@@ -679,12 +668,12 @@ public class IslandBlock {
                         .putString("Text2", signText.get(1).replace("[player]", p.getName()))
                         .putString("Text3", signText.get(2).replace("[player]", p.getName()))
                         .putString("Text4", signText.get(3).replace("[player]", p.getName()));
-                
+
                 BlockEntitySign sign = (BlockEntitySign) BlockEntity.createBlockEntity(
                         BlockEntity.SIGN,
                         chunk,
                         nbt);
-                
+
                 p.chunk.addBlockEntity(sign);
                 loc.level.addBlockEntity(sign);
                 sign.spawnToAll();

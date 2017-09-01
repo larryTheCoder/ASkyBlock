@@ -25,21 +25,20 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * @author Adam Matthew
  */
 public class IslandData implements Cloneable {
 
+    private final HashMap<SettingsFlag, Boolean> igs = new HashMap<>();
     public int islandId;
     public int id;
     public String levelName;
-    // Coordinates of the island area
-    private int centerX = 0;
-    private int centerY = 0;
-    private int centerZ = 0;
     // Coordinates of the home spawn location
     public int homeX = 0;
     public int homeY = 0;
@@ -49,58 +48,14 @@ public class IslandData implements Cloneable {
     public String owner;
     public String biome;
     public boolean locked;
+    // Coordinates of the island area
+    private int centerX = 0;
+    private int centerY = 0;
+    private int centerZ = 0;
     // Set if this island is a spawn island
     private boolean isSpawn = false;
     // Protection size
     private int protectionRange = 0; //Unaccessable
-
-    private final HashMap<SettingsFlag, Boolean> igs = new HashMap<>();
-
-    public Vector3 getCenter() {
-        return new Vector3(centerX, centerY, centerZ);
-    }
-
-    public void setCenter(int centerX, int centerY, int centerZ) {
-        this.centerX = centerX;
-        this.centerY = centerY;
-        this.centerZ = centerZ;
-    }
-
-    public void setHomeLocation(Vector3 vector) {
-        this.homeX = vector.getFloorX();
-        this.homeY = vector.getFloorY();
-        this.homeZ = vector.getFloorZ();
-        ASkyBlock.get().getDatabase().setSpawnPosition(getHome());
-    }
-
-    public Location getHome() {
-        return new Location(homeX, homeY, homeZ, Server.getInstance().getLevelByName(levelName));
-    }
-
-    public boolean isSpawn() {
-        return isSpawn;
-    }
-
-    private void serilizeIgs(String defaultvalue) {
-        if (isSpawn) {
-            setSpawnDefaults();
-        } else {
-            setIgsDefaults();
-        }
-        boolean value;
-        ArrayList<String> bool = Utils.stringToArray(defaultvalue, ", ");
-        for (int i = 0; i < SettingsFlag.values().length; i++) {
-            String pool = bool.get(i);
-            value = Boolean.parseBoolean(pool);
-            SettingsFlag[] set = SettingsFlag.values();
-            igs.put(set[i], value);
-        }
-
-    }
-
-    public void setSpawn(boolean b) {
-        isSpawn = b;
-    }
 
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public IslandData(String levelName, int X, int Z, int PSize) {
@@ -135,6 +90,52 @@ public class IslandData implements Cloneable {
         this.isSpawn = isSpawn;
     }
 
+    public Vector3 getCenter() {
+        return new Vector3(centerX, centerY, centerZ);
+    }
+
+    public void setCenter(int centerX, int centerY, int centerZ) {
+        this.centerX = centerX;
+        this.centerY = centerY;
+        this.centerZ = centerZ;
+    }
+
+    public void setHomeLocation(Vector3 vector) {
+        this.homeX = vector.getFloorX();
+        this.homeY = vector.getFloorY();
+        this.homeZ = vector.getFloorZ();
+        ASkyBlock.get().getDatabase().setSpawnPosition(getHome());
+    }
+
+    public Location getHome() {
+        return new Location(homeX, homeY, homeZ, Server.getInstance().getLevelByName(levelName));
+    }
+
+    public boolean isSpawn() {
+        return isSpawn;
+    }
+
+    public void setSpawn(boolean b) {
+        isSpawn = b;
+    }
+
+    private void serilizeIgs(String defaultvalue) {
+        if (isSpawn) {
+            setSpawnDefaults();
+        } else {
+            setIgsDefaults();
+        }
+        boolean value;
+        ArrayList<String> bool = Utils.stringToArray(defaultvalue, ", ");
+        for (int i = 0; i < SettingsFlag.values().length; i++) {
+            String pool = bool.get(i);
+            value = Boolean.parseBoolean(pool);
+            SettingsFlag[] set = SettingsFlag.values();
+            igs.put(set[i], value);
+        }
+
+    }
+
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
@@ -162,7 +163,7 @@ public class IslandData implements Cloneable {
 
     public ArrayList<String> getMembers() {
         PlayerData pd = ASkyBlock.get().getDatabase().getPlayerData(this.owner);
-        if(pd == null){
+        if (pd == null) {
             return Lists.newArrayList(new String());
         }
         return pd.members;
@@ -183,9 +184,9 @@ public class IslandData implements Cloneable {
             //plugin.getLogger().info("DEBUG: max x = " + (getMinProtectedX() + protectionRange) + " max z = " + (minProtectedZ + protectionRange));
 
             if (target.getLevel().getName().equalsIgnoreCase(levelName)) {
-                if (target.getFloorX() >= getMinProtectedX() 
+                if (target.getFloorX() >= getMinProtectedX()
                         && target.getFloorX() <= (getMinProtectedX() + protectionRange)
-                        && target.getFloorZ() >= getMinProtectedZ() 
+                        && target.getFloorZ() >= getMinProtectedZ()
                         && target.getFloorZ() <= (getMinProtectedZ() + protectionRange)) {
                     return true;
                 }
@@ -282,11 +283,26 @@ public class IslandData implements Cloneable {
     }
 
     public boolean inIslandSpace(int x, int z) {
-        if (x >= getCenter().getFloorX() - protectionRange / 2 && x < getCenter().getFloorX() + protectionRange / 2 && z >= getCenter().getFloorZ() - protectionRange / 2
-                && z < getCenter().getFloorZ() + protectionRange / 2) {
-            return true;
+        return x >= getCenter().getFloorX() - protectionRange / 2 && x < getCenter().getFloorX() + protectionRange / 2 && z >= getCenter().getFloorZ() - protectionRange / 2
+                && z < getCenter().getFloorZ() + protectionRange / 2;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof IslandData)) {
+            return false;
         }
-        return false;
+        return hashCode() == obj.hashCode();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 61 * hash + this.islandId;
+        hash = 61 * hash + this.id;
+        hash = 61 * hash + Objects.hashCode(this.levelName);
+        hash = 61 * hash + Objects.hashCode(this.owner);
+        return hash;
     }
 
     /**

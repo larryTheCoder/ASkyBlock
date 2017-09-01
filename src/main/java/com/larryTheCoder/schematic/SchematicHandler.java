@@ -20,14 +20,20 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockSapling;
-import cn.nukkit.blockentity.*;
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.blockentity.BlockEntityChest;
 import cn.nukkit.item.Item;
-import cn.nukkit.level.*;
+import cn.nukkit.level.Level;
+import cn.nukkit.level.Position;
+import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.level.generator.object.tree.ObjectTree;
-import cn.nukkit.math.*;
+import cn.nukkit.math.NukkitRandom;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.scheduler.NukkitRunnable;
-import cn.nukkit.utils.*;
+import cn.nukkit.utils.Config;
+import cn.nukkit.utils.MainLogger;
+import cn.nukkit.utils.TextFormat;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.intellectiualcrafters.TaskManager;
@@ -35,10 +41,13 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
-import java.io.*;
-import java.lang.ref.*;
-import java.util.*;
 import org.jnbt.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.util.*;
 
 /**
  * Author: Adam Matthew
@@ -47,11 +56,12 @@ import org.jnbt.*;
  */
 public final class SchematicHandler extends SchematicInterport {
 
-    // Avoid OOM during startup
+    // Debugging
+    private final MainLogger deb = Server.getInstance().getLogger();
+    // Avoid OOM during startup OR reload
     private Map<Integer, SoftReference<ArrayList<IslandBlock>>> islandBlocks;
     private Map<Vector3, Map<String, Tag>> tileEntitiesMap;
     private Map<Integer, Map<Configuration, Object>> schemaConfiguration;
-
     // Schematic size
     private short width;
     private short length;
@@ -62,23 +72,52 @@ public final class SchematicHandler extends SchematicInterport {
     private Map<Integer, ArrayList<SoftReference<Vector3>>> welcomeSign;
     // Configuration
     private Config configFolder;
-
-    // Debugging
-    private final MainLogger deb = Server.getInstance().getLogger();
+    // Traffic (How long took the schematic to load)
+    private Map<Integer, Long> trafficLastMS;
 
     public SchematicHandler(ASkyBlock plugin, File path) {
         Objects.requireNonNull(plugin, "ASkyBlock instance cannot be null");
+        if (path == null) {
+            Utils.send("&aYou are now using build-in island generation.");
+            Utils.send("&aYou also can use schematic to paste island (Without WorldEdit)!");
+            return;
+        }
         if (!path.isDirectory()) {
             Utils.send("&cThe directory cannot be a file or absolute folder");
             return;
         }
+        Utils.send("&aYou are now using schematic native folder.");
+        Random rand = new Random();
+        int randomInt = rand.nextBoolean() ? 1
+                : rand.nextBoolean() ? 2
+                : rand.nextBoolean() ? 3
+                : rand.nextBoolean() ? 4
+                : 5;
+        switch (randomInt) {
+            case 1:
+                Utils.send("&aTIP: &eUse the Minecraft: PE Schematic. MCPC Schematic might result wrong blocks");
+                break;
+            case 2:
+                Utils.send("&aTIP: &eWhile you standing nearby island offset. Dont forget to sneak before getting there :D");
+                break;
+            case 3:
+                Utils.send("&aTIP: &eDid you know that this schematic are provided by @tastybento original code?");
+                break;
+            case 4:
+                Utils.send("&aTIP: &eThis plugin can also demand on single world production server. Only use /asc setlobby in world");
+                break;
+            default:
+                Utils.send("&aFrom author: Have a great gamings guys. I hope that this plugin could help you server more better!");
+
+        }
         // Start the schematic handler
-        islandBlocks        =   Maps.newHashMap();
-        bedrock             =   Maps.newHashMap();
-        chest               =   Maps.newHashMap();
-        welcomeSign         =   Maps.newHashMap();
-        tileEntitiesMap     =   Maps.newHashMap();
-        schemaConfiguration =   Maps.newHashMap();
+        islandBlocks = Maps.newHashMap();
+        bedrock = Maps.newHashMap();
+        chest = Maps.newHashMap();
+        welcomeSign = Maps.newHashMap();
+        tileEntitiesMap = Maps.newHashMap();
+        schemaConfiguration = Maps.newHashMap();
+        trafficLastMS = Maps.newHashMap();
         // List all of the files
         File[] listes = path.listFiles();
         List<File> list = new ArrayList<>();
@@ -296,7 +335,6 @@ public final class SchematicHandler extends SchematicInterport {
                     }
                 }
 
-                // to-do An animal
                 List<Tag> tileEntities = getChildTag(schematic, "TileEntities", ListTag.class).getValue();
                 for (Tag tag : tileEntities) {
                     if (!(tag instanceof CompoundTag)) {
@@ -383,21 +421,25 @@ public final class SchematicHandler extends SchematicInterport {
     }
 
     @Override
+    public void handleSchematic(short[] blocks, byte[] data) {
+        handleSchematic(blocks, data, 1);
+    }
+
     public void handleSchematic(short[] blocks, byte[] data, int id) {
         List blockToAdded = new ArrayList<>();
-        Vector3 bedloc = this.bedrock.get(id).get();
-        if(bedloc == null){
-            bedloc = new Vector3();
+        Vector3 EndRock = new Vector3();
+        if (this.bedrock.get(id) != null) {
+            EndRock = this.bedrock.get(id).get();
         }
         Map<Vector3, Map<String, Tag>> TileEntities = tileEntitiesMap;
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; ++y) {
                 for (int z = 0; z < length; ++z) {
                     int index = y * width * length + z * width + x;
-                    // Only bother if this block is above ground zero and 
+                    // Only bother if this block is above ground zero and
                     // only bother with air if it is below sea level
                     // TODO: need to check max world height too?
-                    int h = Settings.islandHieght + y - bedloc.getFloorY();
+                    int h = Settings.islandHieght + y - EndRock.getFloorY();
                     if (h >= 0 && h < 255 && (blocks[index] != 0 || h < Settings.islandHieght)) {
                         // Only bother if the schematic blocks are within the range that y can be
                         IslandBlock block = new IslandBlock(x, y, z);
@@ -434,9 +476,12 @@ public final class SchematicHandler extends SchematicInterport {
     }
 
     @Override
+    public boolean pasteSchematic(Player p, Position pos) {
+        return pasteSchematic(p, pos, 1);
+    }
+
     public boolean pasteSchematic(Player p, Position pos, int id) {
-        if (islandBlocks.isEmpty()) {
-            Utils.send("Missing schematic file.. Using default");
+        if (islandBlocks.isEmpty() || islandBlocks.get(id) != null) {
             createIsland(p, pos);
             return true;
         }
@@ -444,6 +489,10 @@ public final class SchematicHandler extends SchematicInterport {
     }
 
     @Override
+    public List<IslandBlock> getIslandBlocks() {
+        return getIslandBlocks(1);
+    }
+
     public List<IslandBlock> getIslandBlocks(int id) {
         return islandBlocks.get(id).get();
     }
@@ -451,8 +500,8 @@ public final class SchematicHandler extends SchematicInterport {
     /**
      * Get child tag of a NBT structure.
      *
-     * @param items The parent tag map
-     * @param key The name of the tag to get
+     * @param items    The parent tag map
+     * @param key      The name of the tag to get
      * @param expected The expected type of the tag
      * @return child tag casted to the expected type
      */
@@ -486,8 +535,8 @@ public final class SchematicHandler extends SchematicInterport {
     /**
      * Set the island schematic configuration
      *
-     * @param id The schematic id
-     * @param type Type of the configuration
+     * @param id    The schematic id
+     * @param type  Type of the configuration
      * @param value Value of the configuration
      */
     public void setIslandValue(int id, Configuration type, Object value) {
@@ -507,6 +556,13 @@ public final class SchematicHandler extends SchematicInterport {
      */
     public boolean isUsingDefaultChest(int id) {
         return Boolean.getBoolean((String) schemaConfiguration.get(id).get(Configuration.USE_CONFIG_CHEST));
+    }
+
+    /**
+     * How long that this
+     */
+    public long getSchematicBuildMS(int id) {
+        return trafficLastMS.get(id) != null ? trafficLastMS.get(id) : 0;
     }
 
     private void createIsland(Player p, Position pos) {
@@ -571,11 +627,10 @@ public final class SchematicHandler extends SchematicInterport {
         new NukkitRunnable() {
             @Override
             public void run() {
-                if (!p.chunk.isGenerated()
-                        && !p.chunk.getProvider().getLevel().getName().equalsIgnoreCase(lvl.getName())
-                        && !p.chunk.isLoaded()
-                        && lvl.isChunkGenerated(x, z)) {
-                    TaskManager.runTaskLater(this, 20); // It will not be a problem if the player use /is create
+                BaseFullChunk chunk = lvl.getChunk(x >> 4, z >> 4);
+                if (chunk == null || chunk.isLoaded() && chunk.isGenerated()) {
+                    lvl.generateChunk(x >> 4, z >> 4);
+                    TaskManager.runTaskLater(this, 20);
                     return;
                 }
                 lvl.setBlockIdAt(x, y, z, Block.CHEST);
@@ -585,8 +640,8 @@ public final class SchematicHandler extends SchematicInterport {
                         .putInt("x", x)
                         .putInt("y", y)
                         .putInt("z", z);
-                BlockEntity.createBlockEntity(BlockEntity.CHEST, p.chunk, nbt);
-                BlockEntityChest e = new BlockEntityChest(p.chunk, nbt);
+                BlockEntity.createBlockEntity(BlockEntity.CHEST, chunk, nbt);
+                BlockEntityChest e = new BlockEntityChest(chunk, nbt);
                 // Items
                 if (Settings.chestItems.length != 0) {
                     int count = 0;

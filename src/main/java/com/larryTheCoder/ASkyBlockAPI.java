@@ -23,14 +23,15 @@ import com.larryTheCoder.database.ASConnection;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.storage.IslandData;
+
 import java.io.File;
 
 /**
  * The public API of the ASkyBlock plugin.
- *
+ * <p>
  * This API will not be changed without prior notice - allowing other plugins a
  * way to access data from the ASkyBlock plugin.
- *
+ * <p>
  * To get hold of an API object, make sure your plugin depends on ASkyBlock, and
  * then do:
  * <pre>{@code
@@ -42,20 +43,20 @@ import java.io.File;
  *     }
  * }</pre>
  *
- * @since v0.2.5 
+ * @since v0.2.5
  */
 public interface ASkyBlockAPI extends Plugin {
-    
+
     /**
      * Returns the island level from the last time it was calculated. Note this
      * does not calculate the island level.
-     * 
+     *
      * @param player
      * @return the last level calculated for the island or zero if none.
      * @since 0.3.0
      */
     Integer getIslandLevel(Player player);
-    
+
     /**
      * Returns the island-information for the player, or <code>null</code> if
      * none exist.
@@ -72,9 +73,9 @@ public interface ASkyBlockAPI extends Plugin {
      * <code>null</code> if none exist.
      *
      * @param location The location to test for the existence of an island.
-     * @since 0.2.5
      * @return the island-information for the supplied location, or
      * <code>null</code> if none exist.
+     * @since 0.2.5
      */
     IslandData getIslandInfo(Location location);
 
@@ -91,7 +92,7 @@ public interface ASkyBlockAPI extends Plugin {
      * Try to register a schematic manually
      *
      * @param schematic File of that target
-     * @param name The name of that file e.g SkyBlock
+     * @param name      The name of that file e.g SkyBlock
      * @since 0.1.0
      */
     void registerSchematic(File schematic, String name);

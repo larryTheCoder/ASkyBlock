@@ -21,11 +21,12 @@ import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
+
 import java.util.List;
 
 /**
  * The default command of messages
- * 
+ *
  * @author Adam Matthew
  */
 public class MessageSubCommand extends SubCommand {
@@ -67,7 +68,7 @@ public class MessageSubCommand extends SubCommand {
             p.sendMessage(getPlugin().getLocale(p).newsHeadline);
             list.forEach((alist) -> {
                 p.sendMessage("- §e" + alist);
-                
+
             });
             getPlugin().getMessages().clearMessages(p.getName());
         } else {

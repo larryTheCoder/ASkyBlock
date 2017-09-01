@@ -18,16 +18,14 @@
 package com.larryTheCoder;
 
 import cn.nukkit.Player;
-import com.larryTheCoder.utils.Utils;
-import com.larryTheCoder.utils.ConfigManager;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
-import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.biome.Biome;
+import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.utils.Config;
@@ -40,29 +38,30 @@ import com.larryTheCoder.database.ASConnection;
 import com.larryTheCoder.database.JDBCUtilities;
 import com.larryTheCoder.database.variables.MySQLDatabase;
 import com.larryTheCoder.database.variables.SQLiteDatabase;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
-import com.larryTheCoder.storage.InventorySave;
-import com.larryTheCoder.listener.IslandGuard;
-import com.larryTheCoder.listener.ChatHandler;
 import com.larryTheCoder.economy.Economy;
-import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
+import com.larryTheCoder.listener.ChatHandler;
+import com.larryTheCoder.listener.IslandGuard;
+import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.schematic.Schematic;
+import com.larryTheCoder.storage.InventorySave;
 import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.utils.ConfigManager;
 import com.larryTheCoder.utils.Settings;
+import com.larryTheCoder.utils.Utils;
+
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Author: Adam Matthew
@@ -72,17 +71,16 @@ import java.sql.SQLException;
  */
 public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
-    public Config cfg;
+    public static HashMap<String, Schematic> schematics = new HashMap<>();
+    public static Economy econ;
+    private static ASkyBlock object;
     public int[] version;
     public ArrayList<String> level = new ArrayList<>();
-    public static HashMap<String, Schematic> schematics = new HashMap<>();
-
+    private Config cfg;
     // Managers
     private Config msg;
-    public static Economy econ;
     private ASConnection db = null;
     private ChatHandler chatHandler;
-    private static ASkyBlock object;
     private InvitationHandler invitationHandler;
     private IslandManager manager;
     private GridManager grid;
@@ -93,6 +91,15 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     private Messages msgs;
     // Localization Strings
     private HashMap<String, ASlocales> availableLocales = new HashMap<>();
+
+    /**
+     * Return of ASkyBlock plug-in
+     *
+     * @return ASkyBlock
+     */
+    public static ASkyBlock get() {
+        return object;
+    }
 
     @Override
     public void registerSchematic(File schematic, String name) {
@@ -166,7 +173,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         return getDatabase().getPlayerData(player.getName());
     }
 
-//  #################################### NON-API ####################################
+    //  #################################### NON-API ####################################
     public TeleportLogic getTeleportLogic() {
         return teleportLogic;
     }
@@ -181,19 +188,10 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     }
 
     /**
-     * Return of ASkyBlock plug-in
-     *
-     * @return ASkyBlock
-     */
-    public static ASkyBlock get() {
-        return object;
-    }
-
-    /**
      * Get The ChatHandler instance
      *
-     * @api
      * @return ChatHandler
+     * @api
      */
     public ChatHandler getChatHandlers() {
         return chatHandler;
@@ -202,8 +200,8 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     /**
      * Get The InvitationHandler instance
      *
-     * @api
      * @return InvitationHandler
+     * @api
      */
     public InvitationHandler getInvitationHandler() {
         return invitationHandler;
@@ -212,8 +210,8 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     /**
      * Get the island Manager section
      *
-     * @api
      * @return IslandManager
+     * @api
      */
     public IslandManager getIsland() {
         return manager;
@@ -222,8 +220,8 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     /**
      * Get the GridManager Manager section
      *
-     * @api
      * @return GridManager
+     * @api
      */
     public GridManager getGrid() {
         return grid;
@@ -232,8 +230,8 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     /**
      * Get the GridManager Manager section
      *
-     * @api
      * @return InventorySave
+     * @api
      */
     public InventorySave getInventory() {
         return inventory;
@@ -242,8 +240,8 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     /**
      * Get the TeamManager section
      *
-     * @api
      * @return BaseEntity
+     * @api
      */
     public TeamManager getTManager() {
         return managers;
@@ -287,7 +285,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         }
         // Register generator
         Generator.addGenerator(SkyBlockGenerator.class, "island", SkyBlockGenerator.TYPE_SKYBLOCK);
-        // Register TaskManager        
+        // Register TaskManager
         com.intellectiualcrafters.TaskManager.IMP = new com.intellectiualcrafters.TaskManager();
     }
 
@@ -581,7 +579,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
                     // Paste Entities or not
                     newSchem.setPasteEntities(schemSection.getBoolean("schematics." + key + ".pasteentities", false));
                     // Paste air or not. Default is false - huge performance savings!
-                    //newSchem.setPasteAir(schemSection.getBoolean("schematics." + key + ".pasteair",false));	    
+                    //newSchem.setPasteAir(schemSection.getBoolean("schematics." + key + ".pasteair",false));
                     // Visible in GUI or not
                     newSchem.setVisible(schemSection.getBoolean("schematics." + key + ".show", true));
                     // Partner schematic
@@ -679,7 +677,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
                     }
                     // If this is repeated later due to the schematic config, fine, it will only add info
                 } else {
-                    // No islands.schematic in the jar, so just make the default using 
+                    // No islands.schematic in the jar, so just make the default using
                     // built-in island generation
                     schematics.put("default", new Schematic(this));
                 }
@@ -758,17 +756,17 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         return msgs;
     }
 
-    public void setAvailableLocales(HashMap<String, ASlocales> availableLocales) {
-        this.availableLocales = availableLocales;
-    }
-
     public HashMap<String, ASlocales> getAvailableLocales() {
         return availableLocales;
     }
 
+    public void setAvailableLocales(HashMap<String, ASlocales> availableLocales) {
+        this.availableLocales = availableLocales;
+    }
+
     private void test() {
         //getSchematic("default").pasteSchematic(new Location(50, 90, 50, getServer().getLevelByName("SkyBlock")));
-        
+
     }
 
 }

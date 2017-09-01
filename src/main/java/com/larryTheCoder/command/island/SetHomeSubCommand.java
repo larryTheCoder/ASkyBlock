@@ -65,7 +65,7 @@ public class SetHomeSubCommand extends SubCommand {
         Player p = Server.getInstance().getPlayer(sender.getName());
         IslandData pd = getPlugin().getIslandInfo(p.getLocation());
         // Check if the player on their own island or not
-        if(pd != null && pd.owner.equalsIgnoreCase(sender.getName())){
+        if (pd != null && pd.owner.equalsIgnoreCase(sender.getName())) {
             pd.setHomeLocation(p.getLocation());
             p.sendMessage(getLocale(p).setHomeSucess);
         } else {

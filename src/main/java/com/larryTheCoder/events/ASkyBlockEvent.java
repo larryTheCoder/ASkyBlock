@@ -49,8 +49,13 @@ public class ASkyBlockEvent extends Event {
         this.island = null;
     }
 
+    public static HandlerList getHandlers() {
+        return handlers;
+    }
+
     /**
      * Gets the player involved in this event
+     *
      * @return the player
      */
     public Player getPlayer() {
@@ -59,6 +64,7 @@ public class ASkyBlockEvent extends Event {
 
     /**
      * The island involved in the event
+     *
      * @return the island
      */
     public IslandData getIsland() {
@@ -67,6 +73,7 @@ public class ASkyBlockEvent extends Event {
 
     /**
      * Convenience function to obtain the island's protection size
+     *
      * @return the protectionSize
      */
     public int getProtectionSize() {
@@ -75,6 +82,7 @@ public class ASkyBlockEvent extends Event {
 
     /**
      * Convenience function to obtain the island's locked status
+     *
      * @return the isLocked
      */
     public boolean isLocked() {
@@ -83,6 +91,7 @@ public class ASkyBlockEvent extends Event {
 
     /**
      * Convenience function to obtain the island's distance
+     *
      * @return the islandDistance
      */
     public int getIslandDistance() {
@@ -98,6 +107,7 @@ public class ASkyBlockEvent extends Event {
 
     /**
      * Convenience function to obtain the island's owner
+     *
      * @return UUID of owner
      */
     public Player getIslandOwner() {
@@ -106,13 +116,10 @@ public class ASkyBlockEvent extends Event {
 
     /**
      * Convenience function to obtain the island's center location
+     *
      * @return the island location
      */
     public Location getIslandLocation() {
         return new Location(0, 0, 0, 0, 0, Server.getInstance().getLevelByName(island.levelName)).add(island.getCenter());
-    }
-
-    public static HandlerList getHandlers() {
-        return handlers;
     }
 }

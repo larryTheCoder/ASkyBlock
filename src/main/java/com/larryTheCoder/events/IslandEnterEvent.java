@@ -22,7 +22,7 @@ import com.larryTheCoder.storage.IslandData;
 
 /**
  * Fired when a player enters an island's area
- * 
+ *
  * @author Adam Matthew
  */
 public class IslandEnterEvent extends ASkyBlockEvent {
@@ -34,7 +34,7 @@ public class IslandEnterEvent extends ASkyBlockEvent {
      *
      * @param player
      * @param island - island the player is entering
-     * @param loc - Location of where the player entered the island or tried to enter
+     * @param loc    - Location of where the player entered the island or tried to enter
      */
     public IslandEnterEvent(Player player, IslandData island, Location loc) {
         super(player, island);

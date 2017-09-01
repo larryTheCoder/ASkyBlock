@@ -22,6 +22,7 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Utils;
+
 import java.util.List;
 
 /**
@@ -69,7 +70,7 @@ public class HomeSubCommand extends SubCommand {
             return false;
         }
         // The island number might be -1 or -2
-        if(islandNumber < 1){
+        if (islandNumber < 1) {
             islandNumber = 1;
         }
         Player p = sender.getServer().getPlayer(sender.getName());

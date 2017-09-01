@@ -20,6 +20,7 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -100,6 +101,7 @@ public class ConnectionUpdater {
 
     private class IndependantIsland {
 
+        private final HashMap<IslandData.SettingsFlag, Boolean> igs = new HashMap<>();
         // This is how new island data is.
         public int islandId;
         public int id;
@@ -109,7 +111,6 @@ public class ConnectionUpdater {
         public int X = 0;
         public int Y = 0;
         public int Z = 0;
-
         public String name;
         public String owner;
         public String biome;
@@ -118,8 +119,6 @@ public class ConnectionUpdater {
         private boolean isSpawn = false;
         // Protection size
         private int protectionRange = 0; //Unaccessable
-
-        private final HashMap<IslandData.SettingsFlag, Boolean> igs = new HashMap<>();
 
         public IndependantIsland() {
             prepareStatement();

@@ -18,14 +18,15 @@ package com.larryTheCoder.command.island;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
-import java.util.ArrayList;
-import java.util.List;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
-import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.schematic.Schematic;
+import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Adam Matthew
@@ -86,7 +87,7 @@ public class CreateISubCommand extends SubCommand {
         }
         List<IslandData> maxPlotsOfPlayers = getPlugin().getDatabase().getIslands(sender.getName(), getPlugin().getDefaultWorld(p));
         if (Settings.maxHome >= 0 && maxPlotsOfPlayers.size() >= Settings.maxHome) {
-            sender.sendMessage(getPrefix() +getLocale(p).errorMaxIsland.replace("[maxplot]", "" + Settings.maxHome));
+            sender.sendMessage(getPrefix() + getLocale(p).errorMaxIsland.replace("[maxplot]", "" + Settings.maxHome));
             return true;
         }
         getPlugin().getIsland().createIsland(p, smt, name);

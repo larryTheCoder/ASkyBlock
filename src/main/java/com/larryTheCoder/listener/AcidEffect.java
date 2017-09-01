@@ -24,9 +24,10 @@ import cn.nukkit.event.player.PlayerDeathEvent;
 import cn.nukkit.event.weather.WeatherChangeEvent;
 import cn.nukkit.inventory.Inventory;
 import cn.nukkit.item.Item;
+import com.larryTheCoder.ASkyBlock;
+
 import java.util.ArrayList;
 import java.util.List;
-import com.larryTheCoder.ASkyBlock;
 
 /**
  * @author Adam Matthew
@@ -35,17 +36,11 @@ public class AcidEffect implements Listener {
 
     private final ASkyBlock plugin;
     private final List<Player> burningPlayers = new ArrayList<>();
-    private boolean isRaining = false;
     private final List<Player> wetPlayers = new ArrayList<>();
+    private boolean isRaining = false;
 
     public AcidEffect(final ASkyBlock pluginI) {
         plugin = pluginI;
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerDeath(PlayerDeathEvent e) {
-        burningPlayers.remove(e.getEntity());
-        wetPlayers.remove(e.getEntity());
     }
 
     /**
@@ -123,6 +118,12 @@ public class AcidEffect implements Listener {
             }
         }
         return red;
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onPlayerDeath(PlayerDeathEvent e) {
+        burningPlayers.remove(e.getEntity());
+        wetPlayers.remove(e.getEntity());
     }
 
     /**

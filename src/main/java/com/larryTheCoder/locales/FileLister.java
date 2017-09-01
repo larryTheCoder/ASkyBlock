@@ -17,25 +17,26 @@
 package com.larryTheCoder.locales;
 
 import cn.nukkit.plugin.PluginBase;
+import com.larryTheCoder.ASkyBlock;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import com.larryTheCoder.ASkyBlock;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author Adam Matthew
  */
 public final class FileLister {
 
-    private final ASkyBlock plugin;
     private final static String FOLDERPATH = "locale";
+    private final ASkyBlock plugin;
 
     public FileLister(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -84,18 +85,18 @@ public final class FileLister {
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
                 String path = entry.getName();
-                
+
                 /**
                  * Not in the folder.
                  */
                 if (!path.startsWith(FOLDERPATH)) {
                     continue;
                 }
-                
+
                 if (entry.getName().endsWith(".yml")) {
                     result.add((entry.getName().replace(".yml", "")).replace("locale/", ""));
                 }
-                
+
             }
         }
         return result;

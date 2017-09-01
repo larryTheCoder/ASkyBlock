@@ -13,6 +13,7 @@ public class XMLTokener extends JSONTokener {
      * The table of entity values. It initially contains Character values for amp, apos, gt, lt, quot.
      */
     public static final HashMap<String, Character> entity;
+
     static {
         entity = new HashMap<>(8);
         entity.put("amp", XML.AMP);
@@ -21,7 +22,7 @@ public class XMLTokener extends JSONTokener {
         entity.put("lt", XML.LT);
         entity.put("quot", XML.QUOT);
     }
-    
+
     /**
      * Construct an XMLTokener from a string.
      *
@@ -30,17 +31,16 @@ public class XMLTokener extends JSONTokener {
     public XMLTokener(final String s) {
         super(s);
     }
-    
+
     /**
      * Get the text in the CDATA block.
      *
      * @return The string up to the <code>]]&gt;</code>.
-     *
      * @throws JSONException If the <code>]]&gt;</code> is not found.
      */
     public String nextCDATA() throws JSONException {
         final StringBuilder sb = new StringBuilder();
-        for (;;) {
+        for (; ; ) {
             char c = next();
             if (end()) {
                 throw syntaxError("Unclosed CDATA");
@@ -53,13 +53,12 @@ public class XMLTokener extends JSONTokener {
             }
         }
     }
-    
+
     /**
      * Get the next XML outer token, trimming whitespace. There are two kinds of tokens: the '&lt;' character which begins
      * a markup tag, and the content text between markup tags.
      *
      * @return A string, or a '&lt;' Character, or null if there is no more source text.
-     *
      * @throws JSONException
      */
     public Object nextContent() throws JSONException {
@@ -74,7 +73,7 @@ public class XMLTokener extends JSONTokener {
             return XML.LT;
         }
         StringBuilder sb = new StringBuilder();
-        for (;;) {
+        for (; ; ) {
             if ((c == '<') || (c == 0)) {
                 back();
                 return sb.toString().trim();
@@ -87,20 +86,18 @@ public class XMLTokener extends JSONTokener {
             c = next();
         }
     }
-    
+
     /**
      * Return the next entity. These entities are translated to Characters: <code>&amp; &quot; &gt;  &lt;
      * &quot;</code>.
      *
      * @param ampersand An ampersand character.
-     *
      * @return A Character or an entity String if the entity is not recognized.
-     *
      * @throws JSONException If missing ';' in XML entity.
      */
     public Object nextEntity(final char ampersand) throws JSONException {
         final StringBuilder sb = new StringBuilder();
-        for (;;) {
+        for (; ; ) {
             final char c = next();
             if (Character.isLetterOrDigit(c) || (c == '#')) {
                 sb.append(Character.toLowerCase(c));
@@ -114,13 +111,12 @@ public class XMLTokener extends JSONTokener {
         final Object object = entity.get(string);
         return object != null ? object : ampersand + string + ';';
     }
-    
+
     /**
      * Returns the next XML meta token. This is used for skipping over <!...> and <?...?> structures.
      *
      * @return Syntax characters (<code>&lt; &gt; / = ! ?</code>) are returned as Character, and strings and names are
      * returned as Boolean. We don't care what the values actually are.
-     *
      * @throws JSONException If a string is not properly closed or if the XML is badly structured.
      */
     public Object nextMeta() throws JSONException {
@@ -147,7 +143,7 @@ public class XMLTokener extends JSONTokener {
             case '"':
             case '\'':
                 q = c;
-                for (;;) {
+                for (; ; ) {
                     c = next();
                     if (c == 0) {
                         throw syntaxError("Unterminated string");
@@ -157,7 +153,7 @@ public class XMLTokener extends JSONTokener {
                     }
                 }
             default:
-                for (;;) {
+                for (; ; ) {
                     c = next();
                     if (Character.isWhitespace(c)) {
                         return Boolean.TRUE;
@@ -178,13 +174,12 @@ public class XMLTokener extends JSONTokener {
                 }
         }
     }
-    
+
     /**
      * Get the next XML Token. These tokens are found inside of angle brackets. It may be one of these characters:
      * <code>/ &gt;= ! ?</code> or it may be a string wrapped in single quotes or double quotes, or it may be a name.
      *
      * @return a String or a Character.
-     *
      * @throws JSONException If the XML is not well formed.
      */
     public Object nextToken() throws JSONException {
@@ -209,12 +204,12 @@ public class XMLTokener extends JSONTokener {
                 return XML.BANG;
             case '?':
                 return XML.QUEST;
-                // Quoted string
+            // Quoted string
             case '"':
             case '\'':
                 q = c;
                 sb = new StringBuilder();
-                for (;;) {
+                for (; ; ) {
                     c = next();
                     if (c == 0) {
                         throw syntaxError("Unterminated string");
@@ -231,7 +226,7 @@ public class XMLTokener extends JSONTokener {
             default:
                 // Name
                 sb = new StringBuilder();
-                for (;;) {
+                for (; ; ) {
                     sb.append(c);
                     c = next();
                     if (Character.isWhitespace(c)) {
@@ -257,13 +252,12 @@ public class XMLTokener extends JSONTokener {
                 }
         }
     }
-    
+
     /**
      * Skip characters until past the requested string. If it is not found, we are left at the end of the source with a
      * result of false.
      *
      * @param to A string to skip past.
-     *
      * @throws JSONException
      */
     public boolean skipPast(final String to) throws JSONException {
@@ -283,7 +277,7 @@ public class XMLTokener extends JSONTokener {
             circle[i] = c;
         }
         /* We will loop, possibly for all of the remaining characters. */
-        for (int offset = 0; ;) {
+        for (int offset = 0; ; ) {
             int j = offset;
             boolean b = true;
             /* Compare the circle buffer with the to string. */

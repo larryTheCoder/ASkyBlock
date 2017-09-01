@@ -25,18 +25,15 @@ import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.block.BlockFromToEvent;
 import cn.nukkit.event.block.BlockPlaceEvent;
 import cn.nukkit.event.entity.EntityExplodeEvent;
-import cn.nukkit.event.player.PlayerCommandPreprocessEvent;
-import cn.nukkit.event.player.PlayerItemHeldEvent;
-import cn.nukkit.event.player.PlayerJoinEvent;
-import cn.nukkit.event.player.PlayerPreLoginEvent;
-import cn.nukkit.event.player.PlayerQuitEvent;
+import cn.nukkit.event.player.*;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
-import java.util.ArrayList;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -145,11 +142,11 @@ public class IslandListener implements Listener {
         }
     }
 
-    public void onPlayerLogin(PlayerPreLoginEvent ex){
+    public void onPlayerLogin(PlayerPreLoginEvent ex) {
         Player p = ex.getPlayer();
         plugin.getIslandInfo(p); // laod the player islands
     }
-    
+
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerJoin(PlayerJoinEvent ex) {
         // load player inventory if exsits
@@ -162,17 +159,17 @@ public class IslandListener implements Listener {
         }
         // Load messages
         List<String> news = plugin.getMessages().getMessages(p.getName());
-        
-        if(news != null && news.isEmpty()){
+
+        if (news != null && news.isEmpty()) {
             p.sendMessage(plugin.getLocale(p).newNews.replace("[count]", Integer.toString(news.size())));
         }
     }
-    
+
     @EventHandler(priority = EventPriority.HIGH)
-    public void onPlayerLeave(PlayerQuitEvent ex){
+    public void onPlayerLeave(PlayerQuitEvent ex) {
         Player p = ex.getPlayer();
         IslandData pd = plugin.getIslandInfo(p);
-        if(pd != null){
+        if (pd != null) {
             // Remove the island data from cache provides the memory to server
             plugin.getDatabase().removeIslandFromCache(pd);
         }

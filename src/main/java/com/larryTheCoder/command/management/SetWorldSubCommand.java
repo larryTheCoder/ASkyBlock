@@ -25,7 +25,6 @@ import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.utils.Utils;
 
 /**
- *
  * @author Adam Matthew
  */
 public class SetWorldSubCommand extends SubCommand {
@@ -65,7 +64,7 @@ public class SetWorldSubCommand extends SubCommand {
             return false;
         }
         Player p = Server.getInstance().getPlayer(sender.getName());
-        if(!getPlugin().level.contains(args[1])){
+        if (!getPlugin().level.contains(args[1])) {
             sender.sendMessage(getLocale(p).errorUnknownWorld);
             sender.sendMessage(Utils.arrayToString(getPlugin().level));
             return true;
@@ -73,7 +72,7 @@ public class SetWorldSubCommand extends SubCommand {
         PlayerData pd = getPlugin().getPlayerInfo(p);
         pd.defaultLevel = args[1];
         boolean result = getPlugin().getDatabase().savePlayerData(pd);
-        if(result){
+        if (result) {
             sender.sendMessage(getLocale(p).setworldSeccess);
         } else {
             sender.sendMessage(getLocale(p).errorFailedNormal);

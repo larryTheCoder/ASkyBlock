@@ -18,11 +18,12 @@ package com.larryTheCoder.panels;
 
 import cn.nukkit.item.Item;
 import cn.nukkit.utils.TextFormat;
+import com.larryTheCoder.schematic.Schematic;
+import com.larryTheCoder.utils.Utils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.larryTheCoder.schematic.Schematic;
-import com.larryTheCoder.utils.Utils;
 
 /**
  * Schematic Panel Item

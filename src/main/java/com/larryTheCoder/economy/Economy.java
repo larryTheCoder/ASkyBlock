@@ -20,14 +20,13 @@ package com.larryTheCoder.economy;
 import cn.nukkit.Player;
 
 /**
- *
  * @author Adam Matthew
  */
 public interface Economy {
-    
-    public boolean reduceMoney(Player p, double amount);
-    
-    public boolean addMoney(Player p, double amount);
 
-    public double getMoney(Player p);
+    boolean reduceMoney(Player p, double amount);
+
+    boolean addMoney(Player p, double amount);
+
+    double getMoney(Player p);
 }

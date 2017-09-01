@@ -18,16 +18,13 @@
 package com.larryTheCoder.database.variables;
 
 import com.larryTheCoder.utils.Utils;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+
+import java.sql.*;
 
 /**
  * @author Adam Matthew
  */
-public class MySQLDatabase implements AbstractDatabase{
+public class MySQLDatabase implements AbstractDatabase {
 
 
     private final String user;

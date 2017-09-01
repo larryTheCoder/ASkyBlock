@@ -84,7 +84,7 @@ public class ChatSubCommand extends SubCommand {
             } else {
                 p.sendMessage(getPrefix() + getLocale(p).teamChatStatusOn);
                 getPlugin().getChatHandlers().setPlayer(p);
-            }   
+            }
         }
         return false;
     }

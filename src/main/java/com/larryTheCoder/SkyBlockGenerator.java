@@ -16,7 +16,6 @@
  */
 package com.larryTheCoder;
 
-import com.larryTheCoder.utils.Settings;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.Level;
@@ -25,6 +24,8 @@ import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
+import com.larryTheCoder.utils.Settings;
+
 import java.util.Map;
 
 /**
@@ -33,14 +34,14 @@ import java.util.Map;
 public class SkyBlockGenerator extends Generator {
 
     public static final int TYPE_SKYBLOCK = 0x7fffffff;
+    private final Map<String, Object> options;
     private ChunkManager level;
     private NukkitRandom random;
-    private final Map<String, Object> options;
 
     public SkyBlockGenerator(Map<String, Object> options) {
         this.options = options;
     }
-    
+
     @Override
     public int getId() {
         return TYPE_SKYBLOCK;
@@ -65,7 +66,7 @@ public class SkyBlockGenerator extends Generator {
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 for (int y = 0; y < Settings.seaLevel; y++) {
-                    chunk.setBlock(x, y, z, Block.STILL_WATER); // Water Allows stuff 
+                    chunk.setBlock(x, y, z, Block.STILL_WATER); // Water Allows stuff
                     // to fall through into oblivion, thus keeping lag to a minimum
                 }
             }

@@ -18,6 +18,7 @@ package com.larryTheCoder.schematic;
 
 import cn.nukkit.Player;
 import cn.nukkit.level.Position;
+
 import java.util.List;
 
 /**
@@ -35,25 +36,22 @@ public abstract class SchematicInterport {
      *
      * @param blocks The Blocks (same as data)
      * @param data   Data (damage or meta)
-     * @param id     The id of the island
      */
-    public abstract void handleSchematic(short[] blocks, byte[] data, int id);
+    public abstract void handleSchematic(short[] blocks, byte[] data);
 
     /**
      * This method handling player island blocks-by-blocks
      *
-     * @param p     The player
-     * @param pos   The position to pasting the blocks
-     * @param id    The number of the schematic (starts with 1)
+     * @param p   The player
+     * @param pos The position to pasting the blocks
      * @return True if the player island were generated|null
      */
-    public abstract boolean pasteSchematic(Player p, Position pos, int id);
+    public abstract boolean pasteSchematic(Player p, Position pos);
 
     /**
      * Get the list of available islands
-     * 
-     * @param id    The id of the island
+     *
      * @return An array of the listed blocks
      */
-    public abstract List<IslandBlock> getIslandBlocks(int id);
+    public abstract List<IslandBlock> getIslandBlocks();
 }

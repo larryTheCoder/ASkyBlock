@@ -19,9 +19,7 @@ package com.larryTheCoder.schematic;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
-import cn.nukkit.entity.item.EntityPainting.Motive; // Art
-import static cn.nukkit.entity.item.EntityPainting.motives;
-import static cn.nukkit.math.BlockFace.*;
+import cn.nukkit.entity.item.EntityPainting.Motive;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
@@ -31,41 +29,29 @@ import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
+import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.utils.Settings;
+import com.larryTheCoder.utils.Utils;
+import org.jnbt.*;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Random;
+import java.util.*;
 
-import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.utils.Settings;
-import com.larryTheCoder.utils.Utils;
-
-import org.jnbt.ByteArrayTag;
-import org.jnbt.ByteTag;
-import org.jnbt.CompoundTag;
-import org.jnbt.FloatTag;
-import org.jnbt.IntTag;
-import org.jnbt.ListTag;
-import org.jnbt.NBTInputStream;
-import org.jnbt.ShortTag;
-import org.jnbt.StringTag;
-import org.jnbt.Tag;
+import static cn.nukkit.entity.item.EntityPainting.motives;
+import static cn.nukkit.math.BlockFace.*;
 
 /**
  * @author Adam Matthew
  */
 public class Schematic {
 
-    private File schematicFolder;
     public ASkyBlock plugin;
     public boolean running = false;
+    public HashMap<Integer, Position> spot = new HashMap<>();
+    public int count = 0;
+    private File schematicFolder;
     //Utils
     private short width;
     private short length;
@@ -74,7 +60,6 @@ public class Schematic {
     private Map<String, Motive> paintingList = new HashMap<>();
     private Set<Integer> attachable = new HashSet<>();
     private Map<Byte, BlockFace> facingList = new HashMap<>();
-    public HashMap<Integer, Position> spot = new HashMap<>();
     private Vector3 bedrock;
     private Vector3 chest;
     private Vector3 welcomeSign;
@@ -100,7 +85,6 @@ public class Schematic {
     private String partnerName = "";
     private List<String> islandCompanion;
     private Item[] defaultChestItems;
-    public int count = 0;
     // DEBUG
     private MainLogger debug = Server.getInstance().getLogger();
 
@@ -108,7 +92,7 @@ public class Schematic {
 
     public Schematic(ASkyBlock plugin) {
         this.plugin = plugin;
-        // Initialize 
+        // Initialize
         name = "";
         heading = "";
         description = "Default Island";
@@ -165,6 +149,25 @@ public class Schematic {
         this.init();
         this.initAttachable();
         this.initArt();
+    }
+
+    /**
+     * Get child tag of a NBT structure.
+     *
+     * @param items    The parent tag map
+     * @param key      The name of the tag to get
+     * @param expected The expected type of the tag
+     * @return child tag casted to the expected type
+     */
+    private static <T extends Tag> T getChildTag(Map<String, Tag> items, String key, Class<T> expected) throws IllegalArgumentException {
+        if (!items.containsKey(key)) {
+            throw new IllegalArgumentException("Schematic file is missing a \"" + key + "\" tag");
+        }
+        Tag tag = items.get(key);
+        if (!expected.isInstance(tag)) {
+            throw new IllegalArgumentException(key + " tag is not of tag type " + expected.getName());
+        }
+        return expected.cast(tag);
     }
 
     protected final void initAttachable() {
@@ -560,7 +563,7 @@ public class Schematic {
             for (int y = 0; y < height; ++y) {
                 for (int z = 0; z < length; ++z) {
                     int index = y * width * length + z * width + x;
-                    // Only bother if this block is above ground zero and 
+                    // Only bother if this block is above ground zero and
                     // only bother with air if it is below sea level
                     // TODO: need to check max world height too?
                     int h = Settings.islandHieght + y - bedrock.getFloorY();
@@ -659,25 +662,6 @@ public class Schematic {
     }
 
     /**
-     * Get child tag of a NBT structure.
-     *
-     * @param items The parent tag map
-     * @param key The name of the tag to get
-     * @param expected The expected type of the tag
-     * @return child tag casted to the expected type
-     */
-    private static <T extends Tag> T getChildTag(Map<String, Tag> items, String key, Class<T> expected) throws IllegalArgumentException {
-        if (!items.containsKey(key)) {
-            throw new IllegalArgumentException("Schematic file is missing a \"" + key + "\" tag");
-        }
-        Tag tag = items.get(key);
-        if (!expected.isInstance(tag)) {
-            throw new IllegalArgumentException(key + " tag is not of tag type " + expected.getName());
-        }
-        return expected.cast(tag);
-    }
-
-    /**
      * @return the biome
      */
     public Biome getBiome() {
@@ -685,10 +669,28 @@ public class Schematic {
     }
 
     /**
+     * @param biome the biome to set
+     */
+    public void setBiome(Biome biome) {
+        this.biome = biome;
+    }
+
+    public void setBiome(int HELL) {
+        setBiome(Biome.getBiome(HELL));
+    }
+
+    /**
      * @return the description
      */
     public String getDescription() {
         return description;
+    }
+
+    /**
+     * @param description the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**
@@ -734,6 +736,13 @@ public class Schematic {
     }
 
     /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
      * @return the perm
      */
     public String getPerm() {
@@ -741,10 +750,24 @@ public class Schematic {
     }
 
     /**
+     * @param perm the perm to set
+     */
+    public void setPerm(String perm) {
+        this.perm = perm;
+    }
+
+    /**
      * @return the rating
      */
     public int getRating() {
         return rating;
+    }
+
+    /**
+     * @param rating the rating to set
+     */
+    public void setRating(int rating) {
+        this.rating = rating;
     }
 
     /**
@@ -769,6 +792,13 @@ public class Schematic {
     }
 
     /**
+     * @param useDefaultChest the useDefaultChest to set
+     */
+    public void setUseDefaultChest(boolean useDefaultChest) {
+        this.useDefaultChest = useDefaultChest;
+    }
+
+    /**
      * @return the usePhysics
      */
     public boolean isUsePhysics() {
@@ -788,13 +818,6 @@ public class Schematic {
      */
     public Position getPlayerSpawn(Position pasteLocation) {
         return pasteLocation.clone().add(playerSpawn);
-    }
-
-    /**
-     * @param rating the rating to set
-     */
-    public void setRating(int rating) {
-        this.rating = rating;
     }
 
     /**
@@ -826,6 +849,13 @@ public class Schematic {
         return levelHandicap;
     }
 
+    /**
+     * @param levelHandicap the levelHandicap to set
+     */
+    public void setLevelHandicap(int levelHandicap) {
+        this.levelHandicap = levelHandicap;
+    }
+
     public void setIcon(Item icon, int damage) {
         this.icon = icon;
         this.durability = damage; // META
@@ -836,20 +866,6 @@ public class Schematic {
      */
     public void setIcon(int icon) {
         this.icon = Item.get(icon);
-    }
-
-    /**
-     * @param useDefaultChest the useDefaultChest to set
-     */
-    public void setUseDefaultChest(boolean useDefaultChest) {
-        this.useDefaultChest = useDefaultChest;
-    }
-
-    /**
-     * @param levelHandicap the levelHandicap to set
-     */
-    public void setLevelHandicap(int levelHandicap) {
-        this.levelHandicap = levelHandicap;
     }
 
     /**
@@ -919,27 +935,6 @@ public class Schematic {
     }
 
     /**
-     * @param biome the biome to set
-     */
-    public void setBiome(Biome biome) {
-        this.biome = biome;
-    }
-
-    /**
-     * @param description the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
      * @return the pasteEntities
      */
     public boolean isPasteEntities() {
@@ -984,16 +979,5 @@ public class Schematic {
      */
     public void setOrder(int order) {
         this.order = order;
-    }
-
-    public void setBiome(int HELL) {
-        setBiome(Biome.getBiome(HELL));
-    }
-
-    /**
-     * @param perm the perm to set
-     */
-    public void setPerm(String perm) {
-        this.perm = perm;
     }
 }

@@ -22,9 +22,9 @@ import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.HandlerList;
 import cn.nukkit.level.Location;
+import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
-import com.larryTheCoder.schematic.Schematic;
 
 /**
  * @author Adam Matthew
@@ -45,6 +45,10 @@ public class IslandCreateEvent extends Event implements Cancellable {
         this.player = player;
         this.schematic = schematic;
         this.island = island;
+    }
+
+    public static HandlerList getHandlers() {
+        return HANDLERS;
     }
 
     /**
@@ -87,9 +91,5 @@ public class IslandCreateEvent extends Event implements Cancellable {
      */
     public int getIslandDistance() {
         return Settings.islandDistance;
-    }
-
-    public static HandlerList getHandlers() {
-        return HANDLERS;
     }
 }

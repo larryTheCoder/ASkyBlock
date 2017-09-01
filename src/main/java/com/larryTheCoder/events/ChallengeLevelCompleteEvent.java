@@ -21,35 +21,37 @@ import cn.nukkit.Player;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.HandlerList;
 import cn.nukkit.item.Item;
+
 import java.util.List;
 
 /**
  * This event is fired when a player completes a challenge level
- * 
+ *
  * @author Adam Matthew
  */
 public class ChallengeLevelCompleteEvent extends Event {
-    
+
+    private static final HandlerList HANDLERS = new HandlerList();
     private final Player player;
     private final int oldLevel;
     private final int newLevel;
     private final List<Item> rewardedItems;
-    private static final HandlerList HANDLERS = new HandlerList();
 
-    public static HandlerList getHandlers(){
-        return HANDLERS;
-    }
     /**
      * @param player
      * @param oldLevel
      * @param newLevel
-     * @param rewardedItems 
+     * @param rewardedItems
      */
     public ChallengeLevelCompleteEvent(Player player, int oldLevel, int newLevel, List<Item> rewardedItems) {
         this.player = player;
         this.oldLevel = oldLevel;
         this.newLevel = newLevel;
         this.rewardedItems = rewardedItems;
+    }
+
+    public static HandlerList getHandlers() {
+        return HANDLERS;
     }
 
     /**

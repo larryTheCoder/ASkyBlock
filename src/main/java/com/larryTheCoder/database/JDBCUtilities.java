@@ -17,26 +17,21 @@
 package com.larryTheCoder.database;
 
 import com.larryTheCoder.ASkyBlock;
-import java.io.StringWriter;
-import java.sql.BatchUpdateException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
+import org.w3c.dom.Document;
+
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.w3c.dom.Document;
+import java.io.StringWriter;
+import java.sql.*;
 
 /**
- *
  * @author Adam Matthew
  */
 public class JDBCUtilities {
-        public static void getWarningsFromResultSet(ResultSet rs) throws SQLException {
+    public static void getWarningsFromResultSet(ResultSet rs) throws SQLException {
         JDBCUtilities.printWarnings(rs.getWarnings());
     }
 
@@ -68,10 +63,7 @@ public class JDBCUtilities {
             return true;
         }
         // 42Y55: Table already exists in schema
-        if (sqlState.equalsIgnoreCase("42Y55")) {
-            return true;
-        }
-        return false;
+        return sqlState.equalsIgnoreCase("42Y55");
     }
 
     public static void printBatchUpdateException(BatchUpdateException b) {
@@ -118,7 +110,7 @@ public class JDBCUtilities {
         }
     }
 
-    public static String convertDocumentToString(Document doc) throws TransformerConfigurationException,
+    public static String convertDocumentToString(Document doc) throws
             TransformerException {
         Transformer t = TransformerFactory.newInstance().newTransformer();
 //    t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");

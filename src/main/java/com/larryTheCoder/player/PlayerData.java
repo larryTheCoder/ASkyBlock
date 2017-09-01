@@ -20,11 +20,11 @@ import cn.nukkit.level.Location;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- *
  * @author Adam Matthew
  */
 public class PlayerData implements Cloneable {

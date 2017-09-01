@@ -23,13 +23,8 @@ import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
-import java.sql.BatchUpdateException;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -42,9 +37,9 @@ public final class ASConnection {
 
     private final AbstractDatabase db;
     private final Connection con;
-    private boolean closed = true;
     // Faster to search islands ~75%
     private final ArrayList<IslandData> islandCache = new ArrayList<>();
+    private boolean closed = true;
     private IslandData islandSpawn;
 
     public ASConnection(AbstractDatabase database, boolean debug) throws SQLException, ClassNotFoundException, InterruptedException {
@@ -88,7 +83,7 @@ public final class ASConnection {
                         + "`protection` VARCHAR NOT NULL,"
                         + "`biome` VARCHAR NOT NULL,"
                         + "`locked` INTEGER NOT NULL)");
-                        //+ "`active` INTEGER NOT NULL)");
+                //+ "`active` INTEGER NOT NULL)");
                 set.addBatch("CREATE TABLE IF NOT EXISTS `worlds` (`world` VARCHAR)");
                 set.addBatch("CREATE TABLE IF NOT EXISTS `players` (`player` VARCHAR NOT NULL,"
                         + "`homes` INTEGER NOT NULL,"
@@ -121,10 +116,10 @@ public final class ASConnection {
             Utils.send("&cError Code: 0x4f");
         }
     }
-    
-    public void removeIslandFromCache(IslandData pd){
-        for(IslandData pde : islandCache){
-            if(pde.islandId == pd.islandId){
+
+    public void removeIslandFromCache(IslandData pd) {
+        for (IslandData pde : islandCache) {
+            if (pde.islandId == pd.islandId) {
                 islandCache.remove(pde);
                 break;
             }
@@ -280,8 +275,8 @@ public final class ASConnection {
     public IslandData getIslandById(int id) {
         // safe block
         IslandData pd = null;
-        for(IslandData pde : islandCache){
-            if(pde.islandId == id){
+        for (IslandData pde : islandCache) {
+            if (pde.islandId == id) {
                 return pde;
             }
         }
@@ -343,8 +338,8 @@ public final class ASConnection {
     }
 
     public boolean saveIsland(IslandData pd) {
-        for(IslandData pde : islandCache){
-            if(pde.islandId == pd.islandId){
+        for (IslandData pde : islandCache) {
+            if (pde.islandId == pd.islandId) {
                 islandCache.remove(pde);
                 break;
             }
@@ -480,20 +475,20 @@ public final class ASConnection {
         // TESTED SECCESS
         try (PreparedStatement stmt = con.prepareStatement(
                 "UPDATE `players` SET "
-                + "`homes` = ?, "
-                + "`resetleft` = ?, "
-                + "`banlist` = ?, "
-                + "`teamleader` = ?, "
-                + "`teamislandlocation` = ?, "
-                + "`inteam` = ?, "
-                + "`islandlvl` = ?, "
-                + "`members` = ?, "
-                + "`challengelist` = ?, "
-                + "`challengelisttimes` = ?, "
-                + "`name` = ?, "
-                + "`locale` = ?, "
-                + "`defaultlevel` = ? "
-                + "WHERE `player` = '" + pd.playerName + "'")) {
+                        + "`homes` = ?, "
+                        + "`resetleft` = ?, "
+                        + "`banlist` = ?, "
+                        + "`teamleader` = ?, "
+                        + "`teamislandlocation` = ?, "
+                        + "`inteam` = ?, "
+                        + "`islandlvl` = ?, "
+                        + "`members` = ?, "
+                        + "`challengelist` = ?, "
+                        + "`challengelisttimes` = ?, "
+                        + "`name` = ?, "
+                        + "`locale` = ?, "
+                        + "`defaultlevel` = ? "
+                        + "WHERE `player` = '" + pd.playerName + "'")) {
             stmt.setInt(1, pd.homes);
             stmt.setInt(2, pd.resetleft);
             stmt.setString(3, Utils.arrayToString(pd.banList));

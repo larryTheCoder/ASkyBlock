@@ -16,9 +16,7 @@ public class JSONML {
      * @param x         The XMLTokener containing the source string.
      * @param arrayForm true if array form, false if object form.
      * @param ja        The JSONArray that is containing the current tag or null if we are at the outermost level.
-     *
      * @return A JSONArray if the value is the outermost tag, otherwise null.
-     *
      * @throws JSONException
      */
     private static Object parse(XMLTokener x, boolean arrayForm, JSONArray ja) throws JSONException {
@@ -110,7 +108,7 @@ public class JSONML {
                         }
                     }
                     token = null;
-                    for (;;) {
+                    for (; ; ) {
                         if (token == null) {
                             token = x.nextToken();
                         }
@@ -180,22 +178,20 @@ public class JSONML {
             }
         }
     }
-    
+
     /**
      * Convert a well-formed (but not necessarily valid) XML string into a JSONArray using the JsonML transform. Each
      * XML tag is represented as a JSONArray in which the first element is the tag name. If the tag has attributes, then
      * the second element will be JSONObject containing the name/value pairs. If the tag contains children, then strings
      *
      * @param string The source string.
-     *
      * @return A JSONArray containing the structured data from the XML string.
-     *
      * @throws JSONException
      */
     public static JSONArray toJSONArray(String string) throws JSONException {
         return toJSONArray(new XMLTokener(string));
     }
-    
+
     /**
      * Convert a well-formed (but not necessarily valid) XML string into a JSONArray using the JsonML transform. Each
      * XML tag is represented as a JSONArray in which the first element is the tag name. If the tag has attributes, then
@@ -204,58 +200,50 @@ public class JSONML {
      * are ignored.
      *
      * @param x An XMLTokener.
-     *
      * @return A JSONArray containing the structured data from the XML string.
-     *
      * @throws JSONException
      */
     public static JSONArray toJSONArray(XMLTokener x) throws JSONException {
         return (JSONArray) parse(x, true, null);
     }
-    
+
     /**
      * Convert a well-formed (but not necessarily valid) XML string into a JSONObject using the JsonML transform. Each
      * XML tag is represented as a JSONObject with a "tagName" property. If the tag has attributes, then the attributes
      * will be in the JSONObject as properties. If the tag contains children, the object will have a "childNodes"
      * property which will be an array of strings and JsonML JSONObjects.
-     *
+     * <p>
      * Comments, prologs, DTDs, and <code>&lt;[ [ ]]></code> are ignored.
      *
      * @param x An XMLTokener of the XML source text.
-     *
      * @return A JSONObject containing the structured data from the XML string.
-     *
      * @throws JSONException
      */
     public static JSONObject toJSONObject(XMLTokener x) throws JSONException {
         return (JSONObject) parse(x, false, null);
     }
-    
+
     /**
      * Convert a well-formed (but not necessarily valid) XML string into a JSONObject using the JsonML transform. Each
      * XML tag is represented as a JSONObject with a "tagName" property. If the tag has attributes, then the attributes
      * will be in the JSONObject as properties. If the tag contains children, the object will have a "childNodes"
      * property which will be an array of strings and JsonML JSONObjects.
-     *
+     * <p>
      * Comments, prologs, DTDs, and <code>&lt;[ [ ]]></code> are ignored.
      *
      * @param string The XML source text.
-     *
      * @return A JSONObject containing the structured data from the XML string.
-     *
      * @throws JSONException
      */
     public static JSONObject toJSONObject(String string) throws JSONException {
         return toJSONObject(new XMLTokener(string));
     }
-    
+
     /**
      * Reverse the JSONML transformation, making an XML text from a JSONArray.
      *
      * @param ja A JSONArray.
-     *
      * @return An XML string.
-     *
      * @throws JSONException
      */
     public static String toString(JSONArray ja) throws JSONException {
@@ -323,16 +311,14 @@ public class JSONML {
         }
         return sb.toString();
     }
-    
+
     /**
      * Reverse the JSONML transformation, making an XML text from a JSONObject. The JSONObject must contain a "tagName"
      * property. If it has children, then it must have a "childNodes" property containing an array of objects. The other
      * properties are attributes with string values.
      *
      * @param jo A JSONObject.
-     *
      * @return An XML string.
-     *
      * @throws JSONException
      */
     public static String toString(JSONObject jo) throws JSONException {

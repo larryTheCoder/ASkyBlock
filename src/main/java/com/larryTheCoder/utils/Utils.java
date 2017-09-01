@@ -23,18 +23,15 @@ import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import com.larryTheCoder.ASkyBlock;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Utils functions
- * 
+ *
  * @author Adam Matthew
  */
 public class Utils {
@@ -50,7 +47,7 @@ public class Utils {
         if (yamlFile.exists()) {
             try {
                 config = new Config();
-                config.load(ASkyBlock.get().getDataFolder() + file, Config.YAML);
+                    config.load(DIRECTORY + file, Config.YAML);
             } catch (Exception e) {
                 if (ASkyBlock.get().isDebug()) {
                     e.printStackTrace();
@@ -65,7 +62,7 @@ public class Utils {
                     send("&cUsing default found in jar file.");
                     ASkyBlock.get().saveResource(file, false);
                     config = new Config();
-                    config.load(ASkyBlock.get().getDataFolder() + file, Config.YAML);
+                        config.load(DIRECTORY + file, Config.YAML);
                 } else {
                     config.save(yamlFile);
                 }
@@ -86,9 +83,7 @@ public class Utils {
         if (msBefore != null) {
             Long msDelta = curMS - msBefore;
             Long msWaitTime = 1000 * (long) seconds;
-            if (msDelta < msWaitTime) {
-                return false;
-            }
+                return msDelta < msWaitTime;
         }
         tooSoon.put(key, curMS);
         return true;
@@ -100,54 +95,8 @@ public class Utils {
         Long curMS = System.currentTimeMillis();
         Long msDelta = curMS - msBefore;
         Long msWaitTime = 1000 * (long) seconds;
-        String e = Utils.millisToConvertedMin(msWaitTime - msDelta);
+            String e = Utils.convertTimer(msWaitTime - msDelta);
         return e;
-    }
-
-    /**
-     * Returns of the formatted date HH:mm:ss.
-     *
-     * @param times Milli seconds of the time
-     * @return String of the date
-     */
-    public static String convertTimer(long times) {
-        long seconds = times;
-        int minutes = 0;
-        int hour = 0;
-        int days = 0;
-        int week = 0;
-        // Sec -> Minutes
-        while (seconds >= 60) {
-            seconds -= 60;
-            minutes += 1;
-        }
-        // Minutes -> Hour
-        while (minutes >= 60) {
-            minutes = 0;
-            hour += 1;
-        }
-        // Hour -> Day
-        while (hour >= 24) {
-            hour -= 24;
-            days += 1;
-        }
-        // Days -> Week
-        while (days >= 7) {
-            days -= 7;
-            week += 1;
-        }
-
-        if (week != 0) {
-            return week + "W " + days + "D " + hour + "H " + minutes + "M " + seconds + "S";
-        } else if (days != 0) {
-            return days + "D " + hour + "H " + minutes + "M " + seconds + "S";
-        } else if (hour != 0) {
-            return hour + "H " + minutes + "M " + seconds + "S";
-        } else if (minutes != 0) {
-            return minutes + "M " + seconds + "S";
-        } else {
-            return seconds + "S";
-        }
     }
 
     /**
@@ -308,16 +257,13 @@ public class Utils {
 
     public static void send(String msg) {
         try {
-            if(ASkyBlock.get().getPrefix() == null){
-                
-            }
             Server.getInstance().getLogger().info(ASkyBlock.get().getPrefix() + TextFormat.GREEN + msg.replace("&", "§"));
         } catch (Throwable exc) {
             System.out.println("ASkyBlock failed to send: " + msg);
         }
     }
 
-    public static String millisToConvertedMin(long ms) {
+        public static String convertTimer(long ms) {
         int secs = (int) (ms / 1000 % 60);
         int mins = (int) (ms / 1000 / 60 % 60);
         return String.format("%02dm %02ds", mins, secs);

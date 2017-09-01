@@ -26,13 +26,14 @@ import cn.nukkit.scheduler.TaskHandler;
 import cn.nukkit.utils.TextFormat;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Responsible for teleporting (and canceling teleporting) of players.
@@ -41,17 +42,8 @@ public class TeleportLogic implements Listener {
 
     public static List<String> list = Lists.newArrayList();
     public static Map<String, Integer> time = Maps.newHashMap();
-
-    public static boolean isPlayerMoved(String p) {
-        return list.contains(p);
-    }
-
-    public static int getPlayerTeleport(String p) {
-        return time.get(p);
-    }
-
-    private final ASkyBlock plugin;
     public static int teleportDelay;
+    private final ASkyBlock plugin;
     private final Map<UUID, PendingTeleport> pendingTPs = new ConcurrentHashMap<>();
     private final double cancelDistance;
 
@@ -61,6 +53,14 @@ public class TeleportLogic implements Listener {
         teleportDelay = plugin.getConfig().getInt("general.islandTeleportDelay", 2);
         cancelDistance = plugin.getConfig().getDouble("options.island.teleportCancelDistance", 0.2);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
+
+    public static boolean isPlayerMoved(String p) {
+        return list.contains(p);
+    }
+
+    public static int getPlayerTeleport(String p) {
+        return time.get(p);
     }
 
     public void safeTeleport(final Player player, final Location homeSweetHome, boolean force, int home) {
@@ -92,7 +92,7 @@ public class TeleportLogic implements Listener {
                     //player.setGamemode(Settings.gamemode);
                 }
                 list.remove(player.getName());
-            }, (int) Utils.secondsAsMillis(teleportDelay));
+            }, Utils.secondsAsMillis(teleportDelay));
             time.put(player.getName(), Utils.secondsAsMillis(teleportDelay));
             pendingTPs.put(player.getUniqueId(), new PendingTeleport(player.getLocation(), task));
         }

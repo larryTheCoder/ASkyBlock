@@ -17,7 +17,6 @@
 package com.larryTheCoder.utils;
 
 /**
- *
  * @author Adam Matthew
  */
 public enum GameType {

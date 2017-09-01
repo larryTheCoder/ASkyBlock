@@ -18,21 +18,22 @@ package com.larryTheCoder.listener.invitation;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
-import java.util.HashMap;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
+
+import java.util.HashMap;
 
 /**
  * This class handle all Invitations and addmember function It will tick every
  * seconds as in config.yml
  *
- * @api
  * @author Adam Matthew
+ * @api
  */
 public class InvitationHandler {
 
-    private HashMap<Player, Invitation> invitation = new HashMap<>();
     private final ASkyBlock plugin;
+    private HashMap<Player, Invitation> invitation = new HashMap<>();
 
     public InvitationHandler(ASkyBlock main) {
         plugin = main;

@@ -16,22 +16,28 @@
  */
 package com.larryTheCoder;
 
-import com.larryTheCoder.utils.Utils;
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.command.PluginCommand;
 import cn.nukkit.utils.TextFormat;
+import com.larryTheCoder.command.SubCommand;
+import com.larryTheCoder.command.chat.ChatSubCommand;
+import com.larryTheCoder.command.chat.MessageSubCommand;
+import com.larryTheCoder.command.generic.ExpelSubCommand;
+import com.larryTheCoder.command.generic.LeaveSubCommand;
+import com.larryTheCoder.command.generic.SetSpawnSubCommand;
+import com.larryTheCoder.command.island.*;
+import com.larryTheCoder.command.management.AcceptSubCommand;
+import com.larryTheCoder.command.management.DenySubCommand;
+import com.larryTheCoder.command.management.EditSubCommand;
+import com.larryTheCoder.command.management.InviteSubCommand;
+import com.larryTheCoder.locales.ASlocales;
+import com.larryTheCoder.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import com.larryTheCoder.command.generic.*;
-import com.larryTheCoder.command.island.*;
-import com.larryTheCoder.command.management.*;
-import com.larryTheCoder.command.chat.*;
-import com.larryTheCoder.command.SubCommand;
-import com.larryTheCoder.locales.ASlocales;
 
 /**
  * Commands v2.0 [SkyBlock]
@@ -82,7 +88,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
     @Override
     public boolean execute(CommandSender sender, String label, String[] args) {
         Player p = sender.isPlayer() ? getPlugin().getServer().getPlayer(sender.getName()) : null;
-        if(!sender.hasPermission("is.command")){
+        if (!sender.hasPermission("is.command")) {
             sender.sendMessage(getLocale(p).errorNoPermission);
             return true;
         }

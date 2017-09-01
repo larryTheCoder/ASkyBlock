@@ -66,14 +66,14 @@ public class LeaveSubCommand extends SubCommand {
             }
         }
         // Check if sender is in gamemode 1
-        if(!pt.isOp()){
-            if(pt.getGamemode() != 0){
+        if (!pt.isOp()) {
+            if (pt.getGamemode() != 0) {
                 pt.setGamemode(0);
             }
         }
         getPlugin().getInventory().loadPlayerInventory(pt);
         // default spawn world
-        if(getPlugin().getDatabase().getSpawn() != null){
+        if (getPlugin().getDatabase().getSpawn() != null) {
             pt.teleport(getPlugin().getDatabase().getSpawn().getCenter());
         } else {
             Utils.send("&c[READ ME] &eThe default spawn world not found. Please use /is "

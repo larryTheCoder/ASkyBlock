@@ -21,33 +21,52 @@ import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
+import cn.nukkit.math.Vector3;
+import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.BlockUtil;
+import com.larryTheCoder.utils.Settings;
+import com.larryTheCoder.utils.Utils;
+
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
-import static cn.nukkit.math.BlockFace.*;
-import cn.nukkit.math.Vector3;
-import cn.nukkit.utils.MainLogger;
-import com.larryTheCoder.utils.Pair;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import static cn.nukkit.math.BlockFace.DOWN;
+import static cn.nukkit.math.BlockFace.UP;
 
 /**
  * @author Adam Matthew
  */
 public class GridManager {
 
-    private MainLogger deb = Server.getInstance().getLogger();
-
     private final ASkyBlock plugin;
+    private MainLogger deb = Server.getInstance().getLogger();
 
     public GridManager(ASkyBlock plugin) {
         this.plugin = plugin;
+    }
+
+    /**
+     * Checks if this location is safe for a player to teleport to. Used by
+     * warps and boat exits Unsafe is any liquid or air and also if there's no
+     * space
+     *
+     * @param l - Location to be checked
+     * @return true if safe, otherwise false
+     */
+    public static boolean isSafeLocation(final Position l) {
+        if (l == null) {
+            return false;
+        }
+        final Block ground = l.getLevelBlock().getSide(DOWN);
+        final Block space1 = l.getLevelBlock();
+        final Block space2 = l.getLevelBlock().getSide(UP);
+        return ground.isSolid()
+                && BlockUtil.isBreathable(space1)
+                && BlockUtil.isBreathable(space2);
     }
 
     public boolean onGrid(Location pos) {
@@ -73,7 +92,7 @@ public class GridManager {
      * Checks if a location is within the home boundaries of a player.
      *
      * @param player The player
-     * @param loc The geo location of
+     * @param loc    The geo location of
      * @return true if the location is within home boundaries
      */
     public boolean locationIsAtHome(final Player player, Location loc) {
@@ -92,7 +111,7 @@ public class GridManager {
             return false;
         }
         // Run through all the locations
-        for (Iterator<Location> it = islandTestLocations.iterator(); it.hasNext();) {
+        for (Iterator<Location> it = islandTestLocations.iterator(); it.hasNext(); ) {
             Location islandTestLocation = it.next();
             // Must be in the same world as the locations being checked
             // Note that getWorld can return null if a world has been deleted on the server
@@ -118,30 +137,10 @@ public class GridManager {
     }
 
     /**
-     * Checks if this location is safe for a player to teleport to. Used by
-     * warps and boat exits Unsafe is any liquid or air and also if there's no
-     * space
-     *
-     * @param l - Location to be checked
-     * @return true if safe, otherwise false
-     */
-    public static boolean isSafeLocation(final Position l) {
-        if (l == null) {
-            return false;
-        }
-        final Block ground = l.getLevelBlock().getSide(DOWN);
-        final Block space1 = l.getLevelBlock();
-        final Block space2 = l.getLevelBlock().getSide(UP);
-        return ground.isSolid()
-                && BlockUtil.isBreathable(space1)
-                && BlockUtil.isBreathable(space2);
-    }
-
-    /**
      * Determines a safe teleport spot on player's island or the team island
      * they belong to.
      *
-     * @param p The player
+     * @param p      The player
      * @param number Starting home location e.g., 1
      * @return Location of a safe teleport spot or null if one cannot be found
      */
@@ -165,6 +164,9 @@ public class GridManager {
                 locationSafe = new Location(0, 0, 0, 0, 0, plugin.getServer().getLevelByName(pd.levelName)).add(pd.getCenter());
             }
 
+            // Load the chunks (Pretend that the island chunks has not loaded)
+            // This is an actual fix for #28
+            Utils.loadChunkAt(locationSafe);
             deb.debug(locationSafe.toString());
             // Check if it is safe
             // Homes are stored as integers and need correcting to be more central

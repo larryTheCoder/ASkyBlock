@@ -25,7 +25,7 @@ import com.larryTheCoder.storage.IslandData;
 
 /**
  * The main island spawn
- * 
+ *
  * @author Adam Matthew
  */
 public class SetSpawnSubCommand extends SubCommand {
@@ -68,12 +68,12 @@ public class SetSpawnSubCommand extends SubCommand {
         } else if (!getPlugin().inIslandWorld(p)) {
             p.sendMessage(getPrefix() + getLocale(p).errorWrongWorld);
             return true;
-        } else if(!getPlugin().getIslandInfo(p.getLocation()).owner.equalsIgnoreCase(p.getName())){
+        } else if (!getPlugin().getIslandInfo(p.getLocation()).owner.equalsIgnoreCase(p.getName())) {
             p.sendMessage(getPrefix() + getLocale(p).errorNotOnIsland);
-            return true;            
+            return true;
         }
         // To avoid multiple spawns, try to remove the old spawn
-        if(getPlugin().getDatabase().getSpawn() != null){
+        if (getPlugin().getDatabase().getSpawn() != null) {
             IslandData pd = getPlugin().getDatabase().getSpawn();
             pd.setSpawn(false);
             getPlugin().getDatabase().saveIsland(pd);

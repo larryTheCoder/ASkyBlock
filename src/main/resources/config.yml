@@ -1,7 +1,7 @@
 ## Default Config for ASkyBlock
 ---
 ## Do not change this
-version: "MadeIn3D"
+version: "MadeInJava"
 ## Game Prefix.
 Prefix: "&d[&eASkyBlock&d] &e"
 ## Max islands homes
@@ -84,6 +84,13 @@ island:
    # If sea level is less than about 10, then players will drop right through it
    # if it exists. Makes for an interesting variation on skyblock.
    seaLevel: 3
+   # This feature intended in seconds
+   # Use calculator and do
+   #  MINU        MIN_TREESHOLD
+   #   60      *      60
+   #        MULTIPLY
+   # Hope you understand
+   deleteTiming: 180
    # Restricted commands in Island / SkyBlock
    #   level. You must respect the command format
    #   Such as `/example1, /example2`
