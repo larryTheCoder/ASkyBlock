@@ -309,7 +309,7 @@ public class Schematic {
                                 pos = ((ListTag) entry.getValue()).getValue();
                                 //Bukkit.getLogger().info("DEBUG pos: " + pos);
                                 ent.setMotion(new Vector3((double) pos.get(0).getValue(), (double) pos.get(1).getValue(),
-                                        (double) pos.get(2).getValue()));
+                                    (double) pos.get(2).getValue()));
                             }
                             break;
                         case "Rotation":
@@ -646,7 +646,7 @@ public class Schematic {
         blockLoc.subtract(bedrock);
         // Paste the island blocks
         islandBlocks.stream().forEach((b) -> {
-            b.paste(player, blockLoc, true);
+            b.paste(blockLoc, true);
         });
 
         // Find the grass spot
@@ -668,15 +668,15 @@ public class Schematic {
         return biome;
     }
 
+    public void setBiome(int HELL) {
+        setBiome(Biome.getBiome(HELL));
+    }
+
     /**
      * @param biome the biome to set
      */
     public void setBiome(Biome biome) {
         this.biome = biome;
-    }
-
-    public void setBiome(int HELL) {
-        setBiome(Biome.getBiome(HELL));
     }
 
     /**

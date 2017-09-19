@@ -23,7 +23,7 @@ import cn.nukkit.plugin.Plugin;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
-import com.intellectiualcrafters.TaskManager;
+import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.economy.EconomyAPI;
 import com.larryTheCoder.locales.ASlocales;
@@ -42,7 +42,7 @@ import java.util.List;
  */
 public class ConfigManager {
 
-        public static final String CONFIG_VERSION = "MadeInJava";
+    public static final String CONFIG_VERSION = "MadeInJava";
 
     /**
      * Loads the various settings from the config.yml file into the plugin
@@ -112,7 +112,7 @@ public class ConfigManager {
         });
         //Chest Items
         Settings.chestInventoryOverride = cfg.getBoolean("island.items.shouldOverride", false);
-            Settings.resetTime = cfg.getInt("island.deleteTiming", 0);
+        Settings.resetTime = cfg.getInt("island.deleteTiming", 0);
         String chestItems = cfg.getString("island.items.chestItems", "");
         // Check chest items
         if (!chestItems.isEmpty()) {
@@ -184,7 +184,7 @@ public class ConfigManager {
         Settings.defaultSpawnSettings.clear();
         Settings.visitorSettings.clear();
         ConfigSection protectionWorld = cfg.getSections("protection.world");
-            for (Iterator<String> it = protectionWorld.getKeys(false).iterator(); it.hasNext(); ) {
+        for (Iterator<String> it = protectionWorld.getKeys(false).iterator(); it.hasNext(); ) {
             String setting = it.next();
             try {
                 SettingsFlag flag = SettingsFlag.valueOf(setting.toUpperCase());
@@ -225,7 +225,7 @@ public class ConfigManager {
     private static void scheduleCheck(boolean flag, Config cfg) {
         if (flag) {
             Plugin plugin = ASkyBlock.get().getServer().getPluginManager()
-                    .getPlugin("EconomyAPI");
+                .getPlugin("EconomyAPI");
             if (plugin != null && !plugin.isEnabled()) {
                 Utils.send("&eScheduling Economy instance due to 'plugin not enabled'");
                 // schedule another delayed task
@@ -240,7 +240,7 @@ public class ConfigManager {
                 Utils.send("&eError: No economy plugin were found!");
                 Settings.useEconomy = false;
             }
-                if (Settings.useEconomy) {
+            if (Settings.useEconomy) {
                 Settings.islandCost = cfg.getDouble("economy.islandCost", 5);
                 Settings.firstIslandFree = !cfg.getBoolean("economy.payNewIsland", false);
             }

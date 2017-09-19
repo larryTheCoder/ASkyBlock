@@ -125,7 +125,7 @@ public class PlayerData implements Cloneable {
      */
     public void setIslandLevel(final int i) {
         islandLevel = i;
-        ASkyBlock.get().getDatabase().savePlayerData(this);
+        ASkyBlock.get().getAPI(ASkyBlock.get()).getDatabase().savePlayerData(this);
     }
 
     public HashMap<String, Boolean> getChallengeStatus() {
@@ -142,7 +142,7 @@ public class PlayerData implements Cloneable {
         islandLevel = 0;
         teamIslandLocation = null;
         members = new ArrayList<>();
-        ASkyBlock.get().getDatabase().savePlayerData(this);
+        ASkyBlock.get().getAPI(ASkyBlock.get()).getDatabase().savePlayerData(this);
     }
 
     /**
@@ -165,7 +165,7 @@ public class PlayerData implements Cloneable {
         Utils.send(Utils.hashToString(challengeListTimes));
         // plugin.getLogger().info("DEBUG: complete " + challenge + ":" +
         // challengeListTimes.get(challenge.toLowerCase()).intValue() );
-        ASkyBlock.get().getDatabase().savePlayerData(this);
+        ASkyBlock.get().getAPI(ASkyBlock.get()).getDatabase().savePlayerData(this);
     }
 
     /**
@@ -173,7 +173,7 @@ public class PlayerData implements Cloneable {
      */
     public void setLocale(String locale) {
         this.pubLocale = locale;
-        ASkyBlock.get().getDatabase().savePlayerData(this);
+        ASkyBlock.get().getAPI(ASkyBlock.get()).getDatabase().savePlayerData(this);
     }
 
     public Location getTeamIslandLocation() {

@@ -65,11 +65,11 @@ public class EditSubCommand extends SubCommand {
             sender.sendMessage(TextFormat.RED + "Too few parameters Usage: /is edit help");
             return true;
         }
-        if (!getPlugin().getIsland().isPlayerIsland(p, p.getLocation())) {
+        if (!getPlugin().getAPI(getPlugin()).getIsland().isPlayerIsland(p, p.getLocation())) {
             sender.sendMessage(TextFormat.RED + "You are not in your island");
             return true;
         }
-        IslandData pd = getPlugin().getIslandInfo(p.getLocation());
+        IslandData pd = getPlugin().getAPI(ASkyBlock.get()).getIslandInfo(p.getLocation());
         switch (args[1]) {
             case "?":
             case "help":
@@ -115,7 +115,7 @@ public class EditSubCommand extends SubCommand {
                 sender.sendMessage(getPrefix() + TextFormat.GREEN + "Renamed your island name into " + args[2]);
                 break;
         }
-        getPlugin().getDatabase().saveIsland(pd);
+        getPlugin().getAPI(ASkyBlock.get()).getDatabase().saveIsland(pd);
         return true;
     }
 }

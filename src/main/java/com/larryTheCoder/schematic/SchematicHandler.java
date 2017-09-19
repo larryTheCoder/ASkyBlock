@@ -17,7 +17,6 @@
 package com.larryTheCoder.schematic;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockSapling;
 import cn.nukkit.blockentity.BlockEntity;
@@ -32,13 +31,13 @@ import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.utils.Config;
-import cn.nukkit.utils.MainLogger;
+import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.intellectiualcrafters.TaskManager;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.TeleportLogic;
+import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import org.jnbt.*;
@@ -56,12 +55,11 @@ import java.util.*;
  */
 public final class SchematicHandler extends SchematicInterport {
 
-    // Debugging
-    private final MainLogger deb = Server.getInstance().getLogger();
     // Avoid OOM during startup OR reload
     private Map<Integer, SoftReference<ArrayList<IslandBlock>>> islandBlocks;
     private Map<Vector3, Map<String, Tag>> tileEntitiesMap;
     private Map<Integer, Map<Configuration, Object>> schemaConfiguration;
+    private Map<Integer, String> schematicKey;
     // Schematic size
     private short width;
     private short length;
@@ -73,7 +71,6 @@ public final class SchematicHandler extends SchematicInterport {
     // Configuration
     private Config configFolder;
     // Traffic (How long took the schematic to load)
-    private Map<Integer, Long> trafficLastMS;
 
     public SchematicHandler(ASkyBlock plugin, File path) {
         Objects.requireNonNull(plugin, "ASkyBlock instance cannot be null");
@@ -86,30 +83,6 @@ public final class SchematicHandler extends SchematicInterport {
             Utils.send("&cThe directory cannot be a file or absolute folder");
             return;
         }
-        Utils.send("&aYou are now using schematic native folder.");
-        Random rand = new Random();
-        int randomInt = rand.nextBoolean() ? 1
-                : rand.nextBoolean() ? 2
-                : rand.nextBoolean() ? 3
-                : rand.nextBoolean() ? 4
-                : 5;
-        switch (randomInt) {
-            case 1:
-                Utils.send("&aTIP: &eUse the Minecraft: PE Schematic. MCPC Schematic might result wrong blocks");
-                break;
-            case 2:
-                Utils.send("&aTIP: &eWhile you standing nearby island offset. Dont forget to sneak before getting there :D");
-                break;
-            case 3:
-                Utils.send("&aTIP: &eDid you know that this schematic are provided by @tastybento original code?");
-                break;
-            case 4:
-                Utils.send("&aTIP: &eThis plugin can also demand on single world production server. Only use /asc setlobby in world");
-                break;
-            default:
-                Utils.send("&aFrom author: Have a great gamings guys. I hope that this plugin could help you server more better!");
-
-        }
         // Start the schematic handler
         islandBlocks = Maps.newHashMap();
         bedrock = Maps.newHashMap();
@@ -117,25 +90,58 @@ public final class SchematicHandler extends SchematicInterport {
         welcomeSign = Maps.newHashMap();
         tileEntitiesMap = Maps.newHashMap();
         schemaConfiguration = Maps.newHashMap();
-        trafficLastMS = Maps.newHashMap();
+        schematicKey = Maps.newHashMap();
         // List all of the files
-        File[] listes = path.listFiles();
+        File[] lists = path.listFiles();
         List<File> list = new ArrayList<>();
-        for (File file : listes) {
-            // Load the configuration config
-            if (file.getName().contains("configuration.yml") && configFolder == null) {
-                configFolder = new Config(file + "configuration.yml");
-            }
-            // Make sure that the file are not junkies
-            if (file.getName().contains(".schematic")) {
-                list.add(file);
+        File configPath = new File(path, "configuration.yml");
+
+        if (configPath.exists()) {
+            configFolder = new Config(configPath);
+        } else if (plugin.getResource("schematics/configuration.yml") != null) {
+            plugin.saveResource("schematics/configuration.yml", false);
+            configFolder = new Config(configPath);
+        } else {
+            Utils.send("&cCannot find the schematic configuration section");
+            Utils.send("&eYou are now using build-in island generation.");
+            return;
+        }
+
+        if (!configFolder.getBoolean("enable", false)) {
+            Utils.send("&aYou are now using build-in island generation.");
+            Utils.send("&aYou also can use schematic to paste island (Without WorldEdit)!");
+            return;
+        }
+
+        Utils.send("&7Loading schematic framework"); // Schematic base-framework
+
+        int id = 0; // The id
+        ConfigSection configSection = configFolder.getSection("schematicList");
+        for (String key : configSection.getSection("schematic").getKeys(false)) {
+            String fileName = configSection.getString("schematic." + key + ".FILE_NAME");
+            if (!fileName.isEmpty()) {
+                // Check if this file exists or if it is in the jar
+                File schematicFile = new File(path, fileName);
+                // See if the file exists
+                if (schematicFile.exists()) {
+                    list.add(schematicFile);
+                    schematicKey.put(id, fileName);
+                    id++;
+                } else if (plugin.getResource("schematics/" + fileName) != null) {
+                    plugin.saveResource("schematics/" + fileName, false);
+                    list.add(schematicFile);
+                    schematicKey.put(id, fileName);
+                    id++;
+                } else {
+                    Utils.send("&e" + fileName + " &adoes not have a filename. Skipping!");
+                }
+            } else {
+                Utils.send("&e" + fileName + " &adoes not have a filename. Skipping!");
             }
         }
-        deb.debug("Config: " + configFolder.toString());
-        deb.debug("Listed Schematic: " + list.size());
 
+        id = 0; // Reset back the id
         Iterator<File> iter = list.iterator();
-        int id = 0;
         while (iter.hasNext()) {
             id++;
             File file = iter.next();
@@ -220,7 +226,7 @@ public final class SchematicHandler extends SchematicInterport {
                                     List<Tag> pos;
                                     pos = ((ListTag) entry.getValue()).getValue();
                                     ent.setMotion(new Vector3((double) pos.get(0).getValue(), (double) pos.get(1).getValue(),
-                                            (double) pos.get(2).getValue()));
+                                        (double) pos.get(2).getValue()));
                                 }
                                 break;
                             case "Rotation":
@@ -375,12 +381,10 @@ public final class SchematicHandler extends SchematicInterport {
                     Vector3 vec = new Vector3(x, y, z);
                     tileEntitiesMap.put(vec, values);
                 }
-
             } catch (IOException e) {
-                Server.getInstance().getLogger().info(TextFormat.RED + "An error occured while attemping to load Schematic File!");
-                return;
+                Utils.send(TextFormat.RED + "Error while attempt to register schematic: " + file.getName());
+                continue;
             }
-
             Vector3 bedrockLocation = null;
             ArrayList<SoftReference<Vector3>> chestLocation = Lists.newArrayList();
             ArrayList<SoftReference<Vector3>> signLocation = Lists.newArrayList();
@@ -418,6 +422,8 @@ public final class SchematicHandler extends SchematicInterport {
             handleSchematic(blocks, data, id);
             iter.remove();
         }
+        Utils.send("&aSeccessfully loaded &e" + islandBlocks.size() + " &aschematic");
+        this.sendTip();
     }
 
     @Override
@@ -469,10 +475,13 @@ public final class SchematicHandler extends SchematicInterport {
                 }
             }
         }
-
-        islandBlocks.get(id).clear(); // Clear all of the island blocks (API)
+        // Clear all of the island blocks (API)
+        if (islandBlocks.get(id) != null) {
+            islandBlocks.get(id).clear();
+        }
         islandBlocks.put(id, new SoftReference(blockToAdded));
         setDefaultValue(id);
+        prepareIslandValue(id);
     }
 
     @Override
@@ -484,6 +493,10 @@ public final class SchematicHandler extends SchematicInterport {
         if (islandBlocks.isEmpty() || islandBlocks.get(id) != null) {
             createIsland(p, pos);
             return true;
+        }
+        List<IslandBlock> blocks = getIslandBlocks(id);
+        for (IslandBlock block : blocks) {
+            block.paste(pos, true);
         }
         return true;
     }
@@ -522,6 +535,9 @@ public final class SchematicHandler extends SchematicInterport {
      * @param id The schematic id
      */
     public void setDefaultValue(int id) {
+        if (schemaConfiguration.get(id) == null) {
+            schemaConfiguration.put(id, new HashMap<>());
+        }
         schemaConfiguration.get(id).clear();
         schemaConfiguration.get(id).put(Configuration.BIOME, Biome.getBiome(Biome.PLAINS));
         schemaConfiguration.get(id).put(Configuration.BLOCK_SPAWN, null);
@@ -549,6 +565,45 @@ public final class SchematicHandler extends SchematicInterport {
     }
 
     /**
+     * @param id
+     */
+    private void prepareIslandValue(int id) {
+        String key = schematicKey.get(id);
+        ConfigSection section = configFolder.getSection("schematicList");
+
+        // configuration keys
+        String[] blockSpawn = section.getString("schematic." + key + ".BLOCK_SPAWN", "").split(":");
+        String description = section.getString("schematic." + key + ".DESCRIPTION", "The island");
+        String permission = section.getString("schematic." + key + ".PERMISSION", "");
+        String biome = section.getString("schematic." + key + ".BIOME", "Plains");
+        double rating = section.getDouble("schematic." + key + ".RATING", 0);
+        boolean useConfigChest = section.getBoolean("schematic." + key + ".USE_CONFIG_CHEST", false);
+        boolean usePasteEntity = section.getBoolean("schematic." + key + ".PASTE_ENTITIES", false);
+        Block block = null;
+
+        // Check for configuration type
+        for (String sting : blockSpawn) {
+            if (!Utils.isNumeric(sting)) {
+                break;
+            }
+            if (block == null) {
+                block = Block.get(Integer.parseInt(sting));
+            } else if (block.getDamage() == 0) {
+                block.setDamage(Integer.parseInt(sting));
+            }
+        }
+
+        // Set the configuration into system (can be null)
+        this.setIslandValue(id, Configuration.BLOCK_SPAWN, block);
+        this.setIslandValue(id, Configuration.DESCRIPTION, description);
+        this.setIslandValue(id, Configuration.PERMISSION, permission);
+        this.setIslandValue(id, Configuration.USE_CONFIG_CHEST, useConfigChest);
+        this.setIslandValue(id, Configuration.RATING, rating);
+        this.setIslandValue(id, Configuration.BIOME, Biome.getBiome(biome));
+        this.setIslandValue(id, Configuration.PASTE_ENTITIES, usePasteEntity);
+    }
+
+    /**
      * Return if the schematic using the default chest in config
      *
      * @param id The schematic id
@@ -556,13 +611,6 @@ public final class SchematicHandler extends SchematicInterport {
      */
     public boolean isUsingDefaultChest(int id) {
         return Boolean.getBoolean((String) schemaConfiguration.get(id).get(Configuration.USE_CONFIG_CHEST));
-    }
-
-    /**
-     * How long that this
-     */
-    public long getSchematicBuildMS(int id) {
-        return trafficLastMS.get(id) != null ? trafficLastMS.get(id) : 0;
     }
 
     private void createIsland(Player p, Position pos) {
@@ -635,11 +683,11 @@ public final class SchematicHandler extends SchematicInterport {
                 }
                 lvl.setBlockIdAt(x, y, z, Block.CHEST);
                 cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                        .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
-                        .putString("id", BlockEntity.CHEST)
-                        .putInt("x", x)
-                        .putInt("y", y)
-                        .putInt("z", z);
+                    .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
+                    .putString("id", BlockEntity.CHEST)
+                    .putInt("x", x)
+                    .putInt("y", y)
+                    .putInt("z", z);
                 BlockEntity.createBlockEntity(BlockEntity.CHEST, chunk, nbt);
                 BlockEntityChest e = new BlockEntityChest(chunk, nbt);
                 // Items
@@ -667,5 +715,26 @@ public final class SchematicHandler extends SchematicInterport {
 
             }
         }.runTaskLater(ASkyBlock.get(), Utils.secondsAsMillis(TeleportLogic.teleportDelay + 1));
+    }
+
+    public void sendTip() {
+        Random rand = new Random();
+        switch (rand.nextInt(5)) {
+            case 1:
+                Utils.send("&aTIP: &eUse the Minecraft: PE Schematic. MCPC Schematic might result wrong blocks");
+                break;
+            case 2:
+                Utils.send("&aTIP: &eWhile you standing nearby island offset. Don't forget to sneak before getting there.");
+                break;
+            case 3:
+                Utils.send("&aTIP: &eDid you know that this schematic are provided by @tastybento original code?");
+                break;
+            case 4:
+                Utils.send("&aTIP: &eThis plugin can also demand on single world production server. Only use /asc setlobby in world");
+                break;
+            default:
+                Utils.send("&aFrom author: Have a great time. I hope that this plugin could help your server more better!");
+
+        }
     }
 }

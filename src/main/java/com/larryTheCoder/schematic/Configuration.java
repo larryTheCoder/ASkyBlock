@@ -28,5 +28,5 @@ public enum Configuration {
     RATING,
     USE_CONFIG_CHEST,
     PASTE_ENTITIES,
-    BIOME;
+    BIOME
 }

@@ -65,8 +65,8 @@ public class GridManager {
         final Block space1 = l.getLevelBlock();
         final Block space2 = l.getLevelBlock().getSide(UP);
         return ground.isSolid()
-                && BlockUtil.isBreathable(space1)
-                && BlockUtil.isBreathable(space2);
+            && BlockUtil.isBreathable(space1)
+            && BlockUtil.isBreathable(space2);
     }
 
     public boolean onGrid(Location pos) {
@@ -98,10 +98,10 @@ public class GridManager {
     public boolean locationIsAtHome(final Player player, Location loc) {
         // Make a list of test locations and test them
         Set<Location> islandTestLocations = new HashSet<>();
-        if (plugin.getIsland().checkIsland(player)) {
-            IslandData pd = plugin.getIslandInfo(player);
+        if (plugin.getAPI(plugin).getIsland().checkIsland(player)) {
+            IslandData pd = plugin.getAPI(ASkyBlock.get()).getIslandInfo(player);
             islandTestLocations.add(new Location(0, 0, 0, 0, 0, plugin.getServer().getLevelByName(pd.levelName)).add(pd.getCenter()));
-        } else if (plugin.getTManager().hasTeam(player)) {
+        } else if (plugin.getAPI(plugin).getTManager().hasTeam(player)) {
 //            islandTestLocations.add(plugin.getPlayers().getTeamIslandLocation(player.getUniqueId()));
 //            if (Settings.createNether && Settings.newNether && ASkyBlock.getNetherWorld() != null) {
 //                islandTestLocations.add(netherIsland(plugin.getPlayers().getTeamIslandLocation(player.getUniqueId())));
@@ -117,18 +117,18 @@ public class GridManager {
             // Note that getWorld can return null if a world has been deleted on the server
             if (islandTestLocation != null && islandTestLocation.getLevel() != null && islandTestLocation.getLevel().equals(loc.getLevel())) {
                 int protectionRange = Settings.protectionrange;
-                if (plugin.getIsland().checkIslandAt(islandTestLocation.getLevel()) == true) {
+                if (plugin.getAPI(plugin).getIsland().checkIslandAt(islandTestLocation.getLevel()) == true) {
                     // Get the protection range for this location if possible
-                    IslandData island = plugin.getIsland().GetIslandAt(islandTestLocation);
+                    IslandData island = plugin.getAPI(plugin).getIsland().GetIslandAt(islandTestLocation);
                     if (island != null) {
                         // We are in a protected island area.
                         protectionRange = island.getProtectionSize();
                     }
                 }
                 if (loc.getX() > islandTestLocation.getX() - protectionRange / 2
-                        && loc.getX() < islandTestLocation.getX() + protectionRange / 2
-                        && loc.getZ() > islandTestLocation.getZ() - protectionRange / 2
-                        && loc.getZ() < islandTestLocation.getZ() + protectionRange / 2) {
+                    && loc.getX() < islandTestLocation.getX() + protectionRange / 2
+                    && loc.getZ() > islandTestLocation.getZ() - protectionRange / 2
+                    && loc.getZ() < islandTestLocation.getZ() + protectionRange / 2) {
                     return true;
                 }
             }
@@ -145,11 +145,11 @@ public class GridManager {
      * @return Location of a safe teleport spot or null if one cannot be found
      */
     public Location getSafeHomeLocation(String p, int number) {
-        IslandData pd = plugin.getDatabase().getIsland(p, number);
+        IslandData pd = plugin.getAPI(ASkyBlock.get()).getDatabase().getIsland(p, number);
         if (pd == null) {
             // Get the default home, which may be null too, but that's okay
             number = 1;
-            pd = plugin.getDatabase().getIsland(p, number);
+            pd = plugin.getAPI(ASkyBlock.get()).getDatabase().getIsland(p, number);
         }
 
         if (pd != null) {
@@ -249,12 +249,12 @@ public class GridManager {
             player.sendMessage(plugin.getPrefix() + TextFormat.RED + "Failed to find your island safe spawn");
             return false;
         }
-        plugin.getTeleportLogic().safeTeleport(player, home, false, number);
+        plugin.getAPI(ASkyBlock.get()).getTeleportLogic().safeTeleport(player, home, false, number);
         return true;
     }
 
     public IslandData getProtectedIslandAt(Location location) {
-        IslandData island = plugin.getIslandInfo(location);
+        IslandData island = plugin.getAPI(ASkyBlock.get()).getIslandInfo(location);
         if (island == null) {
             return null;
         }
@@ -265,7 +265,7 @@ public class GridManager {
     }
 
     public boolean isAtSpawn(Location location) {
-        return plugin.getDatabase().getSpawn().onIsland(location);
+        return plugin.getAPI(ASkyBlock.get()).getDatabase().getSpawn().onIsland(location);
     }
 
 }

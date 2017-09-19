@@ -47,7 +47,7 @@ public class Utils {
         if (yamlFile.exists()) {
             try {
                 config = new Config();
-                    config.load(DIRECTORY + file, Config.YAML);
+                config.load(DIRECTORY + file, Config.YAML);
             } catch (Exception e) {
                 if (ASkyBlock.get().isDebug()) {
                     e.printStackTrace();
@@ -62,7 +62,7 @@ public class Utils {
                     send("&cUsing default found in jar file.");
                     ASkyBlock.get().saveResource(file, false);
                     config = new Config();
-                        config.load(DIRECTORY + file, Config.YAML);
+                    config.load(DIRECTORY + file, Config.YAML);
                 } else {
                     config.save(yamlFile);
                 }
@@ -83,7 +83,7 @@ public class Utils {
         if (msBefore != null) {
             Long msDelta = curMS - msBefore;
             Long msWaitTime = 1000 * (long) seconds;
-                return msDelta < msWaitTime;
+            return msDelta < msWaitTime;
         }
         tooSoon.put(key, curMS);
         return true;
@@ -95,7 +95,7 @@ public class Utils {
         Long curMS = System.currentTimeMillis();
         Long msDelta = curMS - msBefore;
         Long msWaitTime = 1000 * (long) seconds;
-            String e = Utils.convertTimer(msWaitTime - msDelta);
+        String e = Utils.convertTimer(msWaitTime - msDelta);
         return e;
     }
 
@@ -263,7 +263,7 @@ public class Utils {
         }
     }
 
-        public static String convertTimer(long ms) {
+    public static String convertTimer(long ms) {
         int secs = (int) (ms / 1000 % 60);
         int mins = (int) (ms / 1000 / 60 % 60);
         return String.format("%02dm %02ds", mins, secs);

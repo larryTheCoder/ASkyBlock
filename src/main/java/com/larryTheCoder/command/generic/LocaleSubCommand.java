@@ -83,7 +83,7 @@ public class LocaleSubCommand extends SubCommand {
                 }
                 for (ASlocales locale : getPlugin().getAvailableLocales().values()) {
                     if (locale.getIndex() == index) {
-                        getPlugin().getPlayerInfo(p).setLocale(locale.getLocaleName());
+                        getPlugin().getAPI(ASkyBlock.get()).getPlayerInfo(p).setLocale(locale.getLocaleName());
                         p.sendMessage(TextFormat.GREEN + getLocale(p).generalSuccess);
                         return true;
                     }

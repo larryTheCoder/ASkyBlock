@@ -111,7 +111,7 @@ public class JDBCUtilities {
     }
 
     public static String convertDocumentToString(Document doc) throws
-            TransformerException {
+        TransformerException {
         Transformer t = TransformerFactory.newInstance().newTransformer();
 //    t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         StringWriter sw = new StringWriter();

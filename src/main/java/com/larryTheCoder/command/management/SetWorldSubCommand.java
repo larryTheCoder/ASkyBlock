@@ -69,9 +69,9 @@ public class SetWorldSubCommand extends SubCommand {
             sender.sendMessage(Utils.arrayToString(getPlugin().level));
             return true;
         }
-        PlayerData pd = getPlugin().getPlayerInfo(p);
+        PlayerData pd = getPlugin().getAPI(ASkyBlock.get()).getPlayerInfo(p);
         pd.defaultLevel = args[1];
-        boolean result = getPlugin().getDatabase().savePlayerData(pd);
+        boolean result = getPlugin().getAPI(ASkyBlock.get()).getDatabase().savePlayerData(pd);
         if (result) {
             sender.sendMessage(getLocale(p).setworldSeccess);
         } else {

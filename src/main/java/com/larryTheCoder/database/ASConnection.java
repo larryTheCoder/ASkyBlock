@@ -41,9 +41,11 @@ public final class ASConnection {
     private final ArrayList<IslandData> islandCache = new ArrayList<>();
     private boolean closed = true;
     private IslandData islandSpawn;
+    private ASkyBlock plugin;
 
-    public ASConnection(AbstractDatabase database, boolean debug) throws SQLException, ClassNotFoundException, InterruptedException {
+    public ASConnection(ASkyBlock plugin, AbstractDatabase database, boolean debug) throws SQLException, ClassNotFoundException, InterruptedException {
         // Performace upgrade: Cache
+        this.plugin = plugin;
         this.db = database;
         this.con = database.openConnection();
         this.createTables(true);
@@ -68,37 +70,37 @@ public final class ASConnection {
             try (Statement set = this.con.createStatement()) {
                 //createdDate updatedDate votes
                 set.addBatch("CREATE TABLE IF NOT EXISTS `island` (`id` INTEGER,"
-                        + "`islandId` INTEGER NOT NULL,"
-                        + "`x` INTEGER NOT NULL,"
-                        + "`y` INTEGER NOT NULL,"
-                        + "`z` INTEGER NOT NULL,"
-                        + "`spawnX` INTEGER,"
-                        + "`spawnY` INTEGER,"
-                        + "`spawnZ` INTEGER,"
-                        + "`isSpawn` BOOLEAN NOT NULL,"
-                        + "`psize` INTEGER NOT NULL,"
-                        + "`owner` VARCHAR NOT NULL,"
-                        + "`name` VARCHAR NOT NULL,"
-                        + "`world` VARCHAR NOT NULL,"
-                        + "`protection` VARCHAR NOT NULL,"
-                        + "`biome` VARCHAR NOT NULL,"
-                        + "`locked` INTEGER NOT NULL)");
+                    + "`islandId` INTEGER NOT NULL,"
+                    + "`x` INTEGER NOT NULL,"
+                    + "`y` INTEGER NOT NULL,"
+                    + "`z` INTEGER NOT NULL,"
+                    + "`spawnX` INTEGER,"
+                    + "`spawnY` INTEGER,"
+                    + "`spawnZ` INTEGER,"
+                    + "`isSpawn` BOOLEAN NOT NULL,"
+                    + "`psize` INTEGER NOT NULL,"
+                    + "`owner` VARCHAR NOT NULL,"
+                    + "`name` VARCHAR NOT NULL,"
+                    + "`world` VARCHAR NOT NULL,"
+                    + "`protection` VARCHAR NOT NULL,"
+                    + "`biome` VARCHAR NOT NULL,"
+                    + "`locked` INTEGER NOT NULL)");
                 //+ "`active` INTEGER NOT NULL)");
                 set.addBatch("CREATE TABLE IF NOT EXISTS `worlds` (`world` VARCHAR)");
                 set.addBatch("CREATE TABLE IF NOT EXISTS `players` (`player` VARCHAR NOT NULL,"
-                        + "`homes` INTEGER NOT NULL,"
-                        + "`resetleft` INTEGER NOT NULL,"
-                        + "`banlist` VARCHAR,"
-                        + "`teamleader` VARCHAR,"
-                        + "`teamislandlocation` VARCHAR,"
-                        + "`inteam` BOOLEAN,"
-                        + "`islandlvl` INTEGER,"
-                        + "`members` VARCHAR,"
-                        + "`challengelist` VARCHAR,"
-                        + "`challengelisttimes` VARCHAR,"
-                        + "`name` VARCHAR,"
-                        + "`locale` VARCHAR NOT NULL,"
-                        + "`defaultlevel` VARCHAR NOT NULL)");
+                    + "`homes` INTEGER NOT NULL,"
+                    + "`resetleft` INTEGER NOT NULL,"
+                    + "`banlist` VARCHAR,"
+                    + "`teamleader` VARCHAR,"
+                    + "`teamislandlocation` VARCHAR,"
+                    + "`inteam` BOOLEAN,"
+                    + "`islandlvl` INTEGER,"
+                    + "`members` VARCHAR,"
+                    + "`challengelist` VARCHAR,"
+                    + "`challengelisttimes` VARCHAR,"
+                    + "`name` VARCHAR,"
+                    + "`locale` VARCHAR NOT NULL,"
+                    + "`defaultlevel` VARCHAR NOT NULL)");
                 set.executeBatch();
                 set.clearBatch();
             }
@@ -145,7 +147,7 @@ public final class ASConnection {
     }
 
     public IslandData getIslandLocation(String levelName, int X, int Z) {
-        int id = ASkyBlock.get().getIsland().generateIslandKey(X, Z);
+        int id = plugin.getAPI(plugin).getIsland().generateIslandKey(X, Z);
         IslandData database = new IslandData(levelName, X, Z, Settings.protectionrange);
         // Get a list of island data on cache
         for (IslandData pd : islandCache) {
@@ -175,10 +177,10 @@ public final class ASConnection {
         ArrayList<IslandData> pd = new ArrayList<>();
         // get the data from cache
         islandCache.stream().filter(
-                (pd3) -> (pd3.owner.equalsIgnoreCase(owner) && pd3.levelName.equalsIgnoreCase(levelName)))
-                .forEachOrdered((pd3) -> {
-                    pd.add(pd3);
-                });
+            (pd3) -> (pd3.owner.equalsIgnoreCase(owner) && pd3.levelName.equalsIgnoreCase(levelName)))
+            .forEachOrdered((pd3) -> {
+                pd.add(pd3);
+            });
         // Not empty: Data in list contains player islands
         if (!pd.isEmpty()) {
             return pd; // Return
@@ -407,19 +409,19 @@ public final class ASConnection {
                 return pd;
             }
             pd = new PlayerData(
-                    set.getString("player"),
-                    set.getInt("homes"),
-                    Utils.stringToArray(set.getString("members"), ", "),
-                    (HashMap<String, Boolean>) Utils.stringToMap(set.getString("challengelist")),
-                    (HashMap<String, Integer>) Utils.stringToMap(set.getString("challengelisttimes")),
-                    set.getInt("islandlvl"),
-                    set.getBoolean("inTeam"),
-                    set.getString("teamLeader"),
-                    set.getString("teamIslandLocation"),
-                    set.getInt("resetleft"),
-                    Utils.stringToArray(set.getString("banList"), ", "),
-                    set.getString("locale"),
-                    set.getString("defaultlevel"));
+                set.getString("player"),
+                set.getInt("homes"),
+                Utils.stringToArray(set.getString("members"), ", "),
+                (HashMap<String, Boolean>) Utils.stringToMap(set.getString("challengelist")),
+                (HashMap<String, Integer>) Utils.stringToMap(set.getString("challengelisttimes")),
+                set.getInt("islandlvl"),
+                set.getBoolean("inTeam"),
+                set.getString("teamLeader"),
+                set.getString("teamIslandLocation"),
+                set.getInt("resetleft"),
+                Utils.stringToArray(set.getString("banList"), ", "),
+                set.getString("locale"),
+                set.getString("defaultlevel"));
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
@@ -429,20 +431,20 @@ public final class ASConnection {
     public boolean createPlayer(String p) {
         // TESTED SECCESS
         try (PreparedStatement set = con.prepareStatement("INSERT INTO `players` ("
-                + "`player`, "
-                + "`homes`, "
-                + "`resetleft`, "
-                + "`banlist`, "
-                + "`teamleader`, "
-                + "`teamislandlocation`, "
-                + "`inteam` , "
-                + "`islandlvl`, "
-                + "`members`,"
-                + "`challengelist`, "
-                + "`challengelisttimes`, "
-                + "`name`, "
-                + "`locale`, "
-                + "`defaultlevel`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
+            + "`player`, "
+            + "`homes`, "
+            + "`resetleft`, "
+            + "`banlist`, "
+            + "`teamleader`, "
+            + "`teamislandlocation`, "
+            + "`inteam` , "
+            + "`islandlvl`, "
+            + "`members`,"
+            + "`challengelist`, "
+            + "`challengelisttimes`, "
+            + "`name`, "
+            + "`locale`, "
+            + "`defaultlevel`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
             PlayerData pd = new PlayerData(p, 0, Settings.reset);
             set.setString(1, pd.playerName);
             set.setInt(2, pd.homes);
@@ -474,21 +476,21 @@ public final class ASConnection {
     public boolean savePlayerData(PlayerData pd) {
         // TESTED SECCESS
         try (PreparedStatement stmt = con.prepareStatement(
-                "UPDATE `players` SET "
-                        + "`homes` = ?, "
-                        + "`resetleft` = ?, "
-                        + "`banlist` = ?, "
-                        + "`teamleader` = ?, "
-                        + "`teamislandlocation` = ?, "
-                        + "`inteam` = ?, "
-                        + "`islandlvl` = ?, "
-                        + "`members` = ?, "
-                        + "`challengelist` = ?, "
-                        + "`challengelisttimes` = ?, "
-                        + "`name` = ?, "
-                        + "`locale` = ?, "
-                        + "`defaultlevel` = ? "
-                        + "WHERE `player` = '" + pd.playerName + "'")) {
+            "UPDATE `players` SET "
+                + "`homes` = ?, "
+                + "`resetleft` = ?, "
+                + "`banlist` = ?, "
+                + "`teamleader` = ?, "
+                + "`teamislandlocation` = ?, "
+                + "`inteam` = ?, "
+                + "`islandlvl` = ?, "
+                + "`members` = ?, "
+                + "`challengelist` = ?, "
+                + "`challengelisttimes` = ?, "
+                + "`name` = ?, "
+                + "`locale` = ?, "
+                + "`defaultlevel` = ? "
+                + "WHERE `player` = '" + pd.playerName + "'")) {
             stmt.setInt(1, pd.homes);
             stmt.setInt(2, pd.resetleft);
             stmt.setString(3, Utils.arrayToString(pd.banList));

@@ -65,6 +65,9 @@ public class TeleportLogic implements Listener {
 
     public void safeTeleport(final Player player, final Location homeSweetHome, boolean force, int home) {
         final Location targetLoc = homeSweetHome.clone().add(0.5, 0, 0.5);
+        if (list.contains(player.getName())) {
+            list.remove(player.getName());
+        }
         if (player.hasPermission("is.bypass.wait") || (teleportDelay == 0) || force) {
             player.teleport(targetLoc);
         } else {
@@ -72,7 +75,7 @@ public class TeleportLogic implements Listener {
             TaskHandler task = plugin.getServer().getScheduler().scheduleDelayedTask(plugin, () -> {
                 // Save player inventory
                 if (Settings.saveInventory) {
-                    plugin.getInventory().savePlayerInventory(player);
+                    plugin.getAPI(plugin).getInventory().savePlayerInventory(player);
                 }
                 pendingTPs.remove(player.getUniqueId());
                 Location loc = targetLoc.clone();
@@ -84,14 +87,12 @@ public class TeleportLogic implements Listener {
                 } else {
                     player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Teleported to your island #" + home);
                 }
-                player.teleport(targetLoc.add(0, 1)); // Adjust spawn hieght
-                plugin.getIsland().showFancyTitle(player);
+                player.teleport(targetLoc.add(0, 0.35)); // Adjust spawn hieght
                 // Teleport in default gamemode
                 if (Settings.gamemode != -1) {
                     // BETA Testing: Add this later
                     //player.setGamemode(Settings.gamemode);
                 }
-                list.remove(player.getName());
             }, Utils.secondsAsMillis(teleportDelay));
             time.put(player.getName(), Utils.secondsAsMillis(teleportDelay));
             pendingTPs.put(player.getUniqueId(), new PendingTeleport(player.getLocation(), task));

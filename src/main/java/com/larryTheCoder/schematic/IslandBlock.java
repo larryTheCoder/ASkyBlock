@@ -22,18 +22,17 @@ import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntityChest;
 import cn.nukkit.blockentity.BlockEntityFlowerPot;
-import cn.nukkit.blockentity.BlockEntitySign;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
+import cn.nukkit.level.Position;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
-import com.intellectiualcrafters.TaskManager;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.TeleportLogic;
-import com.larryTheCoder.utils.Settings;
+import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Utils;
 import org.jnbt.*;
 import org.json.simple.JSONValue;
@@ -288,9 +287,9 @@ public class IslandBlock {
                             potItemData = 0;
                         }
                     } else if (potItem == Block.get(Item.FLOWER)
-                            || potItem == Block.get(Item.RED_MUSHROOM)
-                            || potItem == Block.get(Item.BROWN_MUSHROOM)
-                            || potItem == Block.get(Item.CACTUS)) {
+                        || potItem == Block.get(Item.RED_MUSHROOM)
+                        || potItem == Block.get(Item.BROWN_MUSHROOM)
+                        || potItem == Block.get(Item.CACTUS)) {
                         // Set to 0 anyway
                         potItemData = 0;
                     } else if (potItem == Block.get(Item.SAPLING)) {
@@ -341,7 +340,7 @@ public class IslandBlock {
         JSONParser parser = new JSONParser();
         ContainerFactory containerFactory = new ContainerFactory() {
             @Override
-            public List creatArrayContainer() {
+            public List createArrayContainer() {
                 return new LinkedList<>();
             }
 
@@ -524,18 +523,53 @@ public class IslandBlock {
      * @param usePhysics
      * @param blockLoc
      */
-    public void paste(Player p, Location blockLoc, boolean usePhysics) {
+    public void paste(Position blockLoc, boolean usePhysics) {
         Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
         loadChunkAt(loc);
         blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, usePhysics);
 
         // BlockEntities
         if (signText != null) {
-            scheduleTextPlacement(p, loc);
+            // Various bug fixed (Nukkit bug)
+            BaseFullChunk chunk = loc.level.getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
+            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
+                .putString("id", BlockEntity.SIGN)
+                .putInt("x", (int) loc.x)
+                .putInt("y", (int) loc.y)
+                .putInt("z", (int) loc.z);
+            BlockEntityChest e = (BlockEntityChest) BlockEntity.createBlockEntity(
+                BlockEntity.SIGN,
+                chunk,
+                nbt);
+            e.spawnToAll();
         } else if (potItem != null) {
-            schedulePotPlacement(p, loc);
+            BaseFullChunk chunk = loc.level.getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
+            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                .putString("id", BlockEntity.FLOWER_POT)
+                .putInt("x", (int) loc.x)
+                .putInt("y", (int) loc.y)
+                .putInt("z", (int) loc.z)
+                .putShort("item", potItem.getId())
+                .putInt("data", potItemData);
+
+            BlockEntityFlowerPot potBlock = (BlockEntityFlowerPot) BlockEntity.createBlockEntity(
+                BlockEntity.FLOWER_POT,
+                chunk,
+                nbt);
         } else if (Block.get(typeId, data).getId() == Block.CHEST) {
-            scheduleChestPlacement(p, loc);
+            BaseFullChunk chunk = loc.level.getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
+            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
+                .putString("id", BlockEntity.CHEST)
+                .putInt("x", (int) loc.x)
+                .putInt("y", (int) loc.y)
+                .putInt("z", (int) loc.z);
+            BlockEntityChest e = (BlockEntityChest) BlockEntity.createBlockEntity(
+                BlockEntity.CHEST,
+                chunk,
+                nbt);
+            e.spawnToAll();
         }
 
     }
@@ -547,137 +581,4 @@ public class IslandBlock {
         return new Vector3(x, y, z);
     }
 
-    // --- Task Scheduling --- //
-    private void scheduleChestPlacement(Player p, Location loc) {
-        new NukkitRunnable() {
-            @Override
-            public void run() {
-                int timer = Utils.secondsAsMillis(TeleportLogic.teleportDelay + 1);
-                BaseFullChunk chunk = loc.level.getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
-                boolean restart = chunk == null
-                        || chunk.isGenerated()
-                        && chunk.isLoaded()
-                        && chunk.hasChanged()
-                        && TeleportLogic.isPlayerMoved(p.getName());
-                if (!p.getLevel().getName().equalsIgnoreCase(loc.level.getName()) || restart) {
-                    deb.debug("Restarting the player teleports");
-                    // Fast blockEntity spawning (Not too fast and not too slow)
-                    TaskManager.runTaskLater(this,
-                            timer != Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName()) + 1)
-                                    ? timer
-                                    : Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName())) + 1);
-                    return;
-                }
-                deb.debug("Spawned block entity");
-                cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                        .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
-                        .putString("id", BlockEntity.CHEST)
-                        .putInt("x", (int) loc.x)
-                        .putInt("y", (int) loc.y)
-                        .putInt("z", (int) loc.z);
-                BlockEntityChest e = (BlockEntityChest) BlockEntity.createBlockEntity(
-                        BlockEntity.CHEST,
-                        chunk,
-                        nbt);
-                p.chunk.addBlockEntity(e);
-                loc.level.addBlockEntity(e);
-                if (Settings.chestInventoryOverride || chestContents.isEmpty()) {
-                    int count = 0;
-                    for (Item item : Settings.chestItems) {
-                        e.getInventory().setItem(count, item);
-                        count++;
-                    }
-                } else {
-                    e.getInventory().setContents(chestContents);
-                }
-                e.spawnToAll();
-            }
-        }.runTaskLater(ASkyBlock.get(), Utils.secondsAsMillis(TeleportLogic.teleportDelay + 1));
-    }
-
-    private void schedulePotPlacement(Player p, Location loc) {
-        new NukkitRunnable() {
-            @Override
-            public void run() {
-                int timer = Utils.secondsAsMillis(TeleportLogic.teleportDelay + 1);
-                BaseFullChunk chunk = loc.level.getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
-                boolean restart = chunk == null
-                        || chunk.isGenerated()
-                        && chunk.isLoaded()
-                        && chunk.hasChanged()
-                        && TeleportLogic.isPlayerMoved(p.getName());
-                if (!p.getLevel().getName().equalsIgnoreCase(loc.level.getName()) || restart) {
-                    deb.debug("Restarting the player teleports");
-                    // Fast blockEntity spawning (Not too fast and not too slow)
-                    TaskManager.runTaskLater(this,
-                            timer != Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName()) + 1)
-                                    ? timer
-                                    : Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName())) + 1);
-                    return;
-                }
-                deb.debug("Spawned block entity");
-                cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                        .putString("id", BlockEntity.FLOWER_POT)
-                        .putInt("x", (int) loc.x)
-                        .putInt("y", (int) loc.y)
-                        .putInt("z", (int) loc.z)
-                        .putShort("item", potItem.getId())
-                        .putInt("data", potItemData);
-
-                BlockEntityFlowerPot potBlock = (BlockEntityFlowerPot) BlockEntity.createBlockEntity(
-                        BlockEntity.FLOWER_POT,
-                        chunk,
-                        nbt);
-
-                p.chunk.addBlockEntity(potBlock);
-                loc.level.addBlockEntity(potBlock);
-                potBlock.spawnToAll();
-            }
-        }.runTaskLater(ASkyBlock.get(), Utils.secondsAsMillis(TeleportLogic.teleportDelay + 1));
-
-    }
-
-    private void scheduleTextPlacement(Player p, Location loc) {
-        new NukkitRunnable() {
-            @Override
-            public void run() {
-                BaseFullChunk chunk = loc.level.getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
-                int timer = Utils.secondsAsMillis(TeleportLogic.teleportDelay + 1);
-                boolean restart = chunk == null
-                        || chunk.isGenerated()
-                        && chunk.isLoaded()
-                        && chunk.hasChanged()
-                        && TeleportLogic.isPlayerMoved(p.getName());
-                if (!p.getLevel().getName().equalsIgnoreCase(loc.level.getName()) || restart) {
-                    deb.debug("Restarting the player teleports");
-                    // Fast blockEntity spawning (Not too fast and not too slow)
-                    TaskManager.runTaskLater(this,
-                            timer != Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName()) + 1)
-                                    ? timer
-                                    : Utils.secondsAsMillis(TeleportLogic.getPlayerTeleport(p.getName())) + 1);
-                    return;
-                }
-
-                deb.debug("Spawned block entity");
-                cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                        .putString("id", BlockEntity.SIGN)
-                        .putInt("x", (int) loc.x)
-                        .putInt("y", (int) loc.y)
-                        .putInt("z", (int) loc.z)
-                        .putString("Text1", signText.get(0).replace("[player]", p.getName()))
-                        .putString("Text2", signText.get(1).replace("[player]", p.getName()))
-                        .putString("Text3", signText.get(2).replace("[player]", p.getName()))
-                        .putString("Text4", signText.get(3).replace("[player]", p.getName()));
-
-                BlockEntitySign sign = (BlockEntitySign) BlockEntity.createBlockEntity(
-                        BlockEntity.SIGN,
-                        chunk,
-                        nbt);
-
-                p.chunk.addBlockEntity(sign);
-                loc.level.addBlockEntity(sign);
-                sign.spawnToAll();
-            }
-        }.runTaskLater(ASkyBlock.get(), Utils.secondsAsMillis(TeleportLogic.teleportDelay + 1));
-    }
 }

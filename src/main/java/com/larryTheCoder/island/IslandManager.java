@@ -24,7 +24,8 @@ import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.utils.TextFormat;
-import com.intellectiualcrafters.TaskManager;
+import com.larryTheCoder.task.SimpleFancyTitle;
+import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.IslandCreateEvent;
 import com.larryTheCoder.player.PlayerData;
@@ -64,7 +65,7 @@ public class IslandManager {
             if (!checkIsland(p, homes)) {
                 message = createIsland(p);
             }
-            IslandData pd = ASkyBlock.get().getDatabase().getIsland(p.getName(), homes);
+            IslandData pd = ASkyBlock.get().getAPI(ASkyBlock.get()).getDatabase().getIsland(p.getName(), homes);
             if (pd == null || pd.owner == null) {
                 // check whether the error message has sended or not
                 if (!message) {
@@ -73,35 +74,17 @@ public class IslandManager {
                 return;
             }
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).hangInThere);
+            // SHow that fancy title!
+            showFancyTitle(p);
             // teleport to grid
-            plugin.getGrid().homeTeleport(p, homes);
+            plugin.getAPI(plugin).getGrid().homeTeleport(p, homes);
         } else {
             createIsland(p);
         }
     }
 
     public void showFancyTitle(Player p) {
-        // Show fancy titles!
-        // Hmmm cant use JSON...
-        new NukkitRunnable() {
-            @Override
-            public void run() {
-
-                IslandData ownership = plugin.getIslandInfo(p.getLocation());
-                if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
-                    p.setSubtitle(TextFormat.BLUE + plugin.getLocale(p).islandSubTitle.replace("[player]", p.getName()));
-                }
-                if (!plugin.getLocale(p).islandTitle.isEmpty()) {
-                    p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", ownership.owner));
-                }
-                if (!plugin.getLocale(p).islandDonate.isEmpty() && !plugin.getLocale(p).islandURL.isEmpty()) {
-                    //p.sendMessage(plugin.getLocale(p).islandDonate.replace("[player]", p.getName()));
-                    p.sendMessage(plugin.getLocale(p).islandSupport);
-                    p.sendMessage(plugin.getLocale(p).islandURL);
-                }
-            }
-        }.runTaskLater(plugin, Utils.secondsAsMillis(TeleportLogic.teleportDelay + 3));
-
+        TaskManager.runTask(new SimpleFancyTitle(plugin, p));
     }
 
     public void kickPlayerByName(final Player pOwner, final String victimName) {
@@ -134,16 +117,16 @@ public class IslandManager {
             return;
         }
         Utils.send("&cAn island owner, " + pOwner.getName() + " attempt to "
-                + "execute kick command to " + pVictim.getName() + " At "
-                + Utils.locationShorted(locVict));
+            + "execute kick command to " + pVictim.getName() + " At "
+            + Utils.locationShorted(locVict));
         pOwner.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Success! You send " + TextFormat.YELLOW + victimName + TextFormat.GREEN + " to spawn!");
         pVictim.sendMessage(plugin.getPrefix() + plugin.getLocale(pVictim).kickedFromOwner.replace("[name]", pOwner.getName())); //TextFormat.RED + "You were kicked from island owned by " + TextFormat.YELLOW + pOwner.getName());
         // Teleport
-        if (plugin.getDatabase().getSpawn() != null) {
-            pVictim.teleport(plugin.getDatabase().getSpawn().getCenter());
+        if (plugin.getAPI(ASkyBlock.get()).getDatabase().getSpawn() != null) {
+            pVictim.teleport(plugin.getAPI(ASkyBlock.get()).getDatabase().getSpawn().getCenter());
         } else {
             Utils.send("The default spawn world not found. Please use /is "
-                    + "setspawn in-game. Using default world");
+                + "setspawn in-game. Using default world");
             pVictim.teleport(plugin.getServer().getDefaultLevel().getSafeSpawn());
         }
     }
@@ -165,11 +148,11 @@ public class IslandManager {
         sender.sendMessage(plugin.getPrefix() + plugin.getLocale(kicker).kickSeccess.replace("[player]", arg));
         p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).kickedFromAdmin);
         // Teleport
-        if (plugin.getDatabase().getSpawn() != null) {
-            p.teleport(plugin.getDatabase().getSpawn().getCenter());
+        if (plugin.getAPI(ASkyBlock.get()).getDatabase().getSpawn() != null) {
+            p.teleport(plugin.getAPI(ASkyBlock.get()).getDatabase().getSpawn().getCenter());
         } else {
             Utils.send("The default spawn world not found. Please use /is "
-                    + "setspawn in-game. Using default world");
+                + "setspawn in-game. Using default world");
             p.teleport(plugin.getServer().getDefaultLevel().getSafeSpawn());
         }
     }
@@ -179,7 +162,7 @@ public class IslandManager {
     }
 
     public boolean checkIsland(Player p, int homes) {
-        return plugin.getDatabase().getIsland(p.getName(), homes) != null;
+        return plugin.getAPI(ASkyBlock.get()).getDatabase().getIsland(p.getName(), homes) != null;
     }
 
     public boolean createIsland(Player p) {
@@ -193,7 +176,7 @@ public class IslandManager {
                 // do nothing
             } else {
                 // check if the starting island is FREE
-                if (plugin.getIslandInfo(p) == null && Settings.firstIslandFree) {
+                if (plugin.getAPI(ASkyBlock.get()).getIslandInfo(p) == null && Settings.firstIslandFree) {
                     p.sendMessage(plugin.getLocale(p).firstIslandFree);
                     p.sendMessage(plugin.getLocale(p).nextIslandPrice.replace("[price]", Double.toString(Settings.islandCost)));
                 } else {
@@ -210,9 +193,9 @@ public class IslandManager {
             int wy = Settings.islandHieght;
             wx = wx - wx % Settings.islandDistance + Settings.islandDistance / 2;
             wz = wz - wz % Settings.islandDistance + Settings.islandDistance / 2;
-            IslandData pd = plugin.getDatabase().getIslandById(generateIslandKey(wx, wz));
+            IslandData pd = plugin.getAPI(ASkyBlock.get()).getDatabase().getIslandById(generateIslandKey(wx, wz));
             if (pd == null) {
-                Level world = Server.getInstance().getLevelByName(plugin.getDefaultWorld(p));
+                Level world = Server.getInstance().getLevelByName(plugin.getAPI(plugin).getDefaultWorld(p));
                 Location locIsland = new Location(wx, wy, wz, world);
                 pd = claim(p, locIsland, home);
                 // Call an event
@@ -225,9 +208,9 @@ public class IslandManager {
                 if (stmt != null) {
                     stmt.pasteSchematic(p, locIsland);
                 } else {
-                    plugin.getSchematic("default").pasteSchematic(p, locIsland);
+                    plugin.getAPI(ASkyBlock.get()).getSchematic("default").pasteSchematic(p, locIsland);
                 }
-                boolean result = plugin.getDatabase().createIsland(pd);
+                boolean result = plugin.getAPI(ASkyBlock.get()).getDatabase().createIsland(pd);
                 if (result) {
                     p.sendMessage(plugin.getLocale(p).createSeccess);
                     return true;
@@ -260,8 +243,8 @@ public class IslandManager {
         }
 
         int iKey = generateIslandKey(loc);
-        IslandData pd = plugin.getDatabase().getIslandLocation(loc.getLevel().getName(), x, z);
-        List<IslandData> number = plugin.getDatabase().getIslands(p.getName(), loc.level.getName());
+        IslandData pd = plugin.getAPI(ASkyBlock.get()).getDatabase().getIslandLocation(loc.getLevel().getName(), x, z);
+        List<IslandData> number = plugin.getAPI(ASkyBlock.get()).getDatabase().getIslands(p.getName(), loc.level.getName());
         pd.id = number.size() + 1;
         pd.biome = Settings.defaultBiome.getName();
         pd.name = home;
@@ -278,7 +261,7 @@ public class IslandManager {
             return false;
         }
         // WHatT!!? WHAT!? wHAt?!! OH MY GOD!
-        return plugin.getIslandInfo(loc).owner.equalsIgnoreCase(p.getName());
+        return plugin.getAPI(ASkyBlock.get()).getIslandInfo(loc).owner.equalsIgnoreCase(p.getName());
     }
 
     public void reset(Player p, boolean reset, IslandData pd) {
@@ -322,7 +305,7 @@ public class IslandManager {
         if (pd.owner.equals(pName)) {
             return true;
         }
-        PlayerData pd2 = plugin.getPlayerInfo(p);
+        PlayerData pd2 = plugin.getAPI(ASkyBlock.get()).getPlayerInfo(p);
         return pd2.members.contains(pName);
     }
 
@@ -331,7 +314,7 @@ public class IslandManager {
             return null;
         }
         int iKey = generateIslandKey(loc);
-        IslandData res = ASkyBlock.get().getDatabase().getIslandById(iKey);
+        IslandData res = ASkyBlock.get().getAPI(ASkyBlock.get()).getDatabase().getIslandById(iKey);
         if (res == null) {
             return null;
         }
@@ -347,7 +330,7 @@ public class IslandManager {
             return;
         }
         final IslandData pd = GetIslandAt(loc);
-        PlayerData pd2 = plugin.getPlayerInfo(p);
+        PlayerData pd2 = plugin.getAPI(ASkyBlock.get()).getPlayerInfo(p);
         if (pd == null) {
             p.sendMessage(TextFormat.LIGHT_PURPLE + plugin.getLocale(p).errorNotOnIsland);
             return;
@@ -363,18 +346,18 @@ public class IslandManager {
     }
 
     public void teleportPlayer(Player p, String arg) {
-        IslandData pd = ASkyBlock.get().getDatabase().getIsland(arg, 1);
+        IslandData pd = ASkyBlock.get().getAPI(ASkyBlock.get()).getDatabase().getIsland(arg, 1);
         if (pd.owner != null) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorOfflinePlayer.replace("[player]", arg));
             return;
         }
-        Location home = plugin.getGrid().getSafeHomeLocation(pd.owner, pd.id);
+        Location home = plugin.getAPI(plugin).getGrid().getSafeHomeLocation(pd.owner, pd.id);
         //if the home null
         if (home == null) {
             p.sendMessage(plugin.getPrefix() + TextFormat.RED + "Failed to find your island safe spawn");
             return;
         }
-        plugin.getTeleportLogic().safeTeleport(p, home, false, pd.id);
+        plugin.getAPI(ASkyBlock.get()).getTeleportLogic().safeTeleport(p, home, false, pd.id);
     }
 
     public boolean locationIsOnIsland(Player player, Vector3 loc) {
@@ -395,9 +378,9 @@ public class IslandManager {
         // Make a list of test locations and test them
         Set<Location> islandTestLocations = new HashSet<>();
         if (checkIsland(player)) {
-            islandTestLocations.add(plugin.getIslandInfo(player).getHome());
-        } else if (plugin.getTManager().hasTeam(player)) {
-            islandTestLocations.add(plugin.getPlayerInfo(player).getTeamIslandLocation());
+            islandTestLocations.add(plugin.getAPI(ASkyBlock.get()).getIslandInfo(player).getHome());
+        } else if (plugin.getAPI(plugin).getTManager().hasTeam(player)) {
+            islandTestLocations.add(plugin.getAPI(ASkyBlock.get()).getPlayerInfo(player).getTeamIslandLocation());
         }
         // Check any coop locations
 //        islandTestLocations.addAll(CoopPlay.getInstance().getCoopIslands(player));
@@ -406,9 +389,9 @@ public class IslandManager {
 //        }
         // Run through all the locations
         return islandTestLocations.stream().filter((islandTestLocation) -> (local.getLevel().getName().equalsIgnoreCase(islandTestLocation.level.getName())))
-                .anyMatch((islandTestLocation) -> (loc.getX() >= islandTestLocation.getX() - Settings.protectionrange / 2
-                        && loc.getX() < islandTestLocation.getX() + Settings.protectionrange / 2
-                        && loc.getZ() >= islandTestLocation.getZ() - Settings.protectionrange / 2
-                        && loc.getZ() < islandTestLocation.getZ() + Settings.protectionrange / 2));
+            .anyMatch((islandTestLocation) -> (loc.getX() >= islandTestLocation.getX() - Settings.protectionrange / 2
+                && loc.getX() < islandTestLocation.getX() + Settings.protectionrange / 2
+                && loc.getZ() >= islandTestLocation.getZ() - Settings.protectionrange / 2
+                && loc.getZ() < islandTestLocation.getZ() + Settings.protectionrange / 2));
     }
 }

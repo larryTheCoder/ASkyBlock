@@ -71,13 +71,13 @@ public class LeaveSubCommand extends SubCommand {
                 pt.setGamemode(0);
             }
         }
-        getPlugin().getInventory().loadPlayerInventory(pt);
+        getPlugin().getAPI(getPlugin()).getInventory().loadPlayerInventory(pt);
         // default spawn world
-        if (getPlugin().getDatabase().getSpawn() != null) {
-            pt.teleport(getPlugin().getDatabase().getSpawn().getCenter());
+        if (getPlugin().getAPI(ASkyBlock.get()).getDatabase().getSpawn() != null) {
+            pt.teleport(getPlugin().getAPI(ASkyBlock.get()).getDatabase().getSpawn().getCenter());
         } else {
             Utils.send("&c[READ ME] &eThe default spawn world not found. Please use /is "
-                    + "setspawn in-game. &aUsing default world");
+                + "setspawn in-game. &aUsing default world");
             pt.teleport(getPlugin().getServer().getDefaultLevel().getSafeSpawn());
         }
         return true;

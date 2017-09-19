@@ -62,7 +62,7 @@ public class InviteSubCommand extends SubCommand {
             return false;
         }
         Player p = sender.getServer().getPlayer(sender.getName());
-        if (!getPlugin().getIsland().checkIsland(p)) {
+        if (!getPlugin().getAPI(getPlugin()).getIsland().checkIsland(p)) {
             sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
         }
@@ -71,8 +71,8 @@ public class InviteSubCommand extends SubCommand {
             sender.sendMessage(getPrefix() + getLocale(p).errorOfflinePlayer);
             return true;
         }
-        PlayerData pdinv = ASkyBlock.get().getPlayerInfo(invite);
-        PlayerData pd = ASkyBlock.get().getPlayerInfo(p);
+        PlayerData pdinv = ASkyBlock.get().getAPI(ASkyBlock.get()).getPlayerInfo(invite);
+        PlayerData pd = ASkyBlock.get().getAPI(ASkyBlock.get()).getPlayerInfo(p);
         if (pdinv.inTeam) {
             sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
             return false;
@@ -81,7 +81,7 @@ public class InviteSubCommand extends SubCommand {
             sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
             return false;
         }
-        getPlugin().getInvitationHandler().addInvitation(p, invite);
+        getPlugin().getAPI(getPlugin()).getInvitationHandler().addInvitation(p, invite);
         return true;
     }
 

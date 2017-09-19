@@ -56,7 +56,7 @@ public class MySQLDatabase implements AbstractDatabase {
     public Connection forceConnection() throws SQLException, ClassNotFoundException {
         Class.forName("com.mysql.jdbc.Driver");
         this.connection =
-                DriverManager.getConnection("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
+            DriverManager.getConnection("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
         return this.connection;
     }
 
@@ -68,7 +68,7 @@ public class MySQLDatabase implements AbstractDatabase {
         Class.forName("com.mysql.jdbc.Driver");
         Utils.send("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database);
         this.connection =
-                DriverManager.getConnection("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
+            DriverManager.getConnection("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
         return this.connection;
     }
 

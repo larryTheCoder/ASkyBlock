@@ -85,8 +85,8 @@ public class DeleteIslandTask implements Runnable {
         int maxzZ = (pd.getCenter().getFloorZ() + range + islandSpacing);
 
         // get the chunks for these locations
-        final BaseFullChunk minChunk = level.getChunk(minX >> 4, minZ >> 4);
-        final BaseFullChunk maxChunk = level.getChunk(maxX >> 4, maxZ >> 4);
+        final BaseFullChunk minChunk = level.getChunk(minX >> 4, minZ >> 4, true);
+        final BaseFullChunk maxChunk = level.getChunk(maxX >> 4, maxZ >> 4, true);
 
         if (!minChunk.isGenerated() || !maxChunk.isGenerated()) {
             level.regenerateChunk(minChunk.getX(), minChunk.getZ());
@@ -98,25 +98,27 @@ public class DeleteIslandTask implements Runnable {
 
         // Find out what chunks are within the island protection range
         for (int x = minChunk.getX(); x <= maxChunk.getX(); x++) {
-            for (int z = maxChunk.getZ(); z <= maxChunk.getZ(); z++) {
+            for (int z = minChunk.getZ(); z <= maxChunk.getZ(); z++) {
                 boolean regen = true;
 
-                if (level.getChunk(x, z).getX() < minxX) {
+                if ((level.getChunk(x, z, true).getX() << 4) < minxX) {
                     deb.debug("DEBUG: min x coord is less than absolute min! " + minxX);
                     regen = false;
                 }
-                if (level.getChunk(x, z).getZ() < minzZ) {
+                if ((level.getChunk(x, z, true).getZ() << 4) < minzZ) {
                     deb.debug("DEBUG: min z coord is less than absolute min! " + minzZ);
                     regen = false;
                 }
-                if (level.getChunk(x, z).getX() > maxxX) {
+                if ((level.getChunk(x, z, true).getX() << 4) > maxxX) {
                     deb.debug("DEBUG: max x coord is more than absolute max! " + maxxX);
                     regen = false;
                 }
-                if (level.getChunk(x, z).getZ() > maxzZ) {
+                if ((level.getChunk(x, z, true).getZ() << 4) > maxzZ) {
                     deb.debug("DEBUG: max z coord in chunk is more than absolute max! " + maxzZ);
                     regen = false;
                 }
+                deb.debug("" + (level.getChunk(x, z).getX() << 4));
+                deb.debug("" + (level.getChunk(x, z).getZ() << 4));
                 if (regen) {
                     // Loop in loop are not recommended.
                     // So we seperate some chunks and let the task do it works
@@ -132,26 +134,39 @@ public class DeleteIslandTask implements Runnable {
 
         // Clear up any chunks in list
         if (!chunksToRemoved.isEmpty()) {
-            Iterator<BaseFullChunk> iter = chunksToRemoved.iterator();
-            while (iter.hasNext()) {
-                BaseFullChunk chunk = iter.next();
-                for (int y = 0; y <= 255; y++) {
-                    for (int x = 0; x <= 16; x++) {
-                        for (int z = 0; z <= 16; z++) {
-                            chunk.setBlock(x, y, z, Block.AIR);
-                            chunk.setGenerated();
+            Utils.send("&eIsland delete Task-1: There are &a" + chunksToRemoved.size() + " &echunks that need to be cleared up.");
+            new NukkitRunnable() {
+                public boolean state = false;
+
+                @Override
+                public void run() {
+                    Iterator<BaseFullChunk> iChunk = chunksToRemoved.iterator();
+                    int count = 0;
+                    while (iChunk.hasNext() && count++ < Settings.cleanrate) {
+                        BaseFullChunk chunk = iChunk.next();
+                        for (int y = Settings.seaLevel; y < 255 - Settings.seaLevel; y++) {
+                            for (int x = 0; x < 16; x++) {
+                                for (int z = 0; z < 16; z++) {
+                                    chunk.setBlock(x, y, z, 0); // AIR! SOLUTION! TREATING!
+                                }
+                            }
                         }
+                        level.generateChunkCallback(chunk.getX(), chunk.getZ(), chunk);
+                        iChunk.remove();
+                    }
+                    if (chunksToRemoved.isEmpty()) {
+                        Utils.send("&aFinished island deletion Task-1");
+                        this.cancel();
+                        return;
                     }
                 }
-                level.generateChunkCallback(chunk.getX(), chunk.getZ(), chunk);
-                level.regenerateChunk(chunk.getX(), chunk.getZ());
-                iter.remove();
-            }
+
+            }.runTaskTimer(plugin, 0, 20);
         }
 
         // Clear up any chunks
         if (!chunksToClear.isEmpty()) {
-            Utils.send("&eIsland delete: There are &a" + chunksToClear.size() + " &echunks that need to be cleared up.");
+            Utils.send("&eIsland delete Task-2: There are &a" + chunksToClear.size() + " &echunks that need to be cleared up.");
             Utils.send("&eClean rate is &a" + Settings.cleanrate + " &echunks per second. Should take ~" + Math.round(chunksToClear.size() / Settings.cleanrate) + "s");
             new NukkitRunnable() {
                 @Override
@@ -179,7 +194,7 @@ public class DeleteIslandTask implements Runnable {
                         it.remove();
                     }
                     if (chunksToClear.isEmpty()) {
-                        Utils.send("&aFinished island deletion");
+                        Utils.send("&aFinished island deletion Task-2");
                         this.cancel();
                     }
                 }

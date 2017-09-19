@@ -62,27 +62,27 @@ public class SetSpawnSubCommand extends SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if (getPlugin().getIslandInfo(p) == null) {
+        if (getPlugin().getAPI(ASkyBlock.get()).getIslandInfo(p) == null) {
             p.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
-        } else if (!getPlugin().inIslandWorld(p)) {
+        } else if (!getPlugin().getAPI(getPlugin()).inIslandWorld(p)) {
             p.sendMessage(getPrefix() + getLocale(p).errorWrongWorld);
             return true;
-        } else if (!getPlugin().getIslandInfo(p.getLocation()).owner.equalsIgnoreCase(p.getName())) {
+        } else if (!getPlugin().getAPI(ASkyBlock.get()).getIslandInfo(p.getLocation()).owner.equalsIgnoreCase(p.getName())) {
             p.sendMessage(getPrefix() + getLocale(p).errorNotOnIsland);
             return true;
         }
         // To avoid multiple spawns, try to remove the old spawn
-        if (getPlugin().getDatabase().getSpawn() != null) {
-            IslandData pd = getPlugin().getDatabase().getSpawn();
+        if (getPlugin().getAPI(ASkyBlock.get()).getDatabase().getSpawn() != null) {
+            IslandData pd = getPlugin().getAPI(ASkyBlock.get()).getDatabase().getSpawn();
             pd.setSpawn(false);
-            getPlugin().getDatabase().saveIsland(pd);
+            getPlugin().getAPI(ASkyBlock.get()).getDatabase().saveIsland(pd);
         }
         // Save this island
-        IslandData pd = getPlugin().getIslandInfo(p.getLocation());
+        IslandData pd = getPlugin().getAPI(ASkyBlock.get()).getIslandInfo(p.getLocation());
         pd.setSpawn(true);
         pd.setHomeLocation(p);
-        getPlugin().getDatabase().saveIsland(pd);
+        getPlugin().getAPI(ASkyBlock.get()).getDatabase().saveIsland(pd);
         sender.sendMessage(TextFormat.GREEN + getLocale(p).generalSuccess);
         return true;
     }

@@ -94,7 +94,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
         }
         if (args.length == 0) {
             if (p != null && sender.hasPermission("is.create")) {
-                plugin.getIsland().handleIslandCommand(p);
+                plugin.getAPI(plugin).getIsland().handleIslandCommand(p);
             } else if (!(sender instanceof Player)) {
                 return this.sendHelp(sender, args);
             } else {

@@ -31,7 +31,6 @@ import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
-import com.intellectiualcrafters.updater.Updater;
 import com.larryTheCoder.command.AdminCMD;
 import com.larryTheCoder.command.ChallangesCMD;
 import com.larryTheCoder.database.ASConnection;
@@ -49,11 +48,14 @@ import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.schematic.Schematic;
+import com.larryTheCoder.schematic.SchematicHandler;
 import com.larryTheCoder.storage.InventorySave;
 import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.ConfigManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+import com.larryTheCoder.utils.updater.Updater;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,7 +71,7 @@ import java.util.List;
  * Main class of SkyBlock Framework! Complete with API and Events. May contains
  * Nuts!
  */
-public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
+public class ASkyBlock extends PluginBase {
 
     public static HashMap<String, Schematic> schematics = new HashMap<>();
     public static Economy econ;
@@ -89,6 +91,8 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     private TeleportLogic teleportLogic;
     private ChallangesCMD cmds;
     private Messages msgs;
+    //  SkyBloc API
+    private SkyBlockAPI blockAPI;
     // Localization Strings
     private HashMap<String, ASlocales> availableLocales = new HashMap<>();
 
@@ -101,32 +105,10 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         return object;
     }
 
-    @Override
-    public void registerSchematic(File schematic, String name) {
-        try {
-            ASkyBlock.schematics.put("default", new Schematic(this, schematic));
-        } catch (IOException ex) {
-            Utils.send("Unable to add " + schematic.getName() + " Schematic file.");
-            if (isDebug()) {
-                ex.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public Schematic getSchematic(String key) {
-        if (ASkyBlock.schematics.containsKey(key)) {
-            return ASkyBlock.schematics.get(key);
-        }
-        return null;
-    }
-
-    @Override
     public String getPluginVersionString() {
         return getDescription().getVersion();
     }
 
-    @Override
     public int[] getPluginVersion() {
         String ver = getDescription().getVersion();
         if (ver.contains("-")) {
@@ -136,46 +118,13 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         return new int[]{Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2])};
     }
 
-    @Override
     public boolean checkVersion(int[] version, int... version2) {
         return version[0] > version2[0] || version[0] == version2[0] && version[1] > version2[1] || version[0] == version2[0]
-                && version[1] == version2[1] && version[2] >= version2[2];
+            && version[1] == version2[1] && version[2] >= version2[2];
     }
 
-    @Override
-    public Integer getIslandLevel(Player player) {
-        PlayerData pd = getPlayerInfo(player);
-        return pd.getIslandLevel();
-    }
-
-    @Override
-    public IslandData getIslandInfo(Player player) {
-        return getIslandInfo(player.getName());
-    }
-
-    @Override
     public int[] getVersion() {
         return version;
-    }
-
-    @Override
-    public ASConnection getDatabase() {
-        return db;
-    }
-
-    @Override
-    public IslandData getIslandInfo(Location location) {
-        return getDatabase().getIslandLocation(location.getLevel().getName(), location.getFloorX(), location.getFloorZ());
-    }
-
-    @Override
-    public PlayerData getPlayerInfo(Player player) {
-        return getDatabase().getPlayerData(player.getName());
-    }
-
-    //  #################################### NON-API ####################################
-    public TeleportLogic getTeleportLogic() {
-        return teleportLogic;
     }
 
     /**
@@ -187,95 +136,29 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         return ASkyBlock.object.cfg.getBoolean("debug");
     }
 
-    /**
-     * Get The ChatHandler instance
-     *
-     * @return ChatHandler
-     * @api
-     */
-    public ChatHandler getChatHandlers() {
-        return chatHandler;
+    public SkyBlockAPI registerAPI(PluginBase plugin) {
+        SkyBlockAPI pluginE = new SkyBlockAPI(plugin);
+        pluginE.db = db;
+        pluginE.chatHandler = chatHandler;
+        pluginE.invitationHandler = invitationHandler;
+        pluginE.manager = manager;
+        pluginE.grid = grid;
+        pluginE.inventory = inventory;
+        pluginE.managers = managers;
+        pluginE.teleportLogic = teleportLogic;
+        pluginE.cmds = cmds;
+        pluginE.msgs = msgs;
+        return pluginE;
     }
 
     /**
-     * Get The InvitationHandler instance
+     * Internal usage only
      *
-     * @return InvitationHandler
-     * @api
+     * @param plugin
+     * @return SkyBlockAPI API parameters
      */
-    public InvitationHandler getInvitationHandler() {
-        return invitationHandler;
-    }
-
-    /**
-     * Get the island Manager section
-     *
-     * @return IslandManager
-     * @api
-     */
-    public IslandManager getIsland() {
-        return manager;
-    }
-
-    /**
-     * Get the GridManager Manager section
-     *
-     * @return GridManager
-     * @api
-     */
-    public GridManager getGrid() {
-        return grid;
-    }
-
-    /**
-     * Get the GridManager Manager section
-     *
-     * @return InventorySave
-     * @api
-     */
-    public InventorySave getInventory() {
-        return inventory;
-    }
-
-    /**
-     * Get the TeamManager section
-     *
-     * @return BaseEntity
-     * @api
-     */
-    public TeamManager getTManager() {
-        return managers;
-    }
-
-    public IslandData getIslandInfo(Player player, int homes) {
-        return getDatabase().getIsland(player.getName(), homes);
-    }
-
-    public IslandData getIslandInfo(String player) {
-        return getDatabase().getIsland(player, 1);
-    }
-
-    public IslandData getIslandInfo(String player, int homes) {
-        return getDatabase().getIsland(player, homes);
-    }
-
-    public ChallangesCMD getChallenges() {
-        return cmds;
-    }
-
-    public boolean inIslandWorld(Player p) {
-        return level.contains(p.getLevel().getName());
-    }
-
-    public String getDefaultWorld(Player p) {
-        PlayerData pd = getPlayerInfo(p);
-        // Sometimes default level are null
-        if (level.contains(pd.defaultLevel)) {
-            pd.defaultLevel = "SkyBlock";
-            getDatabase().savePlayerData(pd);
-            return "SkyBlock";
-        }
-        return pd.defaultLevel;
+    public SkyBlockAPI getAPI(ASkyBlock plugin) {
+        return blockAPI;
     }
 
     @Override
@@ -286,14 +169,14 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         // Register generator
         Generator.addGenerator(SkyBlockGenerator.class, "island", SkyBlockGenerator.TYPE_SKYBLOCK);
         // Register TaskManager
-        com.intellectiualcrafters.TaskManager.IMP = new com.intellectiualcrafters.TaskManager();
+        TaskManager.IMP = new TaskManager();
     }
 
     @Override
     public void onEnable() {
         initConfig();
         initDatabase(); // Load the database before others (Avoid crash during startup)
-        getServer().getLogger().info(getPrefix() + "§aLoading source §eASkyBlock §av" + getPluginVersionString());
+        getServer().getLogger().info(getPrefix() + "§7Loading source §eASkyBlock v" + getPluginVersionString());
         getServer().getLogger().info(TextFormat.YELLOW + "------------------------------------------------------------");
         initIslands();
         registerObject();
@@ -309,7 +192,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     public void onDisable() {
         Utils.send(TextFormat.GREEN + "Saving islands framework");
         saveLevel();
-        getDatabase().close();
+        this.db.close();
         msgs.saveMessages();
         Utils.send(TextFormat.RED + "ASkyBlock ~ Disabled seccessfully");
     }
@@ -317,7 +200,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     private void initDatabase() {
         if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {
             try {
-                db = new ASConnection(new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")), true);
+                db = new ASConnection(this, new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")), true);
             } catch (SQLException ex) {
                 JDBCUtilities.printSQLException(ex);
             } catch (ClassNotFoundException | InterruptedException ex) {
@@ -325,7 +208,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
             }
         } else {
             try {
-                db = new ASConnection(new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
+                db = new ASConnection(this, new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
             } catch (SQLException ex) {
                 JDBCUtilities.printSQLException(ex);
             } catch (ClassNotFoundException | InterruptedException ex) {
@@ -358,11 +241,11 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
      * Reload every level that had generated
      */
     private void saveLevel() {
-        getDatabase().saveWorlds(level);
+        this.db.saveWorlds(level);
     }
 
     private void registerObject() {
-        Utils.send(TextFormat.GREEN + "Loading the Island Framework");
+        Utils.send(TextFormat.GRAY + "Loading the Island Framework");
         loadSchematic();
         if (cfg.getBoolean("updater")) {
             Updater.getUpdate();
@@ -372,6 +255,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         managers = new TeamManager(this);
         inventory = new InventorySave(this);
         generateLevel();
+        this.blockAPI = registerAPI(this); // Register this API
     }
 
     public String getPrefix() {
@@ -382,7 +266,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         if (p == null) {
             return getAvailableLocales().get(Settings.defaultLanguage);
         }
-        PlayerData pd = this.getPlayerInfo(p);
+        PlayerData pd = this.getAPI(this).getPlayerInfo(p);
         if (!this.getAvailableLocales().containsKey(pd.pubLocale)) {
             Utils.send("Unknown locale: " + pd.pubLocale);
             Utils.send("Using default: en-US");
@@ -462,7 +346,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         if (!Server.getInstance().isLevelLoaded("SkyBlock")) {
             Server.getInstance().loadLevel("SkyBlock");
         }
-        level = getDatabase().getWorlds(); // should work
+        level = this.db.getWorlds(); // should work
         level.stream().forEach((String world) -> {
             if (!Server.getInstance().isLevelGenerated(world)) {
                 Server.getInstance().generateLevel(world, 0, SkyBlockGenerator.class);
@@ -752,6 +636,15 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     }
 
+    public void loadV2Schematic() {
+        File schematicFolder = new File(getDataFolder(), "schematics");
+        if (!schematicFolder.exists()) {
+            schematicFolder.mkdir();
+        }
+        // Works well
+        new SchematicHandler(this, schematicFolder);
+    }
+
     public Messages getMessages() {
         return msgs;
     }
@@ -765,8 +658,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     }
 
     private void test() {
-        //getSchematic("default").pasteSchematic(new Location(50, 90, 50, getServer().getLevelByName("SkyBlock")));
-
+        //loadV2Schematic();
     }
 
 }

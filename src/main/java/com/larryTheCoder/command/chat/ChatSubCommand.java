@@ -59,14 +59,14 @@ public class ChatSubCommand extends SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = Server.getInstance().getPlayer(sender.getName());
-        if (getPlugin().getIsland().checkIsland(p)) {
+        if (getPlugin().getAPI(getPlugin()).getIsland().checkIsland(p)) {
             sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
         }
-        if (getPlugin().getTManager().hasTeam(p)) {
+        if (getPlugin().getAPI(getPlugin()).getTManager().hasTeam(p)) {
             // Check if team members are online
             boolean online = false;
-            for (String teamMember : getPlugin().getPlayerInfo(p).members) {
+            for (String teamMember : getPlugin().getAPI(getPlugin()).getPlayerInfo(p).members) {
                 if (!teamMember.equals(p.getName()) && getPlugin().getServer().getPlayer(teamMember) != null) {
                     online = true;
                 }
@@ -74,16 +74,16 @@ public class ChatSubCommand extends SubCommand {
             if (!online) {
                 p.sendMessage(getPrefix() + getLocale(p).teamChatNoTeamAround);
                 p.sendMessage(getPrefix() + getLocale(p).teamChatStatusOff);
-                getPlugin().getChatHandlers().unSetPlayer(p);
+                getPlugin().getAPI(getPlugin()).getChatHandlers().unSetPlayer(p);
                 return true;
             }
-            if (getPlugin().getChatHandlers().isTeamChat(p)) {
+            if (getPlugin().getAPI(getPlugin()).getChatHandlers().isTeamChat(p)) {
                 // Toggle
                 p.sendMessage(getPrefix() + getLocale(p).teamChatStatusOff);
-                getPlugin().getChatHandlers().unSetPlayer(p);
+                getPlugin().getAPI(getPlugin()).getChatHandlers().unSetPlayer(p);
             } else {
                 p.sendMessage(getPrefix() + getLocale(p).teamChatStatusOn);
-                getPlugin().getChatHandlers().setPlayer(p);
+                getPlugin().getAPI(getPlugin()).getChatHandlers().setPlayer(p);
             }
         }
         return false;

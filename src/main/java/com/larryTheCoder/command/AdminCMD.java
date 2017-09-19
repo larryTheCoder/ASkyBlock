@@ -98,7 +98,7 @@ public class AdminCMD extends Command {
                             plugin.getServer().generateLevel(args[1], System.currentTimeMillis(), SkyBlockGenerator.class);
                             plugin.getServer().loadLevel(args[1]);
                             plugin.level.add(args[1]);
-                            plugin.getDatabase().saveWorlds(plugin.level);
+                            plugin.getAPI(ASkyBlock.get()).getDatabase().saveWorlds(plugin.level);
                             sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).generalSuccess);
                             return true;
                         }
@@ -109,7 +109,7 @@ public class AdminCMD extends Command {
                             sender.sendMessage(plugin.getLocale(p).errorNoPermission);
                             break;
                         }
-                        plugin.getIsland().kickPlayerByAdmin(sender, args[1]);
+                        plugin.getAPI(plugin).getIsland().kickPlayerByAdmin(sender, args[1]);
                         break;
                     case "rename":
                         sender.sendMessage(plugin.getPrefix() + "§aUsage: /" + commandLabel + " rename <player> <name>");
@@ -126,7 +126,7 @@ public class AdminCMD extends Command {
                             return true;
                         }
                         // Get the island I am on
-                        IslandData island = plugin.getIsland().GetIslandAt(p);
+                        IslandData island = plugin.getAPI(plugin).getIsland().GetIslandAt(p);
                         if (island == null) {
                             sender.sendMessage(plugin.getLocale(p).adminDeleteIslandnoid);
                             return true;
@@ -165,13 +165,13 @@ public class AdminCMD extends Command {
                             sender.sendMessage(plugin.getLocale(p).errorNoPermission);
                             break;
                         }
-                        IslandData pd = plugin.getIslandInfo(args[1]);
+                        IslandData pd = plugin.getAPI(plugin).getIslandInfo(args[1]);
                         if (pd == null) {
                             sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNoIslandOther);
                             break;
                         }
                         pd.name = args[2];
-                        boolean secces = plugin.getDatabase().saveIsland(pd);
+                        boolean secces = plugin.getAPI(ASkyBlock.get()).getDatabase().saveIsland(pd);
                         if (secces) {
                             sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).renameSeccess);
                             break;
@@ -199,26 +199,26 @@ public class AdminCMD extends Command {
             sender.sendMessage(plugin.getLocale(p).errorNoPermission);
             return;
         }
-        if (plugin.getIslandInfo(p) == null) {
+        if (plugin.getAPI(ASkyBlock.get()).getIslandInfo(p) == null) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNoIsland);
             return;
-        } else if (!plugin.inIslandWorld(p)) {
+        } else if (!plugin.getAPI(plugin).inIslandWorld(p)) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorWrongWorld);
             return;
-        } else if (!plugin.getIslandInfo(p.getLocation()).owner.equalsIgnoreCase(p.getName())) {
+        } else if (!plugin.getAPI(ASkyBlock.get()).getIslandInfo(p.getLocation()).owner.equalsIgnoreCase(p.getName())) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNotOnIsland);
             return;
         }
         // To avoid multiple spawns, try to remove the old spawn
-        if (plugin.getDatabase().getSpawn() != null) {
-            IslandData pd = plugin.getDatabase().getSpawn();
+        if (plugin.getAPI(ASkyBlock.get()).getDatabase().getSpawn() != null) {
+            IslandData pd = plugin.getAPI(ASkyBlock.get()).getDatabase().getSpawn();
             pd.setSpawn(false);
-            plugin.getDatabase().saveIsland(pd);
+            plugin.getAPI(ASkyBlock.get()).getDatabase().saveIsland(pd);
         }
         // Save this island
-        IslandData pd = plugin.getIslandInfo(p.getLocation());
+        IslandData pd = plugin.getAPI(ASkyBlock.get()).getIslandInfo(p.getLocation());
         pd.setSpawn(true);
-        plugin.getDatabase().saveIsland(pd);
+        plugin.getAPI(ASkyBlock.get()).getDatabase().saveIsland(pd);
         sender.sendMessage(TextFormat.GREEN + plugin.getLocale(p).generalSuccess);
     }
 

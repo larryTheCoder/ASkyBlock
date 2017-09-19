@@ -34,12 +34,14 @@ import java.util.Map;
 public class SkyBlockGenerator extends Generator {
 
     public static final int TYPE_SKYBLOCK = 0x7fffffff;
+    public static SkyBlockGenerator INSTANCE_DELETE_COMMAND;
     private final Map<String, Object> options;
     private ChunkManager level;
     private NukkitRandom random;
 
     public SkyBlockGenerator(Map<String, Object> options) {
         this.options = options;
+        SkyBlockGenerator.INSTANCE_DELETE_COMMAND = this;
     }
 
     @Override
@@ -62,12 +64,23 @@ public class SkyBlockGenerator extends Generator {
             }
         }
         // making island in this section has been removed
-        // reason why blocks not appear BECAUSE OF THIS @#*~+ AIR!!
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 for (int y = 0; y < Settings.seaLevel; y++) {
                     chunk.setBlock(x, y, z, Block.STILL_WATER); // Water Allows stuff
                     // to fall through into oblivion, thus keeping lag to a minimum
+                }
+            }
+        }
+    }
+
+    public void removeAllChunk(int chunkX, int chunkZ) {
+        BaseFullChunk chunk = level.getChunk(chunkX, chunkZ);
+        // Remove all chunks (DO NOT USE IN PRODUCTION) unless you want to rewed people servers
+        for (int y = Settings.seaLevel; y < 255 - Settings.seaLevel; y++) {
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    chunk.setBlock(x, y, z, 0); // AIR! SOLUTION! TREATING!
                 }
             }
         }
@@ -90,7 +103,7 @@ public class SkyBlockGenerator extends Generator {
 
     @Override
     public Vector3 getSpawn() {
-        return new Vector3(14, 60, 14);
+        return new Vector3(15, 60, 15);
     }
 
     @Override

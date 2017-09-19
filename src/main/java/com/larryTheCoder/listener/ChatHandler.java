@@ -47,10 +47,10 @@ public class ChatHandler implements Listener {
         this.playerChallengeLevels = new ConcurrentHashMap<>();
         // Add all online player Levels
         plugin.getServer().getOnlinePlayers().values().stream().map((player) -> {
-            playerLevels.put(player, String.valueOf(plugin.getIslandLevel(player)));
+            playerLevels.put(player, String.valueOf(plugin.getAPI(ASkyBlock.get()).getIslandLevel(player)));
             return player;
         }).forEachOrdered((player) -> {
-            playerChallengeLevels.put(player.getUniqueId(), plugin.getChallenges().getChallengeLevel(player));
+            playerChallengeLevels.put(player.getUniqueId(), plugin.getAPI(plugin).getChallenges().getChallengeLevel(player));
         });
     }
 
@@ -80,8 +80,8 @@ public class ChatHandler implements Listener {
         // Is team chat on for this player
         // Find out if this player is in a team (should be if team chat is on)
         // TODO: remove when player resets or leaves team
-        if ((plugin.getTManager().getPlayerMembers(player.getName()).isEmpty()) == false) {
-            ArrayList<String> teams = plugin.getTManager().getPlayerMembers(player.getName());
+        if ((plugin.getAPI(plugin).getTManager().getPlayerMembers(player.getName()).isEmpty()) == false) {
+            ArrayList<String> teams = plugin.getAPI(plugin).getTManager().getPlayerMembers(player.getName());
             // Tell only the team members if they are online
             boolean online = false;
             for (String teamMembers : teams) {
@@ -140,7 +140,7 @@ public class ChatHandler implements Listener {
      */
     public void setPlayerChallengeLevel(Player player) {
         //plugin.getLogger().info("DEBUG: setting player's challenge level to " + plugin.getChallenges().getChallengeLevel(player));
-        playerChallengeLevels.put(player.getUniqueId(), plugin.getChallenges().getChallengeLevel(player));
+        playerChallengeLevels.put(player.getUniqueId(), plugin.getAPI(plugin).getChallenges().getChallengeLevel(player));
     }
 
     /**

@@ -37,22 +37,22 @@ import java.util.Set;
 public final class ASlocales {
 
     private final static Set<String> TITLE_COLORS = new HashSet<>(Arrays.asList(
-            "black",
-            "dark_blue",
-            "dark_green",
-            "dark_aqua",
-            "dark_red",
-            "dark_purple",
-            "gold",
-            "gray",
-            "dark_gray",
-            "blue",
-            "green",
-            "aqua",
-            "red",
-            "light_purple",
-            "yellow",
-            "white"
+        "black",
+        "dark_blue",
+        "dark_green",
+        "dark_aqua",
+        "dark_red",
+        "dark_purple",
+        "gold",
+        "gray",
+        "dark_gray",
+        "blue",
+        "green",
+        "aqua",
+        "red",
+        "light_purple",
+        "yellow",
+        "white"
     ));
     public String changingObsidiantoLava;
     public String acidLore;
@@ -133,14 +133,14 @@ public final class ASlocales {
     public String acceptedFrom = "§eYou accepted [player]'s invintation.";
     public String acceptedTo = "§e[player] has accepted your invintation!";
     // Titles
-    public String islandSubTitle = "Welcome back players!";
+    public String islandSubTitle = "Welcome back to [player] island!";
     public String islandDonate = "§aSource code made by §e@larryTheCoder";
     public String islandURL = "§aLink: http://github.com/larryTheCoder/ASkyBlock-Nukkit";
     public String islandSupport = "§aLove it? Give us a star on GitHub!";
     public String islandSubTitleColor = "blue";
     public String islandDonateColor = "aqua";
     public String islandTitleColor = "gold";
-    public String islandTitle = "[player]'s island";
+    public String islandTitle = "Welcome to [player]'s island";
     // Guard island
     public String islandProtected = "§cThat island is protected";
     // Localization Strings

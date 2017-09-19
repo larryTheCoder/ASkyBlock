@@ -86,7 +86,7 @@ public class Messages {
     }
 
     public boolean loadMessages() {
-        Utils.send("&aLoading offline messages...");
+        Utils.send("&7Loading offline messages...");
         try {
             messageStore = Utils.loadYamlFile("messages.yml");
             if (messageStore.getSections("messages") == null) {
@@ -135,12 +135,12 @@ public class Messages {
      */
     public void tellOfflineTeam(String team, String message) {
         // getLogger().info("DEBUG: tell offline team called");
-        if (!plugin.getTManager().inTeam(team)) {
+        if (!plugin.getAPI(plugin).getTManager().inTeam(team)) {
             //    // getLogger().info("DEBUG: player is not in a team");
             return;
         }
-        String teamLeader = plugin.getTManager().getLeader(team);
-        List<String> teamMembers = plugin.getTManager().getPlayerMembers(teamLeader);
+        String teamLeader = plugin.getAPI(plugin).getTManager().getLeader(team);
+        List<String> teamMembers = plugin.getAPI(plugin).getTManager().getPlayerMembers(teamLeader);
         for (String member : teamMembers) {
             // getLogger().info("DEBUG: trying String " + member.toString());
             if (plugin.getServer().getPlayer(team) == null) {
@@ -158,12 +158,12 @@ public class Messages {
      */
     public void tellTeam(String p, String message) {
         // getLogger().info("DEBUG: tell offline team called");
-        if (!plugin.getTManager().inTeam(p)) {
+        if (!plugin.getAPI(plugin).getTManager().inTeam(p)) {
             // getLogger().info("DEBUG: player is not in a team");
             return;
         }
-        String teamLeader = plugin.getTManager().getLeader(p);
-        List<String> teamMembers = plugin.getTManager().getPlayerMembers(teamLeader);
+        String teamLeader = plugin.getAPI(plugin).getTManager().getLeader(p);
+        List<String> teamMembers = plugin.getAPI(plugin).getTManager().getPlayerMembers(teamLeader);
         for (String member : teamMembers) {
             // getLogger().info("DEBUG: trying String " + member.toString());
             if (!member.equals(p) && plugin.getServer().getPlayer(member) != null) {

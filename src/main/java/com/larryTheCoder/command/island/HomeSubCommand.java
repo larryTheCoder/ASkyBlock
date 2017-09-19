@@ -74,7 +74,7 @@ public class HomeSubCommand extends SubCommand {
             islandNumber = 1;
         }
         Player p = sender.getServer().getPlayer(sender.getName());
-        List<IslandData> island = getPlugin().getDatabase().getIslands(sender.getName(), getPlugin().getDefaultWorld(p));
+        List<IslandData> island = getPlugin().getAPI(ASkyBlock.get()).getDatabase().getIslands(sender.getName(), getPlugin().getAPI(getPlugin()).getDefaultWorld(p));
         if (island == null) {
             sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
@@ -83,7 +83,7 @@ public class HomeSubCommand extends SubCommand {
             sender.sendMessage(getPrefix() + getLocale(p).errorNoIslandExsits + islandNumber);
             return true;
         }
-        getPlugin().getGrid().homeTeleport(p, islandNumber);
+        getPlugin().getAPI(getPlugin()).getGrid().homeTeleport(p, islandNumber);
         return true;
     }
 

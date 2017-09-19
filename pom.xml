@@ -78,6 +78,7 @@
                 <directory>${basedir}/src/main/resources/schematics</directory>
                 <includes>
                     <include>*.schematic</include>
+                    <include>*.yml</include>
                 </includes>
             </resource>
             <resource>
@@ -94,9 +95,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.5</version>
                 <configuration>
-                    <nonFilteredFileExtensions>
-                        <nonFilteredFileExtension>schematic</nonFilteredFileExtension>
-                    </nonFilteredFileExtensions>
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>

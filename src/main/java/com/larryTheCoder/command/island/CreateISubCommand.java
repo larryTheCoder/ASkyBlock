@@ -73,7 +73,7 @@ public class CreateISubCommand extends SubCommand {
                 break;
             case 3:
                 name = args[1];
-                if (getPlugin().getSchematic(args[2]) == null) {
+                if (getPlugin().getAPI(ASkyBlock.get()).getSchematic(args[2]) == null) {
                     List<String> ft = new ArrayList<>();
                     ASkyBlock.schematics.keySet().stream().forEach((de) -> {
                         ft.add(de);
@@ -81,16 +81,16 @@ public class CreateISubCommand extends SubCommand {
                     p.sendMessage(getPrefix() + "".replace("[SCEM]", Utils.arrayToString(ft)));
                     return true;
                 } else {
-                    smt = getPlugin().getSchematic(args[2]);
+                    smt = getPlugin().getAPI(ASkyBlock.get()).getSchematic(args[2]);
                 }
                 break;
         }
-        List<IslandData> maxPlotsOfPlayers = getPlugin().getDatabase().getIslands(sender.getName(), getPlugin().getDefaultWorld(p));
+        List<IslandData> maxPlotsOfPlayers = getPlugin().getAPI(ASkyBlock.get()).getDatabase().getIslands(sender.getName(), getPlugin().getAPI(getPlugin()).getDefaultWorld(p));
         if (Settings.maxHome >= 0 && maxPlotsOfPlayers.size() >= Settings.maxHome) {
             sender.sendMessage(getPrefix() + getLocale(p).errorMaxIsland.replace("[maxplot]", "" + Settings.maxHome));
             return true;
         }
-        getPlugin().getIsland().createIsland(p, smt, name);
+        getPlugin().getAPI(getPlugin()).getIsland().createIsland(p, smt, name);
         return true;
     }
 

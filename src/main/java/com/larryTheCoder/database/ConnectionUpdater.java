@@ -37,8 +37,10 @@ public class ConnectionUpdater {
 
     private final Connection con;
     private final ArrayList<IndependantIsland> pd = new ArrayList<>();
+    private final ASkyBlock plugin;
 
-    public ConnectionUpdater(Connection cone) {
+    public ConnectionUpdater(ASkyBlock plugin, Connection cone) {
+        this.plugin = plugin;
         this.con = cone;
     }
 
@@ -66,7 +68,7 @@ public class ConnectionUpdater {
                 try {
                     ipd.islandId = set.getInt("islandId");
                 } catch (SQLException ex) {
-                    ipd.islandId = ASkyBlock.get().getIsland().generateIslandKey(set.getInt("x"), set.getInt("z"));
+                    ipd.islandId = plugin.getAPI(plugin).getIsland().generateIslandKey(set.getInt("x"), set.getInt("z"));
                 }
                 try {
                     ipd.protectionRange = set.getInt("psize");
