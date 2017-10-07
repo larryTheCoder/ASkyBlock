@@ -147,7 +147,7 @@ public final class ASConnection {
     }
 
     public IslandData getIslandLocation(String levelName, int X, int Z) {
-        int id = plugin.getAPI(plugin).getIsland().generateIslandKey(X, Z);
+        int id = plugin.getIsland().generateIslandKey(X, Z);
         IslandData database = new IslandData(levelName, X, Z, Settings.protectionrange);
         // Get a list of island data on cache
         for (IslandData pd : islandCache) {

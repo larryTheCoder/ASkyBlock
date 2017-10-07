@@ -26,6 +26,7 @@ import cn.nukkit.form.element.ElementDropdown;
 import cn.nukkit.form.element.ElementInput;
 import cn.nukkit.form.element.ElementLabel;
 import cn.nukkit.form.response.FormResponseCustom;
+import cn.nukkit.form.response.FormResponseData;
 import cn.nukkit.form.window.FormWindowCustom;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.schematic.SchematicHandler;
@@ -40,10 +41,10 @@ public class SchematicPanel extends FormWindowCustom implements Listener {
     private SchematicHandler bindTo;
     private boolean closed = false;
 
-    public SchematicPanel(Player player, ASkyBlock plugin, SchematicHandler handling) {
+    public SchematicPanel(Player player, ASkyBlock plugin) {
         super("Schematic Menu");
         this.player = player;
-        this.bindTo = handling;
+        this.bindTo = ASkyBlock.schematics;
         this.plugin = plugin;
 
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -53,15 +54,19 @@ public class SchematicPanel extends FormWindowCustom implements Listener {
 
     public void showInformation() {
         // Show the elements for Panel 1.2
-        this.addElement(new ElementLabel("Here you can pick which of the schematic templates. Pick a great ones"));
-        this.addElement(new ElementDropdown("Choose one...", bindTo.getSchemaList(), bindTo.getDefaultIsland()));
+        this.addElement(new ElementLabel("Welcome to the Schematic Panel. Please fill in these forms."));
+        this.addElement(new ElementInput("Your home name", "", "Home sweet Home"));
+
+        if (!bindTo.isUseDefaultGeneration()) {
+            this.addElement(new ElementDropdown("Island Templates", bindTo.getSchemaList(), bindTo.getDefaultIsland()));
+        }
 
         player.showFormWindow(this);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerRespondForm(PlayerFormRespondedEvent event) {
-        if (event.wasClosed() || event.getResponse() == null) {
+        if ((event.wasClosed() || event.getResponse() == null) && event.getResponse().equals(this)) {
             closed = true;
             return;
         }
@@ -70,7 +75,17 @@ public class SchematicPanel extends FormWindowCustom implements Listener {
         // Player are opening Panel. Using Player UUID will making this easier to decide
         if (event.getResponse().equals(this)) {
             FormResponseCustom response = getResponse();
-            response.getStepSliderResponse(1); // Step slider
+            String islandName = response.getInputResponse(1);
+            int id = -1;
+            if (!bindTo.isUseDefaultGeneration()) {
+                FormResponseData form = response.getDropdownResponse(2); // Dropdown respond
+
+                String schematicType = form.getElementContent();
+
+                id = bindTo.getSchemaId(schematicType);
+            }
+
+            plugin.getIsland().createIsland(player, id, islandName);
         }
     }
 

@@ -28,7 +28,7 @@ public class PluginTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> {
 
     @Override
     public void onRun(int currentTick) {
-        owner.getAPI(getOwner()).getInvitationHandler().tick();
+        owner.getInvitationHandler().tick();
     }
 
 }

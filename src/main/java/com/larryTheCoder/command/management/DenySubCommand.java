@@ -59,7 +59,7 @@ public class DenySubCommand extends SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = sender.getServer().getPlayer(sender.getName());
-        InvitationHandler pd = getPlugin().getAPI(getPlugin()).getInvitationHandler();
+        InvitationHandler pd = getPlugin().getInvitationHandler();
         if (pd.getInvitation(p) == null) {
             sender.sendMessage(getPrefix() + getLocale(p).errorNotPending);
             return false;

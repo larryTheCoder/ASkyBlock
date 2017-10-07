@@ -46,7 +46,7 @@ public class SimpleFancyTitle extends Task {
                 break;
             }
             // Logical statement
-            if (!plugin.getAPI(plugin).inIslandWorld(p)) {
+            if (!plugin.inIslandWorld(p)) {
                 shouldLoopBack = true;
             } else {
                 // Reset the lastPos (Not in world)
@@ -58,7 +58,7 @@ public class SimpleFancyTitle extends Task {
             }
         }
 
-        IslandData ownership = plugin.getAPI(plugin).getIslandInfo(p.getLocation());
+        IslandData ownership = plugin.getIslandInfo(p.getLocation());
         if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
             p.setSubtitle(TextFormat.GOLD + plugin.getLocale(p).islandSupport.replace("[player]", ownership.owner));
         }

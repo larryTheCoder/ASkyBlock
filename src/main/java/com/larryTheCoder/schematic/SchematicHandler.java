@@ -72,12 +72,15 @@ public final class SchematicHandler {
     private Config configFolder;
     // Default island
     private Integer defaultIsland;
+    // Use build-in island generation
+    private boolean useDefaultGeneration = false;
 
     public SchematicHandler(ASkyBlock plugin, File path) {
         Objects.requireNonNull(plugin, "ASkyBlock instance cannot be null");
         if (path == null) {
-            Utils.send("&aYou are now using build-in island generation.");
-            Utils.send("&aYou also can use schematic to paste island (Without WorldEdit)!");
+            useDefaultGeneration = true;
+            Utils.send("&eYou are now using build-in island generation.");
+            Utils.send("&eYou also can use schematic to paste island (Without WorldEdit)!");
             return;
         }
         if (!path.isDirectory()) {
@@ -105,14 +108,16 @@ public final class SchematicHandler {
             plugin.saveResource("schematics/configuration.yml", false);
             configFolder = new Config(configPath);
         } else {
+            useDefaultGeneration = true;
             Utils.send("&cCannot find the schematic configuration section");
             Utils.send("&eYou are now using build-in island generation.");
             return;
         }
 
         if (!configFolder.getBoolean("enable", false)) {
-            Utils.send("&aYou are now using build-in island generation.");
-            Utils.send("&aYou also can use schematic to paste island (Without WorldEdit)!");
+            useDefaultGeneration = true;
+            Utils.send("&eYou are now using build-in island generation.");
+            Utils.send("&eYou also can use schematic to paste island (Without WorldEdit)!");
             return;
         }
 
@@ -136,10 +141,10 @@ public final class SchematicHandler {
                     schematicKey.put(id, fileName);
                     id++;
                 } else {
-                    Utils.send("&e" + fileName + " &adoes not have a filename. Skipping!");
+                    Utils.send("&e" + fileName + " &edoes not have a filename. Skipping!");
                 }
             } else {
-                Utils.send("&e" + fileName + " &adoes not have a filename. Skipping!");
+                Utils.send("&e" + fileName + " &edoes not have a filename. Skipping!");
             }
         }
 
@@ -425,7 +430,7 @@ public final class SchematicHandler {
             handleSchematic(blocks, data, id);
             iter.remove();
         }
-        Utils.send("&aSeccessfully loaded &e" + islandBlocks.size() + " &aschematic");
+        Utils.send("&eSeccessfully loaded &e" + islandBlocks.size() + " &eschematic");
         this.sendTip();
     }
 
@@ -738,25 +743,40 @@ public final class SchematicHandler {
         Random rand = new Random();
         switch (rand.nextInt(5)) {
             case 1:
-                Utils.send("&aTIP: &eUse the Minecraft: PE Schematic. MCPC Schematic might result wrong blocks");
+                Utils.send("&eTIP: &eUse the Minecraft: PE Schematic. MCPC Schematic might result wrong blocks");
                 break;
             case 2:
-                Utils.send("&aTIP: &eWhile you standing nearby island offset. Don't forget to sneak before getting there.");
+                Utils.send("&eTIP: &eWhile you standing nearby island offset. Don't forget to sneak before getting there.");
                 break;
             case 3:
-                Utils.send("&aTIP: &eDid you know that this schematic are provided by @tastybento original code?");
+                Utils.send("&eTIP: &eDid you know that this schematic are provided by @tastybento original code?");
                 break;
             case 4:
-                Utils.send("&aTIP: &eThis plugin can also demand on single world production server. Only use /asc setlobby in world");
+                Utils.send("&eTIP: &eThis plugin can also demand on single world production server. Only use /asc setlobby in world");
                 break;
             default:
-                Utils.send("&aFrom author: Have a great time. I hope that this plugin could help your server more better!");
+                Utils.send("&eFrom author: Have a great time. I hope that this plugin could help your server more better!");
 
         }
     }
 
     public List<String> getSchemaList() {
         return schematicList;
+    }
+
+    public int getSchemaId(String name) {
+        int id = 0;
+        for (String list : schematicList) {
+            if (list.equalsIgnoreCase(name)) {
+                return id;
+            }
+            id++;
+        }
+        return -1;
+    }
+
+    public boolean isUseDefaultGeneration() {
+        return useDefaultGeneration;
     }
 
     public Integer getDefaultIsland() {

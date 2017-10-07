@@ -90,7 +90,7 @@ public final class ChallangesCMD extends Command {
                     //Utils.send("DEBUG: " + oldLevel + " " + newLevel);
                     if (oldLevel < newLevel) {
                         // Update chat
-                        plugin.getAPI(plugin).getChatHandlers().setPlayerChallengeLevel(p);
+                        plugin.getChatHandlers().setPlayerChallengeLevel(p);
                         // Run commands and give rewards but only if they haven't done it below
                         //Utils.send("DEBUG: old level = " + oldLevel + " new level = " + newLevel);
                         String level = Settings.challengeLevels.get(newLevel);
@@ -287,7 +287,7 @@ public final class ChallangesCMD extends Command {
         List<String> levelChallengeList = challengeList.get(level);
         int waiver = Settings.waiverAmount;
         if (levelChallengeList != null) {
-            challengesCompleted = levelChallengeList.stream().filter((challenge) -> (plugin.getAPI(ASkyBlock.get()).getPlayerInfo(player).checkChallenge(challenge))).map((_item) -> 1).reduce(challengesCompleted, Integer::sum);
+            challengesCompleted = levelChallengeList.stream().filter((challenge) -> (plugin.getPlayerInfo(player).checkChallenge(challenge))).map((_item) -> 1).reduce(challengesCompleted, Integer::sum);
             // If the number of challenges in a level is below the waiver amount, then they all need to be done
             if (levelChallengeList.size() <= Settings.waiverAmount) {
                 waiver = 0;
@@ -408,7 +408,7 @@ public final class ChallangesCMD extends Command {
         // Check if this is an island-based challenge
         if (getChallengeConfig().getString("challenges.challengeList." + challenge + ".type").equalsIgnoreCase("island")) {
             // Utils.send("DEBUG: 6");
-            if (!plugin.getAPI(plugin).getGrid().playerIsOnIsland(player)) {
+            if (!plugin.getGrid().playerIsOnIsland(player)) {
                 player.sendMessage(TextFormat.RED + "You are not in island!");
                 return false;
             }
@@ -437,7 +437,7 @@ public final class ChallangesCMD extends Command {
         }
         // Island level check
         if (getChallengeConfig().getString("challenges.challengeList." + challenge + ".type").equalsIgnoreCase("level")) {
-            if (plugin.getAPI(ASkyBlock.get()).getIslandLevel(player) >= getChallengeConfig().getInt("challenges.challengeList." + challenge + ".requiredItems")) {
+            if (plugin.getIslandLevel(player) >= getChallengeConfig().getInt("challenges.challengeList." + challenge + ".requiredItems")) {
                 return true;
             }
             player.sendMessage(TextFormat.RED
@@ -842,12 +842,12 @@ public final class ChallangesCMD extends Command {
     }
 
     private boolean checkChallenge(Player player, String challenge) {
-        PlayerData pd = plugin.getAPI(ASkyBlock.get()).getPlayerInfo(player);
+        PlayerData pd = plugin.getPlayerInfo(player);
         return pd.checkChallenge(challenge);
     }
 
     public int checkChallengeTimes(Player player, String challenge) {
-        PlayerData pd = plugin.getAPI(ASkyBlock.get()).getPlayerInfo(player);
+        PlayerData pd = plugin.getPlayerInfo(player);
         return pd.checkChallengeTimes(challenge);
     }
 
@@ -938,7 +938,7 @@ public final class ChallangesCMD extends Command {
 
         // Mark the challenge as complete
         // if (!plugin.getPlayers().checkChallenge(player,challenge)) {
-        plugin.getAPI(ASkyBlock.get()).getPlayerInfo(player).completeChallenge(challenge);
+        plugin.getPlayerInfo(player).completeChallenge(challenge);
         // }
         // Call the Challenge Complete Event
         final ChallengeCompleteEvent event = new ChallengeCompleteEvent(player, challenge, permList, itemRewards, moneyReward, expReward, rewardText, rewardedItems);
@@ -1080,7 +1080,7 @@ public final class ChallangesCMD extends Command {
     }
 
     private void completeChallenge(Player uniqueId, String level) {
-        PlayerData pd = plugin.getAPI(ASkyBlock.get()).getPlayerInfo(uniqueId);
+        PlayerData pd = plugin.getPlayerInfo(uniqueId);
         pd.completeChallenge(level);
     }
 

@@ -22,7 +22,6 @@ import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.HandlerList;
 import cn.nukkit.level.Location;
-import com.larryTheCoder.schematic.Schematic;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 
@@ -33,17 +32,17 @@ public class IslandCreateEvent extends Event implements Cancellable {
 
     private static final HandlerList HANDLERS = new HandlerList();
     private final Player player;
-    private final Schematic schematic;
+    private final int schematicId;
     private final IslandData island;
 
     /**
      * @param player
-     * @param schematic
+     * @param schematicId
      * @param island
      */
-    public IslandCreateEvent(Player player, Schematic schematic, IslandData island) {
+    public IslandCreateEvent(Player player, int schematicId, IslandData island) {
         this.player = player;
-        this.schematic = schematic;
+        this.schematicId = schematicId;
         this.island = island;
     }
 
@@ -61,8 +60,8 @@ public class IslandCreateEvent extends Event implements Cancellable {
     /**
      * @return the schematicName
      */
-    public Schematic getSchematicName() {
-        return schematic;
+    public int getSchematicId() {
+        return schematicId;
     }
 
     /**

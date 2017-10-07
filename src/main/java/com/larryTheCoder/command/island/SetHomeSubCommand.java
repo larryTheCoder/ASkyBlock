@@ -63,7 +63,7 @@ public class SetHomeSubCommand extends SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = Server.getInstance().getPlayer(sender.getName());
-        IslandData pd = getPlugin().getAPI(ASkyBlock.get()).getIslandInfo(p.getLocation());
+        IslandData pd = getPlugin().getIslandInfo(p.getLocation());
         // Check if the player on their own island or not
         if (pd != null && pd.owner.equalsIgnoreCase(sender.getName())) {
             pd.setHomeLocation(p.getLocation());

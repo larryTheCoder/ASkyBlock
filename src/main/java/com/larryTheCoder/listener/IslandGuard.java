@@ -125,7 +125,7 @@ public class IslandGuard implements Listener {
         if (player.isOp() || player.hasPermission("is.mod.bypassprotect")) {
             return true;
         }
-        IslandData island = plugin.getAPI(plugin).getGrid().getProtectedIslandAt(location);
+        IslandData island = plugin.getGrid().getProtectedIslandAt(location);
         if (island.owner == null) {
             return false;
         }
@@ -143,7 +143,7 @@ public class IslandGuard implements Listener {
      * @return true if allowed
      */
     private boolean actionAllowed(Location location, IslandData.SettingsFlag flag) {
-        IslandData island = plugin.getAPI(plugin).getGrid().getProtectedIslandAt(location);
+        IslandData island = plugin.getGrid().getProtectedIslandAt(location);
         if (island != null && island.getIgsFlag(flag)) {
             return true;
         }
@@ -164,14 +164,14 @@ public class IslandGuard implements Listener {
         }
 
         Player player = (Player) passenger;
-        if (plugin.getAPI(plugin).getGrid() == null) {
+        if (plugin.getGrid() == null) {
             deb.debug("DEBUG: grid = null");
             return;
         }
 
-        IslandData islandTo = plugin.getAPI(plugin).getGrid().getProtectedIslandAt(e.getTo());
+        IslandData islandTo = plugin.getGrid().getProtectedIslandAt(e.getTo());
         // Announcement entering
-        IslandData islandFrom = plugin.getAPI(plugin).getGrid().getProtectedIslandAt(e.getFrom());
+        IslandData islandFrom = plugin.getGrid().getProtectedIslandAt(e.getFrom());
         // Only says something if there is a change in islands
         /*
          * Situations:
@@ -278,7 +278,7 @@ public class IslandGuard implements Listener {
         if (!inWorld(e.getPlayer())) {
             return;
         }
-        if (plugin.getAPI(plugin).getGrid() == null) {
+        if (plugin.getGrid() == null) {
             return;
         }
         // Only do something if there is a definite x or z movement
@@ -286,9 +286,9 @@ public class IslandGuard implements Listener {
             .getFloorZ() == 0) {
             return;
         }
-        final IslandData islandTo = plugin.getAPI(plugin).getGrid().getProtectedIslandAt(e.getTo());
+        final IslandData islandTo = plugin.getGrid().getProtectedIslandAt(e.getTo());
         // Announcement entering
-        final IslandData islandFrom = plugin.getAPI(plugin).getGrid().getProtectedIslandAt(e.getFrom());
+        final IslandData islandFrom = plugin.getGrid().getProtectedIslandAt(e.getFrom());
         Player p = e.getPlayer();
         // Only says something if there is a change in islands
         /*
@@ -401,19 +401,19 @@ public class IslandGuard implements Listener {
             return;
         }
 
-        if (plugin.getAPI(plugin).getIsland().locationIsOnIsland(e.getPlayer(), e.getBlock())) {
+        if (plugin.getIsland().locationIsOnIsland(e.getPlayer(), e.getBlock())) {
             // You can do anything on your island
             deb.debug("The player in on his island");
             return;
         }
         // Player is not clicking a block, they are clicking a material so this
         // is driven by where the player is
-        if (e.getAction() != PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK && (e.getBlock() != null && plugin.getAPI(plugin).getGrid().playerIsOnIsland(e.getPlayer()))) {
+        if (e.getAction() != PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK && (e.getBlock() != null && plugin.getGrid().playerIsOnIsland(e.getPlayer()))) {
             deb.debug("The player in clicking on the block");
             return;
         }
         // Get island
-        IslandData island = plugin.getAPI(plugin).getGrid().getProtectedIslandAt(e.getPlayer().getLocation());
+        IslandData island = plugin.getGrid().getProtectedIslandAt(e.getPlayer().getLocation());
         // Check for disallowed clicked blocks
         if (e.getBlock() != null) {
             // Look along player's sight line to see if any blocks are fire
@@ -903,7 +903,7 @@ public class IslandGuard implements Listener {
             return;
         }
         // prevent at spawn
-        if (plugin.getAPI(plugin).getGrid().isAtSpawn(e.getPosition().getLocation())) {
+        if (plugin.getGrid().isAtSpawn(e.getPosition().getLocation())) {
             e.setCancelled(true);
         }
         // Find out what is exploding
@@ -1003,7 +1003,7 @@ public class IslandGuard implements Listener {
             return;
         }
         // Get the island where the damage is occurring
-        IslandData island = plugin.getAPI(plugin).getGrid().getProtectedIslandAt(e.getEntity().getLocation());
+        IslandData island = plugin.getGrid().getProtectedIslandAt(e.getEntity().getLocation());
         // Stop TNT damage if it is disallowed
         if (!Settings.allowTNTDamage && (e.getDamager().getNetworkId() == EntityPrimedTNT.NETWORK_ID)) {
             deb.debug("DEBUG: cancelling tnt or fireball damage");
@@ -1119,7 +1119,7 @@ public class IslandGuard implements Listener {
                 return;
             }
             deb.debug("DEBUG: checking is inside protection area");
-            IslandData island = plugin.getAPI(plugin).getGrid().getProtectedIslandAt(e.getBlock().getLocation());
+            IslandData island = plugin.getGrid().getProtectedIslandAt(e.getBlock().getLocation());
             // Outside of island protection zone
             if (island == null) {
                 if (!Settings.defaultWorldSettings.get(IslandData.SettingsFlag.PLACE_BLOCKS)) {
@@ -1198,8 +1198,8 @@ public class IslandGuard implements Listener {
         if (p.getInventory().getItemInHand() != null && p.getInventory().getItemInHand().getId() == LEAD) {
             return;
         }
-        IslandData island = plugin.getAPI(plugin).getGrid().getProtectedIslandAt(e.getPlayer().getLocation());
-        if (!plugin.getAPI(plugin).getGrid().playerIsOnIsland(e.getPlayer())) {
+        IslandData island = plugin.getGrid().getProtectedIslandAt(e.getPlayer().getLocation());
+        if (!plugin.getGrid().playerIsOnIsland(e.getPlayer())) {
             // Not on island
             // Minecarts and other storage entities
             deb.debug("DEBUG: " + e.getItem().toString());
@@ -1352,12 +1352,12 @@ public class IslandGuard implements Listener {
             || e.getAction() != PlayerInteractEvent.Action.PHYSICAL
             || e.getPlayer().isOp()
             || e.getPlayer().hasPermission("is.mod.bypassprotect")
-            || plugin.getAPI(plugin).getGrid().playerIsOnIsland(e.getPlayer())) {
+            || plugin.getGrid().playerIsOnIsland(e.getPlayer())) {
             deb.debug("DEBUG: Haz permission to do this");
             return;
         }
         // Check island
-        IslandData island = plugin.getAPI(plugin).getGrid().getProtectedIslandAt(e.getPlayer().getLocation());
+        IslandData island = plugin.getGrid().getProtectedIslandAt(e.getPlayer().getLocation());
         if ((island == null && Settings.defaultWorldSettings.get(IslandData.SettingsFlag.PRESSURE_PLATE))) {
             return;
         }
@@ -1376,18 +1376,18 @@ public class IslandGuard implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerLogin(PlayerPreLoginEvent ex) {
         Player p = ex.getPlayer();
-        plugin.getAPI(ASkyBlock.get()).getIslandInfo(p); // laod the player islands
+        plugin.getIslandInfo(p); // laod the player islands
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent ex) {
         // load player inventory if exsits
         Player p = ex.getPlayer();
-        plugin.getAPI(plugin).getInventory().loadPlayerInventory(p);
+        plugin.getInventory().loadPlayerInventory(p);
         // Load player datatatatata tadaaaa
-        if (plugin.getAPI(ASkyBlock.get()).getPlayerInfo(p) == null) {
+        if (plugin.getPlayerInfo(p) == null) {
             com.larryTheCoder.utils.Utils.send(p.getName() + " &adata doesn`t exsits. Creating new ones");
-            plugin.getAPI(ASkyBlock.get()).getDatabase().createPlayer(p.getName());
+            plugin.getDatabase().createPlayer(p.getName());
         }
         // Load messages
         List<String> news = plugin.getMessages().getMessages(p.getName());
@@ -1400,10 +1400,10 @@ public class IslandGuard implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerLeave(PlayerQuitEvent ex) {
         Player p = ex.getPlayer();
-        IslandData pd = plugin.getAPI(ASkyBlock.get()).getIslandInfo(p);
+        IslandData pd = plugin.getIslandInfo(p);
         if (pd != null) {
             // Remove the island data from cache provides the memory to server
-            plugin.getAPI(ASkyBlock.get()).getDatabase().removeIslandFromCache(pd);
+            plugin.getDatabase().removeIslandFromCache(pd);
         }
     }
 

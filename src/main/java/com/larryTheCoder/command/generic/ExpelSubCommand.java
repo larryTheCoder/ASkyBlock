@@ -59,7 +59,7 @@ public class ExpelSubCommand extends SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if (getPlugin().getAPI(getPlugin()).getIsland().checkIsland(p)) {
+        if (getPlugin().getIsland().checkIsland(p)) {
             sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
         } else if (args.length != 2) {
@@ -69,7 +69,7 @@ public class ExpelSubCommand extends SubCommand {
             sender.sendMessage(getPrefix() + getLocale(p).errorOfflinePlayer);
             return true;
         }
-        getPlugin().getAPI(getPlugin()).getIsland().kickPlayerByName(p, args[1]);
+        getPlugin().getIsland().kickPlayerByName(p, args[1]);
         return true;
     }
 

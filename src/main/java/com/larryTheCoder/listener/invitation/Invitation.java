@@ -69,7 +69,7 @@ public class Invitation {
     public void accept() {
         sender.sendMessage(plugin.getPrefix() + plugin.getLocale(sender).acceptedTo.replace("[player]", receiver.getName()));
         receiver.sendMessage(plugin.getPrefix() + plugin.getLocale(receiver).acceptedFrom.replace("[player]", sender.getName()));
-        plugin.getAPI(plugin).getTManager().addTeam(sender, receiver);
+        plugin.getTManager().addTeam(sender, receiver);
     }
 
     public void deny() {

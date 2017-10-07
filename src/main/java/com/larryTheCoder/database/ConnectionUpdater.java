@@ -68,7 +68,7 @@ public class ConnectionUpdater {
                 try {
                     ipd.islandId = set.getInt("islandId");
                 } catch (SQLException ex) {
-                    ipd.islandId = plugin.getAPI(plugin).getIsland().generateIslandKey(set.getInt("x"), set.getInt("z"));
+                    ipd.islandId = plugin.getIsland().generateIslandKey(set.getInt("x"), set.getInt("z"));
                 }
                 try {
                     ipd.protectionRange = set.getInt("psize");

@@ -75,7 +75,7 @@ public class TeleportLogic implements Listener {
             TaskHandler task = plugin.getServer().getScheduler().scheduleDelayedTask(plugin, () -> {
                 // Save player inventory
                 if (Settings.saveInventory) {
-                    plugin.getAPI(plugin).getInventory().savePlayerInventory(player);
+                    plugin.getInventory().savePlayerInventory(player);
                 }
                 pendingTPs.remove(player.getUniqueId());
                 Location loc = targetLoc.clone();

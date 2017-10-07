@@ -20,6 +20,7 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.command.PluginCommand;
+import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.command.chat.ChatSubCommand;
@@ -96,13 +97,13 @@ public class Commands extends PluginCommand<ASkyBlock> {
             return true;
         }
         if (args.length == 0) {
-            if (p != null && sender.hasPermission("is.create") && (plugin.getAPI(plugin).getIsland().checkIsland(p) || listOfPlayers.contains(sender.getName()))) {
-                plugin.getAPI(plugin).getIsland().handleIslandCommand(p);
+            if (p != null && sender.hasPermission("is.create") && (plugin.getIsland().checkIsland(p) || listOfPlayers.contains(sender.getName()))) {
+                plugin.getIsland().handleIslandCommand(p);
                 if (listOfPlayers.contains(sender.getName())) {
                     listOfPlayers.remove(sender.getName());
                 }
             } else if (!(sender instanceof Player)) {
-                return this.sendHelpVer2(sender, args);
+                return this.sendHelp(sender, args);
             } else {
                 sender.sendMessage("§eBefore creating island, Checkout §a/is templates §eto see some cool island templates");
                 sender.sendMessage("§eYou can also check out our new commands by using §/is help");
@@ -125,7 +126,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
                 sender.sendMessage(plugin.getLocale(p).errorNoPermission);
             }
         } else {
-            return this.sendHelpVer2(sender, args);
+            return this.sendHelp(sender, args);
         }
         return true;
     }
@@ -134,78 +135,34 @@ public class Commands extends PluginCommand<ASkyBlock> {
         return plugin.getLocale(key);
     }
 
-    private boolean sendHelp(CommandSender sender, String[] args) {
-        if (args.length != 0) {
-            if (!args[0].equalsIgnoreCase("help")) {
-                sender.sendMessage(TextFormat.RED + "Unknown command use /is help for a list of commands");
-                return true;
-            }
-            if (args.length == 2 && !Utils.isNumeric(args[1])) {
-                if (SubCommand.containsKey(args[1].toLowerCase())) {
-                    // Show help for #IRC
-                    SubCommand sub = commands.get(SubCommand.get(args[1].toLowerCase()));
-                    String command = "";
-                    for (String arg : sub.getAliases()) {
-                        if (!command.equals("")) {
-                            command += " ";
-                        }
-                        command += arg;
-                    }
-                    if (command.isEmpty()) {
-                        command = "none";
-                    }
-                    String usage = sub.getUsage();
-                    if (sub.getUsage().isEmpty()) {
-                        usage = "none";
-                    }
-                    sender.sendMessage("§aHelp for §e/is " + sub.getName() + "§a:");
-                    sender.sendMessage(" §d- §aAliases: §e" + command);
-                    sender.sendMessage(" §d- §aDescription: §e" + sub.getDescription());
-                    sender.sendMessage(" §d- §aArrugements: §e" + usage);
-                    return true;
-                } else {
-                    sender.sendMessage("§cNo help for §e" + args[1] + "");
-                    return true;
-                }
-            }
-            int pageNumber = 1;
-
-            if (args.length == 2 && Utils.isNumeric(args[1])) {
-                pageNumber = Integer.parseInt(args[1]);
-            }
-            int pageHeight;
-            if (sender instanceof ConsoleCommandSender) {
-                pageHeight = Integer.MAX_VALUE;
-            } else {
-                pageHeight = 5;
-            }
-            int totalPage = commands.size() % pageHeight == 0 ? commands.size() / pageHeight : commands.size() / pageHeight + 1;
-            pageNumber = Math.min(pageNumber, totalPage);
-            if (pageNumber < 1) {
-                pageNumber = 1;
-            }
-            sender.sendMessage("§d--- §aASkyBlock help page §e" + pageNumber + " §aof §e" + totalPage + " §d---");
-            int i = 1;
-            for (SubCommand cmd : commands) {
-                if (i >= (pageNumber - 1) * pageHeight + 1 && i <= Math.min(commands.size(), pageNumber * pageHeight)) {
-                    sender.sendMessage(TextFormat.DARK_GREEN + "/is " + cmd.getName() + ": §e" + TextFormat.WHITE + cmd.getDescription());
-                }
-                i++;
-            }
-            if (pageNumber != totalPage) {
-                sender.sendMessage("§aType §e/is help " + (pageNumber + 1) + "§a to see the next page.");
-            } else {
-                sender.sendMessage("§aUse /is help §e<#IRC> §ato see command parameters");
-            }
-        } else {
-            sender.sendMessage("§cUnknown command use /is help for a list of commands");
-        }
-        return true;
-    }
-
-    public boolean sendHelpVer2(CommandSender sender, String[] args) {
+    public boolean sendHelp(CommandSender sender, String[] args) {
         if (args.length == 0 || !args[0].equalsIgnoreCase("help")) {
-            sender.sendMessage("§cUnknown command use /is help for a list of commands");
+            switch (args[0]) {
+                case "version":
+                case "ver":
+                    sender.sendMessage("§aASkyBlock Module " + ASkyBlock.moduleVersion + " Build 7");
+                    sender.sendMessage("§aVendor Type: " + System.getProperty("os.name"));
+                    sender.sendMessage("§aJava Module Version: " + System.getProperty("java.version"));
+                    break;
+                case "about":
+                    sender.sendMessage("§aA Fresh Nukkit SkyBlock module for MCPE " + ProtocolInfo.MINECRAFT_VERSION);
+                    sender.sendMessage("§aThis game inspired from a plugin called ASkyBlock.");
+                    sender.sendMessage("§aSame as this plugin but it only in PC. The most powerful Java game in the world");
+                    sender.sendMessage("§aHopefully that you can contribute more with us at: ");
+                    sender.sendMessage("§eGitHub: §ahttps://github.com/TheSolidCrafter/ASkyBlock-Nukkit");
+                    sender.sendMessage("§ePayPal: §ahttp://www.paypal.me/DoubleCheese");
+                    break;
+                case "author":
+                    sender.sendMessage("§aThank you for contributing with us! §eYou will always be remembered");
+                    sender.sendMessage("§a- larryTheCoder   => §eOwner");
+                    sender.sendMessage("§a- NycuRO          => §eOwner");
+                    sender.sendMessage("§a- PikyCZ          => §eMember");
+                    sender.sendMessage("§a- Skull3x         => §eMember");
+                    sender.sendMessage("§a- Adam1609        => §eMember");
+                    break;
+                default:
+                    sender.sendMessage("§cUnknown command use /is help for a list of commands");
+            }
             return true;
         }
 
@@ -261,6 +218,11 @@ public class Commands extends PluginCommand<ASkyBlock> {
         for (SubCommand cmd : commands) {
             helpList.add("§eis " + cmd.getName() + TextFormat.GRAY + " => §a" + cmd.getDescription());
         }
+
+        helpList.add("§eis version" + TextFormat.GRAY + " => §aGets the current module version.");
+        helpList.add("§eis about" + TextFormat.GRAY + " => §aListen to what this author say.");
+        helpList.add("§eis author" + TextFormat.GRAY + " => §aThanks for your contributions.");
+
 
         helpList.add("");
         helpList.add("§eHere is the another tips for your new island.");

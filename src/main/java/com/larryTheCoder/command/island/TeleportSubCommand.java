@@ -62,7 +62,7 @@ public class TeleportSubCommand extends SubCommand {
             return false;
         }
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        getPlugin().getAPI(getPlugin()).getIsland().teleportPlayer(p, args[1]);
+        getPlugin().getIsland().teleportPlayer(p, args[1]);
         return true;
     }
 

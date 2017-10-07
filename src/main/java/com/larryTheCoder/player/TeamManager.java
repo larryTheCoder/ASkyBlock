@@ -44,12 +44,12 @@ public class TeamManager {
      * @return {@code true} if not null
      */
     public boolean hasTeam(Player p) {
-        return plugin.getAPI(ASkyBlock.get()).getPlayerInfo(p).inTeam;
+        return plugin.getPlayerInfo(p).inTeam;
     }
 
     public boolean addTeam(Player leader, Player member) {
         boolean done = false;
-        PlayerData te = plugin.getAPI(ASkyBlock.get()).getPlayerInfo(leader);
+        PlayerData te = plugin.getPlayerInfo(leader);
         te.members.add(member.getName());
         for (String members : te.members) {
             if (members.equalsIgnoreCase(member.getName())) {
@@ -66,7 +66,7 @@ public class TeamManager {
         if (!message.isEmpty()) {
             kickMessage = message;
         }
-        PlayerData te = plugin.getAPI(ASkyBlock.get()).getPlayerInfo(leader);
+        PlayerData te = plugin.getPlayerInfo(leader);
         if (!te.members.contains(member.getName())) {
             leader.sendMessage(plugin.getPrefix() + plugin.getLocale(leader).errorOfflinePlayer);
             return true;
@@ -83,7 +83,7 @@ public class TeamManager {
     }
 
     public ArrayList<String> getPlayerMembers(String p) {
-        PlayerData pd = plugin.getAPI(ASkyBlock.get()).getDatabase().getPlayerData(p);
+        PlayerData pd = plugin.getDatabase().getPlayerData(p);
         if (pd.members != null && !pd.members.isEmpty()) {
             return pd.members;
         }
@@ -93,9 +93,9 @@ public class TeamManager {
     private boolean kick(Player p, PlayerData td) {
         if (plugin.level.contains(p.getLevel().getName())) {
             String st = td.leader;
-            IslandData pd = plugin.getAPI(ASkyBlock.get()).getDatabase().getIsland(p.getName(), 1);
-            IslandData p1 = plugin.getAPI(ASkyBlock.get()).getDatabase().getIsland(st, 1);
-            if (plugin.getAPI(plugin).getIsland().generateIslandKey(p.getLocation()) == p1.islandId) {
+            IslandData pd = plugin.getDatabase().getIsland(p.getName(), 1);
+            IslandData p1 = plugin.getDatabase().getIsland(st, 1);
+            if (plugin.getIsland().generateIslandKey(p.getLocation()) == p1.islandId) {
                 //kick the player
                 p.teleport(new Location());
             }
@@ -104,12 +104,12 @@ public class TeamManager {
     }
 
     public String getLeader(String p) {
-        PlayerData pd = plugin.getAPI(ASkyBlock.get()).getDatabase().getPlayerData(p);
+        PlayerData pd = plugin.getDatabase().getPlayerData(p);
         return pd.leader;
     }
 
     public boolean inTeam(String team) {
-        PlayerData pd = plugin.getAPI(ASkyBlock.get()).getDatabase().getPlayerData(team);
+        PlayerData pd = plugin.getDatabase().getPlayerData(team);
         return pd.inTeam == true;
     }
 }

@@ -104,7 +104,7 @@ public class IslandData implements Cloneable {
         this.homeX = vector.getFloorX();
         this.homeY = vector.getFloorY();
         this.homeZ = vector.getFloorZ();
-        ASkyBlock.get().getAPI(ASkyBlock.get()).getDatabase().setSpawnPosition(getHome());
+        ASkyBlock.get().getDatabase().setSpawnPosition(getHome());
     }
 
     public Location getHome() {
@@ -162,7 +162,7 @@ public class IslandData implements Cloneable {
     }
 
     public ArrayList<String> getMembers() {
-        PlayerData pd = ASkyBlock.get().getAPI(ASkyBlock.get()).getDatabase().getPlayerData(this.owner);
+        PlayerData pd = ASkyBlock.get().getDatabase().getPlayerData(this.owner);
         if (pd == null) {
             return Lists.newArrayList(new String());
         }

@@ -20,12 +20,10 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
-import com.larryTheCoder.schematic.Schematic;
+import com.larryTheCoder.panels.SchematicPanel;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
-import com.larryTheCoder.utils.Utils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,7 +42,7 @@ public class CreateISubCommand extends SubCommand {
 
     @Override
     public String getUsage() {
-        return "<Island name> <Schematic>";
+        return "";
     }
 
     @Override
@@ -65,28 +63,7 @@ public class CreateISubCommand extends SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = sender.getServer().getPlayer(sender.getName());
-        Schematic smt = null;
-        String name = "My Island";
-        switch (args.length) {
-            case 2:
-                name = args[1];
-                break;
-            case 3:
-                name = args[1];
-                if (getPlugin().getAPI(ASkyBlock.get()).getSchematic(args[2]) == null) {
-                    p.sendMessage(getPrefix() + "Unknown schematic. Use /is listsc to list all of available schematics");
-                    return true;
-                } else {
-                    smt = getPlugin().getAPI(ASkyBlock.get()).getSchematic(args[2]);
-                }
-                break;
-        }
-        List<IslandData> maxPlotsOfPlayers = getPlugin().getAPI(ASkyBlock.get()).getDatabase().getIslands(sender.getName(), getPlugin().getAPI(getPlugin()).getDefaultWorld(p));
-        if (Settings.maxHome >= 0 && maxPlotsOfPlayers.size() >= Settings.maxHome) {
-            sender.sendMessage(getPrefix() + getLocale(p).errorMaxIsland.replace("[maxplot]", "" + Settings.maxHome));
-            return true;
-        }
-        getPlugin().getAPI(getPlugin()).getIsland().createIsland(p, smt, name);
+        new SchematicPanel(p, getPlugin()); // Automatically decide which island the player wants
         return true;
     }
 
