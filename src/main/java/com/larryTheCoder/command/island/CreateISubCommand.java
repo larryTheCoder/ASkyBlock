@@ -74,11 +74,7 @@ public class CreateISubCommand extends SubCommand {
             case 3:
                 name = args[1];
                 if (getPlugin().getAPI(ASkyBlock.get()).getSchematic(args[2]) == null) {
-                    List<String> ft = new ArrayList<>();
-                    ASkyBlock.schematics.keySet().stream().forEach((de) -> {
-                        ft.add(de);
-                    });
-                    p.sendMessage(getPrefix() + "".replace("[SCEM]", Utils.arrayToString(ft)));
+                    p.sendMessage(getPrefix() + "Unknown schematic. Use /is listsc to list all of available schematics");
                     return true;
                 } else {
                     smt = getPlugin().getAPI(ASkyBlock.get()).getSchematic(args[2]);

@@ -176,12 +176,13 @@ public class ASkyBlock extends PluginBase {
     public void onEnable() {
         initConfig();
         initDatabase(); // Load the database before others (Avoid crash during startup)
-        getServer().getLogger().info(getPrefix() + "§7Loading source §eASkyBlock v" + getPluginVersionString());
-        getServer().getLogger().info(TextFormat.YELLOW + "------------------------------------------------------------");
+        // Regenerate The world
+        generateLevel();
+        getServer().getLogger().info(getPrefix() + "§7Enabling ASkyBlock - Ultra");
         initIslands();
         registerObject();
+        //Utils.send("OKAY: " + 3600 % 24000);
         test();
-        getServer().getLogger().info(TextFormat.YELLOW + "------------------------------------------------------------");
         getServer().getLogger().notice(TextFormat.colorize('&', "&eYou are using BETA-Builds of ASkyBlock!"));
         getServer().getLogger().notice(TextFormat.colorize('&', "&eWarning! You might experience some crash and errors while using this plugin"));
         getServer().getLogger().notice(TextFormat.colorize('&', "&eIt is recommended to report any issues at: http://www.github.com/larryTheCoder/ASkyBlock-Nukkit/issues"));
@@ -254,7 +255,6 @@ public class ASkyBlock extends PluginBase {
         grid = new GridManager(this);
         managers = new TeamManager(this);
         inventory = new InventorySave(this);
-        generateLevel();
         this.blockAPI = registerAPI(this); // Register this API
     }
 

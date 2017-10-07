@@ -43,7 +43,7 @@ public class ChatSubCommand extends SubCommand {
 
     @Override
     public String getName() {
-        return "teamchat";
+        return "chat";
     }
 
     @Override

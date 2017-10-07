@@ -29,15 +29,12 @@ import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.level.generator.object.tree.ObjectTree;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
-import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.player.TeleportLogic;
-import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import org.jnbt.*;
@@ -51,9 +48,10 @@ import java.util.*;
 /**
  * Author: Adam Matthew
  * <p>
- * High end Minecraft: PE custom schematic generator
+ * High end Minecraft: PE custom schematic generator. Stored central in integers
+ * To find the schematic more efficiently.
  */
-public final class SchematicHandler extends SchematicInterport {
+public final class SchematicHandler {
 
     // Avoid OOM during startup OR reload
     private Map<Integer, SoftReference<ArrayList<IslandBlock>>> islandBlocks;
@@ -68,9 +66,12 @@ public final class SchematicHandler extends SchematicInterport {
     private Map<Integer, SoftReference<Vector3>> bedrock;
     private Map<Integer, ArrayList<SoftReference<Vector3>>> chest;
     private Map<Integer, ArrayList<SoftReference<Vector3>>> welcomeSign;
+    // Panel configuration
+    private List<String> schematicList;
     // Configuration
     private Config configFolder;
-    // Traffic (How long took the schematic to load)
+    // Default island
+    private Integer defaultIsland;
 
     public SchematicHandler(ASkyBlock plugin, File path) {
         Objects.requireNonNull(plugin, "ASkyBlock instance cannot be null");
@@ -91,6 +92,8 @@ public final class SchematicHandler extends SchematicInterport {
         tileEntitiesMap = Maps.newHashMap();
         schemaConfiguration = Maps.newHashMap();
         schematicKey = Maps.newHashMap();
+        schematicList = Lists.newArrayList();
+        defaultIsland = -1;
         // List all of the files
         File[] lists = path.listFiles();
         List<File> list = new ArrayList<>();
@@ -426,7 +429,12 @@ public final class SchematicHandler extends SchematicInterport {
         this.sendTip();
     }
 
-    @Override
+    /**
+     * This method prepares to pastes a schematic.
+     *
+     * @param blocks The Blocks (same as data)
+     * @param data   Data (damage or meta)
+     */
     public void handleSchematic(short[] blocks, byte[] data) {
         handleSchematic(blocks, data, 1);
     }
@@ -484,16 +492,23 @@ public final class SchematicHandler extends SchematicInterport {
         prepareIslandValue(id);
     }
 
-    @Override
+    /**
+     * This method handling player island blocks-by-blocks
+     *
+     * @param p   The player
+     * @param pos The position to pasting the blocks
+     * @return True if the player island were generated|null
+     */
     public boolean pasteSchematic(Player p, Position pos) {
         return pasteSchematic(p, pos, 1);
     }
 
     public boolean pasteSchematic(Player p, Position pos, int id) {
-        if (islandBlocks.isEmpty() || islandBlocks.get(id) != null) {
+        if (islandBlocks == null || islandBlocks.isEmpty() || islandBlocks.get(id) != null) {
             createIsland(p, pos);
             return true;
         }
+
         List<IslandBlock> blocks = getIslandBlocks(id);
         for (IslandBlock block : blocks) {
             block.paste(pos, true);
@@ -501,7 +516,11 @@ public final class SchematicHandler extends SchematicInterport {
         return true;
     }
 
-    @Override
+    /**
+     * Get the list of available islands
+     *
+     * @return An array of the listed blocks
+     */
     public List<IslandBlock> getIslandBlocks() {
         return getIslandBlocks(1);
     }
@@ -574,13 +593,19 @@ public final class SchematicHandler extends SchematicInterport {
         // configuration keys
         String[] blockSpawn = section.getString("schematic." + key + ".BLOCK_SPAWN", "").split(":");
         String description = section.getString("schematic." + key + ".DESCRIPTION", "The island");
+        String islandName = section.getString("schematic." + key + ".NAME", "Island");
         String permission = section.getString("schematic." + key + ".PERMISSION", "");
         String biome = section.getString("schematic." + key + ".BIOME", "Plains");
         double rating = section.getDouble("schematic." + key + ".RATING", 0);
+        boolean defaultPriority = section.getBoolean("schematic." + key + ".DEFAULT", false);
         boolean useConfigChest = section.getBoolean("schematic." + key + ".USE_CONFIG_CHEST", false);
         boolean usePasteEntity = section.getBoolean("schematic." + key + ".PASTE_ENTITIES", false);
         Block block = null;
+        schematicList.add(islandName);
 
+        if (defaultPriority && defaultIsland == -1) {
+            defaultIsland = id;
+        }
         // Check for configuration type
         for (String sting : blockSpawn) {
             if (!Utils.isNumeric(sting)) {
@@ -672,49 +697,41 @@ public final class SchematicHandler extends SchematicInterport {
     }
 
     private void initChest(Level lvl, int x, int y, int z, Player p) {
-        new NukkitRunnable() {
-            @Override
-            public void run() {
-                BaseFullChunk chunk = lvl.getChunk(x >> 4, z >> 4);
-                if (chunk == null || chunk.isLoaded() && chunk.isGenerated()) {
-                    lvl.generateChunk(x >> 4, z >> 4);
-                    TaskManager.runTaskLater(this, 20);
-                    return;
-                }
-                lvl.setBlockIdAt(x, y, z, Block.CHEST);
-                cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                    .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
-                    .putString("id", BlockEntity.CHEST)
-                    .putInt("x", x)
-                    .putInt("y", y)
-                    .putInt("z", z);
-                BlockEntity.createBlockEntity(BlockEntity.CHEST, chunk, nbt);
-                BlockEntityChest e = new BlockEntityChest(chunk, nbt);
-                // Items
-                if (Settings.chestItems.length != 0) {
-                    int count = 0;
-                    for (Item item : Settings.chestItems) {
-                        e.getInventory().setItem(count, item);
-                        count++;
-                    }
-                } else {
-                    Map<Integer, Item> items = new HashMap<>();
-                    items.put(0, Item.get(Item.ICE, 0, 2));
-                    items.put(1, Item.get(Item.BUCKET, 10, 1));
-                    items.put(2, Item.get(Item.BONE, 0, 2));
-                    items.put(3, Item.get(Item.SUGARCANE, 0, 1));
-                    items.put(4, Item.get(Item.RED_MUSHROOM, 0, 1));
-                    items.put(5, Item.get(Item.BROWN_MUSHROOM, 0, 2));
-                    items.put(6, Item.get(Item.PUMPKIN_SEEDS, 0, 2));
-                    items.put(7, Item.get(Item.MELON, 0, 1));
-                    items.put(8, Item.get(Item.SAPLING, 0, 1));
-                    items.put(9, Item.get(Item.STRING, 0, 12));
-                    items.put(10, Item.get(Item.POISONOUS_POTATO, 0, 32));
-                    e.getInventory().setContents(items);
-                }
+        BaseFullChunk chunk = lvl.getChunk(x >> 4, z >> 4);
+        lvl.setBlockIdAt(x, y, z, Block.CHEST);
 
+        cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+            .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
+            .putString("id", BlockEntity.CHEST)
+            .putInt("x", x)
+            .putInt("y", y)
+            .putInt("z", z);
+
+        BlockEntityChest e = new BlockEntityChest(chunk, nbt);
+
+        // Items
+        if (Settings.chestItems.length != 0) {
+            int count = 0;
+            for (Item item : Settings.chestItems) {
+                e.getInventory().setItem(count, item);
+                count++;
             }
-        }.runTaskLater(ASkyBlock.get(), Utils.secondsAsMillis(TeleportLogic.teleportDelay + 1));
+        } else {
+            Map<Integer, Item> items = new HashMap<>();
+            items.put(0, Item.get(Item.ICE, 0, 2));
+            items.put(1, Item.get(Item.BUCKET, 10, 1));
+            items.put(2, Item.get(Item.BONE, 0, 2));
+            items.put(3, Item.get(Item.SUGARCANE, 0, 1));
+            items.put(4, Item.get(Item.RED_MUSHROOM, 0, 1));
+            items.put(5, Item.get(Item.BROWN_MUSHROOM, 0, 2));
+            items.put(6, Item.get(Item.PUMPKIN_SEEDS, 0, 2));
+            items.put(7, Item.get(Item.MELON, 0, 1));
+            items.put(8, Item.get(Item.SAPLING, 0, 1));
+            items.put(9, Item.get(Item.STRING, 0, 12));
+            items.put(10, Item.get(Item.POISONOUS_POTATO, 0, 32));
+            e.getInventory().setContents(items);
+        }
+
     }
 
     public void sendTip() {
@@ -736,5 +753,13 @@ public final class SchematicHandler extends SchematicInterport {
                 Utils.send("&aFrom author: Have a great time. I hope that this plugin could help your server more better!");
 
         }
+    }
+
+    public List<String> getSchemaList() {
+        return schematicList;
+    }
+
+    public Integer getDefaultIsland() {
+        return defaultIsland;
     }
 }

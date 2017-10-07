@@ -47,6 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Commands extends PluginCommand<ASkyBlock> {
 
     private final List<SubCommand> commands = new ArrayList<>();
+    private final List<String> listOfPlayers = new ArrayList<>();
     private final ConcurrentHashMap<String, Integer> SubCommand = new ConcurrentHashMap<>();
     private final ASkyBlock plugin;
 
@@ -74,6 +75,8 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.loadSubCommand(new SetHomeSubCommand(getPlugin()));
         this.loadSubCommand(new SetSpawnSubCommand(getPlugin()));
         this.loadSubCommand(new TeleportSubCommand(getPlugin()));
+
+        // TODO: restyle the command looking (Making it easy to see)
     }
 
     private void loadSubCommand(SubCommand cmd) {
@@ -93,12 +96,17 @@ public class Commands extends PluginCommand<ASkyBlock> {
             return true;
         }
         if (args.length == 0) {
-            if (p != null && sender.hasPermission("is.create")) {
+            if (p != null && sender.hasPermission("is.create") && (plugin.getAPI(plugin).getIsland().checkIsland(p) || listOfPlayers.contains(sender.getName()))) {
                 plugin.getAPI(plugin).getIsland().handleIslandCommand(p);
+                if (listOfPlayers.contains(sender.getName())) {
+                    listOfPlayers.remove(sender.getName());
+                }
             } else if (!(sender instanceof Player)) {
-                return this.sendHelp(sender, args);
+                return this.sendHelpVer2(sender, args);
             } else {
-                return this.sendHelp(sender, args);
+                sender.sendMessage("§eBefore creating island, Checkout §a/is templates §eto see some cool island templates");
+                sender.sendMessage("§eYou can also check out our new commands by using §/is help");
+                listOfPlayers.add(sender.getName());
             }
             return true;
         }
@@ -117,7 +125,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
                 sender.sendMessage(plugin.getLocale(p).errorNoPermission);
             }
         } else {
-            return this.sendHelp(sender, args);
+            return this.sendHelpVer2(sender, args);
         }
         return true;
     }
@@ -194,5 +202,98 @@ public class Commands extends PluginCommand<ASkyBlock> {
         }
         return true;
     }
+
+    public boolean sendHelpVer2(CommandSender sender, String[] args) {
+        if (args.length == 0 || !args[0].equalsIgnoreCase("help")) {
+            sender.sendMessage("§cUnknown command use /is help for a list of commands");
+            return true;
+        }
+
+        // Command #IRC
+        if (args.length == 2 && !Utils.isNumeric(args[1])) {
+            if (SubCommand.containsKey(args[1].toLowerCase())) {
+                // Show help for #IRC
+                SubCommand sub = commands.get(SubCommand.get(args[1].toLowerCase()));
+                String command = "";
+                for (String arg : sub.getAliases()) {
+                    if (!command.equals("")) {
+                        command += " ";
+                    }
+                    command += arg;
+                }
+                if (command.isEmpty()) {
+                    command = "none";
+                }
+                String usage = sub.getUsage();
+                if (sub.getUsage().isEmpty()) {
+                    usage = "none";
+                }
+                sender.sendMessage("§aHelp for §e/is " + sub.getName() + "§a:");
+                sender.sendMessage(" §d- §aAliases: §e" + command);
+                sender.sendMessage(" §d- §aDescription: §e" + sub.getDescription());
+                sender.sendMessage(" §d- §aAgreements: §e" + usage);
+                return true;
+            } else {
+                sender.sendMessage("§cNo help for §e" + args[1] + "");
+                return true;
+            }
+        }
+
+        int pageNumber = 1;
+
+        if (args.length == 2 && Utils.isNumeric(args[1])) {
+            pageNumber = Integer.parseInt(args[1]);
+        }
+        int pageHeight;
+        if (sender instanceof ConsoleCommandSender) {
+            pageHeight = Integer.MAX_VALUE;
+        } else {
+            pageHeight = 5;
+        }
+
+        List<String> helpList = new ArrayList<>();
+
+        helpList.add(""); // Really weird Java Machine bug (Usually this will be stored in List but not)
+        helpList.add("");
+        helpList.add("§dBefore creating island, Checkout /is templates to see some cool island templates");
+        helpList.add("");
+
+        for (SubCommand cmd : commands) {
+            helpList.add("§eis " + cmd.getName() + TextFormat.GRAY + " => §a" + cmd.getDescription());
+        }
+
+        helpList.add("");
+        helpList.add("§eHere is the another tips for your new island.");
+        helpList.add("§eYou can break your island but not others island.");
+        helpList.add("§eYou also can made an ally to able players come your island.");
+        helpList.add("§ePeople cannot enter your island, break, grief any blocks in your");
+        helpList.add("§eisland without permission.");
+        helpList.add("");
+        helpList.add("§eYou may not understand some commands but you will get it soon.");
+        helpList.add("§eAdmin or OP can do anything on your island (Including deleting).");
+        helpList.add("§eYou can kick player but not OP's");
+        helpList.add("§eYou can chat with your team privately but the Admin can spying on you");
+
+        int totalPage = helpList.size() % pageHeight == 0 ? helpList.size() / pageHeight : helpList.size() / pageHeight + 1;
+        pageNumber = Math.min(pageNumber, totalPage);
+        if (pageNumber < 1) {
+            pageNumber = 1;
+        }
+
+        sender.sendMessage("§e--- §eSkyBlock Help Page §a" + pageNumber + " §eof §a" + totalPage + " §e---");
+
+        int i = 0;
+        for (String list : helpList) {
+            if (i >= (pageNumber - 1) * pageHeight + 1 && i <= Math.min(helpList.size(), pageNumber * pageHeight)) {
+                sender.sendMessage(list.replace("&", "§"));
+            }
+            i++;
+        }
+        return true;
+    }
+
+    // ----- [0]  SkyBlock Help Page 1 of 8 [0] -----
+    // is command => Involved of an description
+    // inGame help
 
 }
