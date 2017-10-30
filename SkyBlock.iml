@@ -7,6 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -17,7 +18,10 @@
           <root url="jar://$MODULE_DIR$/lib/nukkit-1.0-SNAPSHOT.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="file://$USER_HOME$/Downloads/Nukkit-GT1.2/src/main/java" />
+          <root url="file://$USER_HOME$/Downloads/Nukkit-GT1.2/src/test/java" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">

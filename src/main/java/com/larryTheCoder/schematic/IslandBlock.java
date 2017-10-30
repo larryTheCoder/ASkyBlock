@@ -16,7 +16,6 @@
  */
 package com.larryTheCoder.schematic;
 
-import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
@@ -28,12 +27,10 @@ import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.math.Vector3;
-import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.player.TeleportLogic;
-import com.larryTheCoder.task.TaskManager;
+import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import org.jnbt.*;
 import org.json.simple.JSONValue;
@@ -56,6 +53,8 @@ public class IslandBlock extends BlockMinecraftId {
     private final int x;
     private final int y;
     private final int z;
+    // Current island id
+    private final int islandId;
     // Chest contents
     private final HashMap<Integer, Item> chestContents;
     private short typeId;
@@ -72,10 +71,11 @@ public class IslandBlock extends BlockMinecraftId {
      * @param y
      * @param z
      */
-    public IslandBlock(int x, int y, int z) {
+    public IslandBlock(int x, int y, int z, int islandId) {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.islandId = islandId;
         signText = null;
         chestContents = new HashMap<>();
     }
@@ -463,6 +463,15 @@ public class IslandBlock extends BlockMinecraftId {
                 BlockEntity.CHEST,
                 chunk,
                 nbt);
+            if (ASkyBlock.schematics.isUsingDefaultChest(islandId) || chestContents.isEmpty()) {
+                int count = 0;
+                for (Item item : Settings.chestItems) {
+                    e.getInventory().setItem(count, item);
+                    count++;
+                }
+            } else {
+                e.getInventory().setContents(chestContents);
+            }
             e.spawnToAll();
         }
 

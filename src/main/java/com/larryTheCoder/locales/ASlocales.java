@@ -140,6 +140,7 @@ public final class ASlocales {
     public String islandDonateColor = "aqua";
     public String islandTitleColor = "gold";
     public String islandTitle = "Welcome to [player]'s island";
+    public String groundNoAir = "§eWhat do you think you are? You can't set home on air!";
     // Guard island
     public String islandProtected = "§cThat island is protected";
     // Localization Strings

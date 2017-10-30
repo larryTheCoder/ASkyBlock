@@ -72,7 +72,7 @@ public class IslandManager {
             }
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).hangInThere);
             // SHow that fancy title!
-            showFancyTitle(p);
+            //showFancyTitle(p);
             // teleport to grid
             plugin.getGrid().homeTeleport(p, homes);
         } else {

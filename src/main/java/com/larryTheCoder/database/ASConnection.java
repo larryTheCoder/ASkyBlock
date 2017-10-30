@@ -19,8 +19,10 @@ package com.larryTheCoder.database;
 import cn.nukkit.level.Position;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.database.variables.AbstractDatabase;
+import com.larryTheCoder.database.variables.MySQLDatabase;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
@@ -37,19 +39,42 @@ import java.util.UUID;
 public final class ASConnection {
 
     private final AbstractDatabase db;
-    private final Connection con;
+    private Connection con;
     // Faster to search islands ~75%
     private final ArrayList<IslandData> islandCache = new ArrayList<>();
     private boolean closed = true;
     private IslandData islandSpawn;
     private ASkyBlock plugin;
+    private boolean enableFastCache;
+    private boolean mySQL;
 
     public ASConnection(ASkyBlock plugin, AbstractDatabase database, boolean debug) throws SQLException, ClassNotFoundException, InterruptedException {
         // Performace upgrade: Cache
         this.plugin = plugin;
         this.db = database;
         this.con = database.openConnection();
+        this.mySQL = database instanceof MySQLDatabase;
+        this.enableFastCache = ASkyBlock.get().getConfig().getBoolean("fastCache");
         this.createTables(true);
+        // MySQL Support
+        TaskManager.runTaskAsync(() -> {
+            long last = System.currentTimeMillis();
+            while (true) {
+                if (closed) {
+                    break;
+                }
+                if (mySQL && System.currentTimeMillis() - last > 550000 || !isValid()) {
+                    last = System.currentTimeMillis();
+                    reconnect();
+                } else {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 
     public void createTables(boolean updateCheck) throws SQLException, ClassNotFoundException, InterruptedException {
@@ -120,11 +145,39 @@ public final class ASConnection {
         }
     }
 
+    public boolean isValid() {
+        try {
+            if (con.isClosed()) {
+                return false;
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+        try (PreparedStatement stmt = this.con.prepareStatement("SELECT 1")) {
+            stmt.executeQuery();
+            return true;
+        } catch (Throwable e) {
+            return false;
+        }
+    }
+
+    public void reconnect() {
+        try {
+            close();
+            closed = false;
+            con = db.forceConnection();
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void removeIslandFromCache(IslandData pd) {
-        for (IslandData pde : islandCache) {
-            if (pde.islandId == pd.islandId) {
-                islandCache.remove(pde);
-                break;
+        if (enableFastCache) {
+            for (IslandData pde : islandCache) {
+                if (pde.islandId == pd.islandId) {
+                    islandCache.remove(pde);
+                    break;
+                }
             }
         }
     }
@@ -150,10 +203,12 @@ public final class ASConnection {
     public IslandData getIslandLocation(String levelName, int X, int Z) {
         int id = plugin.getIsland().generateIslandKey(X, Z);
         IslandData database = new IslandData(levelName, X, Z, Settings.protectionrange);
-        // Get a list of island data on cache
-        for (IslandData pd : islandCache) {
-            if (pd.islandId == id && pd.levelName.equalsIgnoreCase(levelName)) {
-                return pd;
+        if (enableFastCache) {
+            // Get a list of island data on cache
+            for (IslandData pd : islandCache) {
+                if (pd.islandId == id && pd.levelName.equalsIgnoreCase(levelName)) {
+                    return pd;
+                }
             }
         }
         try (Statement stmt = con.createStatement()) {
@@ -164,7 +219,9 @@ public final class ASConnection {
             }
             while (set.next()) {
                 database = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
-                islandCache.add(database);
+                if (enableFastCache) {
+                    islandCache.add(database);
+                }
                 break;
             }
             stmt.close();
@@ -176,15 +233,17 @@ public final class ASConnection {
 
     public ArrayList<IslandData> getIslands(String owner, String levelName) {
         ArrayList<IslandData> pd = new ArrayList<>();
-        // get the data from cache
-        islandCache.stream().filter(
-            (pd3) -> (pd3.owner.equalsIgnoreCase(owner) && pd3.levelName.equalsIgnoreCase(levelName)))
-            .forEachOrdered((pd3) -> {
-                pd.add(pd3);
-            });
-        // Not empty: Data in list contains player islands
-        if (!pd.isEmpty()) {
-            return pd; // Return
+        if (enableFastCache) {
+            // get the data from cache
+            islandCache.stream().filter(
+                (pd3) -> (pd3.owner.equalsIgnoreCase(owner) && pd3.levelName.equalsIgnoreCase(levelName)))
+                .forEachOrdered((pd3) -> {
+                    pd.add(pd3);
+                });
+            // Not empty: Data in list contains player islands
+            if (!pd.isEmpty()) {
+                return pd; // Return
+            }
         }
         try (Statement stmt = con.createStatement()) {
             ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE `owner` = '" + owner + "'");
@@ -198,19 +257,23 @@ public final class ASConnection {
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
-        // Save the island into cache
-        pd.forEach((pda) -> {
-            islandCache.add(pda);
-        });
+        if (enableFastCache) {
+            // Save the island into cache
+            pd.forEach((pda) -> {
+                islandCache.add(pda);
+            });
+        }
         return pd;
     }
 
     public IslandData getIsland(String name, int homes) {
         // safe block
         IslandData pd = null;
-        for (IslandData pda : islandCache) {
-            if (pda.owner.equals(name) && pda.id == homes) {
-                return pda;
+        if (enableFastCache) {
+            for (IslandData pda : islandCache) {
+                if (pda.owner.equals(name) && pda.id == homes) {
+                    return pda;
+                }
             }
         }
         try (Statement stmt = con.createStatement()) {
@@ -223,7 +286,9 @@ public final class ASConnection {
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
-        islandCache.add(pd);
+        if (enableFastCache) {
+            islandCache.add(pd);
+        }
         return pd;
     }
 
@@ -247,7 +312,9 @@ public final class ASConnection {
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
-        islandCache.remove(pd);
+        if (enableFastCache) {
+            islandCache.remove(pd);
+        }
         return result;
     }
 
@@ -278,9 +345,11 @@ public final class ASConnection {
     public IslandData getIslandById(int id) {
         // safe block
         IslandData pd = null;
-        for (IslandData pde : islandCache) {
-            if (pde.islandId == id) {
-                return pde;
+        if (enableFastCache) {
+            for (IslandData pde : islandCache) {
+                if (pde.islandId == id) {
+                    return pde;
+                }
             }
         }
         try (Statement stmt = con.createStatement()) {
@@ -296,7 +365,9 @@ public final class ASConnection {
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
-        islandCache.add(pd);
+        if (enableFastCache) {
+            islandCache.add(pd);
+        }
         return pd;
     }
 
@@ -331,7 +402,9 @@ public final class ASConnection {
             set.addBatch();
             set.executeBatch();
             set.close();
-            islandCache.add(pd);
+            if (enableFastCache) {
+                islandCache.add(pd);
+            }
             return true;
         } catch (BatchUpdateException b) {
             JDBCUtilities.printBatchUpdateException(b);
@@ -342,10 +415,12 @@ public final class ASConnection {
     }
 
     public boolean saveIsland(IslandData pd) {
-        for (IslandData pde : islandCache) {
-            if (pde.islandId == pd.islandId) {
-                islandCache.remove(pde);
-                break;
+        if (enableFastCache) {
+            for (IslandData pde : islandCache) {
+                if (pde.islandId == pd.islandId) {
+                    islandCache.remove(pde);
+                    break;
+                }
             }
         }
         try (PreparedStatement stmt = con.prepareStatement("UPDATE `island` SET `name` = ?, `biome` = ?, `locked` = ?,`isSpawn` = ?, `protection` = ?, `spawnX` = ?, `spawnY` = ?, `spawnZ` = ? WHERE(`id` = '" + pd.id + "' AND `owner` = '" + pd.owner + "')")) {
@@ -360,7 +435,9 @@ public final class ASConnection {
             stmt.addBatch();
             stmt.executeBatch();
             stmt.close();
-            islandCache.add(pd);
+            if (enableFastCache) {
+                islandCache.add(pd);
+            }
             return true;
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);

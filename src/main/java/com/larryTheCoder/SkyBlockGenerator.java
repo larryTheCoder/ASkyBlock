@@ -33,7 +33,7 @@ import java.util.Map;
  */
 public class SkyBlockGenerator extends Generator {
 
-    public static final int TYPE_SKYBLOCK = 0x7fffffff;
+    public static final int TYPE_SKYBLOCK = 0x7eabbff;
     public static SkyBlockGenerator INSTANCE_DELETE_COMMAND;
     private final Map<String, Object> options;
     private ChunkManager level;
@@ -69,18 +69,6 @@ public class SkyBlockGenerator extends Generator {
                 for (int y = 0; y < Settings.seaLevel; y++) {
                     chunk.setBlock(x, y, z, Block.STILL_WATER); // Water Allows stuff
                     // to fall through into oblivion, thus keeping lag to a minimum
-                }
-            }
-        }
-    }
-
-    public void removeAllChunk(int chunkX, int chunkZ) {
-        BaseFullChunk chunk = level.getChunk(chunkX, chunkZ);
-        // Remove all chunks (DO NOT USE IN PRODUCTION) unless you want to rewed people servers
-        for (int y = Settings.seaLevel; y < 255 - Settings.seaLevel; y++) {
-            for (int x = 0; x < 16; x++) {
-                for (int z = 0; z < 16; z++) {
-                    chunk.setBlock(x, y, z, 0); // AIR! SOLUTION! TREATING!
                 }
             }
         }

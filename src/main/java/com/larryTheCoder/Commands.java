@@ -97,15 +97,12 @@ public class Commands extends PluginCommand<ASkyBlock> {
         if (args.length == 0) {
             if (p != null && sender.hasPermission("is.create") && (plugin.getIsland().checkIsland(p) || listOfPlayers.contains(sender.getName()))) {
                 plugin.getIsland().handleIslandCommand(p);
-                if (listOfPlayers.contains(sender.getName())) {
-                    listOfPlayers.remove(sender.getName());
-                }
             } else if (!(sender instanceof Player)) {
                 return this.sendHelp(sender, args);
             } else {
                 sender.sendMessage("§eBefore creating island, Checkout §a/is create §eto see some cool island templates and settings");
                 sender.sendMessage("§eYou can also check out our new commands by using §/is help");
-                listOfPlayers.add(sender.getName());
+                listOfPlayers.add(sender.getName()); // keep in this list until next restart
             }
             return true;
         }

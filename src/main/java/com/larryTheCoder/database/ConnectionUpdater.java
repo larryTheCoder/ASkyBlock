@@ -42,12 +42,15 @@ public class ConnectionUpdater {
     public ConnectionUpdater(ASkyBlock plugin, Connection cone) {
         this.plugin = plugin;
         this.con = cone;
+
+        checkStatement();
     }
 
     /**
      *
      */
     public void checkStatement() {
+        // TODO: BE DONE OF ALL OF AOF THESE WAR!UHS@H@Q(A)$@*#P@*
         try (Statement stmt = con.createStatement()) {
             ResultSet set = stmt.executeQuery("SELECT * FROM `island`");
             if (set.isClosed()) {

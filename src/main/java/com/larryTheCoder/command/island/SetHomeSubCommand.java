@@ -23,6 +23,7 @@ import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.utils.BlockUtil;
 
 /**
  * Author: Adam Matthew
@@ -64,6 +65,11 @@ public class SetHomeSubCommand extends SubCommand {
     public boolean execute(CommandSender sender, String[] args) {
         Player p = Server.getInstance().getPlayer(sender.getName());
         IslandData pd = getPlugin().getIslandInfo(p.getLocation());
+        // Check if the ground is an air
+        if (!BlockUtil.isBreathable(p.clone().add(p.down()).getLevelBlock())) {
+            p.sendMessage(getLocale(p).groundNoAir);
+            return true;
+        }
         // Check if the player on their own island or not
         if (pd != null && pd.owner.equalsIgnoreCase(sender.getName())) {
             pd.setHomeLocation(p.getLocation());

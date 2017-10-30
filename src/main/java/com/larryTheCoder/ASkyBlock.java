@@ -17,6 +17,7 @@
  */
 package com.larryTheCoder;
 
+import cn.nukkit.Nukkit;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.level.Level;
@@ -76,7 +77,6 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     private Config cfg;
     // Managers
-    private Config msg;
     private ASConnection db = null;
     private ChatHandler chatHandler;
     private InvitationHandler invitationHandler;
@@ -236,11 +236,19 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         // Wohooo! Fast! Unique and Colorful!
         generateLevel(); // Regenerate The world
         getServer().getLogger().info(getPrefix() + "§7Enabling ASkyBlock - Founders Edition");
+        if (cfg.getBoolean("fastLoad")) {
+            TaskManager.runTaskLater(() -> start(), 100);
+        } else {
+            start();
+        }
+        getServer().getLogger().info(getPrefix() + "§cBETA Build detected, use with precautions.");
+        getServer().getLogger().info(getPrefix() + "§aASkyBlock has seccessfully enabled!");
+    }
+
+    private void start() {
         initIslands();
         registerObject();
         test();
-        getServer().getLogger().info(getPrefix() + "§cBETA Build detected, use with precautions.");
-        getServer().getLogger().info(getPrefix() + "§aASkyBlock has seccessfully enabled!");
     }
 
     @Override
@@ -250,6 +258,11 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         this.db.close();
         msgs.saveMessages();
         Utils.send("&cASkyBlock has successfully disabled. Goodbye");
+    }
+
+    @Override
+    public Config getConfig() {
+        return cfg;
     }
 
     private void initDatabase() {
@@ -340,10 +353,6 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
             saveResource("challenges.yml");
         }
         cfg = new Config(new File(getDataFolder(), "config.yml"), Config.YAML);
-        if (getResource("English.yml") != null) {
-            saveResource("English.yml");
-        }
-        msg = new Config(new File(getDataFolder(), "English.yml"), Config.YAML);
         recheck();
         ConfigManager.load();
     }

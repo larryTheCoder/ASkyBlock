@@ -35,7 +35,7 @@ import static cn.nukkit.level.generator.biome.Biome.*;
 /**
  * Panel class for MCPE 1.2
  */
-public class IslandPanel extends FormWindowCustom implements Listener {
+public class IslandPanel extends FormWindowCustom {
 
     private Player player;
     private SchematicHandler bindTo;

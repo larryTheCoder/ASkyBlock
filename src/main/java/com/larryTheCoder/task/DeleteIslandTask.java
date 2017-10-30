@@ -19,6 +19,7 @@ package com.larryTheCoder.task;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
+import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.math.Vector3;
@@ -134,7 +135,6 @@ public class DeleteIslandTask implements Runnable {
 
         // Clear up any chunks in list
         if (!chunksToRemoved.isEmpty()) {
-            Utils.send("&eIsland delete Task-1: There are &a" + chunksToRemoved.size() + " &echunks that need to be cleared up.");
             new NukkitRunnable() {
                 public boolean state = false;
 
@@ -148,6 +148,12 @@ public class DeleteIslandTask implements Runnable {
                             for (int x = 0; x < 16; x++) {
                                 for (int z = 0; z < 16; z++) {
                                     chunk.setBlock(x, y, z, 0); // AIR! SOLUTION! TREATING!
+                                    BlockEntity entity = chunk.getTile(x, y, z);
+                                    // Sometimes chest will be removed, but the data wont
+                                    // This can corrupt the world data so be prepare
+                                    if (entity != null) {
+                                        chunk.removeBlockEntity(entity);
+                                    }
                                 }
                             }
                         }
@@ -155,7 +161,6 @@ public class DeleteIslandTask implements Runnable {
                         iChunk.remove();
                     }
                     if (chunksToRemoved.isEmpty()) {
-                        Utils.send("&aFinished island deletion Task-1");
                         this.cancel();
                         return;
                     }

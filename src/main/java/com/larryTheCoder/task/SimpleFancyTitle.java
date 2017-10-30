@@ -39,6 +39,7 @@ public class SimpleFancyTitle extends Task {
     public void onRun(int currentTick) {
         Position lastPos = p.clone();
         boolean shouldLoopBack = true;
+        int i = 0;
         while (shouldLoopBack) {
             // Automatically cancel this task when player moved or something
             if (TeleportLogic.isPlayerMoved(p.getName())) {

@@ -42,7 +42,7 @@ import java.util.List;
  */
 public class ConfigManager {
 
-    public static final String CONFIG_VERSION = "MadeInJava";
+    public static final String CONFIG_VERSION = "ChangingTheWorld";
 
     /**
      * Loads the various settings from the config.yml file into the plugin

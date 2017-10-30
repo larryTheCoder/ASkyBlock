@@ -105,8 +105,8 @@ public class Utils {
      * @param loc The location of chunks target
      */
     public static void loadChunkAt(Position loc) {
-        if (loc != null && !loc.getLevel().isChunkLoaded(loc.getFloorX() >> 4, loc.getFloorZ() >> 4)) {
-            loc.getLevel().loadChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
+        if (loc != null && !loc.getLevel().isChunkLoaded((int) loc.getX() >> 4, (int) loc.getZ() >> 4)) {
+            loc.getLevel().loadChunk((int) loc.getX() >> 4, (int) loc.getZ() >> 4);
         }
     }
 

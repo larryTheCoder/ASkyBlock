@@ -464,7 +464,7 @@ public final class SchematicHandler {
                     int h = Settings.islandHieght + y - EndRock.getFloorY();
                     if (h >= 0 && h < 255 && (blocks[index] != 0 || h < Settings.islandHieght)) {
                         // Only bother if the schematic blocks are within the range that y can be
-                        IslandBlock block = new IslandBlock(x, y, z);
+                        IslandBlock block = new IslandBlock(x, y, z, id);
                         block.setBlock(blocks[index], data[index]);
                         // Tile Entities
                         if (TileEntities.containsKey(new Vector3(x, y, z))) {
@@ -512,11 +512,24 @@ public final class SchematicHandler {
     }
 
     public boolean pasteSchematic(Player p, Position pos, int id) {
+        return pasteSchematic(p, pos, id, false);
+    }
+
+    public boolean pasteSchematic(Player p, Position pos, int id, boolean defaultIsland) {
         if (islandBlocks == null || islandBlocks.isEmpty() || islandBlocks.get(id) != null) {
             createIsland(p, pos);
             return true;
         }
 
+        if (defaultIsland) {
+            id = 0;
+            for (Map<Configuration, Object> idea : schemaConfiguration.values()) {
+                if ((boolean) idea.get(Configuration.DEFAULT)) {
+                    break;
+                }
+                id++;
+            }
+        }
         List<IslandBlock> blocks = getIslandBlocks(id);
         for (IslandBlock block : blocks) {
             block.paste(pos, true);
@@ -567,6 +580,7 @@ public final class SchematicHandler {
         }
         schemaConfiguration.get(id).clear();
         schemaConfiguration.get(id).put(Configuration.BIOME, Biome.getBiome(Biome.PLAINS));
+        schemaConfiguration.get(id).put(Configuration.DEFAULT, false);
         schemaConfiguration.get(id).put(Configuration.BLOCK_SPAWN, null);
         schemaConfiguration.get(id).put(Configuration.DESCRIPTION, "Best cozy world");
         schemaConfiguration.get(id).put(Configuration.PASTE_ENTITIES, false);
@@ -608,6 +622,7 @@ public final class SchematicHandler {
         boolean defaultPriority = section.getBoolean("schematic." + key + ".DEFAULT", false);
         boolean useConfigChest = section.getBoolean("schematic." + key + ".USE_CONFIG_CHEST", false);
         boolean usePasteEntity = section.getBoolean("schematic." + key + ".PASTE_ENTITIES", false);
+        boolean defaultUsage = section.getBoolean("schematic." + key + ".PASTE_ENTITIES", false);
         Block block = null;
         schematicList.add(islandName);
 
@@ -627,6 +642,7 @@ public final class SchematicHandler {
         }
 
         // Set the configuration into system (can be null)
+        this.setIslandValue(id, Configuration.DEFAULT, defaultUsage);
         this.setIslandValue(id, Configuration.BLOCK_SPAWN, block);
         this.setIslandValue(id, Configuration.DESCRIPTION, description);
         this.setIslandValue(id, Configuration.PERMISSION, permission);
@@ -652,48 +668,48 @@ public final class SchematicHandler {
         int Z = pos.getFloorZ();
         Level world = pos.level;
         // bedrock - ensures island are not overwritten
-        for (int x = X + 13; x < X + 14; ++x) {
-            for (int z = Z + 13; z < Z + 14; ++z) {
+        for (int x = X; x < X + 1; ++x) {
+            for (int z = Z; z < Z + 1; ++z) {
                 world.setBlockIdAt(x, groundHeight, z, Block.BEDROCK);
             }
         }
         // Add some dirt and grass
-        for (int x = X + 12; x < X + 15; ++x) {
-            for (int z = X + 12; z < X + 15; ++z) {
+        for (int x = X - 1; x < X + 3; ++x) {
+            for (int z = X - 1; z < X + 3; ++z) {
                 world.setBlockIdAt(x, groundHeight + 1, z, Block.DIRT);
                 world.setBlockIdAt(x, groundHeight + 2, z, Block.DIRT);
             }
         }
-        for (int x = X + 11; x < X + 16; ++x) {
-            for (int z = Z + 11; z < Z + 16; ++z) {
+        for (int x = X - 2; x < X + 4; ++x) {
+            for (int z = Z - 2; z < Z + 4; ++z) {
                 world.setBlockIdAt(x, groundHeight + 3, z, Block.DIRT);
                 world.setBlockIdAt(x, groundHeight + 4, z, Block.DIRT);
             }
         }
-        for (int x = X + 10; x < X + 17; ++x) {
-            for (int z = Z + 10; z < Z + 17; ++z) {
+        for (int x = X - 3; x < X + 5; ++x) {
+            for (int z = Z - 3; z < Z + 5; ++z) {
                 world.setBlockIdAt(x, groundHeight + 5, z, Block.DIRT);
                 world.setBlockIdAt(x, groundHeight + 6, z, Block.DIRT);
                 world.setBlockIdAt(x, groundHeight + 7, z, Block.GRASS);
             }
         }
         // Then cut off the corners to make it round-ish
-        for (int x_space = X + 13 - 2; x_space <= X + 13 + 2; x_space += 4) {
-            for (int z_space = Z + 13 - 2; z_space <= Z + 13 + 2; z_space += 4) {
+        for (int x_space = X - 2; x_space <= X + 2; x_space += 4) {
+            for (int z_space = Z - 2; z_space <= Z + 2; z_space += 4) {
                 world.setBlockIdAt(x_space, groundHeight + 3, z_space, Block.AIR);
                 world.setBlockIdAt(x_space, groundHeight + 4, z_space, Block.AIR);
             }
         }
 
         for (int y = groundHeight - 1; y < groundHeight + 8; ++y) {
-            for (int x_space = X + 13 - 3; x_space <= X + 13 + 3; x_space += 6) {
-                for (int z_space = Z + 13 - 3; z_space <= Z + 13 + 3; z_space += 6) {
+            for (int x_space = X - 3; x_space <= X + 3; x_space += 6) {
+                for (int z_space = -3; z_space <= Z + 3; z_space += 6) {
                     world.setBlockIdAt(x_space, y, z_space, Block.AIR);
                 }
             }
         }
-        int Xt = X + 13;
-        int Zt = X + 13;
+        int Xt = X;
+        int Zt = Z;
         // First place
         world.setBlockIdAt(Xt - 1, groundHeight + 1, Zt + 1, Block.AIR);
         world.setBlockIdAt(Xt - 2, groundHeight + 1, Zt + 2, Block.AIR);
@@ -716,6 +732,8 @@ public final class SchematicHandler {
             .putInt("z", z);
 
         BlockEntityChest e = new BlockEntityChest(chunk, nbt);
+        lvl.addBlockEntity(e);
+        e.spawnToAll();
 
         // Items
         if (Settings.chestItems.length != 0) {
@@ -758,7 +776,7 @@ public final class SchematicHandler {
                 Utils.send("&eTIP: &eThis plugin can also demand on single world production server. Only use /asc setlobby in world");
                 break;
             default:
-                Utils.send("&eFrom author: Have a great time. I hope that this plugin could help your server more better!");
+                Utils.send("&eFrom author: Have a great time. I hope that this plugin could help your server more and better!");
 
         }
     }
@@ -793,6 +811,7 @@ public final class SchematicHandler {
         RATING,
         USE_CONFIG_CHEST,
         PASTE_ENTITIES,
-        BIOME
+        BIOME,
+        DEFAULT
     }
 }

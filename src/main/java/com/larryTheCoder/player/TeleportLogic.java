@@ -20,7 +20,9 @@ import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
+import cn.nukkit.event.entity.EntityTeleportEvent;
 import cn.nukkit.event.player.PlayerMoveEvent;
+import cn.nukkit.event.player.PlayerTeleportEvent;
 import cn.nukkit.level.Location;
 import cn.nukkit.scheduler.TaskHandler;
 import cn.nukkit.utils.TextFormat;
@@ -51,7 +53,7 @@ public class TeleportLogic implements Listener {
     public TeleportLogic(ASkyBlock plugin) {
         this.plugin = plugin;
         teleportDelay = plugin.getConfig().getInt("general.islandTeleportDelay", 2);
-        cancelDistance = plugin.getConfig().getDouble("options.island.teleportCancelDistance", 0.2);
+        cancelDistance = plugin.getConfig().getDouble("options.island.teleportCancelDistance", 0.6);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -68,8 +70,9 @@ public class TeleportLogic implements Listener {
         if (list.contains(player.getName())) {
             list.remove(player.getName());
         }
+        Utils.loadChunkAt(targetLoc);
         if (player.hasPermission("is.bypass.wait") || (teleportDelay == 0) || force) {
-            player.teleport(targetLoc);
+            player.teleport(targetLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
         } else {
             player.sendMessage(plugin.getPrefix() + plugin.getLocale(player).teleportDelay.replace("{0}", "" + teleportDelay));
             TaskHandler task = plugin.getServer().getScheduler().scheduleDelayedTask(plugin, () -> {
@@ -78,16 +81,12 @@ public class TeleportLogic implements Listener {
                     plugin.getInventory().savePlayerInventory(player);
                 }
                 pendingTPs.remove(player.getUniqueId());
-                Location loc = targetLoc.clone();
-                if (loc != null && !loc.getLevel().isChunkLoaded((int) loc.getX() >> 4, (int) loc.getZ() >> 4)) {
-                    loc.getLevel().loadChunk((int) loc.getX() >> 4, (int) loc.getZ() >> 4);
-                }
                 if (home == 1) {
                     player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Teleported to your island");
                 } else {
                     player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Teleported to your island #" + home);
                 }
-                player.teleport(targetLoc.add(0, 0.35)); // Adjust spawn hieght
+                player.teleport(targetLoc.add(0, 0.35), PlayerTeleportEvent.TeleportCause.PLUGIN); // Adjust spawn hieght
                 // Teleport in default gamemode
                 if (Settings.gamemode != -1) {
                     // BETA Testing: Add this later

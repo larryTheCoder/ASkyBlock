@@ -1,7 +1,7 @@
 ## Default Config for ASkyBlock
 ---
 ## Do not change this
-version: "MadeInJava"
+version: "ChangingTheWorld"
 ## Game Prefix.
 Prefix: "&d[&eASkyBlock&d] &e"
 ## Max islands homes
@@ -24,7 +24,13 @@ grid:
   # Should teleport player who in island world
   # Into spawn or default spawn
   teleportSpawn: true
-  
+# Enable FastLoad. This usually task the plugin to load
+# 100ms after plugin load.
+fastLoad: false
+# Fast cache
+# Enable to enable fast cache
+# Not every data are saved efficiently
+fastCache: true
 ## Economy section
 economy:
   # Enable economys?
@@ -52,9 +58,8 @@ island:
    # OR RESET YOUR WORLD
    # Value must be an even number
    # ---
-   # Warning: Make sure that island size are not MORE THAN 150 (Unless you got high speed CPU)
-   #          More island size = time to delete island blocks are higher
    islandSize: 100
+
    # Level Information
    #  Stop the time in island world
    #  Recommended to not set this to 'true' because it will chage the game
@@ -85,16 +90,12 @@ island:
    # if it exists. Makes for an interesting variation on skyblock.
    seaLevel: 3
    # This feature intended in seconds
-   # Use calculator and do
-   #  MINU        MIN_TREESHOLD
-   #   60      *      60
-   #        MULTIPLY
-   # Hope you understand
+   # Not in minute
    deleteTiming: 180
    # Restricted commands in Island / SkyBlock
    #   level. You must respect the command format
    #   Such as `/example1, /example2`
-   restrictedCommands: "/fly, /sell, /sg"
+   restrictedCommands: "/exampleCommand, /exampleCommand2"
    # Island reset
    # You can use -1 for unlimited island reset
    reset: 3
