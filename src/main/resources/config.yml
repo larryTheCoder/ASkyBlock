@@ -19,13 +19,39 @@ updater: false
 defaultlanguage: "en-US"
 # Team chatting
 teamChannels: true
+
+# Do this when you create a double world
+# Remove this section if you want to use default island
+# Generation
+world:
+  # Name must be an exact name with level
+  # create level before attempting to do this
+  SkyBlock:
+    # This is your island Permission
+    permission: "is.create"
+    # This is your island plot size
+    plotSize: 100
+    # Level Information
+    #  Stop the time in island world
+    #  Recommended to not set this to 'true' because it will change the game
+    #  Environment.
+    stopTime: false
+    # Island Height
+    #   You can use this as island High
+    #   Minimum: 20
+    islandHeight: 60
+    # Sea level height (don't changes this mid-game unless you delete the world)
+    # Minimum is 0, which means you are playing sky block!
+    # If sea level is less than about 10, then players will drop right through it
+    # if it exists. Makes for an interesting variation on SkyBlock.
+    seaLevel: 3
 ## GridProtection section
 grid:
   # Should teleport player who in island world
   # Into spawn or default spawn
   teleportSpawn: true
 # Enable FastLoad. This usually task the plugin to load
-# 100ms after plugin load.
+# 100ms after plugin load. Good but bad looking in console
 fastLoad: false
 # Fast cache
 # Enable to enable fast cache

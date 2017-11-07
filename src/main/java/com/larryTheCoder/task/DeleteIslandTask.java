@@ -16,11 +16,12 @@
  */
 package com.larryTheCoder.task;
 
-import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.Position;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.scheduler.NukkitRunnable;
@@ -45,10 +46,10 @@ public class DeleteIslandTask implements Runnable {
 
     public final MainLogger deb = Server.getInstance().getLogger();
     private final IslandData pd;
-    private final Player player;
+    private final CommandSender player;
     private final ASkyBlock plugin;
 
-    public DeleteIslandTask(ASkyBlock plugin, IslandData pd, Player player) {
+    public DeleteIslandTask(ASkyBlock plugin, IslandData pd, CommandSender player) {
         this.plugin = plugin;
         this.pd = pd;
         this.player = player;
@@ -59,11 +60,11 @@ public class DeleteIslandTask implements Runnable {
         // Use chunk instead of using loop
         // Deleting island now faster ~99%
         Server.getInstance().dispatchCommand(player, "is leave"); // Easy
-        Level level = plugin.getServer().getLevelByName(pd.levelName);
+        Level level = plugin.getServer().getLevelByName(pd.getLevelName());
 
         if (level == null) {
-            Utils.send("ERROR: Cannot find the level " + pd.levelName);
-            Utils.send("The sender who execute this: " + pd.owner);
+            Utils.send("ERROR: Cannot find the level " + pd.getLevelName());
+            Utils.send("The sender who execute this: " + pd.getOwner());
             return;
         }
 
@@ -120,6 +121,8 @@ public class DeleteIslandTask implements Runnable {
                 }
                 deb.debug("" + (level.getChunk(x, z).getX() << 4));
                 deb.debug("" + (level.getChunk(x, z).getZ() << 4));
+                Utils.loadChunkAt(new Position(x, 0, z, level));
+
                 if (regen) {
                     // Loop in loop are not recommended.
                     // So we seperate some chunks and let the task do it works
@@ -207,7 +210,7 @@ public class DeleteIslandTask implements Runnable {
         }
 
         // Remove from database
-        //ASkyBlock.get().getDatabase().deleteIsland(pd);
+        ASkyBlock.get().getDatabase().deleteIsland(pd);
     }
 
 }

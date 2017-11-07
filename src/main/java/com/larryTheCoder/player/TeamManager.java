@@ -95,7 +95,7 @@ public class TeamManager {
             String st = td.leader;
             IslandData pd = plugin.getDatabase().getIsland(p.getName(), 1);
             IslandData p1 = plugin.getDatabase().getIsland(st, 1);
-            if (plugin.getIsland().generateIslandKey(p.getLocation()) == p1.islandId) {
+            if (plugin.getIsland().generateIslandKey(p.getLocation()) == p1.getIslandId()) {
                 //kick the player
                 p.teleport(new Location());
             }

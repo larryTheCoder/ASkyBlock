@@ -29,6 +29,7 @@ public class SimpleFancyTitle extends Task {
 
     private ASkyBlock plugin;
     private Player p;
+    private Position lastPos;
 
     public SimpleFancyTitle(ASkyBlock plugin, Player player) {
         this.plugin = plugin;
@@ -37,34 +38,36 @@ public class SimpleFancyTitle extends Task {
 
     @Override
     public void onRun(int currentTick) {
-        Position lastPos = p.clone();
-        boolean shouldLoopBack = true;
-        int i = 0;
-        while (shouldLoopBack) {
-            // Automatically cancel this task when player moved or something
-            if (TeleportLogic.isPlayerMoved(p.getName())) {
-                this.cancel();
-                break;
+        lastPos = p.clone();
+        boolean shouldLoopBack;
+
+        // Automatically cancel this task when player moved or something
+        if (TeleportLogic.isPlayerMoved(p.getName())) {
+            this.cancel();
+            return;
+        }
+        // Logical statement
+        if (!plugin.inIslandWorld(p)) {
+            shouldLoopBack = true;
+        } else {
+            // Reset the lastPos (Not in world)
+            if (!plugin.level.contains(lastPos.level.getName())) {
+                lastPos = p.clone();
             }
-            // Logical statement
-            if (!plugin.inIslandWorld(p)) {
-                shouldLoopBack = true;
-            } else {
-                // Reset the lastPos (Not in world)
-                if (!plugin.level.contains(lastPos.level.getName())) {
-                    lastPos = p.clone();
-                }
-                // Now let wait till player moved or something
-                shouldLoopBack = lastPos.getFloorX() == p.getFloorX() && lastPos.getFloorZ() == p.getFloorZ();
-            }
+            // Now let wait till player moved or something
+            shouldLoopBack = lastPos.getFloorX() == p.getFloorX() && lastPos.getFloorZ() == p.getFloorZ();
+        }
+
+        if (shouldLoopBack) {
+            return;
         }
 
         IslandData ownership = plugin.getIslandInfo(p.getLocation());
         if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
-            p.setSubtitle(TextFormat.GOLD + plugin.getLocale(p).islandSupport.replace("[player]", ownership.owner));
+            p.setSubtitle(TextFormat.GOLD + plugin.getLocale(p).islandSupport.replace("[player]", ownership.getOwner()));
         }
         if (!plugin.getLocale(p).islandSupport.isEmpty()) {
-            p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", ownership.owner));
+            p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", ownership.getOwner()));
         }
         if (!plugin.getLocale(p).islandDonate.isEmpty() && !plugin.getLocale(p).islandURL.isEmpty()) {
             // These are useful for me not for you xD
@@ -72,5 +75,7 @@ public class SimpleFancyTitle extends Task {
             //p.sendMessage(plugin.getLocale(p).islandSupport);
             //p.sendMessage(plugin.getLocale(p).islandURL);
         }
+        // Cancel the task (Complete the repeat task)
+        this.cancel();
     }
 }

@@ -20,10 +20,6 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
-import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.utils.Utils;
-
-import java.util.List;
 
 /**
  * @author Adam Matthew
@@ -41,7 +37,7 @@ public class HomeSubCommand extends SubCommand {
 
     @Override
     public String getUsage() {
-        return "<island number>";
+        return "";
     }
 
     @Override
@@ -61,29 +57,14 @@ public class HomeSubCommand extends SubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        int islandNumber;
-        if (args.length <= 2 || args.length >= 2) {
-            islandNumber = 1;
-        } else if (Utils.isNumeric(args[1])) {
-            islandNumber = Integer.parseInt(args[1]);
-        } else {
-            return false;
-        }
-        // The island number might be -1 or -2
-        if (islandNumber < 1) {
-            islandNumber = 1;
-        }
         Player p = sender.getServer().getPlayer(sender.getName());
-        List<IslandData> island = getPlugin().getDatabase().getIslands(sender.getName(), getPlugin().getDefaultWorld(p));
-        if (island == null) {
-            sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
+        // Only one home? Don't worry. we wont open the form overlay
+        if (getPlugin().getDatabase().getIslands(sender.getName()).size() == 1) {
+            getPlugin().getGrid().homeTeleport(p, 1);
             return true;
         }
-        if (island.size() >= islandNumber) {
-            sender.sendMessage(getPrefix() + getLocale(p).errorNoIslandExsits + islandNumber);
-            return true;
-        }
-        getPlugin().getGrid().homeTeleport(p, islandNumber);
+
+        getPlugin().getPanel().addHomeFormOverlay(p);
         return true;
     }
 

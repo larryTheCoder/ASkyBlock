@@ -77,7 +77,7 @@ public class InvitationHandler {
      */
     public void addInvitation(Player sender, Player receiver) {
         sender.sendMessage(plugin.getPrefix() + plugin.getLocale(sender).generalSuccess);
-        receiver.sendMessage(plugin.getPrefix() + plugin.getLocale(receiver).newInvintation.replace("[player]", sender.getName()));
+        receiver.sendMessage(plugin.getPrefix() + plugin.getLocale(receiver).newInvitation.replace("[player]", sender.getName()));
         invitation.put(sender, new Invitation(this, sender, receiver));
     }
 

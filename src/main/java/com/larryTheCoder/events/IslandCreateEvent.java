@@ -68,7 +68,7 @@ public class IslandCreateEvent extends Event implements Cancellable {
      * @return the island
      */
     public Location getIslandLocation() {
-        return new Location(0, 0, 0, 0, 0, Server.getInstance().getLevelByName(island.levelName)).add(island.getCenter());
+        return new Location(0, 0, 0, 0, 0, Server.getInstance().getLevelByName(island.getLevelName())).add(island.getCenter());
     }
 
     /**
@@ -82,7 +82,7 @@ public class IslandCreateEvent extends Event implements Cancellable {
      * @return the isLocked
      */
     public boolean isLocked() {
-        return island.locked;
+        return island.isLocked();
     }
 
     /**

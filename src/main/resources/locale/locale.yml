@@ -1,0 +1,92 @@
+###########################################################################################
+# This is a YML file. Be careful when editing. Check your edits in a YAML checker like    #
+# the one at http://yaml-online-parser.appspot.com                                        #
+###########################################################################################
+# Note: looking for translators to help translate all of these
+# It will not be used until further update
+---
+firstIslandFree: "&aYour first island are free!"
+nextIslandPrice: "&aNext time you may need $&e[price] to buy other island"
+# Admin help default
+adminHelpGenerate: "&aAttempt to create a new level."
+adminHelpKick: "&aTo kick player from island worlds."
+adminHelpRename: "&aAttempt to rename other player's island."
+adminHelpSpawn: "&aSet the island's spawn point!"
+adminHelpDelete: "&aDelete other player island"
+# Errors defaults
+errorUnknownPlayer: "&cThat player is unknown."
+errorNoPermission: "&cYou don't have permission to use that command!"
+errorNoIsland: "&cYou do not have an island!"
+errorNoIslandExists: "&cYou don't have an island with home number "
+errorNoIslandOther: "&cThat player does not have an island!"
+errorCommandNotReady: "&cYou can't use that command right now."
+errorOfflinePlayer: "&cThat player is offline or doesn't exist."
+errorNotOnIsland: "&cYou are not in your/other's island space!"
+errorTooLong: "&cToo long. Maximum size is [length]."
+errorTooShort: "&cToo short. Minimum size is [length]."
+adminSetSpawnOverride: "&cThere a player owned this plot. Admin override this command"
+errorTooSoon: "&cYou need to wait [secs] to [cmd] your island"
+errorUseInGame: "&cThis command must be used in-game."
+errorWrongWorld: "&cYou cannot do that in this world."
+errorUnknownWorld: "&cUnknown world. Possible worlds are:"
+errorMaxIsland: "&cYou reached the limit of [maxplot] Island on all world"
+errorNotPending: "&cNo invitation pending! Try again later"
+errorInTeam: "&cThe player [player] are already in team!"
+errorBlockedByAPI: "&cA plugin using the API blocked this action."
+errorKickOwner: "&cYou cant kick yourself out your own island!"
+errorAdminOnly: "&cYou cant kick admins from your island!"
+errorFailedNormal: "&cInvalid or wrong parameters"
+errorFailedCritical: "&cFailed to attempt this command. Contact admin!"
+errorLevelGenerated: "&cThe level has already generated"
+errorNotEnoughMoney: "&cYou don't have enough money! Default price: $[price]"
+# Commands messages
+kickSuccess: "&aKicked [player] from SkyBlock world!"
+createSuccess: "&aSuccessfully created you an island!"
+resetSuccess: "&aSuccessfully cleared your island!"
+renameSuccess: "&aSuccessfully renamed island!"
+setWorldSuccess: "&aSuccessfully changed island world location!"
+setHomeSuccess: "&aSuccessfully changed island home location!"
+generalSuccess: "&aSuccess!"
+helpMessage: "&aNeed help? Use: /[com] help."
+# Teleport messages
+teleportDelay: "&aYou will be teleported in {0} seconds."
+teleportCancelled: "&cTeleport cancelled"
+# Admin commands message
+adminOverride: "&aYou override this command"
+adminDeleteIslandError: "&cUse &ldelete confirm &r&cto delete the island you are on."
+adminDeleteIslandnoid: "&cCannot identify island."
+adminDeleteIslandUse: "&rUse &ldelete [name] &r&cto delete the player instead."
+adminSetSpawnOwnedBy: "&cThis island space is owned by [name]"
+# Team messages
+teamChatStatusOff: "&aTeam chat is off"
+teamChatStatusOn: "&aTeam chat is on"
+teamChatNoTeamAround: "&cNone of your team are online!"
+# Others
+hangInThere: "&aHang in there. Finding your best safe teleport position..."
+deleteRemoving: "&cRemoving [name]'s island."
+kickedFromOwner: "&eYou were kicked from island owned by [name]."
+kickedFromAdmin: "&eYou were kicked by Admin on duty."
+kickedFromTeam: "&eYou were kicked from [name]'s team"
+newsHeadline: "&aWhile you were &eOffline&a:"
+newsEmpty: "&aThere no messages for you today. Check back later!"
+newNews: "&eWelcome back! There's [count] news today! Use /is messages to see all messages"
+newInvitation: "&aNew invitation from [player]'s island"
+acceptedFrom: "&eYou accepted [player]'s invitation."
+acceptedTo: "&e[player] has accepted your invitation!"
+panelCancelled: "&eYou cancelled your island panel!"
+# Titles
+islandSubTitle: "Welcome back to [player] island!"
+islandDonate: "&aSource code made by &e@larryTheCoder"
+islandURL: "&aLink: http://github.com/larryTheCoder/ASkyBlock-Nukkit"
+islandSupport: "&aLove it? Give us a star on GitHub!"
+islandTitle: "Welcome to [player]'s island"
+groundNoAir: "&eWhat do you think you are? You can't set home on air!"
+# Guard island
+islandProtected: "&cThat island is protected"
+# Panels
+panelIslandHeader: "&eWelcome to the Island Panel. Please fill in these forms."
+panelIslandHome: "&dYour Home Name."
+panelIslandTemplate: "&dIsland Templates"
+panelIslandDefault: "&eThese are your island Settings."
+panelIslandWorld: "&dChoose your world"
+panelChallengesHeader: "&aChoose your toppings! All of these are your challenges to complete! You will be awarded with an amazing prize!"

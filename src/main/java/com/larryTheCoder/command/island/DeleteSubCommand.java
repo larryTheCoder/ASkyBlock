@@ -58,12 +58,7 @@ public class DeleteSubCommand extends SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = getPlugin().getServer().getPlayer(sender.getName());
-        if (!getPlugin().getIsland().isPlayerIsland(p, p.getLocation())) {
-            sender.sendMessage(getPrefix() + getLocale(p).errorNotOnIsland);
-            return true;
-        }
-        // Command works
-        getPlugin().getIsland().reset(p, false, getPlugin().getIslandInfo(p.getLocation()));
+        getPlugin().getPanel().addDeleteFormOverlay(p);
         return true;
     }
 

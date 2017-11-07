@@ -126,10 +126,10 @@ public class IslandGuard implements Listener {
             return true;
         }
         IslandData island = plugin.getGrid().getProtectedIslandAt(location);
-        if (island.owner == null) {
+        if (island.getOwner() == null) {
             return false;
         }
-        if (island.getIgsFlag(flag) || island.owner.equalsIgnoreCase(player.getName())) {
+        if (island.getIgsFlag(flag) || island.getOwner().equalsIgnoreCase(player.getName())) {
             return true;
         }
         return Settings.defaultWorldSettings.get(flag);
@@ -184,9 +184,9 @@ public class IslandGuard implements Listener {
 //        deb.debug("islandTo = " + islandTo);
 //        deb.debug("islandFrom = " + islandFrom);
 
-        if (islandTo != null && (islandTo.owner != null || islandTo.isSpawn())) {
+        if (islandTo != null && (islandTo.getOwner() != null || islandTo.isSpawn())) {
             // Lock check
-            if (islandTo.locked) {//|| plugin.getPlayers().isBanned(islandTo.owner, player)) {
+            if (islandTo.isLocked()) {//|| plugin.getPlayers().isBanned(islandTo.getOwner(), player)) {
                 if (!islandTo.getMembers().contains(player.getName()) && !player.isOp()
                     && !player.hasPermission("is.mod.bypassprotect")
                     && !player.hasPermission("is.mod.bypasslock")) {
@@ -201,9 +201,9 @@ public class IslandGuard implements Listener {
                 }
             }
         }
-        if (islandTo != null && islandFrom == null && (islandTo.owner != null || islandTo.isSpawn())) {
+        if (islandTo != null && islandFrom == null && (islandTo.getOwner() != null || islandTo.isSpawn())) {
             // Entering
-            if (islandTo.locked) {
+            if (islandTo.isLocked()) {
                 player.sendMessage(plugin.getPrefix() + TextFormat.RED + "This island is locked");
             }
             if (islandTo.isSpawn()) {
@@ -212,13 +212,13 @@ public class IslandGuard implements Listener {
                 }
             } else {
                 if (islandTo.getIgsFlag(IslandData.SettingsFlag.ENTER_EXIT_MESSAGES)) {
-                    player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering " + islandTo.name + "'s island");
+                    player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering " + islandTo.getName() + "'s island");
                 }
             }
             // Fire entry event
             final IslandEnterEvent event = new IslandEnterEvent(player, islandTo, e.getTo());
             plugin.getServer().getPluginManager().callEvent(event);
-        } else if (islandTo == null && islandFrom != null && (islandFrom.owner != null || islandFrom.isSpawn())) {
+        } else if (islandTo == null && islandFrom != null && (islandFrom.getOwner() != null || islandFrom.isSpawn())) {
             // Leaving
             if (islandFrom.isSpawn()) {
                 // Leaving
@@ -228,7 +228,7 @@ public class IslandGuard implements Listener {
 
             } else {
                 if (islandFrom.getIgsFlag(IslandData.SettingsFlag.ENTER_EXIT_MESSAGES)) {
-                    player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving " + islandFrom.name + "'s island");
+                    player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving " + islandFrom.getName() + "'s island");
                 }
 
             }
@@ -242,18 +242,18 @@ public class IslandGuard implements Listener {
                 if (islandFrom.getIgsFlag(IslandData.SettingsFlag.ENTER_EXIT_MESSAGES)) {
                     player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving spawn area");
                 }
-            } else if (islandFrom.owner != null) {
+            } else if (islandFrom.getOwner() != null) {
                 if (islandFrom.getIgsFlag(IslandData.SettingsFlag.ENTER_EXIT_MESSAGES)) {
-                    player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving " + islandFrom.name + "'s island");
+                    player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving " + islandFrom.getName() + "'s island");
                 }
             }
             if (islandTo.isSpawn()) {
                 if (islandTo.getIgsFlag(IslandData.SettingsFlag.ENTER_EXIT_MESSAGES)) {
                     player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering spawn area");
                 }
-            } else if (islandTo.owner != null) {
+            } else if (islandTo.getOwner() != null) {
                 if (islandTo.getIgsFlag(IslandData.SettingsFlag.ENTER_EXIT_MESSAGES)) {
-                    player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering " + islandTo.name + "'s island");
+                    player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering " + islandTo.getName() + "'s island");
                 }
             }
             // Fire exit event
@@ -301,9 +301,9 @@ public class IslandGuard implements Listener {
          */
 //        deb.debug("islandTo = " + islandTo);
 //        deb.debug("islandFrom = " + islandFrom);
-        if (islandTo != null && (islandTo.owner != null || islandTo.isSpawn())) {
+        if (islandTo != null && (islandTo.getOwner() != null || islandTo.isSpawn())) {
             // Lock check
-            if (islandTo.locked) {
+            if (islandTo.isLocked()) {
                 if (!islandTo.getMembers().contains(p.getName()) && !p.isOp()
                     && !p.hasPermission("is.mod.bypassprotect")
                     && !p.hasPermission("is.mod.bypasslock")) {
@@ -322,9 +322,9 @@ public class IslandGuard implements Listener {
             }
         }
 
-        if (islandTo != null && islandFrom == null && (islandTo.owner != null || islandTo.isSpawn())) {
+        if (islandTo != null && islandFrom == null && (islandTo.getOwner() != null || islandTo.isSpawn())) {
             // Entering
-            if (islandTo.locked) {
+            if (islandTo.isLocked()) {
                 p.sendMessage(plugin.getPrefix() + TextFormat.RED + "This island is locked");
             }
             if (islandTo.isSpawn()) {
@@ -333,13 +333,13 @@ public class IslandGuard implements Listener {
                 }
             } else {
                 if (islandTo.getIgsFlag(IslandData.SettingsFlag.ENTER_EXIT_MESSAGES)) {
-                    p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering " + islandTo.name + "'s island");
+                    p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering " + islandTo.getName() + "'s island");
                 }
             }
             // Fire entry event
             final IslandEnterEvent event = new IslandEnterEvent(p, islandTo, e.getTo());
             plugin.getServer().getPluginManager().callEvent(event);
-        } else if (islandTo == null && islandFrom != null && (islandFrom.owner != null || islandFrom.isSpawn())) {
+        } else if (islandTo == null && islandFrom != null && (islandFrom.getOwner() != null || islandFrom.isSpawn())) {
             // Leaving
             if (islandFrom.isSpawn()) {
                 // Leaving
@@ -349,7 +349,7 @@ public class IslandGuard implements Listener {
 
             } else {
                 if (islandFrom.getIgsFlag(IslandData.SettingsFlag.ENTER_EXIT_MESSAGES)) {
-                    p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving " + islandFrom.name + "'s island");
+                    p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving " + islandFrom.getName() + "'s island");
                 }
 
             }
@@ -363,18 +363,18 @@ public class IslandGuard implements Listener {
                 if (islandFrom.getIgsFlag(IslandData.SettingsFlag.ENTER_EXIT_MESSAGES)) {
                     p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving spawn area");
                 }
-            } else if (islandFrom.owner != null) {
+            } else if (islandFrom.getOwner() != null) {
                 if (islandFrom.getIgsFlag(IslandData.SettingsFlag.ENTER_EXIT_MESSAGES)) {
-                    p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving " + islandFrom.name + "'s island");
+                    p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving " + islandFrom.getName() + "'s island");
                 }
             }
             if (islandTo.isSpawn()) {
                 if (islandTo.getIgsFlag(IslandData.SettingsFlag.ENTER_EXIT_MESSAGES)) {
                     p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering spawn area");
                 }
-            } else if (islandTo.owner != null) {
+            } else if (islandTo.getOwner() != null) {
                 if (islandTo.getIgsFlag(IslandData.SettingsFlag.ENTER_EXIT_MESSAGES)) {
-                    p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering " + islandTo.name + "'s island");
+                    p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering " + islandTo.getName() + "'s island");
                 }
             }
             // Fire exit event

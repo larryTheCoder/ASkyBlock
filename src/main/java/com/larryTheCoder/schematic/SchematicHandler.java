@@ -58,6 +58,7 @@ public final class SchematicHandler {
     private Map<Vector3, Map<String, Tag>> tileEntitiesMap;
     private Map<Integer, Map<Configuration, Object>> schemaConfiguration;
     private Map<Integer, String> schematicKey;
+    private Map<Integer, String> configKey;
     // Schematic size
     private short width;
     private short length;
@@ -71,13 +72,17 @@ public final class SchematicHandler {
     // Configuration
     private Config configFolder;
     // Default island
-    private Integer defaultIsland;
+    private Integer defaultIsland = -1;
     // Use build-in island generation
     private boolean useDefaultGeneration = false;
+    // Plugin instance
+    private ASkyBlock plugin;
 
     public SchematicHandler(ASkyBlock plugin, File path) {
         Objects.requireNonNull(plugin, "ASkyBlock instance cannot be null");
         Utils.send("&7Starting Schematic Resource Pack.");
+
+        this.plugin = plugin;
 
         if (path == null) {
             useDefaultGeneration = true;
@@ -99,7 +104,7 @@ public final class SchematicHandler {
         schemaConfiguration = Maps.newHashMap();
         schematicKey = Maps.newHashMap();
         schematicList = Lists.newArrayList();
-        defaultIsland = -1;
+        configKey = Maps.newHashMap();
         // List all of the files
         File[] lists = path.listFiles();
         List<File> list = new ArrayList<>();
@@ -135,14 +140,16 @@ public final class SchematicHandler {
                 File schematicFile = new File(path, fileName);
                 // See if the file exists
                 if (schematicFile.exists()) {
+                    id++;
                     list.add(schematicFile);
                     schematicKey.put(id, fileName);
-                    id++;
+                    configKey.put(id, key);
                 } else if (plugin.getResource("schematics/" + fileName) != null) {
+                    id++;
                     plugin.saveResource("schematics/" + fileName, false);
                     list.add(schematicFile);
                     schematicKey.put(id, fileName);
-                    id++;
+                    configKey.put(id, key);
                 } else {
                     Utils.send("&e" + fileName + " &edoes not have a filename. Skipping!");
                 }
@@ -433,7 +440,7 @@ public final class SchematicHandler {
             handleSchematic(blocks, data, id);
             iter.remove();
         }
-        Utils.send("&eSeccessfully loaded &e" + islandBlocks.size() + " &eschematic");
+        Utils.send("&eSuccessfully loaded &e" + islandBlocks.size() + " &eSchematic");
         this.sendTip();
     }
 
@@ -442,11 +449,8 @@ public final class SchematicHandler {
      *
      * @param blocks The Blocks (same as data)
      * @param data   Data (damage or meta)
+     * @param id     The id of the island template
      */
-    public void handleSchematic(short[] blocks, byte[] data) {
-        handleSchematic(blocks, data, 1);
-    }
-
     public void handleSchematic(short[] blocks, byte[] data, int id) {
         List blockToAdded = new ArrayList<>();
         Vector3 EndRock = new Vector3();
@@ -501,38 +505,31 @@ public final class SchematicHandler {
     }
 
     /**
-     * This method handling player island blocks-by-blocks
+     * This method handling player island blocks-by-blocks with id and
+     * Biome
      *
-     * @param p   The player
-     * @param pos The position to pasting the blocks
+     * @param p     The player
+     * @param pos   The position to pasting the blocks
+     * @param biome The Biome
+     * @param id    The island id
      * @return True if the player island were generated|null
      */
-    public boolean pasteSchematic(Player p, Position pos) {
-        return pasteSchematic(p, pos, 1);
-    }
-
-    public boolean pasteSchematic(Player p, Position pos, int id) {
-        return pasteSchematic(p, pos, id, false);
-    }
-
-    public boolean pasteSchematic(Player p, Position pos, int id, boolean defaultIsland) {
-        if (islandBlocks == null || islandBlocks.isEmpty() || islandBlocks.get(id) != null) {
+    public boolean pasteSchematic(Player p, Position pos, int id, Biome biome) {
+        if (islandBlocks == null || islandBlocks.isEmpty() || islandBlocks.get(id) == null) {
             createIsland(p, pos);
             return true;
         }
 
-        if (defaultIsland) {
-            id = 0;
-            for (Map<Configuration, Object> idea : schemaConfiguration.values()) {
-                if ((boolean) idea.get(Configuration.DEFAULT)) {
-                    break;
-                }
-                id++;
-            }
-        }
         List<IslandBlock> blocks = getIslandBlocks(id);
-        for (IslandBlock block : blocks) {
-            block.paste(pos, true);
+        try {
+            for (IslandBlock block : blocks) {
+                block.paste(pos, true, biome);
+            }
+        } catch (Exception ex) {
+            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorIslandPC);
+            for (IslandBlock block : blocks) {
+                block.revert(pos);
+            }
         }
         return true;
     }
@@ -540,12 +537,9 @@ public final class SchematicHandler {
     /**
      * Get the list of available islands
      *
+     * @param id The id of the block
      * @return An array of the listed blocks
      */
-    public List<IslandBlock> getIslandBlocks() {
-        return getIslandBlocks(1);
-    }
-
     public List<IslandBlock> getIslandBlocks(int id) {
         return islandBlocks.get(id).get();
     }
@@ -609,28 +603,30 @@ public final class SchematicHandler {
      * @param id
      */
     private void prepareIslandValue(int id) {
-        String key = schematicKey.get(id);
-        ConfigSection section = configFolder.getSection("schematicList");
+        String key = configKey.get(id);
+        ConfigSection section = configFolder.getSection("schematicList.schematic." + key);
 
         // configuration keys
-        String[] blockSpawn = section.getString("schematic." + key + ".BLOCK_SPAWN", "").split(":");
-        String description = section.getString("schematic." + key + ".DESCRIPTION", "The island");
-        String islandName = section.getString("schematic." + key + ".NAME", "Island");
-        String permission = section.getString("schematic." + key + ".PERMISSION", "");
-        String biome = section.getString("schematic." + key + ".BIOME", "Plains");
-        double rating = section.getDouble("schematic." + key + ".RATING", 0);
-        boolean defaultPriority = section.getBoolean("schematic." + key + ".DEFAULT", false);
-        boolean useConfigChest = section.getBoolean("schematic." + key + ".USE_CONFIG_CHEST", false);
-        boolean usePasteEntity = section.getBoolean("schematic." + key + ".PASTE_ENTITIES", false);
-        boolean defaultUsage = section.getBoolean("schematic." + key + ".PASTE_ENTITIES", false);
+        String[] blockSpawn = section.getString("BLOCK_SPAWN", "").split(":");
+        String description = section.getString("DESCRIPTION", "The island");
+        String islandName = section.getString("NAME", "Island");
+        String permission = section.getString("PERMISSION", "");
+        String biome = section.getString("BIOME", "Plains");
+        double rating = section.getDouble("RATING", 0);
+        boolean defaultPriority = section.getBoolean("DEFAULT_PRIORITY");
+        boolean useConfigChest = section.getBoolean("USE_CONFIG_CHEST", false);
+        boolean usePasteEntity = section.getBoolean("PASTE_ENTITIES", false);
         Block block = null;
-        schematicList.add(islandName);
+        schematicList.add(islandName.replace("&", "§"));
 
         if (defaultPriority && defaultIsland == -1) {
             defaultIsland = id;
         }
         // Check for configuration type
         for (String sting : blockSpawn) {
+            if (sting.isEmpty()) {
+                break;
+            }
             if (!Utils.isNumeric(sting)) {
                 break;
             }
@@ -640,9 +636,10 @@ public final class SchematicHandler {
                 block.setDamage(Integer.parseInt(sting));
             }
         }
+        configKey.remove(id); // Remove from system so THEY WONT MAKE OOM's
 
         // Set the configuration into system (can be null)
-        this.setIslandValue(id, Configuration.DEFAULT, defaultUsage);
+        this.setIslandValue(id, Configuration.DEFAULT, defaultPriority);
         this.setIslandValue(id, Configuration.BLOCK_SPAWN, block);
         this.setIslandValue(id, Configuration.DESCRIPTION, description);
         this.setIslandValue(id, Configuration.PERMISSION, permission);
@@ -659,7 +656,7 @@ public final class SchematicHandler {
      * @return A boolean
      */
     public boolean isUsingDefaultChest(int id) {
-        return Boolean.getBoolean((String) schemaConfiguration.get(id).get(Configuration.USE_CONFIG_CHEST));
+        return (boolean) schemaConfiguration.get(id).get(Configuration.USE_CONFIG_CHEST);
     }
 
     private void createIsland(Player p, Position pos) {
@@ -773,10 +770,10 @@ public final class SchematicHandler {
                 Utils.send("&eTIP: &eDid you know that this schematic are provided by @tastybento original code?");
                 break;
             case 4:
-                Utils.send("&eTIP: &eThis plugin can also demand on single world production server. Only use /asc setlobby in world");
+                Utils.send("&eTIP: &eThis plugin can also demand on single world production server. Only use /isa setSpawn in world");
                 break;
             default:
-                Utils.send("&eFrom author: Have a great time. I hope that this plugin could help your server more and better!");
+                Utils.send("&eFrom author: This is not an abandoned project! This always be updated once a week");
 
         }
     }
@@ -786,14 +783,14 @@ public final class SchematicHandler {
     }
 
     public int getSchemaId(String name) {
-        int id = 0;
+        int id = 1;
         for (String list : schematicList) {
-            if (list.equalsIgnoreCase(name)) {
+            if (list.replace("§", "").equalsIgnoreCase(name.replace("§", ""))) {
                 return id;
             }
             id++;
         }
-        return -1;
+        return 1;
     }
 
     public boolean isUseDefaultGeneration() {

@@ -58,7 +58,7 @@ public class InfoSubCommand extends SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = sender.getServer().getPlayer(sender.getName());
-        for (String level : getPlugin().level) {
+        for (String level : getPlugin().getLevels()) {
             if (!p.getLevel().getName().equalsIgnoreCase(level)) {
                 sender.sendMessage(getPrefix() + getLocale(p).errorWrongWorld);
                 return true;

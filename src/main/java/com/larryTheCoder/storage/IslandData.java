@@ -36,18 +36,18 @@ import java.util.Objects;
 public class IslandData implements Cloneable {
 
     private final HashMap<SettingsFlag, Boolean> igs = new HashMap<>();
-    public int islandId;
-    public int id;
-    public String levelName;
     // Coordinates of the home spawn location
     public int homeX = 0;
     public int homeY = 0;
     public int homeZ = 0;
+    private int islandId = 0;
+    private int id = 0;
+    private String levelName;
+    private String owner;
+    private String biome;
+    private boolean locked;
     // Island information
-    public String name;
-    public String owner;
-    public String biome;
-    public boolean locked;
+    private String name;
     // Coordinates of the island area
     private int centerX = 0;
     private int centerY = 0;
@@ -55,7 +55,7 @@ public class IslandData implements Cloneable {
     // Set if this island is a spawn island
     private boolean isSpawn = false;
     // Protection size
-    private int protectionRange = 0; //Unaccessable
+    private int protectionRange = 0;
 
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public IslandData(String levelName, int X, int Z, int PSize) {
@@ -263,6 +263,22 @@ public class IslandData implements Cloneable {
         return result;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getIslandId() {
+        return islandId;
+    }
+
+    public void setIslandId(int islandId) {
+        this.islandId = islandId;
+    }
+
     /**
      * Reset spawn protection settings to their default as set in config.yml for
      * this island
@@ -287,6 +303,46 @@ public class IslandData implements Cloneable {
             && z < getCenter().getFloorZ() + protectionRange / 2;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getBiome() {
+        return biome;
+    }
+
+    public void setBiome(String biome) {
+        this.biome = biome;
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public final void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getLevelName() {
+        return levelName;
+    }
+
+    public void setLevelName(String levelName) {
+        this.levelName = levelName;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof IslandData)) {
@@ -304,6 +360,7 @@ public class IslandData implements Cloneable {
         hash = 61 * hash + Objects.hashCode(this.owner);
         return hash;
     }
+
 
     /**
      * Island Guard Setting flags Covers island, spawn and system settings

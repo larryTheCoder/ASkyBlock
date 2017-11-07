@@ -3,36 +3,39 @@
 ---
 # Enable this features
 # If false, the plugin will use build-in generation
-enable: false
+enable: true
 # Schematic list
 # Here is the hints for you (Case sensitive):
-#  - FILE_NAME*       (String):     The name of the folder (including .schematic)
-#  - BLOCK_SPAWN      (String):     he type of block that will be needed to spawn player
-#                                   Must be one. Eg. '115:3' - Indicating to black wool
-#  - PERMISSION       (String):     The permission that will be needed for player to attempt to
-#                                   use this schematic.
-#  - DESCRIPTION*     (String):     You know what is this mean for right?
-#  - RATING           (double):     This might be unimplemented yet but this usage are to count
-#                                   Player rating on challenges.
-#  - USE_CONFIG_CHEST (boolean):    Use the default chest in config.yml
-#  - PASTE_ENTITIES   (boolean):    Still under development. But work on minecarts
-#  - BIOME            (String):     The Biome of the island. Eg: 'Plains'
-#  - DEFAULT**        (boolean):    Set the template to be default template
+#  - FILE_NAME*         (String):     The name of the folder (including .schematic)
+#  - BLOCK_SPAWN        (String):     he type of block that will be needed to spawn player
+#                                     Must be one. Eg. '115:3' - Indicating to black wool
+#  - PERMISSION         (String):     The permission that will be needed for player to attempt to
+#                                     use this schematic.
+#  - DESCRIPTION*       (String):     You know what is this mean for right?
+#  - RATING             (double):     This might be unimplemented yet but this usage are to count
+#                                     Player rating on challenges.
+#  - USE_CONFIG_CHEST   (boolean):    Use the default chest in config.yml
+#  - PASTE_ENTITIES     (boolean):    Still under development. But work on minecarts
+#  - BIOME              (String):     The Biome of the island. Eg: 'Plains'
+#  - DEFAULT_PRIORITY** (boolean):    Set the template to be default template
 #  - Note: ' * ' means required
 #          ' ** ' means required to be used once
 # You can leave other variables to indicate that you don't want them
 schematicList:
   # Schematic list
   schematic:
-    # This is a key for your island
-    default:
+    # This is a key for your island. This key is not be used in this plugin
+    # You can make your own private schematic types (Saved in integers)
+    # This is the order of your schematic (1)
+    island:
       # This is an example of the island name
       FILE_NAME: "island.schematic"
       # This island name
-      NAME: "Default Island"
+      # You can use & as color codes
+      NAME: "&aThe Original"
       # This is an example of a description
       # This will be used in sign and others (Must be not long 25 char, otherwise the sign will be empty)
-      DESCRIPTION: "The cozy island"
+      DESCRIPTION: "The default island for starters. Great resource with extreme height."
       # Permission base
       PERMISSION: "is.create"
       # Rating
@@ -40,6 +43,39 @@ schematicList:
       # Biome
       BIOME: "Plains"
       # Default priority
-      DEFAULT: true
-
-
+      DEFAULT_PRIORITY: true
+    # Double island (2)
+    double:
+      FILE_NAME: "double.schematic"
+      # This island name
+      NAME: "&aIsland &dDuo"
+      # This is an example of a description
+      DESCRIPTION: "Pretty much for double islands. Two close islands. Double more fun. But a little easier. Credit: Antal1609"
+      # Permission base
+      # This is your permission
+      PERMISSION: "is.create"
+      # Rating
+      RATING: 9
+      # Schematics can have biome set when they are created
+      BIOME: "FOREST"
+      # Default priority
+      # You cant double the default
+      DEFAULT_PRIORITY: false
+    # Harder schematic (3)
+    hareder:
+      FILE_NAME: "harder.schematic"
+      # This island an example for epic name
+      NAME: "&lBlack &bDiamonds"
+      # This is an example of a description
+      DESCRIPTION: "&cExperts only! &aMinimal resources. &aWith a few diamonds."
+      # Permission base
+      # This is your permission
+      PERMISSION: "is.create"
+      # Rating
+      RATING: 1
+      # Biome
+      BIOME: "FOREST"
+      # Default priority
+      # You cant double the default
+      DEFAULT_PRIORITY: false
+    # What is your schematic ?

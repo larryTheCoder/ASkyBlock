@@ -34,14 +34,12 @@ import java.util.Map;
 public class SkyBlockGenerator extends Generator {
 
     public static final int TYPE_SKYBLOCK = 0x7eabbff;
-    public static SkyBlockGenerator INSTANCE_DELETE_COMMAND;
     private final Map<String, Object> options;
     private ChunkManager level;
     private NukkitRandom random;
 
     public SkyBlockGenerator(Map<String, Object> options) {
         this.options = options;
-        SkyBlockGenerator.INSTANCE_DELETE_COMMAND = this;
     }
 
     @Override

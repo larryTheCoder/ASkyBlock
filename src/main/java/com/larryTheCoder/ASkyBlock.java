@@ -17,7 +17,6 @@
  */
 package com.larryTheCoder;
 
-import cn.nukkit.Nukkit;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.level.Level;
@@ -27,6 +26,7 @@ import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.command.AdminCMD;
 import com.larryTheCoder.command.ChallangesCMD;
@@ -48,6 +48,7 @@ import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.schematic.SchematicHandler;
 import com.larryTheCoder.storage.InventorySave;
 import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.storage.WorldSettings;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.ConfigManager;
 import com.larryTheCoder.utils.Settings;
@@ -58,6 +59,7 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Author: Adam Matthew
@@ -73,7 +75,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     private static ASkyBlock object;
 
     public int[] version;
-    public ArrayList<String> level = new ArrayList<>();
+    public ArrayList<WorldSettings> level = new ArrayList<>();
 
     private Config cfg;
     // Managers
@@ -153,17 +155,6 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         return level.contains(p.getLevel().getName());
     }
 
-    public String getDefaultWorld(Player p) {
-        PlayerData pd = getPlayerInfo(p);
-        // Sometimes default level are null
-        if (level.contains(pd.defaultLevel)) {
-            pd.defaultLevel = "SkyBlock";
-            getDatabase().savePlayerData(pd);
-            return "SkyBlock";
-        }
-        return pd.defaultLevel;
-    }
-
     public PlayerData getPlayerInfo(Player player) {
         return getDatabase().getPlayerData(player.getName());
     }
@@ -179,6 +170,10 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     public Integer getIslandLevel(Player player) {
         PlayerData pd = getPlayerInfo(player);
         return pd == null ? 0 : pd.getIslandLevel();
+    }
+
+    public String getDefaultWorld() {
+        return "SkyBlock";
     }
 
     public IslandData getIslandInfo(Player player) {
@@ -223,8 +218,6 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         }
         // Init this config
         initConfig();
-        // Then load the database
-        initDatabase();
         // Register generator
         Generator.addGenerator(SkyBlockGenerator.class, "island", SkyBlockGenerator.TYPE_SKYBLOCK);
         // Register TaskManager
@@ -233,9 +226,11 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     @Override
     public void onEnable() {
+        // A simple problem while new plugin is placed on server
+        initDatabase();
         // Wohooo! Fast! Unique and Colorful!
         generateLevel(); // Regenerate The world
-        getServer().getLogger().info(getPrefix() + "§7Enabling ASkyBlock - Founders Edition");
+        getServer().getLogger().info(getPrefix() + "§7Enabling ASkyBlock - Founders Edition (API 21)");
         if (cfg.getBoolean("fastLoad")) {
             TaskManager.runTaskLater(() -> start(), 100);
         } else {
@@ -245,16 +240,28 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         getServer().getLogger().info(getPrefix() + "§aASkyBlock has seccessfully enabled!");
     }
 
+    public ArrayList<String> getLevels() {
+        ArrayList<String> level = new ArrayList<>();
+        for (WorldSettings settings : this.level) {
+            level.add(settings.getLevel().getName());
+        }
+        return level;
+    }
+
     private void start() {
         initIslands();
         registerObject();
         test();
     }
 
+    public WorldSettings getSettings(String level) {
+        return this.level.stream().filter(settings -> settings.getLevel().getName().equalsIgnoreCase(level)).findFirst().orElse(null);
+    }
+
     @Override
     public void onDisable() {
         Utils.send("&7Saving islands framework");
-        saveLevel();
+        saveLevel(true);
         this.db.close();
         msgs.saveMessages();
         Utils.send("&cASkyBlock has successfully disabled. Goodbye");
@@ -309,8 +316,14 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     /**
      * Reload every level that had generated
      */
-    private void saveLevel() {
-        Utils.send("&7Saving worlds...");
+    public void saveLevel(boolean showEnd) {
+        if (showEnd) {
+            Utils.send("&7Saving worlds...");
+        }
+        ArrayList<String> level = new ArrayList<>();
+        for (WorldSettings settings : this.level) {
+            level.add(settings.getLevel().getName());
+        }
         this.db.saveWorlds(level);
     }
 
@@ -380,23 +393,40 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         if (!Server.getInstance().isLevelLoaded("SkyBlock")) {
             Server.getInstance().loadLevel("SkyBlock");
         }
-        level = this.db.getWorlds(); // should work
-        level.stream().forEach((String world) -> {
-            if (!Server.getInstance().isLevelGenerated(world)) {
-                Server.getInstance().generateLevel(world, 0, SkyBlockGenerator.class);
+        List<String> levels = db.getWorlds();
+        if (!levels.contains("SkyBlock")) {
+            levels.add("SkyBlock");
+        }
+
+        ArrayList<WorldSettings> settings = new ArrayList<>();
+        for (String levelName : levels) {
+            if (!Server.getInstance().isLevelGenerated(levelName)) {
+                Server.getInstance().generateLevel(levelName, 0, SkyBlockGenerator.class);
             }
-            if (!Server.getInstance().isLevelLoaded(world)) {
-                Server.getInstance().loadLevel(world);
+            if (!Server.getInstance().isLevelLoaded(levelName)) {
+                Server.getInstance().loadLevel(levelName);
             }
             if (Settings.stopTime) {
-                Level worldo = getServer().getLevelByName(world);
-                worldo.setTime(1600);
-                worldo.stopTime();
+                Level world = getServer().getLevelByName(levelName);
+                world.setTime(1600);
+                world.stopTime();
             }
-        });
-        if (!level.contains("SkyBlock")) {
-            level.add("SkyBlock");
+
+            Level level = getServer().getLevelByName(levelName);
+            WorldSettings worldSettings = new WorldSettings(level);
+            ConfigSection section = cfg.getSections("world." + levelName);
+            if (!section.getKeys(false).isEmpty()) {
+                Utils.send("Settings: ");
+                String permission = section.getString("permission");
+                int plotSize = section.getInt("plotSize");
+                boolean stopTime = section.getBoolean("stopTime");
+                int islandHieght = section.getInt("islandHeight");
+                int seaLevel = section.getInt("seaLevel");
+                worldSettings = new WorldSettings(permission, level, plotSize, stopTime, islandHieght, seaLevel);
+            }
+            settings.add(worldSettings);
         }
+        this.level = settings;
     }
 
     public void loadV2Schematic() {
@@ -423,5 +453,4 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     private void test() {
         //loadV2Schematic();
     }
-
 }

@@ -44,8 +44,7 @@ public class PlayerData implements Cloneable {
     public ArrayList<String> members = new ArrayList<>();
     public String name;
     public String leader;
-    // The location where island will created
-    public String defaultLevel;
+
 
     public PlayerData(String playerName, int homes, int resetleft) {
         this.playerName = playerName;
@@ -54,7 +53,7 @@ public class PlayerData implements Cloneable {
         this.pubLocale = Settings.defaultLanguage;
     }
 
-    public PlayerData(String playerName, int homes, ArrayList<String> members, HashMap<String, Boolean> list, HashMap<String, Integer> times, int islandlvl, boolean inTeam, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList, String locale, String defaultLevel) {
+    public PlayerData(String playerName, int homes, ArrayList<String> members, HashMap<String, Boolean> list, HashMap<String, Integer> times, int islandlvl, boolean inTeam, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList, String locale) {
         this.homes = homes;
         this.members = members;
         this.inTeam = inTeam;
@@ -65,7 +64,6 @@ public class PlayerData implements Cloneable {
         this.playerName = playerName;
         this.banList = banList;
         this.pubLocale = locale;
-        this.defaultLevel = defaultLevel;
     }
 
     /**

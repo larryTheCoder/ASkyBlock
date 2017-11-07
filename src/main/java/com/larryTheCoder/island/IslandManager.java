@@ -21,6 +21,7 @@ import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
+import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
@@ -48,46 +49,39 @@ public class IslandManager {
         this.plugin = plugin;
     }
 
-    public void handleIslandCommand(Player p) {
-        handleIslandCommand(p, false, 1);
-    }
-
-    public void handleIslandCommand(Player p, int homes) {
-        handleIslandCommand(p, false, homes);
-    }
-
-    public void handleIslandCommand(Player p, boolean reset, int homes) {
+    public void handleIslandCommand(Player p, boolean reset) {
         if (!reset) {
             boolean message = false;
-            if (!checkIsland(p, homes)) {
-                message = createIsland(p); // TODO: REPLACE THIS WITH FORM OVERLAY
+            if (!checkIsland(p)) {
+                plugin.getPanel().addIslandFormOverlay(p);
+                return;
             }
-            IslandData pd = ASkyBlock.get().getDatabase().getIsland(p.getName(), homes);
-            if (pd == null || pd.owner == null) {
+            IslandData pd = ASkyBlock.get().getDatabase().getIsland(p.getName(), 1);
+            if (pd == null || pd.getOwner() == null) {
                 // check whether the error message has sended or not
                 if (!message) {
                     p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorFailedCritical);
                 }
                 return;
             }
-            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).hangInThere);
-            // SHow that fancy title!
-            //showFancyTitle(p);
+            p.sendMessage(plugin.getLocale(p).hangInThere);
             // teleport to grid
-            plugin.getGrid().homeTeleport(p, homes);
+            plugin.getGrid().homeTeleport(p, 1);
         } else {
             createIsland(p);
         }
     }
 
     public void showFancyTitle(Player p) {
-        TaskManager.runTask(new SimpleFancyTitle(plugin, p));
+        // The problem solved. The task `while` are pushing the CPU far more to load makes it
+        // Glitching and corrupted half chunk data. #20 Cannot teleport to island
+        TaskManager.runTaskRepeat(new SimpleFancyTitle(plugin, p), 20);
     }
 
     public void kickPlayerByName(final Player pOwner, final String victimName) {
         final Location loc = pOwner.getLocation();
         final IslandData pd = GetIslandAt(loc);
-        if (pd == null || pd.owner == null || !pd.owner.equals(pOwner.getName())) {
+        if (pd == null || pd.getOwner() == null || !pd.getOwner().equals(pOwner.getName())) {
             pOwner.sendMessage(plugin.getPrefix() + plugin.getLocale(pOwner).errorNotOnIsland);
             return;
         }
@@ -136,13 +130,13 @@ public class IslandManager {
             return;
         }
         Location locVict = p.getLocation();
-        for (String lvl : ASkyBlock.get().level) {
+        for (String lvl : plugin.getLevels()) {
             if (!locVict.getLevel().getName().equalsIgnoreCase(lvl)) {
                 sender.sendMessage(plugin.getPrefix() + plugin.getLocale(kicker).errorOfflinePlayer.replace("[player]", arg));
                 return;
             }
         }
-        sender.sendMessage(plugin.getPrefix() + plugin.getLocale(kicker).kickSeccess.replace("[player]", arg));
+        sender.sendMessage(plugin.getPrefix() + plugin.getLocale(kicker).kickSuccess.replace("[player]", arg));
         p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).kickedFromAdmin);
         // Teleport
         if (plugin.getDatabase().getSpawn() != null) {
@@ -163,10 +157,14 @@ public class IslandManager {
     }
 
     public boolean createIsland(Player p) {
-        return this.createIsland(p, 0, "");
+        return this.createIsland(p, 1, "");
     }
 
     public boolean createIsland(Player p, int templateId, String home) {
+        return this.createIsland(p, templateId, home, plugin.getDefaultWorld(), false, Biome.getBiome(Biome.PLAINS));
+    }
+
+    public boolean createIsland(Player p, int templateId, String levelName, String home, boolean locked, Biome biome) {
         if (Settings.useEconomy) {
             double money = ASkyBlock.econ.getMoney(p);
             if (Settings.islandCost < money || Settings.islandCost == money) {
@@ -192,9 +190,9 @@ public class IslandManager {
             wz = wz - wz % Settings.islandDistance + Settings.islandDistance / 2;
             IslandData pd = plugin.getDatabase().getIslandById(generateIslandKey(wx, wz));
             if (pd == null) {
-                Level world = Server.getInstance().getLevelByName(plugin.getDefaultWorld(p));
+                Level world = Server.getInstance().getLevelByName(levelName);
                 Location locIsland = new Location(wx, wy, wz, world);
-                pd = claim(p, locIsland, home);
+                pd = claim(p, locIsland, home, locked);
                 // Call an event
                 IslandCreateEvent event = new IslandCreateEvent(p, templateId, pd);
                 plugin.getServer().getPluginManager().callEvent(event);
@@ -203,10 +201,10 @@ public class IslandManager {
                     return true;
                 }
 
-                ASkyBlock.schematics.pasteSchematic(p, locIsland, templateId);
+                ASkyBlock.schematics.pasteSchematic(p, locIsland, templateId, biome);
                 boolean result = plugin.getDatabase().createIsland(pd);
                 if (result) {
-                    p.sendMessage(plugin.getLocale(p).createSeccess);
+                    p.sendMessage(plugin.getLocale(p).createSuccess);
                     return true;
                 } else {
                     p.sendMessage(plugin.getLocale(p).errorFailedCritical);
@@ -218,7 +216,7 @@ public class IslandManager {
         return false;
     }
 
-    private IslandData claim(Player p, Location loc, String home) {
+    private IslandData claim(Player p, Location loc, String home, boolean locked) {
         int x = loc.getFloorX();
         int z = loc.getFloorZ();
         if (!checkIslandAt(loc.getLevel())) {
@@ -226,16 +224,16 @@ public class IslandManager {
         }
 
         int iKey = generateIslandKey(loc);
+        List<IslandData> number = plugin.getDatabase().getIslands(p.getName());
         IslandData pd = plugin.getDatabase().getIslandLocation(loc.getLevel().getName(), x, z);
-        List<IslandData> number = plugin.getDatabase().getIslands(p.getName(), loc.level.getName());
-        pd.id = number.size() + 1;
-        pd.biome = Settings.defaultBiome.getName();
-        pd.name = home;
-        pd.islandId = iKey;
-        pd.owner = p.getName();
+        pd.setId(number.size() + 1);
+        pd.setIslandId(iKey);
+        pd.setOwner(p.getName());
         pd.setCenter(x, loc.getFloorY(), z);
-        pd.levelName = loc.getLevel().getName();
-        pd.locked = false;
+        pd.setLevelName(loc.getLevel().getName());
+        pd.setLocked(locked);
+        pd.setBiome(Settings.defaultBiome.getName());
+        pd.setName(home);
         return pd;
     }
 
@@ -255,30 +253,27 @@ public class IslandManager {
             return false;
         }
 
-        return plugin.getIslandInfo(loc).owner.equalsIgnoreCase(p.getName());
+        return plugin.getIslandInfo(loc).getOwner().equalsIgnoreCase(p.getName());
     }
 
-    public void reset(Player p, boolean reset, IslandData pd) {
-        if (pd == null || pd.owner == null) {
+    public void deleteIsland(Player p, IslandData pd) {
+        if (pd == null || pd.getOwner() == null) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNoIsland);
             return;
         }
-        if (!Utils.canBypassTimer(p, p.getName() + pd.islandId, Settings.resetTime)) {
-            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorTooSoon.replace("[secs]", Utils.getPlayerRTime(p, p.getName() + pd.islandId, 0)).replace("[cmds]", "delete"));
+        if (!Utils.canBypassTimer(p, p.getName() + pd.getIslandId(), Settings.resetTime)) {
+            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorTooSoon.replace("[secs]", Utils.getPlayerRTime(p, p.getName() + pd.getIslandId(), 0)).replace("[cmds]", "delete"));
             return;
         }
 
         // Reset then wait :P
         TaskManager.runTask(new DeleteIslandTask(plugin, pd, p));
 
-        p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).resetSeccess.replace("[mili]", "" + Settings.resetTime));
-        if (reset) {
-            handleIslandCommand(p, true, pd.id);
-        }
+        p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).resetSuccess.replace("[mili]", "" + Settings.resetTime));
     }
 
     public boolean checkIslandAt(Level level) {
-        return plugin.level.contains(level.getName());
+        return plugin.getLevels().contains(level.getName());
     }
 
     public boolean CanPlayerAccess(Player p, Location loc) {
@@ -293,10 +288,10 @@ public class IslandManager {
         if (pd == null) {
             return false;
         }
-        if (pd.owner == null) {
+        if (pd.getOwner() == null) {
             return false;
         }
-        if (pd.owner.equals(pName)) {
+        if (pd.getOwner().equals(pName)) {
             return true;
         }
         PlayerData pd2 = plugin.getPlayerInfo(p);
@@ -312,7 +307,7 @@ public class IslandManager {
         if (res == null) {
             return null;
         }
-        if (res.owner == null) {
+        if (res.getOwner() == null) {
             return null;
         }
         return res;
@@ -329,29 +324,29 @@ public class IslandManager {
             p.sendMessage(TextFormat.LIGHT_PURPLE + plugin.getLocale(p).errorNotOnIsland);
             return;
         }
-        p.sendMessage(TextFormat.LIGHT_PURPLE + "- Island Owner: " + TextFormat.YELLOW + pd.owner);
+        p.sendMessage(TextFormat.LIGHT_PURPLE + "- Island Owner: " + TextFormat.YELLOW + pd.getOwner());
         String strMembers = Utils.arrayToString(pd2.members);
         if (pd2.members.size() <= 0) {
             strMembers = "none";
         }
         p.sendMessage(TextFormat.LIGHT_PURPLE + "- Members: " + TextFormat.AQUA + strMembers);
 
-        p.sendMessage(TextFormat.LIGHT_PURPLE + "- Flags: " + TextFormat.GOLD + "Allow Teleport: " + pd.locked);
+        p.sendMessage(TextFormat.LIGHT_PURPLE + "- Flags: " + TextFormat.GOLD + "Allow Teleport: " + pd.isLocked());
     }
 
     public void teleportPlayer(Player p, String arg) {
         IslandData pd = ASkyBlock.get().getDatabase().getIsland(arg, 1);
-        if (pd.owner != null) {
+        if (pd.getOwner() != null) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorOfflinePlayer.replace("[player]", arg));
             return;
         }
-        Location home = plugin.getGrid().getSafeHomeLocation(pd.owner, pd.id);
+        Location home = plugin.getGrid().getSafeHomeLocation(pd.getOwner(), pd.getId());
         //if the home null
         if (home == null) {
             p.sendMessage(plugin.getPrefix() + TextFormat.RED + "Failed to find your island safe spawn");
             return;
         }
-        plugin.getTeleportLogic().safeTeleport(p, home, false, pd.id);
+        plugin.getTeleportLogic().safeTeleport(p, home, false, pd.getId());
     }
 
     public boolean locationIsOnIsland(Player player, Vector3 loc) {

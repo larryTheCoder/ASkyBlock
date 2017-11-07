@@ -20,6 +20,7 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
+import com.larryTheCoder.storage.WorldSettings;
 import com.larryTheCoder.utils.Utils;
 
 /**
@@ -59,7 +60,8 @@ public class LeaveSubCommand extends SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player pt = getPlugin().getServer().getPlayer(sender.getName());
-        for (String level : getPlugin().level) {
+        for (WorldSettings levelSetting : getPlugin().level) {
+            String level = levelSetting.getLevel().getName();
             if (!pt.getLevel().getName().equalsIgnoreCase(level)) {
                 sender.sendMessage(getPrefix() + getLocale(pt).errorWrongWorld);
                 return true;

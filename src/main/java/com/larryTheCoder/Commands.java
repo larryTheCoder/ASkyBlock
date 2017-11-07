@@ -27,12 +27,8 @@ import com.larryTheCoder.command.chat.ChatSubCommand;
 import com.larryTheCoder.command.chat.MessageSubCommand;
 import com.larryTheCoder.command.generic.ExpelSubCommand;
 import com.larryTheCoder.command.generic.LeaveSubCommand;
-import com.larryTheCoder.command.generic.SetSpawnSubCommand;
 import com.larryTheCoder.command.island.*;
-import com.larryTheCoder.command.management.AcceptSubCommand;
-import com.larryTheCoder.command.management.DenySubCommand;
-import com.larryTheCoder.command.management.EditSubCommand;
-import com.larryTheCoder.command.management.InviteSubCommand;
+import com.larryTheCoder.command.management.*;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.utils.Utils;
 
@@ -66,7 +62,6 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.loadSubCommand(new CreateISubCommand(getPlugin()));
         this.loadSubCommand(new DeleteSubCommand(getPlugin()));
         this.loadSubCommand(new DenySubCommand(getPlugin()));
-        this.loadSubCommand(new EditSubCommand(getPlugin()));
         this.loadSubCommand(new ExpelSubCommand(getPlugin()));
         this.loadSubCommand(new HomeSubCommand(getPlugin()));
         this.loadSubCommand(new InfoSubCommand(getPlugin()));
@@ -74,7 +69,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
         this.loadSubCommand(new LeaveSubCommand(getPlugin()));
         this.loadSubCommand(new MessageSubCommand(getPlugin()));
         this.loadSubCommand(new SetHomeSubCommand(getPlugin()));
-        this.loadSubCommand(new SetSpawnSubCommand(getPlugin()));
+        this.loadSubCommand(new SettingsSubCommand(getPlugin()));
         this.loadSubCommand(new TeleportSubCommand(getPlugin()));
     }
 
@@ -95,14 +90,12 @@ public class Commands extends PluginCommand<ASkyBlock> {
             return true;
         }
         if (args.length == 0) {
-            if (p != null && sender.hasPermission("is.create") && (plugin.getIsland().checkIsland(p) || listOfPlayers.contains(sender.getName()))) {
-                plugin.getIsland().handleIslandCommand(p);
+            if (p != null && sender.hasPermission("is.create")) {
+                plugin.getIsland().handleIslandCommand(p, false);
             } else if (!(sender instanceof Player)) {
                 return this.sendHelp(sender, args);
             } else {
-                sender.sendMessage("§eBefore creating island, Checkout §a/is create §eto see some cool island templates and settings");
-                sender.sendMessage("§eYou can also check out our new commands by using §/is help");
-                listOfPlayers.add(sender.getName()); // keep in this list until next restart
+                return this.sendHelp(sender, args);
             }
             return true;
         }

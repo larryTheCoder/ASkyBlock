@@ -100,7 +100,7 @@ public class GridManager {
         Set<Location> islandTestLocations = new HashSet<>();
         if (plugin.getIsland().checkIsland(player)) {
             IslandData pd = plugin.getIslandInfo(player);
-            islandTestLocations.add(new Location(0, 0, 0, 0, 0, plugin.getServer().getLevelByName(pd.levelName)).add(pd.getCenter()));
+            islandTestLocations.add(new Location(0, 0, 0, 0, 0, plugin.getServer().getLevelByName(pd.getLevelName())).add(pd.getCenter()));
         } else if (plugin.getTManager().hasTeam(player)) {
 //            islandTestLocations.add(plugin.getPlayers().getTeamIslandLocation(player.getUniqueId()));
 //            if (Settings.createNether && Settings.newNether && ASkyBlock.getNetherWorld() != null) {
@@ -161,7 +161,7 @@ public class GridManager {
             if (pd.homeX != 0 && pd.homeY != 0 && pd.homeZ != 0) {
                 locationSafe = pd.getHome();
             } else {
-                locationSafe = new Location(0, 0, 0, 0, 0, plugin.getServer().getLevelByName(pd.levelName)).add(pd.getCenter());
+                locationSafe = new Location(0, 0, 0, 0, 0, plugin.getServer().getLevelByName(pd.getLevelName())).add(pd.getCenter());
             }
 
             // Load the chunks (Pretend that the island chunks has not loaded)
@@ -244,6 +244,8 @@ public class GridManager {
      */
     public boolean homeTeleport(Player player, int number) {
         Location home = getSafeHomeLocation(player.getName(), number);
+        // SHow that fancy title!
+        plugin.getIsland().showFancyTitle(player);
         //if the home null
         if (home == null) {
             player.sendMessage(plugin.getPrefix() + TextFormat.RED + "Failed to find your island safe spawn");

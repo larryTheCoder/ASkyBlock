@@ -141,16 +141,6 @@ interface ASkyBlockAPI {
     }
 
     /**
-     * Gets the player default island generation
-     *
-     * @param player The player class parameters
-     * @return Default world of player
-     */
-    default String getDefaultWorld(Player player) {
-        return "SkyBlock";
-    }
-
-    /**
      * Gets the player info
      *
      * @param player The player class parameters

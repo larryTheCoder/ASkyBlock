@@ -26,6 +26,7 @@ import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.format.generic.BaseFullChunk;
+import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
@@ -417,10 +418,11 @@ public class IslandBlock extends BlockMinecraftId {
      * @param usePhysics
      * @param blockLoc
      */
-    public void paste(Position blockLoc, boolean usePhysics) {
+    public void paste(Position blockLoc, boolean usePhysics, Biome biome) {
         Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
         loadChunkAt(loc);
         blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, usePhysics);
+        blockLoc.getLevel().setBiomeId(loc.getFloorX(), loc.getFloorZ(), biome.getId());
 
         // BlockEntities
         if (signText != null) {
@@ -475,6 +477,24 @@ public class IslandBlock extends BlockMinecraftId {
             e.spawnToAll();
         }
 
+    }
+
+    /**
+     * This is the function where the Minecraft PC block bugs (Ex. vine)
+     * Were placed and crapping the server
+     * <p>
+     * Revert function is multi-purposes cause
+     */
+    public void revert(Position blockLoc) {
+        Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
+        loadChunkAt(loc);
+        blockLoc.getLevel().setBlock(loc, Block.get(Block.AIR), true, true);
+
+        // Remove block entity
+        BlockEntity entity = blockLoc.getLevel().getBlockEntity(loc);
+        if (entity != null) {
+            blockLoc.getLevel().removeBlockEntity(entity);
+        }
     }
 
     /**

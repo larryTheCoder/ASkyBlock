@@ -18,10 +18,7 @@
           <root url="jar://$MODULE_DIR$/lib/nukkit-1.0-SNAPSHOT.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES>
-          <root url="file://$USER_HOME$/Downloads/Nukkit-GT1.2/src/main/java" />
-          <root url="file://$USER_HOME$/Downloads/Nukkit-GT1.2/src/test/java" />
-        </SOURCES>
+        <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library">

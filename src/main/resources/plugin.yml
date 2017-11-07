@@ -85,6 +85,10 @@ permissions:
     is.command.setworld:
      default: true
      description: "Set the player default world (Where island were generated)"
+    # This is the setting panel
+    is.panel.setting:
+     default: true
+     description: "A Setting panel for your island"
     # These are bypass perm
     is.mod.bypassprotect:
      default: op
@@ -98,7 +102,11 @@ permissions:
     is.bypass.wait:
      default: op
      description: "Bypass the reset timer"
-    # Admin on /asc command
+    # Admin delete command
+    is.admin.delete:
+     default: op
+     description: "Admin delete island command"
+    # Admin on /isa command
     is.admin.command:
      default: op
      description: "Admin main command"

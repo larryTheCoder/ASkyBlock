@@ -34,7 +34,6 @@ public class ASkyBlockEvent extends Event {
     private final Player player;
     private final IslandData island;
 
-
     /**
      * @param player
      * @param island
@@ -86,7 +85,7 @@ public class ASkyBlockEvent extends Event {
      * @return the isLocked
      */
     public boolean isLocked() {
-        return island.locked;
+        return island.isLocked();
     }
 
     /**
@@ -102,7 +101,7 @@ public class ASkyBlockEvent extends Event {
      * @return the teamLeader
      */
     public Player getTeamLeader() {
-        return Server.getInstance().getPlayer(island.owner);
+        return Server.getInstance().getPlayer(island.getOwner());
     }
 
     /**
@@ -111,7 +110,7 @@ public class ASkyBlockEvent extends Event {
      * @return UUID of owner
      */
     public Player getIslandOwner() {
-        return Server.getInstance().getPlayer(island.owner);
+        return Server.getInstance().getPlayer(island.getOwner());
     }
 
     /**
@@ -120,6 +119,6 @@ public class ASkyBlockEvent extends Event {
      * @return the island location
      */
     public Location getIslandLocation() {
-        return new Location(0, 0, 0, 0, 0, Server.getInstance().getLevelByName(island.levelName)).add(island.getCenter());
+        return new Location(0, 0, 0, 0, 0, Server.getInstance().getLevelByName(island.getLevelName())).add(island.getCenter());
     }
 }

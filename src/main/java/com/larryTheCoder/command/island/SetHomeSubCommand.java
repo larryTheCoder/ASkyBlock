@@ -71,9 +71,9 @@ public class SetHomeSubCommand extends SubCommand {
             return true;
         }
         // Check if the player on their own island or not
-        if (pd != null && pd.owner.equalsIgnoreCase(sender.getName())) {
+        if (pd != null && pd.getOwner().equalsIgnoreCase(sender.getName())) {
             pd.setHomeLocation(p.getLocation());
-            p.sendMessage(getLocale(p).setHomeSucess);
+            p.sendMessage(getLocale(p).setHomeSuccess);
         } else {
             p.sendMessage(getLocale(p).errorNotOnIsland);
         }

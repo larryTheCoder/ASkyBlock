@@ -72,46 +72,45 @@ public final class ASlocales {
     public String errorUnknownPlayer = "§cThat player is unknown.";
     public String errorNoPermission = "§cYou don't have permission to use that command!";
     public String errorNoIsland = "§cYou do not have an island!";
-    public String errorNoIslandExsits = "§cYou don't have an island with home number ";
+    public String errorNoIslandExists = "§cYou don't have an island with home number ";
     public String errorNoIslandOther = "§cThat player does not have an island!";
     public String errorCommandNotReady = "§cYou can't use that command right now.";
     public String errorOfflinePlayer = "§cThat player is offline or doesn't exist.";
-    public String errorUnknownCommand = "§cUnknown command.";
-    public String errorNoTeam = "§cPlayer is not in a team.";
-    public String errorMaxIslands = "§cThe world is full of islands! Try again later!";
-    public String errorNotABlock = "§cThat is not a block";
     public String errorNotOnIsland = "§cYou are not in your/other's island space!";
     public String errorTooLong = "§cToo long. Maximum size is [length].";
     public String errorTooShort = "§cToo short. Minimum size is [length].";
+    public String adminSetSpawnOverride = "§cThere a player owned this plot. Admin override this command";
     public String errorTooSoon = "§cYou need to wait [secs] to [cmd] your island";
     public String errorUseInGame = "§cThis command must be used in-game.";
     public String errorWrongWorld = "§cYou cannot do that in this world.";
     public String errorUnknownWorld = "§cUnknown world. Possible worlds are:";
-    public String errorMaxIsland = "§cYou reached the limit of [maxplot] Island per world";
-    public String errorNotPending = "§cNo invintation pending! Try again later";
+    public String errorMaxIsland = "§cSorry you cant create island at this world any more";
+    public String errorNotPending = "§cNo invitation pending! Try again later";
     public String errorInTeam = "§cThe player [player] are already in team!";
     public String errorBlockedByAPI = "§cA plugin using the API blocked this action.";
     public String errorKickOwner = "§cYou cant kick yourself out your own island!";
     public String errorAdminOnly = "§cYou cant kick admins from your island!";
-    public String errorFailedNormal = "§cInvilad or wrong parameters";
+    public String errorFailedNormal = "§cInvalid or wrong parameters";
     public String errorFailedCritical = "§cFailed to attempt this command. Contact admin!";
     public String errorLevelGenerated = "§cThe level has already generated";
     public String errorNotEnoughMoney = "§cYou don't have enough money! Default price: $[price]";
+    public Object errorIslandPC = "§cCannot attempt to generate level. PC Type of schematic";
     // Commands messages
-    public String kickSeccess = "§aKicked [player] from SkyBlock world!";
-    public String createSeccess = "§aSuccesfully created you an island!";
-    public String resetSeccess = "§aSuccesfully cleared your island!";
-    public String renameSeccess = "§aSuccesfully renamed island!";
-    public String setworldSeccess = "§aSuccesfully changed island world location!";
-    public String setHomeSucess = "§aSuccesfully changed island home location!";
-    public String generalSuccess = "§aSucces!";
+    public String kickSuccess = "§aKicked [player] from SkyBlock world!";
+    public String createSuccess = "§aSuccessfully created you an island!";
+    public String resetSuccess = "§aSuccessfully cleared your island!";
+    public String renameSuccess = "§aSuccessfully renamed island!";
+    public String setWorldSuccess = "§aSuccessfully changed island world location!";
+    public String setHomeSuccess = "§aSuccessfully changed island home location!";
+    public String generalSuccess = "§aSuccess!";
     public String helpMessage = "§aNeed help? Use: /[com] help.";
+    public String biomeChangeComplete = "§aChanged your island biome to: [biome]";
     // Teleport messages
     public String teleportDelay = "§aYou will be teleported in {0} seconds.";
     public String teleportCancelled = "§cTeleport cancelled";
     // Admin commands message
     public String adminOverride = "§aYou override this command";
-    public String adminDeleteIslandError = "§cUse §ldelete confirm §r§cto delete the island you are on.";
+    public String adminDeleteIslandError = "§cUse §ldelete confirm §r§cto delete the [player]'s island.";
     public String adminDeleteIslandnoid = "§cCannot identify island.";
     public String adminDeleteIslandUse = "§rUse §ldelete [name] §r§cto delete the player instead.";
     public String adminSetSpawnOwnedBy = "§cThis island space is owned by [name]";
@@ -120,7 +119,7 @@ public final class ASlocales {
     public String teamChatStatusOn = "§aTeam chat is on";
     public String teamChatNoTeamAround = "§cNone of your team are online!";
     // Others
-    public String hangInThere = "§aHang in there. Finding your best safe teleport position...";
+    public String hangInThere = "§eHang in there. Finding your best safe teleport position...";
     public String deleteRemoving = "§cRemoving [name]'s island.";
     public String kickedFromOwner = "§eYou were kicked from island owned by [name].";
     public String kickedFromAdmin = "§eYou were kicked by Admin on duty.";
@@ -128,21 +127,31 @@ public final class ASlocales {
     public String newsHeadline = "§aWhile you were §eOffline§a:";
     public String newsEmpty = "§aThere no messages for you today. Check back later!";
     public String newNews = "§eWelcome back! There's [count] news today! Use /is messages to see all messages";
-    public String newInvintation = "§aNew invintation from [player]'s island";
-    public String acceptedFrom = "§eYou accepted [player]'s invintation.";
-    public String acceptedTo = "§e[player] has accepted your invintation!";
+    public String newInvitation = "§aNew invitation from [player]'s island";
+    public String acceptedFrom = "§eYou accepted [player]'s invitation.";
+    public String acceptedTo = "§e[player] has accepted your invitation!";
+    public String panelCancelled = "§eYou cancelled your island panel!";
     // Titles
     public String islandSubTitle = "Welcome back to [player] island!";
     public String islandDonate = "§aSource code made by §e@larryTheCoder";
     public String islandURL = "§aLink: http://github.com/larryTheCoder/ASkyBlock-Nukkit";
     public String islandSupport = "§aLove it? Give us a star on GitHub!";
-    public String islandSubTitleColor = "blue";
-    public String islandDonateColor = "aqua";
-    public String islandTitleColor = "gold";
     public String islandTitle = "Welcome to [player]'s island";
     public String groundNoAir = "§eWhat do you think you are? You can't set home on air!";
     // Guard island
     public String islandProtected = "§cThat island is protected";
+    // Panels
+    public String panelIslandHeader = "§eWelcome to the Island Panel. Please fill in these forms.";
+    public String panelIslandHome = "§dYour Home Name.";
+    public String panelIslandTemplate = "§dIsland Templates";
+    public String panelIslandDefault = "§eThese are your island Settings.";
+    public String panelIslandWorld = "§dChoose your world";
+    public String panelChallengesHeader = "§aChoose your toppings! All of these are your challenges to complete! You will be awarded with an amazing prize!";
+    public String panelHomeHeader = "§eHere are all of the list of your islands. Choose one of these to [function]";
+    public String panelSettingHeader = "§eYou can make an simple changes for your island. You can set your island any time.";
+    public String deleteIslandSure = "§eAre you sure to delete your island? This is an irreversible!";
+    public String deleteIslandCancelled = "§aYou just cancelled your delete island confirmation";
+
     // Localization Strings
     private Config locale = null;
     private File localeFile = null;
@@ -223,7 +232,7 @@ public final class ASlocales {
      * Reloads the locale file
      */
     private void loadLocale() {
-
+        // TODO: complete this plugin
     }
 
     /**
