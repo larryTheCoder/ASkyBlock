@@ -1,6 +1,6 @@
 ## ASkyBlock ##
 [![PayPayl donate button](https://img.shields.io/badge/paypal-donate-yellow.svg)](http://www.paypal.me/DoubleCheese)
-[![Circle-CI](https://circleci.com/gh/larryTheCoder/ASkyBlock-Nukkit.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/larryTheCoder/ASkyBlock-Nukkit)
+[![Circle-CI](https://circleci.com/gh/TheSolidCrafter/ASkyBlock-Nukkit.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/TheSolidCrafter/ASkyBlock-Nukkit)
 
 __Special SkyBlock minigame build specially for Nukkit.__
 
