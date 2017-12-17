@@ -59,6 +59,10 @@ Releases have a clean version number, has been tested, and should be safe for pr
 ### Note for developers
 This is an actively developed project. Pull requests are accepted if they address a specific issue and are of high enough quality. The best way to do a pull request is to file an issue, then say that you'll fix it so we know it's coming and can coordinate with you.
 
+### Nukkit-Help Group Discord. [Helping, Performance, Informations]
+TheSolidCrafter Staff created this group for more activity on Nukkit/PMMP/Steadfast2 helping and developing plugins!
+If you have Questions, Need Help or Others, you can enter [![here](https://discordapp.com/invite/7y8WM4F)
+
 ### License
 
 	This program is free software: you can redistribute it and/or modify
