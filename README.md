@@ -61,7 +61,7 @@ This is an actively developed project. Pull requests are accepted if they addres
 
 ### Nukkit-Help Group Discord. [Helping, Performance, Informations]
 TheSolidCrafter Staff created this group for more activity on Nukkit/PMMP/Steadfast2 helping and developing plugins!
-If you have Questions, Need Help or Others, you can enter [![here](https://discordapp.com/invite/7y8WM4F)
+If you have Questions, Need Help or Others, you can enter [here](https://discordapp.com/invite/7y8WM4F)
 
 ### License
 
