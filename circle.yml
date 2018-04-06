@@ -4,7 +4,7 @@ checkout:
     - git submodule update --init
     - mvn clean
     - mvn package
-    - cp -R ./target/SkyBlock-1.0-SNAPSHOT.jar $CIRCLE_ARTIFACTS
+    - cp -R ./target/SkyBlock-0.3.7-BETA.jar $CIRCLE_ARTIFACTS
 
 machine:
   java:
