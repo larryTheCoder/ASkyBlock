@@ -24,6 +24,7 @@ import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.utils.Utils;
 
 public class SimpleFancyTitle extends Task {
 
@@ -38,7 +39,10 @@ public class SimpleFancyTitle extends Task {
 
     @Override
     public void onRun(int currentTick) {
-        lastPos = p.clone();
+        if (lastPos == null) {
+            lastPos = p.clone();
+        }
+
         boolean shouldLoopBack;
 
         // Automatically cancel this task when player moved or something
@@ -46,19 +50,17 @@ public class SimpleFancyTitle extends Task {
             this.cancel();
             return;
         }
-        // Logical statement
-        if (!plugin.inIslandWorld(p)) {
-            shouldLoopBack = true;
-        } else {
-            // Reset the lastPos (Not in world)
-            if (!plugin.level.contains(lastPos.level.getName())) {
-                lastPos = p.clone();
-            }
-            // Now let wait till player moved or something
-            shouldLoopBack = lastPos.getFloorX() == p.getFloorX() && lastPos.getFloorZ() == p.getFloorZ();
-        }
+
+        // Now let wait till player moved or something
+        // Do not count on it height. It might be falling from spawn pedestal
+        shouldLoopBack = !plugin.inIslandWorld(p) || p.distance(lastPos) >= 0.3;
 
         if (shouldLoopBack) {
+            // This class interfered to task class
+            // Keep this task in here until player moved
+            TaskManager.runTaskLater(this, 20);
+            Utils.sendDebug("Tasking again");
+            Utils.sendDebug(lastPos.toString() + " " + p.toString());
             return;
         }
 

@@ -76,7 +76,7 @@ public class AdminCMD extends Command {
                     break;
                 }
 
-                if (plugin.level.contains(args[1])) {
+                if (plugin.loadedLevel.contains(args[1])) {
                     sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorLevelGenerated);
                     return true;
                 } else if (!plugin.getServer().isLevelGenerated(args[1])) {
@@ -128,7 +128,7 @@ public class AdminCMD extends Command {
                 }
             case "delete":
                 if (p == null) {
-                    sender.sendMessage(plugin.getLocale(p).errorUseInGame);
+                    sender.sendMessage(plugin.getLocale(null).errorUseInGame);
                     break;
                 }
 
@@ -140,15 +140,15 @@ public class AdminCMD extends Command {
                 // Get the island I am on
                 IslandData island = plugin.getIsland().GetIslandAt(p);
 
+                if (island == null) {
+                    sender.sendMessage(plugin.getLocale(p).adminDeleteIslandnoid);
+                    return true;
+                }
+
                 // Try to get the owner of this island
                 String owner = island.getOwner();
                 if (!args[1].equalsIgnoreCase("confirm")) {
                     sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).adminDeleteIslandError.replace("[player]", owner));
-                    return true;
-                }
-
-                if (island == null) {
-                    sender.sendMessage(plugin.getLocale(p).adminDeleteIslandnoid);
                     return true;
                 }
 
@@ -157,7 +157,7 @@ public class AdminCMD extends Command {
                     sender.sendMessage(plugin.getLocale(p).adminDeleteIslandUse.replace("[name]", owner));
                     return true;
                 } else {
-                    sender.sendMessage(plugin.getLocale(p).deleteRemoving.replace("[name]", owner));
+                    sender.sendMessage(plugin.getLocale(p).deleteRemoving.replace("[name]", "null"));
                     deleteIslands(island, sender);
                 }
                 break;
@@ -170,24 +170,21 @@ public class AdminCMD extends Command {
                     break;
                 }
 
-                String msg = "";
-                String[] var6 = args;
-                int var7 = args.length;
+                StringBuilder msg = new StringBuilder();
 
-                for (int var8 = 0; var8 < var7; ++var8) {
-                    String arg = var6[var8];
-                    msg = msg + arg + " ";
+                for (String arg : args) {
+                    msg.append(arg).append(" ");
                 }
 
                 if (msg.length() > 0) {
-                    msg = msg.substring(0, msg.length() - 1);
+                    msg = new StringBuilder(msg.substring(0, msg.length() - 1));
                 }
 
                 List<String> players = plugin.getDatabase().getPlayersData();
 
                 for (String pl : players) {
                     List<String> list = plugin.getMessages().getMessages(pl);
-                    list.add(msg);
+                    list.add(msg.toString());
                     plugin.getMessages().put(pl, list);
                 }
             default:
@@ -201,7 +198,7 @@ public class AdminCMD extends Command {
     private void setSpawn(CommandSender sender) {
         Player p = sender.isPlayer() ? plugin.getServer().getPlayer(sender.getName()) : null;
         if (p == null) {
-            sender.sendMessage(plugin.getLocale(p).errorUseInGame);
+            sender.sendMessage(plugin.getLocale(null).errorUseInGame);
             return;
         }
         if (!sender.hasPermission("is.admin.setspawn")) {
@@ -230,15 +227,15 @@ public class AdminCMD extends Command {
     /**
      * Deletes the overworld and nether islands together
      *
-     * @param island
-     * @param sender
+     * @param island The player's island
+     * @param sender The sender (player)
      */
     private void deleteIslands(IslandData island, CommandSender sender) {
         // Nukkit has a slow progress on Nether gameplay
         TaskManager.runTask(new DeleteIslandTask(plugin, island, sender));
     }
 
-    public void sendHelp(CommandSender sender, String label, String[] args) {
+    private void sendHelp(CommandSender sender, String label, String[] args) {
         Player p = sender.isPlayer() ? sender.getServer().getPlayer(sender.getName()) : null;
         int pageNumber = 1;
 

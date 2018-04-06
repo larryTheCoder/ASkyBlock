@@ -16,6 +16,7 @@
  */
 package com.larryTheCoder.schematic;
 
+import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
@@ -25,8 +26,8 @@ import cn.nukkit.blockentity.BlockEntitySign;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
+import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.level.format.generic.BaseFullChunk;
-import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
@@ -72,7 +73,7 @@ public class IslandBlock extends BlockMinecraftId {
      * @param y
      * @param z
      */
-    public IslandBlock(int x, int y, int z, int islandId) {
+    IslandBlock(int x, int y, int z, int islandId) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -84,7 +85,7 @@ public class IslandBlock extends BlockMinecraftId {
     /**
      * @return the type
      */
-    public int getTypeId() {
+    int getTypeId() {
         return typeId;
     }
 
@@ -127,7 +128,7 @@ public class IslandBlock extends BlockMinecraftId {
      * @param s
      * @param b
      */
-    public void setBlock(int s, byte b) {
+    void setBlock(int s, byte b) {
         this.typeId = (short) s;
         this.data = b;
     }
@@ -138,12 +139,12 @@ public class IslandBlock extends BlockMinecraftId {
      * @param map
      * @param dataValue
      */
-    public void setSkull(Map<String, Tag> map, int dataValue) {
+    void setSkull(Map<String, Tag> map, int dataValue) {
         //skull = new SkullBlock();
         //skull.prep(map, dataValue);
     }
 
-    public void setFlowerPot(Map<String, Tag> tileData) {
+    void setFlowerPot(Map<String, Tag> tileData) {
         // Initialize as default
         potItem = Block.get(Item.AIR);
         potItemData = 0;
@@ -182,9 +183,9 @@ public class IslandBlock extends BlockMinecraftId {
                             potItemData = 0;
                         }
                     } else if (potItem == Block.get(Item.FLOWER)
-                        || potItem == Block.get(Item.RED_MUSHROOM)
-                        || potItem == Block.get(Item.BROWN_MUSHROOM)
-                        || potItem == Block.get(Item.CACTUS)) {
+                            || potItem == Block.get(Item.RED_MUSHROOM)
+                            || potItem == Block.get(Item.BROWN_MUSHROOM)
+                            || potItem == Block.get(Item.CACTUS)) {
                         // Set to 0 anyway
                         potItemData = 0;
                     } else if (potItem == Block.get(Item.SAPLING)) {
@@ -219,7 +220,7 @@ public class IslandBlock extends BlockMinecraftId {
      *
      * @param tileData
      */
-    public void setSign(Map<String, Tag> tileData) {
+    void setSign(Map<String, Tag> tileData) {
         signText = new ArrayList<>();
         List<String> text = new ArrayList<>();
         for (int i = 1; i < 5; i++) {
@@ -260,6 +261,7 @@ public class IslandBlock extends BlockMinecraftId {
                         //System.out.println("DEBUG1:" + JSONValue.toJSONString(list));
                         if (list != null) {
                             Iterator iter = list.iterator();
+                            StringBuilder lineTextBuilder = new StringBuilder();
                             while (iter.hasNext()) {
                                 Object next = iter.next();
                                 String format = JSONValue.toJSONString(next);
@@ -268,29 +270,28 @@ public class IslandBlock extends BlockMinecraftId {
                                 if (format.startsWith("{")) {
                                     // JSON string
                                     Map jsonFormat = (Map) parser.parse(format, containerFactory);
-                                    Iterator formatIter = jsonFormat.entrySet().iterator();
-                                    while (formatIter.hasNext()) {
-                                        Map.Entry entry = (Map.Entry) formatIter.next();
+                                    for (Object o : jsonFormat.entrySet()) {
+                                        Map.Entry entry = (Map.Entry) o;
                                         //System.out.println("DEBUG3:" + entry.getKey() + "=>" + entry.getValue());
                                         String key = entry.getKey().toString();
                                         String value = entry.getValue().toString();
                                         if (key.equalsIgnoreCase("color")) {
                                             try {
-                                                lineText += TextFormat.valueOf(value.toUpperCase());
+                                                lineTextBuilder.append(TextFormat.valueOf(value.toUpperCase()));
                                             } catch (Exception noColor) {
                                                 Utils.send("Unknown color " + value + " in sign when pasting schematic, skipping...");
                                             }
                                         } else if (key.equalsIgnoreCase("text")) {
-                                            lineText += value;
+                                            lineTextBuilder.append(value);
                                         } else // Formatting - usually the value is always true, but check just in case
                                             if (key.equalsIgnoreCase("obfuscated") && value.equalsIgnoreCase("true")) {
-                                                lineText += TextFormat.OBFUSCATED;
+                                                lineTextBuilder.append(TextFormat.OBFUSCATED);
                                             } else if (key.equalsIgnoreCase("underlined") && value.equalsIgnoreCase("true")) {
-                                                lineText += TextFormat.UNDERLINE;
+                                                lineTextBuilder.append(TextFormat.UNDERLINE);
                                             } else {
                                                 // The rest of the formats
                                                 try {
-                                                    lineText += TextFormat.valueOf(key.toUpperCase());
+                                                    lineTextBuilder.append(TextFormat.valueOf(key.toUpperCase()));
                                                 } catch (Exception noFormat) {
                                                     // Ignore
                                                     //System.out.println("DEBUG3:" + key + "=>" + value);
@@ -302,10 +303,11 @@ public class IslandBlock extends BlockMinecraftId {
                                 // any previous formatting
                                 {
                                     if (format.length() > 1) {
-                                        lineText += TextFormat.RESET + format.substring(format.indexOf('"') + 1, format.lastIndexOf('"'));
+                                        lineTextBuilder.append(TextFormat.RESET).append(format.substring(format.indexOf('"') + 1, format.lastIndexOf('"')));
                                     }
                                 }
                             }
+                            lineText = lineTextBuilder.toString();
                         } else {
                             // No extra tag
                             json = (Map) parser.parse(text.get(line), containerFactory);
@@ -351,12 +353,7 @@ public class IslandBlock extends BlockMinecraftId {
         }
     }
 
-    public void setBook(Map<String, Tag> tileData) {
-        //Bukkit.getLogger().info("DEBUG: Book data ");
-        Utils.send(tileData.toString());
-    }
-
-    public void setChest(Map<String, Tag> tileData) {
+    void setChest(Map<String, Tag> tileData) {
         try {
             ListTag chestItems = (ListTag) tileData.get("Items");
             if (chestItems != null) {
@@ -414,58 +411,66 @@ public class IslandBlock extends BlockMinecraftId {
     /**
      * Paste this block at blockLoc
      *
-     * @param p
-     * @param usePhysics
-     * @param blockLoc
+     * @param p         The player who created this island
+     * @param blockLoc  The block location
      */
-    public void paste(Position blockLoc, boolean usePhysics, Biome biome) {
+    void paste(Player p, Position blockLoc, EnumBiome biome) {
         Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
         loadChunkAt(loc);
-        blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, usePhysics);
-        blockLoc.getLevel().setBiomeId(loc.getFloorX(), loc.getFloorZ(), biome.getId());
+        blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, true);
+        blockLoc.getLevel().setBiomeId(loc.getFloorX(), loc.getFloorZ(), (byte) biome.id);
 
         // BlockEntities
         if (signText != null) {
             // Various bug fixed (Nukkit bug)
-            BaseFullChunk chunk = loc.level.getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
+            BaseFullChunk chunk = blockLoc.getLevel().getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
             cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
-                .putString("id", BlockEntity.SIGN)
-                .putInt("x", (int) loc.x)
-                .putInt("y", (int) loc.y)
-                .putInt("z", (int) loc.z);
+                    .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
+                    .putString("id", BlockEntity.SIGN)
+                    .putInt("x", (int) loc.x)
+                    .putInt("y", (int) loc.y)
+                    .putInt("z", (int) loc.z)
+                    .putString("Text1", signText.get(0).replace("[player]", p.getName()))
+                    .putString("Text2", signText.get(1).replace("[player]", p.getName()))
+                    .putString("Text3", signText.get(2).replace("[player]", p.getName()))
+                    .putString("Text4", signText.get(3).replace("[player]", p.getName()));
+
             BlockEntitySign e = (BlockEntitySign) BlockEntity.createBlockEntity(
-                BlockEntity.SIGN,
-                chunk,
-                nbt);
+                    BlockEntity.SIGN,
+                    chunk,
+                    nbt);
+
+            blockLoc.getLevel().addBlockEntity(e);
             e.spawnToAll();
         } else if (potItem != null) {
-            BaseFullChunk chunk = loc.level.getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
+            BaseFullChunk chunk = blockLoc.getLevel().getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
             cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                .putString("id", BlockEntity.FLOWER_POT)
-                .putInt("x", (int) loc.x)
-                .putInt("y", (int) loc.y)
-                .putInt("z", (int) loc.z)
-                .putShort("item", potItem.getId())
-                .putInt("data", potItemData);
+                    .putString("id", BlockEntity.FLOWER_POT)
+                    .putInt("x", (int) loc.x)
+                    .putInt("y", (int) loc.y)
+                    .putInt("z", (int) loc.z)
+                    .putShort("item", potItem.getId())
+                    .putInt("data", potItemData);
 
             BlockEntityFlowerPot potBlock = (BlockEntityFlowerPot) BlockEntity.createBlockEntity(
-                BlockEntity.FLOWER_POT,
-                chunk,
-                nbt);
+                    BlockEntity.FLOWER_POT,
+                    chunk,
+                    nbt);
+
+            blockLoc.getLevel().addBlockEntity(potBlock);
         } else if (Block.get(typeId, data).getId() == Block.CHEST) {
-            BaseFullChunk chunk = loc.level.getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
+            BaseFullChunk chunk = blockLoc.getLevel().getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
             cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
-                .putString("id", BlockEntity.CHEST)
-                .putInt("x", (int) loc.x)
-                .putInt("y", (int) loc.y)
-                .putInt("z", (int) loc.z);
+                    .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
+                    .putString("id", BlockEntity.CHEST)
+                    .putInt("x", (int) loc.x)
+                    .putInt("y", (int) loc.y)
+                    .putInt("z", (int) loc.z);
             BlockEntityChest e = (BlockEntityChest) BlockEntity.createBlockEntity(
-                BlockEntity.CHEST,
-                chunk,
-                nbt);
-            if (ASkyBlock.schematics.isUsingDefaultChest(islandId) || chestContents.isEmpty()) {
+                    BlockEntity.CHEST,
+                    chunk,
+                    nbt);
+            if (ASkyBlock.get().getSchematics().isUsingDefaultChest(islandId) || chestContents.isEmpty()) {
                 int count = 0;
                 for (Item item : Settings.chestItems) {
                     e.getInventory().setItem(count, item);
@@ -474,6 +479,8 @@ public class IslandBlock extends BlockMinecraftId {
             } else {
                 e.getInventory().setContents(chestContents);
             }
+
+            blockLoc.getLevel().addBlockEntity(e);
             e.spawnToAll();
         }
 
@@ -485,15 +492,19 @@ public class IslandBlock extends BlockMinecraftId {
      * <p>
      * Revert function is multi-purposes cause
      */
-    public void revert(Position blockLoc) {
-        Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
-        loadChunkAt(loc);
-        blockLoc.getLevel().setBlock(loc, Block.get(Block.AIR), true, true);
+    void revert(Position blockLoc) {
+        try {
+            Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
+            loadChunkAt(loc);
+            blockLoc.getLevel().setBlock(loc, Block.get(Block.AIR), true, true);
 
-        // Remove block entity
-        BlockEntity entity = blockLoc.getLevel().getBlockEntity(loc);
-        if (entity != null) {
-            blockLoc.getLevel().removeBlockEntity(entity);
+            // Remove block entity
+            BlockEntity entity = blockLoc.getLevel().getBlockEntity(loc);
+            if (entity != null) {
+                blockLoc.getLevel().removeBlockEntity(entity);
+            }
+        } catch (Exception ex) {
+            // Nope do noting. This just avoiding a crap message on console
         }
     }
 

@@ -136,7 +136,7 @@ public final class ASlocales {
     public String islandDonate = "§aSource code made by §e@larryTheCoder";
     public String islandURL = "§aLink: http://github.com/larryTheCoder/ASkyBlock-Nukkit";
     public String islandSupport = "§aLove it? Give us a star on GitHub!";
-    public String islandTitle = "Welcome to [player]'s island";
+    public String islandTitle = "[player]'s island";
     public String groundNoAir = "§eWhat do you think you are? You can't set home on air!";
     // Guard island
     public String islandProtected = "§cThat island is protected";
@@ -147,10 +147,12 @@ public final class ASlocales {
     public String panelIslandDefault = "§eThese are your island Settings.";
     public String panelIslandWorld = "§dChoose your world";
     public String panelChallengesHeader = "§aChoose your toppings! All of these are your challenges to complete! You will be awarded with an amazing prize!";
-    public String panelHomeHeader = "§eHere are all of the list of your islands. Choose one of these to [function]";
+    public String panelHomeHeader = "§dHere are all of the list of your islands. Choose one of these to [function]";
     public String panelSettingHeader = "§eYou can make an simple changes for your island. You can set your island any time.";
     public String deleteIslandSure = "§eAre you sure to delete your island? This is an irreversible!";
     public String deleteIslandCancelled = "§aYou just cancelled your delete island confirmation";
+    // Public error
+    public String errorResponseUnknown = "§eAn error just occured. Try again later";
 
     // Localization Strings
     private Config locale = null;
@@ -247,9 +249,7 @@ public final class ASlocales {
             return string;
         }
         plugin.getLogger().warning("Title color " + string + " is unknown. Use one from this list:");
-        TITLE_COLORS.stream().forEach((color) -> {
-            plugin.getLogger().warning(color);
-        });
+        TITLE_COLORS.forEach((color) -> plugin.getLogger().warning(color));
         return "white";
     }
 

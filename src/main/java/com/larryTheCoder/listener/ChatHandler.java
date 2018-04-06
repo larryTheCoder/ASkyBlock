@@ -80,7 +80,7 @@ public class ChatHandler implements Listener {
         // Is team chat on for this player
         // Find out if this player is in a team (should be if team chat is on)
         // TODO: remove when player resets or leaves team
-        if ((plugin.getTManager().getPlayerMembers(player.getName()).isEmpty()) == false) {
+        if (!(plugin.getTManager().getPlayerMembers(player.getName()).isEmpty())) {
             ArrayList<String> teams = plugin.getTManager().getPlayerMembers(player.getName());
             // Tell only the team members if they are online
             boolean online = false;

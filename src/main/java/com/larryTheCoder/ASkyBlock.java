@@ -67,17 +67,19 @@ import java.util.List;
  * Main class of SkyBlock Framework! Complete with API and Events. May contains
  * Nuts!
  */
-public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
+public class ASkyBlock extends PluginBase {
 
-    public static SchematicHandler schematics;
     public static Economy econ;
-    public static String moduleVersion = "0eb81f61";
+    public static String moduleVersion = "ad7b3e9c";
     private static ASkyBlock object;
-
+    // Arrays
     public int[] version;
     public ArrayList<WorldSettings> level = new ArrayList<>();
-
+    public ArrayList<String> loadedLevel = new ArrayList<>();
+    private SchematicHandler schematics;
+    // Configs
     private Config cfg;
+    private Config worldConfig;
     // Managers
     private ASConnection db = null;
     private ChatHandler chatHandler;
@@ -135,16 +137,8 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         return panel;
     }
 
-    public IslandData getIslandInfo(Player player, int homes) {
-        return getDatabase().getIsland(player.getName(), homes);
-    }
-
     public IslandData getIslandInfo(String player) {
         return getDatabase().getIsland(player, 1);
-    }
-
-    public IslandData getIslandInfo(String player, int homes) {
-        return getDatabase().getIsland(player, homes);
     }
 
     public ChallangesCMD getChallenges() {
@@ -152,7 +146,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     }
 
     public boolean inIslandWorld(Player p) {
-        return level.contains(p.getLevel().getName());
+        return getIsland().checkIslandAt(p.getLevel());
     }
 
     public PlayerData getPlayerInfo(Player player) {
@@ -195,7 +189,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     public boolean checkVersion(int[] version, int... version2) {
         return version[0] > version2[0] || version[0] == version2[0] && version[1] > version2[1] || version[0] == version2[0]
-            && version[1] == version2[1] && version[2] >= version2[2];
+                && version[1] == version2[1] && version[2] >= version2[2];
     }
 
     public int[] getVersion() {
@@ -213,7 +207,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
 
     @Override
     public void onLoad() {
-        if (!(object instanceof ASkyBlock)) {
+        if (object == null) {
             object = this;
         }
         // Init this config
@@ -232,7 +226,7 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         generateLevel(); // Regenerate The world
         getServer().getLogger().info(getPrefix() + "§7Enabling ASkyBlock - Founders Edition (API 21)");
         if (cfg.getBoolean("fastLoad")) {
-            TaskManager.runTaskLater(() -> start(), 100);
+            TaskManager.runTaskLater(this::start, 100);
         } else {
             start();
         }
@@ -255,7 +249,12 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
     }
 
     public WorldSettings getSettings(String level) {
-        return this.level.stream().filter(settings -> settings.getLevel().getName().equalsIgnoreCase(level)).findFirst().orElse(null);
+        for (WorldSettings settings : this.level) {
+            if (settings.getLevel().getName().equalsIgnoreCase(level)) {
+                return settings;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -324,13 +323,16 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         for (WorldSettings settings : this.level) {
             level.add(settings.getLevel().getName());
         }
-        this.db.saveWorlds(level);
+        boolean result = this.db.saveWorlds(level);
+        if (!result) {
+            Utils.send("&cUnable to save the world.");
+        }
     }
 
     private void registerObject() {
         Utils.send(TextFormat.GRAY + "Loading the Island Framework");
         loadV2Schematic();
-        if (cfg.getBoolean("updater")) {
+        if (Settings.checkUpdate) {
             Updater.getUpdate();
         }
         manager = new IslandManager(this);
@@ -356,21 +358,32 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         return getAvailableLocales().get(pd.pubLocale);
     }
 
-    public final void initConfig() {
+    private void initConfig() {
         Utils.EnsureDirectory(Utils.DIRECTORY);
         Utils.EnsureDirectory(Utils.LOCALES_DIRECTORY);
+        Utils.EnsureDirectory(Utils.SCHEMATIC_DIRECTORY);
         if (getResource("config.yml") != null) {
             saveResource("config.yml");
+        }
+        if (getResource("worlds.yml") != null) {
+            saveResource("worlds.yml");
         }
         if (getResource("challenges.yml") != null) {
             saveResource("challenges.yml");
         }
+
+        saveResource("schematics/island.schematic", false);
+        saveResource("schematics/double.schematic", false);
+        saveResource("schematics/harder.schematic", false);
+        saveResource("schematics/nether.schematic", false);
+
         cfg = new Config(new File(getDataFolder(), "config.yml"), Config.YAML);
+        worldConfig = new Config(new File(getDataFolder(), "worlds.yml"), Config.YAML);
         recheck();
         ConfigManager.load();
     }
 
-    public void recheck() {
+    private void recheck() {
         boolean update = false;
         File file;
         Config cfgg = new Config(file = new File(ASkyBlock.get().getDataFolder(), "config.yml"), Config.YAML);
@@ -406,34 +419,58 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
             if (!Server.getInstance().isLevelLoaded(levelName)) {
                 Server.getInstance().loadLevel(levelName);
             }
-            if (Settings.stopTime) {
-                Level world = getServer().getLevelByName(levelName);
-                world.setTime(1600);
-                world.stopTime();
-            }
 
             Level level = getServer().getLevelByName(levelName);
-            WorldSettings worldSettings = new WorldSettings(level);
-            ConfigSection section = cfg.getSections("world." + levelName);
-            if (!section.getKeys(false).isEmpty()) {
-                Utils.send("Settings: ");
+            WorldSettings worldSettings;
+            Config cfg = worldConfig;
+            if (cfg.isSection(levelName)) {
+                ConfigSection section = cfg.getSection(levelName);
                 String permission = section.getString("permission");
+                int maxPlot = section.getInt("maxHome");
                 int plotSize = section.getInt("plotSize");
+                int plotRange = section.getInt("protectionRange");
                 boolean stopTime = section.getBoolean("stopTime");
-                int islandHieght = section.getInt("islandHeight");
                 int seaLevel = section.getInt("seaLevel");
-                worldSettings = new WorldSettings(permission, level, plotSize, stopTime, islandHieght, seaLevel);
+                if (stopTime) {
+                    Level world = getServer().getLevelByName(levelName);
+                    world.setTime(1600);
+                    world.stopTime();
+                }
+                if (plotRange % 2 != 0) {
+                    plotRange--;
+                    Utils.send("Protection range must be even, using " + plotRange);
+                }
+                if (plotRange > plotSize) {
+                    Utils.send("Protection range cannot be > island distance. Setting them to be half equal.");
+                    plotRange = plotSize / 2; // Avoiding players from CANNOT break their island
+                }
+                if (plotRange < 0) {
+                    plotRange = 0;
+                }
+                worldSettings = new WorldSettings(permission, level, maxPlot, plotSize, plotRange, stopTime, seaLevel);
+            } else {
+                // Default arguments
+                String permission = "";
+                int plotSize = 100;
+                int plotRange = 200;
+                int seaLevel = 3;
+                worldSettings = new WorldSettings(permission, level, 5, plotSize, plotRange, false, seaLevel);
+                cfg.set(levelName + ".permission", permission);
+                cfg.set(levelName + ".maxHome", 5);
+                cfg.set(levelName + ".protectionRange", plotRange);
+                cfg.set(levelName + ".stopTime", false);
+                cfg.set(levelName + ".seaLevel", seaLevel);
             }
+
             settings.add(worldSettings);
+            loadedLevel.add(levelName);
         }
         this.level = settings;
     }
 
-    public void loadV2Schematic() {
+    private void loadV2Schematic() {
         File schematicFolder = new File(getDataFolder(), "schematics");
-        if (!schematicFolder.exists()) {
-            schematicFolder.mkdir();
-        }
+
         // Works well
         schematics = new SchematicHandler(this, schematicFolder);
     }
@@ -450,7 +487,12 @@ public class ASkyBlock extends PluginBase implements ASkyBlockAPI {
         this.availableLocales = availableLocales;
     }
 
+    public SchematicHandler getSchematics() {
+        return schematics;
+    }
+
     private void test() {
-        //loadV2Schematic();
+        //Position pos = new Position(100, 100, 100, Server.getInstance().getLevelByName("SkyBlock"));
+        //this.getSchematics().pasteSchematic(null, pos , 1, EnumBiome.PLAINS);
     }
 }

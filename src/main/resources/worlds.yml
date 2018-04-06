@@ -1,0 +1,32 @@
+###########################################################################################
+# This is a YML file. Be careful when editing. Check your edits in a YAML checker like    #
+# the one at http://yaml-online-parser.appspot.com                                        #
+###########################################################################################
+# This is an worlds modifier (This is a config for your worlds)
+# New feature for multi world, Of course for ranked servers
+---
+# Name must be an exact name with level
+# create level before attempting to do this
+# Island file will be auto generated when u create a new island world
+SkyBlock:
+  # This is your island Permission
+  permission: "is.create"
+  # Maximum island in this world
+  maxHome: 10
+  # This is your island plot size
+  plotSize: 200
+  # Same in the config.
+  # This is a default protection range (even number). Min = 0, Recommended = 100
+  # Larger values will take longer to calculate the island level
+  # For optimal performance, keep protection range at least 16 blocks less than distance.
+  protectionRange: 100
+  # Level Information
+  #  Stop the time in island world
+  #  Recommended to not set this to 'true' because it will change the game
+  #  Environment.
+  stopTime: false
+  # Sea level height (don't changes this mid-game unless you delete the world)
+  # Minimum is 0, which means you are playing sky block!
+  # If sea level is less than about 10, then players will drop right through it
+  # if it exists. Makes for an interesting variation on SkyBlock.
+  seaLevel: 3

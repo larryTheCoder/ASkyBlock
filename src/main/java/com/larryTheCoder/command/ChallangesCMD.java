@@ -144,9 +144,7 @@ public final class ChallangesCMD extends Command {
 
     private void showHelp(CommandSender sender, int numbers) {
         List<String> names = new ArrayList<>();
-        getChallengeConfig().getSection("challenges.challengeList").getKeys(false).stream().forEach((AADES) -> {
-            names.add(AADES);
-        });
+        names.addAll(getChallengeConfig().getSection("challenges.challengeList").getKeys(false));
         int pageNumber = numbers;
         int pageHeight = 3;
         int totalPage = names.size() % pageHeight == 0 ? names.size() / pageHeight : names.size() / pageHeight + 1;
@@ -168,9 +166,7 @@ public final class ChallangesCMD extends Command {
                 } else {
                     result.add(desc);
                 }
-                result.stream().forEach((line) -> {
-                    sender.sendMessage(TextFormat.YELLOW + line);
-                });
+                result.forEach((line) -> sender.sendMessage(TextFormat.YELLOW + line));
                 final String type = getChallengeConfig().getString("challenges.challengeList." + cn + ".type", "").toLowerCase();
                 if (type.equals("inventory")) {
                     if (getChallengeConfig().getBoolean("challenges.challengeList." + cn + ".takeItems")) {
@@ -192,7 +188,7 @@ public final class ChallangesCMD extends Command {
     /**
      * Saves the challenge.yml file if it does not exist
      */
-    public void saveDefaultChallengeConfig() {
+    private void saveDefaultChallengeConfig() {
         challengeFile = new Config(new File(plugin.getDataFolder(), "challenges.yml"), Config.YAML);
     }
 
@@ -209,7 +205,7 @@ public final class ChallangesCMD extends Command {
     /**
      * Reloads the challenge config file
      */
-    public void reloadChallengeConfig() {
+    private void reloadChallengeConfig() {
         Settings.challengeList = getChallengeConfig().getSection("challenges.challengeList").getKeys(false);
         Settings.challengeLevels = Arrays.asList(getChallengeConfig().getString("challenges.levels", "").split(" "));
         Settings.freeLevels = Arrays.asList(getChallengeConfig().getString("challenges.freelevels", "").split(" "));
@@ -224,9 +220,9 @@ public final class ChallangesCMD extends Command {
      * Goes through all the challenges in the config.yml file and puts them into
      * the challenges list
      */
-    public void populateChallengeList() {
+    private void populateChallengeList() {
         challengeList.clear();
-        Settings.challengeList.stream().forEach((s) -> {
+        Settings.challengeList.forEach((s) -> {
             String level = getChallengeConfig().getString("challenges.challengeList." + s + ".level", "");
             // Verify that this challenge's level is in the list of levels
             if (Settings.challengeLevels.contains(level) || level.isEmpty()) {
@@ -246,8 +242,8 @@ public final class ChallangesCMD extends Command {
     /**
      * Returns true if the level is unlocked and false if not
      *
-     * @param player
-     * @param level
+     * @param player The player
+     * @param level  level
      * @return true/false
      */
     public boolean isLevelAvailable(final Player player, final String level) {

@@ -6,8 +6,8 @@
     <name>ASkyBlock</name>
     <groupId>larryTheCoder</groupId>
     <artifactId>SkyBlock</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <description>The First Minecraft PE SkyBlock Minigame!</description>
+    <version>0.3.7-BETA</version>
+    <description>The First Minecraft BE SkyBlock minigame</description>
     <inceptionYear>2016</inceptionYear>
 
     <licenses>
@@ -56,6 +56,8 @@
     </dependencies>
 
     <build>
+        <defaultGoal>clean package install</defaultGoal>
+        <finalName>SkyBlock-${version}</finalName>
         <resources>
             <resource>
                 <directory>.</directory>

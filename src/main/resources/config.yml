@@ -1,62 +1,37 @@
-## Default Config for ASkyBlock
+###########################################################################################
+# This is a YML file. Be careful when editing. Check your edits in a YAML checker like    #
+# the one at http://yaml-online-parser.appspot.com                                        #
+###########################################################################################
+# This is a configuration file for SkyBlock core.
+# For other configurations, please take a look in the plugin folder for:
+# - worlds.yml | schematics/configuration.yml | challenges.yml
 ---
+
 ## Do not change this
-version: "ChangingTheWorld"
+version: "ad7b3e9c"
+
 ## Game Prefix.
 Prefix: "&d[&eASkyBlock&d] &e"
-## Max islands homes
-# You will have to set this as digit and will be used
-# On island!
-maxhome: 1
 ## Allow debugging
 debug: true
-## Allow to get Updates 
-updater: false
+## Allow to get Updates from GitHub database
+allowUpdate: false
 ## Locale language
 ##  Locale is CASE_SENSITIVE!
 ##  Available locales are:
 ##    en-US.
 defaultlanguage: "en-US"
 # Team chatting
-teamChannels: true
-
-# Do this when you create a double world
-# Remove this section if you want to use default island
-# Generation
-world:
-  # Name must be an exact name with level
-  # create level before attempting to do this
-  SkyBlock:
-    # This is your island Permission
-    permission: "is.create"
-    # This is your island plot size
-    plotSize: 100
-    # Level Information
-    #  Stop the time in island world
-    #  Recommended to not set this to 'true' because it will change the game
-    #  Environment.
-    stopTime: false
-    # Island Height
-    #   You can use this as island High
-    #   Minimum: 20
-    islandHeight: 60
-    # Sea level height (don't changes this mid-game unless you delete the world)
-    # Minimum is 0, which means you are playing sky block!
-    # If sea level is less than about 10, then players will drop right through it
-    # if it exists. Makes for an interesting variation on SkyBlock.
-    seaLevel: 3
-## GridProtection section
-grid:
-  # Should teleport player who in island world
-  # Into spawn or default spawn
-  teleportSpawn: true
+teamChat: true
 # Enable FastLoad. This usually task the plugin to load
 # 100ms after plugin load. Good but bad looking in console
 fastLoad: false
 # Fast cache
 # Enable to enable fast cache
 # Not every data are saved efficiently
-fastCache: true
+# Bugs are rarely found on this (But recommended to NOT using it)
+fastCache: false
+
 ## Economy section
 economy:
   # Enable economys?
@@ -74,31 +49,6 @@ economy:
 
 ##### Island Related Settings #####
 island:
-   # Space between islands in blocks - NEVER change this mid-game.
-   # Values for a new world:
-   # 400 - puts players distance enough that they usually cannot see each other
-   # 200 - allows some expansion of the protected zone (recommended)
-   # 110 - for compatibility with established worlds. Cozy.
-   # 50 - minimum - not recommended
-   # IF YOU ARE UPGRADING YOU MUST USE YOUR OLD VALUE EXACTLY, E.G., 110
-   # OR RESET YOUR WORLD
-   # Value must be an even number
-   # ---
-   islandSize: 100
-
-   # Level Information
-   #  Stop the time in island world
-   #  Recommended to not set this to 'true' because it will chage the game
-   #  Enviroment.
-   stopTime: false
-   # Island Hieght
-   #   You can use this as island High
-   #   Minimum: 20
-   islandHieght: 60
-   # Default protection range (even number). Min = 0, Recommended = 100
-   # Larger values will take longer to calculate the island level
-   # For optimal performance, keep protection range at leat 16 blocks less than distance.
-   protectionRange: 100
    # Island name limit
    #   Here you can control th
    #   Limit of the island naming size
@@ -110,61 +60,44 @@ island:
    #   NOTE: more higher you made, more lag your server
    #         depends on your schematic blocks
    chunkResetPerBlocks: 256
-   # Sea level height (don't changes this mid-game unless you delete the world)
-   # Minimum is 0, which means you are playing sky block!
-   # If sea level is less than about 10, then players will drop right through it
-   # if it exists. Makes for an interesting variation on skyblock.
-   seaLevel: 3
    # This feature intended in seconds
    # Not in minute
+   # (Unavailable)
    deleteTiming: 180
    # Restricted commands in Island / SkyBlock
    #   level. You must respect the command format
    #   Such as `/example1, /example2`
+   # (Unavailable)
    restrictedCommands: "/exampleCommand, /exampleCommand2"
    # Island reset
    # You can use -1 for unlimited island reset
+   # (Unavailable)
    reset: 3
-   # Island gamemode, you can decide the gamemode
+   # Island gameMode, you can decide this
    gamemode: 0
    # Island addMember time out
    #   You can use -1 for unlimited time but 
-   #   Recomended 20 seconds
+   #   Recommended 20 seconds
    timeOut: 20
    # Island companion names
    #   Your passion to add this or nor
-   #   Syantax: "&aFood?, &eEmergency Food?, &cYour Pet!"
+   #   Syntax: "&aFood?, &eEmergency Food?, &cYour Pet!"
+   #  (Unavailable)
    companionNames: "&aFood?, &eEmergency Food?, &cYour Pet!"
    # Items section
    items:
-     # The usage of this function are to perform that chest's in the schematic
-     # Will be replaced with this items
-     #
-     # If the chest empty, it will use your chest items as items in the chest.
-     # Sometimes, this function is used to avoid crash during translating MC ID's
-     # Into MCPE ID's. They will cause crash, leak and glitch. So always set this
-     # to true;
-     shouldOverride: true
      # Items that will be in the chest when the player starts an island
      # Must be in Nukkit Item format. Format is <ID>:<Qty> or <ID>:<Data>:<Qty>
      # Use <Data> to set the durability of a item or to select sub-items/colors.  
      #
-     # Spawn EGGs is not available yet! do not put I warned you :P
+     # To use this, please set `USE_CONFIG_CHEST` to true on the schematic
+     # configuration to use this properly.
      #
      # Check console for errors and guidance after reloading configuration
      chestItems: 'ICE:2 MELON:1 TORCH:2 BONE:1 325:1:10 PUMPKIN_SEEDS:1 SUGAR_CANE:1 RED_MUSHROOM:1 BROWN_MUSHROOM:1 CACTUS:1 BREAD:1 WHEAT:1 LEATHER_BOOTS:1 LEATHER_HELMET:1 LEATHER_CHESTPLATE:1 LEATHER_LEGGINGS:1'
-
-# This section contains the biomes that can be bought or used
-biomesettings:
-  # The default cost for changing biome. Can be over-ridden by the Biome settings
-  # Default is 100 if this is not set. Cannot be <0.
-  defaultcost: 100
-
-  # Default biome - what every player will start with. Default is PLAINS. See below
-  # for other options
-  defaultbiome: PLAINS
   
 # Protection settings
+# Some features may be unavailable
 protection:
    # Protection Setting Flags:
    # ACID_DAMAGE, ANVIL, BEACON, BED, BREAK_BLOCKS, BREEDING, BREWING, 
@@ -325,7 +258,7 @@ general:
   broadcastmessages: true
   
 ## Database
-# Recomended to NOT change this in mid game
+# Recommended to NOT change this in mid game
 database:
   # Configuration of DATABASE Connection:
   #  DBLIB  - default connection, defined in DbLib plugin
@@ -338,155 +271,9 @@ database:
     # you no need to put `.db` at back
     file-name: database
   MySQL:
+    # Unavailable
     port: 3306
     database: YourDataBase
     username: YourUserName
     password: 1234IsNotAGoodPassword
     host: localhost
-
-schematicsection:
-   # All schematics should be put in the schematics folder
-
-   # Schematic panel - if more than one schematic is available to the player
-   # Show a panel to choose. If this is false, no panel is shown and the starter 
-   # island is picked by permission. If a player has more than one permission
-   # the island selected is undefined - the plugin will pick one.
-   # Permissions are taken from the below schematics section even if the GUI is
-   # not used.
-  useschematicspanel: true
-
-   # Random island, only apply when useschematicspanel is false - if set to false
-   # the plugin will choose the first island it found with the user permissions
-   # to generate a new island. If set to true, the plugin will generate an island
-   # randomly from the list of all islands available to the player.
-  chooseislandrandomly: false
-
-  # This section lists all the schematics available
-  # Settings are:
-  # show - whether this island will show in the GUI or not. Typically used for partner
-  #        schematics, but can be used to temporarily hide schematics.
-  # icon - the icon to show in the GUI. It must be a known Material
-  # order - the priority for showing in the GUI. Lower numbers are shown first.
-  # name - a friendly short name for the schematic. Color codes okay.
-  # description - a longer description. Use | to split lines. Color codes okay.
-  # filename - the filename of the schematic in the schematic folder
-  # useDefaultChest - fill a chest on the island with the items in this config. If false
-  #                   the contents will come from the schematic.
-  # partnerSchematic - the island that will be pasted in the Nether.
-  # biome - the biome this island should have. All pasted blocks will have this biome.
-  # These next settings may cause lag if true. Default is false. Use judiciously.
-  # pasteentities - if the schematic has entities in it (mobs) this will paste them.
-  # usephysics - if true, causes lava or water to flow after being pasted.
-  # pasteair - Only set to true if you need to paste below sea level.
-  # permission - the permission required to use this schematic. It can be anything you like
-  # You can add or remove from this list. If this section is missing, only the default
-  # island works.
-  schematics:
-    # default heading is required
-    default:
-      # Icon - if this is missing or wrong, it will be a MAP
-      icon: DIRT
-      # Order of preference in listing
-      order: 1
-      # Short name - color codes with & okay
-      name: "The Original"
-      # Longer description. Use | for new lines. Color codes okay.
-      description: "Challenging|starter|island!"
-      # Filename of the schematic in the schematic folder
-      filename: island.schematic
-      # Use default chest if true, or use schematic chest contents if false
-      useDefaultChest: true
-      # Which schematic will be used in the opposite world if newnether:true
-      # If there is no partner, this island will be used
-      partnerSchematic: nether
-      #Level handicap zeros the initial island level. 
-      levelHandicap: 3
-
-    # This is the default nether island - do not remove this section!
-    nether:
-      # Hide or show this schematic to players in the GUI
-      show: false
-      icon: NETHERRACK
-      # If the biome is HELL it is assumed this island goes in the Nether
-      biome: HELL
-      name: "NetherBlock Island"
-      description: "An island in the nether|overlooked by a mob tower"
-      filename: nether.schematic
-      # Nether schematics should generally use the schematic chest contents
-      useDefaultChest: false
-      # The partner to this schematic is the default island
-      partnerSchematic: default
-      # Schematics can include entities (mobs) in them and if pasteentities is true,
-      # mobs will be pasted. 
-      pasteentities: true
-      # Usephysics causes lava or water to flow after being pasted. Change to false
-      # if it lags
-      usephysics: true
-      #Level handicap zeros the initial island level. 
-      levelHandicap: 93
-  
-    # Additional heading names can be anything you like, but must be unique
-    island1:
-      # Credit to Antal1609 for this schematic!
-      icon: RED_ROSE
-      order: 2
-      name: "Island Duo"
-      description: "Two close islands!|Double the fun,|but a little easier.|&a[Credit] Antal1609"
-      filename: double.schematic
-      # Schematics can have biomes set when they are created
-      biome: FOREST
-      # If useDefaultChest is false, the items in the schematic will be used
-      # If false, the default chest items will be used, or the list below
-      useDefaultChest: true
-      # Chest items defined here will override the default chest items.
-      # You can set the chest items here in this list
-      # Material:Qty, or Material:Data:Qty
-      #chestItems:
-      #- MELON:1
-      #- ICE:1
-      # Your island companion. Overrides the default setting. If more than one is
-      # listed, one will be chosen at random.
-      # Options are: COW, PIG, SHEEP, CHICKEN, VILLAGER, HORSE, IRON_GOLEM, OCELOT,
-      # RABBIT, WOLF or NOTHING. Default is COW.
-      companion:
-      - CHICKEN 
-      # This is a list of names, picked at random that will apply to the companion
-      # You can add more if you like. If none are listed, the companion will not be
-      # named.
-      companionnames:
-      - "&9[player]'s chicken"
-      - "&dFree-Range Eggs"
-      partnerSchematic: nether
-      #permission: any.perm.you.like
-      #Level handicap zeros the initial island level. 
-      levelHandicap: 9
-
-    # New snowy schematic
-    extrahard:
-      icon: OBSIDIAN
-      order: 3
-      # Ski theme - a black diamond run is hard.
-      name: "&lBlack &bDiamonds"
-      description: "Experts only!|&aMinimal resources|&awith a few diamonds."
-      filename: harder.schematic
-      biome: COLD_BEACH
-      useDefaultChest: false
-      # Chest items defined here will override the default chest items.
-      # You can set the chest items here in this list
-      # Material:Qty, or Material:Data:Qty
-      #chestItems:
-      #- MELON:1
-      #- ICE:1
-      # Schematics that require water or lava to hover can prevent physics when pasting
-      usephysics: false
-      # Schematics may include entities (mobs) in them and if pasteentities is true,
-      # mobs will be pasted.
-      # Example: Setting this to true for this schematic will give a wolf.
-      pasteentities: false
-      partnerSchematic: nether
-      #permission: any.perm.you.like
-      # This optional block determines where the player will spawn. It must be unique in
-      # the schematic and will be replaced by air when pasted.
-      #spawnblock: SPONGE
-      #Level handicap zeros the initial island level. 
-      levelHandicap: 1

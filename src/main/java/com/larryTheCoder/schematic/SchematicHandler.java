@@ -24,8 +24,8 @@ import cn.nukkit.blockentity.BlockEntityChest;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
+import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.level.format.generic.BaseFullChunk;
-import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.level.generator.object.tree.ObjectTree;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
@@ -42,7 +42,6 @@ import org.jnbt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.ref.SoftReference;
 import java.util.*;
 
 /**
@@ -54,19 +53,16 @@ import java.util.*;
 public final class SchematicHandler {
 
     // Avoid OOM during startup OR reload
-    private Map<Integer, SoftReference<ArrayList<IslandBlock>>> islandBlocks;
+    private Map<Integer, ArrayList<IslandBlock>> islandBlocks;
     private Map<Vector3, Map<String, Tag>> tileEntitiesMap;
     private Map<Integer, Map<Configuration, Object>> schemaConfiguration;
-    private Map<Integer, String> schematicKey;
     private Map<Integer, String> configKey;
     // Schematic size
     private short width;
     private short length;
     private short height;
     // Bedrock location (can be null)
-    private Map<Integer, SoftReference<Vector3>> bedrock;
-    private Map<Integer, ArrayList<SoftReference<Vector3>>> chest;
-    private Map<Integer, ArrayList<SoftReference<Vector3>>> welcomeSign;
+    private Map<Integer, Vector3> bedrock;
     // Panel configuration
     private List<String> schematicList;
     // Configuration
@@ -80,7 +76,6 @@ public final class SchematicHandler {
 
     public SchematicHandler(ASkyBlock plugin, File path) {
         Objects.requireNonNull(plugin, "ASkyBlock instance cannot be null");
-        Utils.send("&7Starting Schematic Resource Pack.");
 
         this.plugin = plugin;
 
@@ -98,17 +93,13 @@ public final class SchematicHandler {
         // Start the schematic handler
         islandBlocks = Maps.newHashMap();
         bedrock = Maps.newHashMap();
-        chest = Maps.newHashMap();
-        welcomeSign = Maps.newHashMap();
         tileEntitiesMap = Maps.newHashMap();
         schemaConfiguration = Maps.newHashMap();
-        schematicKey = Maps.newHashMap();
         schematicList = Lists.newArrayList();
         configKey = Maps.newHashMap();
         // List all of the files
-        File[] lists = path.listFiles();
         List<File> list = new ArrayList<>();
-        File configPath = new File(path, "configuration.yml");
+        File configPath = new File(plugin.getDataFolder(), "schematics/configuration.yml");
 
         if (configPath.exists()) {
             configFolder = new Config(configPath);
@@ -129,7 +120,7 @@ public final class SchematicHandler {
             return;
         }
 
-        Utils.send("&7Loading schematic framework"); // Schematic base-framework
+        Utils.send("&7Starting Schematic Resource Pack."); // Schematic base-framework
 
         int id = 0; // The id
         ConfigSection configSection = configFolder.getSection("schematicList");
@@ -142,13 +133,11 @@ public final class SchematicHandler {
                 if (schematicFile.exists()) {
                     id++;
                     list.add(schematicFile);
-                    schematicKey.put(id, fileName);
                     configKey.put(id, key);
                 } else if (plugin.getResource("schematics/" + fileName) != null) {
                     id++;
                     plugin.saveResource("schematics/" + fileName, false);
                     list.add(schematicFile);
-                    schematicKey.put(id, fileName);
                     configKey.put(id, key);
                 } else {
                     Utils.send("&e" + fileName + " &edoes not have a filename. Skipping!");
@@ -223,10 +212,6 @@ public final class SchematicHandler {
                     CompoundTag nbt = (CompoundTag) tag;
                     EntityObject ent = new EntityObject();
                     for (Map.Entry<String, Tag> entry : nbt.getValue().entrySet()) {
-                        if (entry.getKey().equals("id")) {
-                            String ide = ((StringTag) entry.getValue()).getValue().toUpperCase();
-                            // todo
-                        }
 
                         switch (entry.getKey()) {
                             case "Pos":
@@ -244,7 +229,7 @@ public final class SchematicHandler {
                                     List<Tag> pos;
                                     pos = ((ListTag) entry.getValue()).getValue();
                                     ent.setMotion(new Vector3((double) pos.get(0).getValue(), (double) pos.get(1).getValue(),
-                                        (double) pos.get(2).getValue()));
+                                            (double) pos.get(2).getValue()));
                                 }
                                 break;
                             case "Rotation":
@@ -315,21 +300,21 @@ public final class SchematicHandler {
                             case "Item":
                                 if (entry.getValue() instanceof CompoundTag) {
                                     CompoundTag itemTag = (CompoundTag) entry.getValue();
-                                    itemTag.getValue().entrySet().forEach((itemEntry) -> {
-                                        switch (itemEntry.getKey()) {
+                                    itemTag.getValue().forEach((key, value) -> {
+                                        switch (key) {
                                             case "Count":
-                                                if (itemEntry.getValue() instanceof ByteTag) {
-                                                    ent.setCount(((ByteTag) itemEntry.getValue()).getValue());
+                                                if (value instanceof ByteTag) {
+                                                    ent.setCount(((ByteTag) value).getValue());
                                                 }
                                                 break;
                                             case "Damage":
-                                                if (itemEntry.getValue() instanceof ShortTag) {
-                                                    ent.setDamage(((ShortTag) itemEntry.getValue()).getValue());
+                                                if (value instanceof ShortTag) {
+                                                    ent.setDamage(((ShortTag) value).getValue());
                                                 }
                                                 break;
                                             case "id":
-                                                if (itemEntry.getValue() instanceof StringTag) {
-                                                    ent.setId(((StringTag) itemEntry.getValue()).getValue());
+                                                if (value instanceof StringTag) {
+                                                    ent.setId(((StringTag) value).getValue());
                                                 }
                                                 break;
                                             default:
@@ -401,47 +386,35 @@ public final class SchematicHandler {
                 }
             } catch (IOException e) {
                 Utils.send(TextFormat.RED + "Error while attempt to register schematic: " + file.getName());
+                e.printStackTrace();
                 continue;
             }
             Vector3 bedrockLocation = null;
-            ArrayList<SoftReference<Vector3>> chestLocation = Lists.newArrayList();
-            ArrayList<SoftReference<Vector3>> signLocation = Lists.newArrayList();
             for (int x = 0; x < width; ++x) {
                 for (int y = 0; y < height; ++y) {
                     for (int z = 0; z < length; ++z) {
                         int index = y * width * length + z * width + x;
-                        switch (blocks[index]) {
-                            case 7:
-                                // Bedrock
-                                if (bedrockLocation == null || bedrockLocation.getY() < y) {
-                                    bedrockLocation = new Vector3(x, y, z);
-                                }
-                                break;
-                            case 54:
-                                // Chest
-                                chestLocation.add(new SoftReference(new Vector3(x, y, z)));
-                                break;
-                            case 63:
-                                // Sign
-                                signLocation.add(new SoftReference(new Vector3(x, y, z)));
-                                break;
-                            default:
-                                break;
+                        if (blocks[index] == 7) {
+                            if (bedrockLocation == null || bedrockLocation.getY() < y) {
+                                bedrockLocation = new Vector3(x, y, z);
+                            }
                         }
                     }
                 }
             }
 
             // Put the attachable blocks into list
-            bedrock.put(id, new SoftReference(bedrockLocation));
-            chest.put(id, chestLocation);
-            welcomeSign.put(id, signLocation);
+            bedrock.put(id, bedrockLocation);
 
             handleSchematic(blocks, data, id);
             iter.remove();
         }
+        if (islandBlocks.size() == 0) {
+            useDefaultGeneration = true;
+            Utils.send("&cNo schematic found in list. Using default island-generation");
+            return;
+        }
         Utils.send("&eSuccessfully loaded &e" + islandBlocks.size() + " &eSchematic");
-        this.sendTip();
     }
 
     /**
@@ -451,11 +424,11 @@ public final class SchematicHandler {
      * @param data   Data (damage or meta)
      * @param id     The id of the island template
      */
-    public void handleSchematic(short[] blocks, byte[] data, int id) {
-        List blockToAdded = new ArrayList<>();
+    private void handleSchematic(short[] blocks, byte[] data, int id) {
+        ArrayList<IslandBlock> blockToAdded = new ArrayList<>();
         Vector3 EndRock = new Vector3();
-        if (this.bedrock.get(id) != null) {
-            EndRock = this.bedrock.get(id).get();
+        if (bedrock.get(id) != null) {
+            EndRock = this.bedrock.get(id);
         }
         Map<Vector3, Map<String, Tag>> TileEntities = tileEntitiesMap;
         for (int x = 0; x < width; ++x) {
@@ -465,8 +438,8 @@ public final class SchematicHandler {
                     // Only bother if this block is above ground zero and
                     // only bother with air if it is below sea level
                     // TODO: need to check max world height too?
-                    int h = Settings.islandHieght + y - EndRock.getFloorY();
-                    if (h >= 0 && h < 255 && (blocks[index] != 0 || h < Settings.islandHieght)) {
+                    int h = Settings.islandHeight + y - EndRock.getFloorY();
+                    if (h >= 0 && h < 255 && (blocks[index] != 0 || h < Settings.islandHeight)) {
                         // Only bother if the schematic blocks are within the range that y can be
                         IslandBlock block = new IslandBlock(x, y, z, id);
                         block.setBlock(blocks[index], data[index]);
@@ -499,7 +472,7 @@ public final class SchematicHandler {
         if (islandBlocks.get(id) != null) {
             islandBlocks.get(id).clear();
         }
-        islandBlocks.put(id, new SoftReference(blockToAdded));
+        islandBlocks.put(id, blockToAdded);
         setDefaultValue(id);
         prepareIslandValue(id);
     }
@@ -514,22 +487,25 @@ public final class SchematicHandler {
      * @param id    The island id
      * @return True if the player island were generated|null
      */
-    public boolean pasteSchematic(Player p, Position pos, int id, Biome biome) {
-        if (islandBlocks == null || islandBlocks.isEmpty() || islandBlocks.get(id) == null) {
-            createIsland(p, pos);
+    public boolean pasteSchematic(Player p, Position pos, int id, EnumBiome biome) {
+        // Usually this will be detected by this system
+        if (isUseDefaultGeneration() || islandBlocks.get(id) == null) {
+            createIsland(pos);
             return true;
         }
 
         List<IslandBlock> blocks = getIslandBlocks(id);
         try {
             for (IslandBlock block : blocks) {
-                block.paste(pos, true, biome);
+                block.paste(p, pos, biome);
             }
         } catch (Exception ex) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorIslandPC);
+            // Fail-Safe
             for (IslandBlock block : blocks) {
                 block.revert(pos);
             }
+            return false;
         }
         return true;
     }
@@ -541,7 +517,7 @@ public final class SchematicHandler {
      * @return An array of the listed blocks
      */
     public List<IslandBlock> getIslandBlocks(int id) {
-        return islandBlocks.get(id).get();
+        return islandBlocks.get(id);
     }
 
     /**
@@ -568,12 +544,10 @@ public final class SchematicHandler {
      *
      * @param id The schematic id
      */
-    public void setDefaultValue(int id) {
-        if (schemaConfiguration.get(id) == null) {
-            schemaConfiguration.put(id, new HashMap<>());
-        }
+    private void setDefaultValue(int id) {
+        schemaConfiguration.computeIfAbsent(id, k -> new HashMap<>());
         schemaConfiguration.get(id).clear();
-        schemaConfiguration.get(id).put(Configuration.BIOME, Biome.getBiome(Biome.PLAINS));
+        schemaConfiguration.get(id).put(Configuration.BIOME, EnumBiome.PLAINS.biome);
         schemaConfiguration.get(id).put(Configuration.DEFAULT, false);
         schemaConfiguration.get(id).put(Configuration.BLOCK_SPAWN, null);
         schemaConfiguration.get(id).put(Configuration.DESCRIPTION, "Best cozy world");
@@ -590,7 +564,7 @@ public final class SchematicHandler {
      * @param type  Type of the configuration
      * @param value Value of the configuration
      */
-    public void setIslandValue(int id, Configuration type, Object value) {
+    private void setIslandValue(int id, Configuration type, Object value) {
         if (schemaConfiguration.get(id).containsKey(type)) {
             schemaConfiguration.get(id).remove(type);
             schemaConfiguration.get(id).put(type, value);
@@ -636,7 +610,7 @@ public final class SchematicHandler {
                 block.setDamage(Integer.parseInt(sting));
             }
         }
-        configKey.remove(id); // Remove from system so THEY WONT MAKE OOM's
+        configKey.remove(id); // Remove them to serve more memory
 
         // Set the configuration into system (can be null)
         this.setIslandValue(id, Configuration.DEFAULT, defaultPriority);
@@ -645,7 +619,7 @@ public final class SchematicHandler {
         this.setIslandValue(id, Configuration.PERMISSION, permission);
         this.setIslandValue(id, Configuration.USE_CONFIG_CHEST, useConfigChest);
         this.setIslandValue(id, Configuration.RATING, rating);
-        this.setIslandValue(id, Configuration.BIOME, Biome.getBiome(biome));
+        this.setIslandValue(id, Configuration.BIOME, EnumBiome.valueOf(biome));
         this.setIslandValue(id, Configuration.PASTE_ENTITIES, usePasteEntity);
     }
 
@@ -659,77 +633,69 @@ public final class SchematicHandler {
         return (boolean) schemaConfiguration.get(id).get(Configuration.USE_CONFIG_CHEST);
     }
 
-    private void createIsland(Player p, Position pos) {
-        int groundHeight = pos.getFloorY();
-        int X = pos.getFloorX();
-        int Z = pos.getFloorZ();
-        Level world = pos.level;
+    /**
+     * Create a beautiful island.
+     *
+     * @param pos Position of the palace where the island will generates
+     */
+    private void createIsland(Position pos) {
+        int locX = pos.getFloorX();
+        int locY = pos.getFloorY();
+        int locZ = pos.getFloorZ();
+        Level level = pos.getLevel();
+
         // bedrock - ensures island are not overwritten
-        for (int x = X; x < X + 1; ++x) {
-            for (int z = Z; z < Z + 1; ++z) {
-                world.setBlockIdAt(x, groundHeight, z, Block.BEDROCK);
+        level.setBlockIdAt(locX, locY, locZ, Block.BEDROCK);
+
+        // Other layers
+        // Looking at direction:
+        //    UP            LEFT
+        // * + + + *     * + + + *
+        // + + + + +     * + + + *
+        // + + + + +       * + *
+        // * + + + *         #
+        // * = Half cutting, # = Bedrock;
+
+        // First down upper (First layer)
+        level.setBlockIdAt(locX, locY + 1, locZ, Block.DIRT);
+        level.setBlockIdAt(locX + 1, locY + 1, locZ, Block.DIRT);
+        level.setBlockIdAt(locX, locY + 1, locZ + 1, Block.DIRT);
+        level.setBlockIdAt(locX - 1, locY + 1, locZ, Block.DIRT);
+        level.setBlockIdAt(locX, locY + 1, locZ - 1, Block.DIRT);
+
+        // Second half-top layer (Second layer)
+        for (int x = locX - 3; x < locX + 3; x++) {
+            for (int z = locZ - 3; z < locZ + 3; z++) {
+                level.setBlockIdAt(x, locY + 2, z, Block.DIRT);
+                level.setBlockIdAt(x, locY + 3, z, Block.GRASS);
             }
         }
-        // Add some dirt and grass
-        for (int x = X - 1; x < X + 3; ++x) {
-            for (int z = X - 1; z < X + 3; ++z) {
-                world.setBlockIdAt(x, groundHeight + 1, z, Block.DIRT);
-                world.setBlockIdAt(x, groundHeight + 2, z, Block.DIRT);
-            }
-        }
-        for (int x = X - 2; x < X + 4; ++x) {
-            for (int z = Z - 2; z < Z + 4; ++z) {
-                world.setBlockIdAt(x, groundHeight + 3, z, Block.DIRT);
-                world.setBlockIdAt(x, groundHeight + 4, z, Block.DIRT);
-            }
-        }
-        for (int x = X - 3; x < X + 5; ++x) {
-            for (int z = Z - 3; z < Z + 5; ++z) {
-                world.setBlockIdAt(x, groundHeight + 5, z, Block.DIRT);
-                world.setBlockIdAt(x, groundHeight + 6, z, Block.DIRT);
-                world.setBlockIdAt(x, groundHeight + 7, z, Block.GRASS);
-            }
-        }
+
+
         // Then cut off the corners to make it round-ish
-        for (int x_space = X - 2; x_space <= X + 2; x_space += 4) {
-            for (int z_space = Z - 2; z_space <= Z + 2; z_space += 4) {
-                world.setBlockIdAt(x_space, groundHeight + 3, z_space, Block.AIR);
-                world.setBlockIdAt(x_space, groundHeight + 4, z_space, Block.AIR);
+        for (int x_space = locX - 3; x_space <= locX + 3; x_space += 4) {
+            for (int z_space = locZ - 3; z_space <= locZ + 3; z_space += 4) {
+                level.setBlockIdAt(x_space, locY + 2, z_space, Block.AIR);
+                level.setBlockIdAt(x_space, locY + 3, z_space, Block.AIR);
             }
         }
 
-        for (int y = groundHeight - 1; y < groundHeight + 8; ++y) {
-            for (int x_space = X - 3; x_space <= X + 3; x_space += 6) {
-                for (int z_space = -3; z_space <= Z + 3; z_space += 6) {
-                    world.setBlockIdAt(x_space, y, z_space, Block.AIR);
-                }
-            }
-        }
-        int Xt = X;
-        int Zt = Z;
-        // First place
-        world.setBlockIdAt(Xt - 1, groundHeight + 1, Zt + 1, Block.AIR);
-        world.setBlockIdAt(Xt - 2, groundHeight + 1, Zt + 2, Block.AIR);
-        world.setBlockIdAt(Xt - 1, groundHeight + 1, Zt - 1, Block.AIR);
-        world.setBlockIdAt(Xt - 2, groundHeight + 1, Zt - 2, Block.AIR);
-        // tree
-        ObjectTree.growTree(world, X + 10, groundHeight + 8, Z + 11, new NukkitRandom(), BlockSapling.OAK);
-        this.initChest(world, X, groundHeight, Z, p);
-    }
+        // Done making island base Joe! Now we place the sweets (Tree)
+        ObjectTree.growTree(level, locX, locY + 4, locZ, new NukkitRandom(), BlockSapling.OAK);
 
-    private void initChest(Level lvl, int x, int y, int z, Player p) {
-        BaseFullChunk chunk = lvl.getChunk(x >> 4, z >> 4);
-        lvl.setBlockIdAt(x, y, z, Block.CHEST);
+        // Ok Joe! Tree had been magically summon! Now place the stuff we used
+        BaseFullChunk chunk = level.getChunk(locX >> 4, locZ >> 4);
+        level.setBlockIdAt(locX + 1, locY + 4, locZ + 1, Block.CHEST);
 
         cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-            .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
-            .putString("id", BlockEntity.CHEST)
-            .putInt("x", x)
-            .putInt("y", y)
-            .putInt("z", z);
+                .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
+                .putString("id", BlockEntity.CHEST)
+                .putInt("x", locX)
+                .putInt("y", locY)
+                .putInt("z", locZ);
 
         BlockEntityChest e = new BlockEntityChest(chunk, nbt);
-        lvl.addBlockEntity(e);
+        level.addBlockEntity(e);
         e.spawnToAll();
 
         // Items
@@ -753,28 +719,6 @@ public final class SchematicHandler {
             items.put(9, Item.get(Item.STRING, 0, 12));
             items.put(10, Item.get(Item.POISONOUS_POTATO, 0, 32));
             e.getInventory().setContents(items);
-        }
-
-    }
-
-    public void sendTip() {
-        Random rand = new Random();
-        switch (rand.nextInt(5)) {
-            case 1:
-                Utils.send("&eTIP: &eUse the Minecraft: PE Schematic. MCPC Schematic might result wrong blocks");
-                break;
-            case 2:
-                Utils.send("&eTIP: &eWhile you standing nearby island offset. Don't forget to sneak before getting there.");
-                break;
-            case 3:
-                Utils.send("&eTIP: &eDid you know that this schematic are provided by @tastybento original code?");
-                break;
-            case 4:
-                Utils.send("&eTIP: &eThis plugin can also demand on single world production server. Only use /isa setSpawn in world");
-                break;
-            default:
-                Utils.send("&eFrom author: This is not an abandoned project! This always be updated once a week");
-
         }
     }
 

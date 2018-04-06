@@ -28,7 +28,6 @@ import com.larryTheCoder.utils.Utils;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -78,7 +77,7 @@ public final class ASConnection {
         });
     }
 
-    public void createTables(boolean updateCheck) throws SQLException, ClassNotFoundException, InterruptedException {
+    private void createTables(boolean updateCheck) throws SQLException, ClassNotFoundException, InterruptedException {
         if (closed) {
             String[] tables = new String[]{"island", "worlds", "players"};
             DatabaseMetaData meta = this.con.getMetaData();
@@ -97,55 +96,52 @@ public final class ASConnection {
             try (Statement set = this.con.createStatement()) {
                 //createdDate updatedDate votes
                 set.addBatch("CREATE TABLE IF NOT EXISTS `island` (`id` INTEGER,"
-                    + "`islandId` INTEGER NOT NULL,"
-                    + "`x` INTEGER NOT NULL,"
-                    + "`y` INTEGER NOT NULL,"
-                    + "`z` INTEGER NOT NULL,"
-                    + "`spawnX` INTEGER,"
-                    + "`spawnY` INTEGER,"
-                    + "`spawnZ` INTEGER,"
-                    + "`isSpawn` BOOLEAN NOT NULL,"
-                    + "`psize` INTEGER NOT NULL,"
-                    + "`owner` VARCHAR NOT NULL,"
-                    + "`name` VARCHAR NOT NULL,"
-                    + "`world` VARCHAR NOT NULL,"
-                    + "`protection` VARCHAR NOT NULL,"
-                    + "`biome` VARCHAR NOT NULL,"
-                    + "`locked` INTEGER NOT NULL)");
+                        + "`islandId` INTEGER NOT NULL,"
+                        + "`x` INTEGER NOT NULL,"
+                        + "`y` INTEGER NOT NULL,"
+                        + "`z` INTEGER NOT NULL,"
+                        + "`spawnX` INTEGER,"
+                        + "`spawnY` INTEGER,"
+                        + "`spawnZ` INTEGER,"
+                        + "`isSpawn` BOOLEAN NOT NULL,"
+                        + "`psize` INTEGER NOT NULL,"
+                        + "`owner` VARCHAR NOT NULL,"
+                        + "`name` VARCHAR NOT NULL,"
+                        + "`world` VARCHAR NOT NULL,"
+                        + "`protection` VARCHAR NOT NULL,"
+                        + "`biome` VARCHAR NOT NULL,"
+                        + "`locked` INTEGER NOT NULL)");
                 //+ "`active` INTEGER NOT NULL)");
                 set.addBatch("CREATE TABLE IF NOT EXISTS `worlds` (`world` VARCHAR)");
                 set.addBatch("CREATE TABLE IF NOT EXISTS `players` (`player` VARCHAR NOT NULL,"
-                    + "`homes` INTEGER NOT NULL,"
-                    + "`resetleft` INTEGER NOT NULL,"
-                    + "`banlist` VARCHAR,"
-                    + "`teamleader` VARCHAR,"
-                    + "`teamislandlocation` VARCHAR,"
-                    + "`inteam` BOOLEAN,"
-                    + "`islandlvl` INTEGER,"
-                    + "`members` VARCHAR,"
-                    + "`challengelist` VARCHAR,"
-                    + "`challengelisttimes` VARCHAR,"
-                    + "`name` VARCHAR,"
-                    + "`locale` VARCHAR NOT NULL)");
+                        + "`homes` INTEGER NOT NULL,"
+                        + "`resetleft` INTEGER NOT NULL,"
+                        + "`banlist` VARCHAR,"
+                        + "`teamleader` VARCHAR,"
+                        + "`teamislandlocation` VARCHAR,"
+                        + "`inteam` BOOLEAN,"
+                        + "`islandlvl` INTEGER,"
+                        + "`members` VARCHAR,"
+                        + "`challengelist` VARCHAR,"
+                        + "`challengelisttimes` VARCHAR,"
+                        + "`name` VARCHAR,"
+                        + "`locale` VARCHAR NOT NULL)");
                 set.executeBatch();
                 set.clearBatch();
             }
-            if (updateCheck == false) {
-
-            }
             closed = false;
-        } else if (closed == true && db != null) {
+        } else if (db != null) {
             Utils.send("§cThis a problem. The SQLManager is closed but the Database is not...");
             Utils.send("§cYou might to stop server for this kind of problem to fix this error");
             Utils.send("&cError Code: 0x3f");
-        } else if (closed == false && db == null) {
+        } else {
             Utils.send("§cThis a problem. The SQLManager is open but the Database is not...");
             Utils.send("§cYou might to stop server for this kind of problem to fix this error");
             Utils.send("&cError Code: 0x4f");
         }
     }
 
-    public boolean isValid() {
+    private boolean isValid() {
         try {
             if (con.isClosed()) {
                 return false;
@@ -161,7 +157,7 @@ public final class ASConnection {
         }
     }
 
-    public void reconnect() {
+    private void reconnect() {
         try {
             close();
             closed = false;
@@ -182,7 +178,7 @@ public final class ASConnection {
         }
     }
 
-    public boolean setSpawnPosition(Position pos) {
+    public void setSpawnPosition(Position pos) {
         int x = pos.getFloorX();
         int y = pos.getFloorY();
         int z = pos.getFloorZ();
@@ -193,16 +189,14 @@ public final class ASConnection {
             stmt.addBatch();
             stmt.executeBatch();
             stmt.close();
-            return true;
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
-        return false;
     }
 
     public IslandData getIslandLocation(String levelName, int X, int Z) {
-        int id = plugin.getIsland().generateIslandKey(X, Z);
-        IslandData database = new IslandData(levelName, X, Z, Settings.protectionrange);
+        int id = plugin.getIsland().generateIslandKey(X, Z, levelName);
+        IslandData database = new IslandData(levelName, X, Z, plugin.getSettings(levelName).getProtectionRange());
         if (enableFastCache) {
             // Get a list of island data on cache
             for (IslandData pd : islandCache) {
@@ -212,18 +206,17 @@ public final class ASConnection {
             }
         }
         try (Statement stmt = con.createStatement()) {
-            String l = levelName;
-            ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE(`world` = '" + l + "' AND `islandId` = '" + id + "')");
+            ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE(`world` = '" + levelName + "' AND `islandId` = '" + id + "')");
             if (set.isClosed()) {
                 return database;
             }
-            while (set.next()) {
-                database = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
-                if (enableFastCache) {
-                    islandCache.add(database);
-                }
-                break;
+
+            set.next();
+            database = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
+            if (enableFastCache) {
+                islandCache.add(database);
             }
+
             stmt.close();
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
@@ -236,10 +229,8 @@ public final class ASConnection {
         if (enableFastCache) {
             // get the data from cache
             islandCache.stream().filter(
-                (pd3) -> (pd3.getOwner().equalsIgnoreCase(owner)))
-                .forEachOrdered((pd3) -> {
-                    pd.add(pd3);
-                });
+                    (pd3) -> (pd3.getOwner().equalsIgnoreCase(owner)))
+                    .forEachOrdered(pd::add);
             // Not empty: Data in list contains player islands
             if (!pd.isEmpty()) {
                 return pd; // Return
@@ -259,9 +250,7 @@ public final class ASConnection {
         }
         if (enableFastCache) {
             // Save the island into cache
-            pd.forEach((pda) -> {
-                islandCache.add(pda);
-            });
+            islandCache.addAll(pd);
         }
         return pd;
     }
@@ -271,10 +260,8 @@ public final class ASConnection {
         if (enableFastCache) {
             // get the data from cache
             islandCache.stream().filter(
-                (pd3) -> (pd3.getOwner().equalsIgnoreCase(owner) && pd3.getLevelName().equalsIgnoreCase(levelName)))
-                .forEachOrdered((pd3) -> {
-                    pd.add(pd3);
-                });
+                    (pd3) -> (pd3.getOwner().equalsIgnoreCase(owner) && pd3.getLevelName().equalsIgnoreCase(levelName)))
+                    .forEachOrdered(pd::add);
             // Not empty: Data in list contains player islands
             if (!pd.isEmpty()) {
                 return pd; // Return
@@ -294,9 +281,7 @@ public final class ASConnection {
         }
         if (enableFastCache) {
             // Save the island into cache
-            pd.forEach((pda) -> {
-                islandCache.add(pda);
-            });
+            islandCache.addAll(pd);
         }
         return pd;
     }
@@ -314,7 +299,33 @@ public final class ASConnection {
         try (Statement stmt = con.createStatement()) {
             ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE(`owner` = '" + name + "' AND `id` = '" + homes + "')");
             if (set.isClosed()) {
-                return pd;
+                return null;
+            }
+            pd = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
+            stmt.close();
+        } catch (SQLException ex) {
+            JDBCUtilities.printSQLException(ex);
+        }
+        if (enableFastCache) {
+            islandCache.add(pd);
+        }
+        return pd;
+    }
+
+    public IslandData getIsland(String name, String homeName) {
+        // safe block
+        IslandData pd = null;
+        if (enableFastCache) {
+            for (IslandData pda : islandCache) {
+                if (pda.getOwner().equals(name) && pda.getName().equalsIgnoreCase(homeName)) {
+                    return pda;
+                }
+            }
+        }
+        try (Statement stmt = con.createStatement()) {
+            ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE(`owner` = '" + name + "' AND `name` = '" + homeName + "')");
+            if (set.isClosed()) {
+                return null;
             }
             pd = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
             stmt.close();
@@ -328,29 +339,20 @@ public final class ASConnection {
     }
 
     public boolean deleteIsland(IslandData pd) {
-        // deprecated block
-        boolean result = false;
-        try {
-            PreparedStatement set;
-            if (pd.getId() >= 0) {
-                set = con.prepareStatement("DELETE FROM `island` WHERE(`id` = ? AND `owner` = ?)");
-                set.setInt(1, pd.getId());
-                set.setString(2, pd.getOwner());
-            } else {
-                set = con.prepareStatement("DELETE FROM `island` WHERE(`world` = ? AND `x` = ? AND `z` = ?)");
-                set.setString(1, pd.getLevelName());
-                set.setInt(2, pd.getCenter().getFloorX());
-                set.setInt(3, pd.getCenter().getFloorZ());
-            }
-            set.execute();
-            result = true;
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
         if (enableFastCache) {
             islandCache.remove(pd);
         }
-        return result;
+        try (PreparedStatement set = con.prepareStatement("DELETE FROM `island` WHERE(`id` = ? AND `owner` = ?)")) {
+            set.setInt(1, pd.getId());
+            set.setString(2, pd.getOwner());
+
+            set.execute();
+            set.close();
+            return true;
+        } catch (SQLException ex) {
+            JDBCUtilities.printSQLException(ex);
+        }
+        return false;
     }
 
     public IslandData getSpawn() {
@@ -362,13 +364,11 @@ public final class ASConnection {
         try (Statement stmt = con.createStatement()) {
             ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE `isSpawn` = '1'");
             if (set.isClosed()) {
-                return pd;
+                return null;
             }
+            set.next();
+            pd = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
 
-            while (set.next()) {
-                pd = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
-                break;
-            }
             stmt.close();
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
@@ -390,12 +390,11 @@ public final class ASConnection {
         try (Statement stmt = con.createStatement()) {
             ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE `islandId` = '" + id + "'");
             if (set.isClosed()) {
-                return pd;
+                return null;
             }
-            while (set.next()) {
-                pd = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
-                break;
-            }
+            set.next();
+            pd = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
+
             stmt.close();
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
@@ -536,21 +535,21 @@ public final class ASConnection {
         try (Statement kt = con.createStatement()) {
             ResultSet set = kt.executeQuery("SELECT * FROM `players` WHERE `player` = '" + st + "'");
             if (set.isClosed()) {
-                return pd;
+                return null;
             }
             pd = new PlayerData(
-                set.getString("player"),
-                set.getInt("homes"),
-                Utils.stringToArray(set.getString("members"), ", "),
-                (HashMap<String, Boolean>) Utils.stringToMap(set.getString("challengelist")),
-                (HashMap<String, Integer>) Utils.stringToMap(set.getString("challengelisttimes")),
-                set.getInt("islandlvl"),
-                set.getBoolean("inTeam"),
-                set.getString("teamLeader"),
-                set.getString("teamIslandLocation"),
-                set.getInt("resetleft"),
-                Utils.stringToArray(set.getString("banList"), ", "),
-                set.getString("locale"));
+                    set.getString("player"),
+                    set.getInt("homes"),
+                    Utils.stringToArray(set.getString("members"), ", "),
+                    Utils.stringToMap(set.getString("challengelist")),
+                    Utils.stringToMap(set.getString("challengelisttimes")),
+                    set.getInt("islandlvl"),
+                    set.getBoolean("inTeam"),
+                    set.getString("teamLeader"),
+                    set.getString("teamIslandLocation"),
+                    set.getInt("resetleft"),
+                    Utils.stringToArray(set.getString("banList"), ", "),
+                    set.getString("locale"));
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
@@ -560,19 +559,19 @@ public final class ASConnection {
     public boolean createPlayer(String p) {
         // TESTED SECCESS
         try (PreparedStatement set = con.prepareStatement("INSERT INTO `players` ("
-            + "`player`, "
-            + "`homes`, "
-            + "`resetleft`, "
-            + "`banlist`, "
-            + "`teamleader`, "
-            + "`teamislandlocation`, "
-            + "`inteam` , "
-            + "`islandlvl`, "
-            + "`members`,"
-            + "`challengelist`, "
-            + "`challengelisttimes`, "
-            + "`name`, "
-            + "`locale`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
+                + "`player`, "
+                + "`homes`, "
+                + "`resetleft`, "
+                + "`banlist`, "
+                + "`teamleader`, "
+                + "`teamislandlocation`, "
+                + "`inteam` , "
+                + "`islandlvl`, "
+                + "`members`,"
+                + "`challengelist`, "
+                + "`challengelisttimes`, "
+                + "`name`, "
+                + "`locale`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
             PlayerData pd = new PlayerData(p, 0, Settings.reset);
             set.setString(1, pd.playerName);
             set.setInt(2, pd.homes);
@@ -603,20 +602,20 @@ public final class ASConnection {
     public boolean savePlayerData(PlayerData pd) {
         // TESTED SECCESS
         try (PreparedStatement stmt = con.prepareStatement(
-            "UPDATE `players` SET "
-                + "`homes` = ?, "
-                + "`resetleft` = ?, "
-                + "`banlist` = ?, "
-                + "`teamleader` = ?, "
-                + "`teamislandlocation` = ?, "
-                + "`inteam` = ?, "
-                + "`islandlvl` = ?, "
-                + "`members` = ?, "
-                + "`challengelist` = ?, "
-                + "`challengelisttimes` = ?, "
-                + "`name` = ?, "
-                + "`locale` = ?, "
-                + "WHERE `player` = '" + pd.playerName + "'")) {
+                "UPDATE `players` SET "
+                        + "`homes` = ?, "
+                        + "`resetleft` = ?, "
+                        + "`banlist` = ?, "
+                        + "`teamleader` = ?, "
+                        + "`teamislandlocation` = ?, "
+                        + "`inteam` = ?, "
+                        + "`islandlvl` = ?, "
+                        + "`members` = ?, "
+                        + "`challengelist` = ?, "
+                        + "`challengelisttimes` = ?, "
+                        + "`name` = ?, "
+                        + "`locale` = ?, "
+                        + "WHERE `player` = '" + pd.playerName + "'")) {
             stmt.setInt(1, pd.homes);
             stmt.setInt(2, pd.resetleft);
             stmt.setString(3, Utils.arrayToString(pd.banList));

@@ -18,18 +18,17 @@
 package com.larryTheCoder.task;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
+import cn.nukkit.level.biome.Biome;
+import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.level.format.generic.BaseFullChunk;
-import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.scheduler.Task;
-import cn.nukkit.utils.MainLogger;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.storage.WorldSettings;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
@@ -53,6 +52,7 @@ public class UpdateBiomeTask extends Task {
     public void onRun(int currentTick) {
         Player p = player.isPlayer() ? (Player) player : null;
         Level level = plugin.getServer().getLevelByName(pd.getLevelName());
+        WorldSettings settings = plugin.getSettings(pd.getLevelName());
 
         int minX = pd.getMinProtectedX();
         int minZ = pd.getMinProtectedZ();
@@ -88,12 +88,12 @@ public class UpdateBiomeTask extends Task {
                 public void run() {
                     Iterator<BaseFullChunk> iChunk = biomeToChanged.iterator();
                     int count = 0;
-                    while (iChunk.hasNext() && count++ < Settings.cleanrate) {
+                    while (iChunk.hasNext() && count++ < Settings.cleanRate) {
                         BaseFullChunk chunk = iChunk.next();
-                        for (int y = Settings.seaLevel; y < 255 - Settings.seaLevel; y++) {
+                        for (int y = settings.getSeaLevel(); y < 255 - settings.getSeaLevel(); y++) {
                             for (int x = 0; x < 16; x++) {
                                 for (int z = 0; z < 16; z++) {
-                                    chunk.setBiomeId(x, z, Biome.getBiome(pd.getBiome()).getId());
+                                    chunk.setBiomeId(x, z, getBiome(pd.getBiome()).getId());
                                 }
                             }
                         }
@@ -103,11 +103,25 @@ public class UpdateBiomeTask extends Task {
                     if (biomeToChanged.isEmpty()) {
                         player.sendMessage(plugin.getPrefix() + plugin.getLocale(p).biomeChangeComplete.replace("[biome]", pd.getBiome()));
                         this.cancel();
-                        return;
                     }
                 }
 
             }.runTaskTimer(plugin, 0, 20);
         }
+    }
+
+    /**
+     * Get Biome by name.
+     *
+     * @param name Name of biome. Name could contain symbol "_" instead of space
+     * @return Biome. Null - when biome was not found
+     */
+    private Biome getBiome(String name) {
+        for (Biome biome : Biome.biomes) {
+            if (biome != null) {
+                if (biome.getName().equalsIgnoreCase(name.replace("_", " "))) return biome;
+            }
+        }
+        return EnumBiome.PLAINS.biome;
     }
 }

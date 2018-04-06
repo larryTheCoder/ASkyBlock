@@ -36,9 +36,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Utils {
 
+    public static String SCHEMATIC_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "schematics";
     public static String LOCALES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "locale";
     public static String DIRECTORY = ASkyBlock.get().getDataFolder() + File.separator;
-    public static ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap<>();
 
     public static Config loadYamlFile(String file) {
         File yamlFile = new File(DIRECTORY + file);
@@ -95,8 +96,7 @@ public class Utils {
         Long curMS = System.currentTimeMillis();
         Long msDelta = curMS - msBefore;
         Long msWaitTime = 1000 * (long) seconds;
-        String e = Utils.convertTimer(msWaitTime - msDelta);
-        return e;
+        return Utils.convertTimer(msWaitTime - msDelta);
     }
 
     /**
@@ -176,7 +176,7 @@ public class Utils {
     }
 
     // MAPPING STRINGS ---- Start ----
-    public static Map stringToMap(String append) {
+    public static HashMap stringToMap(String append) {
         if (append.isEmpty()) {
             return new HashMap<>();
         }
@@ -320,5 +320,9 @@ public class Utils {
             result.add(color + line);
         }
         return result;
+    }
+
+    public static void sendDebug(String message) {
+        Server.getInstance().getLogger().debug(message);
     }
 }

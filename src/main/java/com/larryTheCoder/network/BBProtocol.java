@@ -32,6 +32,6 @@ public class BBProtocol {
     // TODO: More catch up on network protocols
 
     public BBProtocol() {
-        // TODO: Server that respond this connection, PLEASE DONATE TO CONTINUE THIS PROJECT
+        // TODO: Server that respond this connection
     }
 }

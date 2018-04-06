@@ -21,7 +21,6 @@ import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.storage.WorldSettings;
-import com.larryTheCoder.utils.Utils;
 
 /**
  * @author Adam Matthew
@@ -67,7 +66,7 @@ public class LeaveSubCommand extends SubCommand {
                 return true;
             }
         }
-        // Check if sender is in gamemode 1
+        // Check if sender is in gameMode 1
         if (!pt.isOp()) {
             if (pt.getGamemode() != 0) {
                 pt.setGamemode(0);
@@ -78,8 +77,6 @@ public class LeaveSubCommand extends SubCommand {
         if (getPlugin().getDatabase().getSpawn() != null) {
             pt.teleport(getPlugin().getDatabase().getSpawn().getCenter());
         } else {
-            Utils.send("&c[READ ME] &eThe default spawn world not found. Please use /is "
-                + "setspawn in-game. &aUsing default world");
             pt.teleport(getPlugin().getServer().getDefaultLevel().getSafeSpawn());
         }
         return true;

@@ -22,8 +22,8 @@ import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.HandlerList;
 import cn.nukkit.level.Location;
+import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.utils.Settings;
 
 /**
  * @author Adam Matthew
@@ -89,6 +89,6 @@ public class IslandCreateEvent extends Event implements Cancellable {
      * @return the islandDistance
      */
     public int getIslandDistance() {
-        return Settings.islandDistance;
+        return ASkyBlock.get().getSettings(island.getLevelName()).getIslandDistance();
     }
 }

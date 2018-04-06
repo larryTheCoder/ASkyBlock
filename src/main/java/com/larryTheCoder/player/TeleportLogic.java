@@ -86,10 +86,9 @@ public class TeleportLogic implements Listener {
                     player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Teleported to your island #" + home);
                 }
                 player.teleport(targetLoc.add(0, 0.35), PlayerTeleportEvent.TeleportCause.PLUGIN); // Adjust spawn hieght
-                // Teleport in default gamemode
-                if (Settings.gamemode != -1) {
-                    // BETA Testing: Add this later
-                    //player.setGamemode(Settings.gamemode);
+                // Teleport in default gameMode
+                if (Settings.gameMode != -1) {
+                    player.setGamemode(Settings.gameMode);
                 }
             }, Utils.secondsAsMillis(teleportDelay));
             time.put(player.getName(), Utils.secondsAsMillis(teleportDelay));

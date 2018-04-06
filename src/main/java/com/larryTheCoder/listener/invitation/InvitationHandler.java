@@ -73,7 +73,6 @@ public class InvitationHandler {
      *
      * @param sender
      * @param receiver
-     * @param island
      */
     public void addInvitation(Player sender, Player receiver) {
         sender.sendMessage(plugin.getPrefix() + plugin.getLocale(sender).generalSuccess);

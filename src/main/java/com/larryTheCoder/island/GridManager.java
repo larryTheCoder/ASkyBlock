@@ -17,21 +17,17 @@
 package com.larryTheCoder.island;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.math.Vector3;
-import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.BlockUtil;
-import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import static cn.nukkit.math.BlockFace.DOWN;
@@ -43,7 +39,6 @@ import static cn.nukkit.math.BlockFace.UP;
 public class GridManager {
 
     private final ASkyBlock plugin;
-    private MainLogger deb = Server.getInstance().getLogger();
 
     public GridManager(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -57,7 +52,7 @@ public class GridManager {
      * @param l - Location to be checked
      * @return true if safe, otherwise false
      */
-    public static boolean isSafeLocation(final Position l) {
+    private static boolean isSafeLocation(final Position l) {
         if (l == null) {
             return false;
         }
@@ -65,23 +60,15 @@ public class GridManager {
         final Block space1 = l.getLevelBlock();
         final Block space2 = l.getLevelBlock().getSide(UP);
         return ground.isSolid()
-            && BlockUtil.isBreathable(space1)
-            && BlockUtil.isBreathable(space2);
-    }
-
-    public boolean onGrid(Location pos) {
-        return onGrid(pos.getFloorX(), pos.getFloorZ());
-    }
-
-    public boolean onGrid(int x, int z) {
-        return x % Settings.islandDistance == 0 || z % Settings.islandDistance == 0;
+                && BlockUtil.isBreathable(space1)
+                && BlockUtil.isBreathable(space2);
     }
 
     /**
      * Checks if an online player is on their island, on a team island or on a
      * coop island
      *
-     * @param player
+     * @param player The target of player
      * @return true if on valid island, false if not
      */
     public boolean playerIsOnIsland(final Player player) {
@@ -95,29 +82,23 @@ public class GridManager {
      * @param loc    The geo location of
      * @return true if the location is within home boundaries
      */
-    public boolean locationIsAtHome(final Player player, Location loc) {
+    private boolean locationIsAtHome(final Player player, Location loc) {
         // Make a list of test locations and test them
         Set<Location> islandTestLocations = new HashSet<>();
         if (plugin.getIsland().checkIsland(player)) {
             IslandData pd = plugin.getIslandInfo(player);
             islandTestLocations.add(new Location(0, 0, 0, 0, 0, plugin.getServer().getLevelByName(pd.getLevelName())).add(pd.getCenter()));
-        } else if (plugin.getTManager().hasTeam(player)) {
-//            islandTestLocations.add(plugin.getPlayers().getTeamIslandLocation(player.getUniqueId()));
-//            if (Settings.createNether && Settings.newNether && ASkyBlock.getNetherWorld() != null) {
-//                islandTestLocations.add(netherIsland(plugin.getPlayers().getTeamIslandLocation(player.getUniqueId())));
-//            }
         }
         if (islandTestLocations.isEmpty()) {
             return false;
         }
         // Run through all the locations
-        for (Iterator<Location> it = islandTestLocations.iterator(); it.hasNext(); ) {
-            Location islandTestLocation = it.next();
+        for (Location islandTestLocation : islandTestLocations) {
             // Must be in the same world as the locations being checked
             // Note that getWorld can return null if a world has been deleted on the server
             if (islandTestLocation != null && islandTestLocation.getLevel() != null && islandTestLocation.getLevel().equals(loc.getLevel())) {
-                int protectionRange = Settings.protectionrange;
-                if (plugin.getIsland().checkIslandAt(islandTestLocation.getLevel()) == true) {
+                int protectionRange = plugin.getSettings(islandTestLocation.getLevel().getName()).getProtectionRange();
+                if (plugin.getIsland().checkIslandAt(islandTestLocation.getLevel())) {
                     // Get the protection range for this location if possible
                     IslandData island = plugin.getIsland().GetIslandAt(islandTestLocation);
                     if (island != null) {
@@ -126,9 +107,9 @@ public class GridManager {
                     }
                 }
                 if (loc.getX() > islandTestLocation.getX() - protectionRange / 2
-                    && loc.getX() < islandTestLocation.getX() + protectionRange / 2
-                    && loc.getZ() > islandTestLocation.getZ() - protectionRange / 2
-                    && loc.getZ() < islandTestLocation.getZ() + protectionRange / 2) {
+                        && loc.getX() < islandTestLocation.getX() + protectionRange / 2
+                        && loc.getZ() > islandTestLocation.getZ() - protectionRange / 2
+                        && loc.getZ() < islandTestLocation.getZ() + protectionRange / 2) {
                     return true;
                 }
             }
@@ -158,7 +139,7 @@ public class GridManager {
             }
 
             Location locationSafe;
-            if (pd.homeX != 0 && pd.homeY != 0 && pd.homeZ != 0) {
+            if (pd.homeX != 0 || pd.homeY != 0 || pd.homeZ != 0) {
                 locationSafe = pd.getHome();
             } else {
                 locationSafe = new Location(0, 0, 0, 0, 0, plugin.getServer().getLevelByName(pd.getLevelName())).add(pd.getCenter());
@@ -167,7 +148,6 @@ public class GridManager {
             // Load the chunks (Pretend that the island chunks has not loaded)
             // This is an actual fix for #28
             Utils.loadChunkAt(locationSafe);
-            deb.debug(locationSafe.toString());
             // Check if it is safe
             // Homes are stored as integers and need correcting to be more central
             if (isSafeLocation(locationSafe)) {
@@ -177,28 +157,22 @@ public class GridManager {
             // To cover slabs, stairs and other half blocks, try one block above
             Location locPlusOne = locationSafe.clone();
             locPlusOne.add(new Vector3(0, 1, 0));
-            deb.debug("Testing if the location is safe");
             if (isSafeLocation(locPlusOne)) {
                 // Adjust the home location accordingly
                 pd.setHomeLocation(locPlusOne);
-                deb.debug("Seccess");
                 return locPlusOne;
             }
 
             // Try to find all the way up
-            deb.debug("Failed! Testing the way up");
             for (int y = 0; y < 255; y++) {
                 Position locPlusY = locPlusOne.setComponents(locationSafe.getX(), y, locationSafe.getZ());
                 if (isSafeLocation(locPlusY)) {
                     // Adjust the home location accordingly
                     pd.setHomeLocation(locPlusY);
-                    deb.debug("Seccess");
                     return locPlusY.getLocation();
                 }
             }
 
-            deb.debug("Failed! The square");
-            int count = 0;
             for (int dy = 1; dy <= pd.getProtectionSize(); dy++) {
                 for (int dx = 1; dx <= pd.getProtectionSize(); dx++) {
                     for (int dz = 1; dz <= pd.getProtectionSize(); dz++) {
@@ -208,15 +182,11 @@ public class GridManager {
                         Position pos = locPlusOne.setComponents(x, y, z);
                         if (isSafeLocation(pos)) {
                             pd.setHomeLocation(pos);
-                            deb.debug("Seccess " + count);
-                            deb.debug(pos.toString());
                             return pos.getLocation();
                         }
-                        count++;
                     }
                 }
             }
-            deb.debug("Failed: Counter " + count);
         }
 
         // Unsuccessful
@@ -244,14 +214,13 @@ public class GridManager {
      */
     public boolean homeTeleport(Player player, int number) {
         Location home = getSafeHomeLocation(player.getName(), number);
-        // SHow that fancy title!
-        plugin.getIsland().showFancyTitle(player);
         //if the home null
         if (home == null) {
             player.sendMessage(plugin.getPrefix() + TextFormat.RED + "Failed to find your island safe spawn");
             return false;
         }
         plugin.getTeleportLogic().safeTeleport(player, home, false, number);
+        plugin.getIsland().showFancyTitle(player);
         return true;
     }
 
@@ -267,7 +236,8 @@ public class GridManager {
     }
 
     public boolean isAtSpawn(Location location) {
-        return plugin.getDatabase().getSpawn().onIsland(location);
+        IslandData spawn = plugin.getDatabase().getSpawn();
+        return spawn != null && spawn.onIsland(location);
     }
 
 }

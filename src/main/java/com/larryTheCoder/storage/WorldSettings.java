@@ -24,27 +24,30 @@ public class WorldSettings {
 
     private Level level;
     private String permission;
+    private int plotMax;
     private int plotSize;
     private boolean stopTime;
-    private int islandHeight;
     private int seaLevel;
+    private int plotRange;
 
     public WorldSettings(Level level) {
         this.level = level;
         // By using default parameters
         this.permission = "is.create";
-        this.plotSize = Settings.protectionrange;
-        this.stopTime = Settings.stopTime;
-        this.islandHeight = Settings.islandHieght;
-        this.seaLevel = Settings.seaLevel;
+        this.plotMax = 5;
+        this.plotSize = 200;
+        this.stopTime = false;
+        this.seaLevel = 0;
+        this.plotRange = 100;
     }
 
-    public WorldSettings(String permission, Level level, int plotSize, boolean stopTime, int islandHeight, int seaLevel) {
+    public WorldSettings(String permission, Level level, int plotMax, int plotSize, int plotRange, boolean stopTime, int seaLevel) {
         this.permission = permission;
         this.level = level;
+        this.plotMax = plotMax;
         this.plotSize = plotSize;
         this.stopTime = stopTime;
-        this.islandHeight = islandHeight;
+        this.plotRange = plotRange;
         this.seaLevel = seaLevel;
     }
 
@@ -52,15 +55,11 @@ public class WorldSettings {
         return seaLevel;
     }
 
-    public int getIslandHeight() {
-        return islandHeight;
-    }
-
     public boolean isStopTime() {
         return stopTime;
     }
 
-    public int getPlotSize() {
+    public int getIslandDistance() {
         return plotSize;
     }
 
@@ -70,5 +69,13 @@ public class WorldSettings {
 
     public Level getLevel() {
         return level;
+    }
+
+    public int getProtectionRange() {
+        return plotRange;
+    }
+
+    public int getMaximumIsland() {
+        return plotMax;
     }
 }

@@ -48,6 +48,7 @@ import com.larryTheCoder.events.IslandExitEvent;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.BlockUtil;
 import com.larryTheCoder.utils.Settings;
+import com.larryTheCoder.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1405,6 +1406,11 @@ public class IslandGuard implements Listener {
             // Remove the island data from cache provides the memory to server
             plugin.getDatabase().removeIslandFromCache(pd);
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPlayerCommand(PlayerCommandPreprocessEvent e){
+        // todo
     }
 
     private String getPrefix() {

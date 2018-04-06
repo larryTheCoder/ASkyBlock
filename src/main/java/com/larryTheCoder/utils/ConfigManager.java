@@ -18,7 +18,7 @@ package com.larryTheCoder.utils;
 
 import cn.nukkit.Server;
 import cn.nukkit.item.Item;
-import cn.nukkit.level.generator.biome.Biome;
+import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.plugin.Plugin;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
@@ -34,7 +34,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -42,7 +41,7 @@ import java.util.List;
  */
 public class ConfigManager {
 
-    public static final String CONFIG_VERSION = "ChangingTheWorld";
+    public static final String CONFIG_VERSION = "ad7b3e9c";
 
     /**
      * Loads the various settings from the config.yml file into the plugin
@@ -52,44 +51,13 @@ public class ConfigManager {
 
         // The order in this file should match the order in config.yml so that it is easy to check that everything is covered
         // ********************** Island settings **************************
-        Settings.maxHome = cfg.getInt("maxhome", 10);
-        Settings.updater = cfg.getBoolean("updater");
+        Settings.checkUpdate = cfg.getBoolean("allowUpdate");
         scheduleCheck(cfg.getBoolean("economy.enable"), cfg);
-        Settings.islandDistance = cfg.getInt("island.islandSize", 200);
-        Settings.islandHieght = cfg.getInt("island.islandHieght", 100);
-        Settings.protectionrange = cfg.getInt("island.protectionRange", 100);
-        if (Settings.protectionrange % 2 != 0) {
-            Settings.protectionrange--;
-            Utils.send("Protection range must be even, using " + Settings.protectionrange);
-        }
-        if (Settings.protectionrange > Settings.islandDistance) {
-            Utils.send("Protection range cannot be > island distance. Setting them to be equal.");
-            Settings.protectionrange = Settings.islandDistance;
-        }
-        if (Settings.protectionrange < 0) {
-            Settings.protectionrange = 0;
-        }
-        // xoffset and zoffset are not public and only used for IslandWorld compatibility
-        Settings.islandXOffset = cfg.getInt("island.xoffset", 0);
-        if (Settings.islandXOffset < 0) {
-            Settings.islandXOffset = 0;
-            Utils.send("Setting minimum island X Offset to 0");
-        } else if (Settings.islandXOffset > Settings.islandDistance) {
-            Settings.islandXOffset = Settings.islandDistance;
-            Utils.send("Setting maximum island X Offset to " + Settings.islandDistance);
-        }
-        Settings.islandZOffset = cfg.getInt("island.zoffset", 0);
-        if (Settings.islandZOffset < 0) {
-            Settings.islandZOffset = 0;
-            Utils.send("Setting minimum island Z Offset to 0");
-        } else if (Settings.islandZOffset > Settings.islandDistance) {
-            Settings.islandZOffset = Settings.islandDistance;
-            Utils.send("Setting maximum island Z Offset to " + Settings.islandDistance);
-        }
-        Settings.teamChat = cfg.getBoolean("teamChannels", true);
+        Settings.islandHeight = cfg.getInt("island.islandHeight", 100);
+
+        Settings.teamChat = cfg.getBoolean("teamChat", true);
         Settings.islandMaxNameLong = cfg.getInt("island.nameLimit", 20);
-        Settings.cleanrate = cfg.getInt("island.chunkResetPerBlocks", 256);
-        Settings.seaLevel = cfg.getInt("island.seaLevel", 3);
+        Settings.cleanRate = cfg.getInt("island.chunkResetPerBlocks", 256);
         String cmd = cfg.getString("island.restrictedCommands", "");
         final String[] pieces = cmd.substring(cmd.length()).trim().split(",");
         String[] array;
@@ -102,16 +70,11 @@ public class ConfigManager {
             }
         }
         Settings.reset = cfg.getInt("island.reset", 0);
-        Settings.gamemode = cfg.getInt("island.gamemode", 0);
+        Settings.gameMode = cfg.getInt("island.gameMode", 0);
         Settings.memberTimeOut = cfg.getInt("island.timeOut", 0);
         // Companion names
         List<String> companionNames = cfg.getStringList("island.companionnames");
-        Settings.companionNames = new ArrayList<>();
-        companionNames.forEach((name) -> {
-            Settings.companionNames.add(TextFormat.colorize('&', name));
-        });
         //Chest Items
-        Settings.chestInventoryOverride = cfg.getBoolean("island.items.shouldOverride", false);
         Settings.resetTime = cfg.getInt("island.deleteTiming", 0);
         String chestItems = cfg.getString("island.items.chestItems", "");
         // Check chest items
@@ -120,18 +83,18 @@ public class ConfigManager {
             // getLogger().info("DEBUG: chest items = " + chestItemString);
             final Item[] tempChest = new Item[chestItemString.length];
             for (int i = 0; i < tempChest.length; i++) {
-                String[] amountdata = chestItemString[i].split(":");
+                String[] amountData = chestItemString[i].split(":");
                 try {
                     Item mat;
-                    if (Utils.isNumeric(amountdata[0])) {
-                        mat = Item.get(Integer.parseInt(amountdata[0]));
+                    if (Utils.isNumeric(amountData[0])) {
+                        mat = Item.get(Integer.parseInt(amountData[0]));
                     } else {
-                        mat = Item.fromString(amountdata[0].toUpperCase());
+                        mat = Item.fromString(amountData[0].toUpperCase());
                     }
-                    if (amountdata.length == 2) {
-                        tempChest[i] = new Item(mat.getId(), Integer.parseInt(amountdata[1]));
-                    } else if (amountdata.length == 3) {
-                        tempChest[i] = new Item(mat.getId(), Integer.parseInt(amountdata[2]), Integer.parseInt(amountdata[1]));
+                    if (amountData.length == 2) {
+                        tempChest[i] = new Item(mat.getId(), Integer.parseInt(amountData[1]));
+                    } else if (amountData.length == 3) {
+                        tempChest[i] = new Item(mat.getId(), Integer.parseInt(amountData[2]), Integer.parseInt(amountData[1]));
                     }
 
                 } catch (java.lang.IllegalArgumentException ex) {
@@ -146,9 +109,7 @@ public class ConfigManager {
                     }
                     Server.getInstance().getLogger().error("Problem loading chest item from config.yml so skipping it: " + chestItemString[i]);
                     Server.getInstance().getLogger().info("Potential material types are: ");
-                    Item.getCreativeItems().stream().forEach((c) -> {
-                        Server.getInstance().getLogger().info(c.getName());
-                    });
+                    Item.getCreativeItems().forEach((c) -> Server.getInstance().getLogger().info(c.getName()));
                 }
             }
             Settings.chestItems = tempChest;
@@ -156,24 +117,10 @@ public class ConfigManager {
             // Nothing in the chest
             Settings.chestItems = new Item[0];
         }
-        Settings.stopTime = cfg.getBoolean("island.stopTime");
         Settings.saveInventory = cfg.getBoolean("island.saveInventory");
         // Challenges
         Settings.broadcastMessages = cfg.getBoolean("general.broadcastmessages", true);
         // ******************** Biome Settings *********************
-        Settings.biomeCost = cfg.getDouble("biomesettings.defaultcost", 100D);
-        if (Settings.biomeCost < 0D) {
-            Settings.biomeCost = 0D;
-            Utils.send("Biome default cost is < $0, so set to zero.");
-        }
-        String defaultBiome = cfg.getString("biomesettings.defaultbiome", "PLAINS");
-        try {
-            // re-check if the biome exsits
-            Settings.defaultBiome = Biome.getBiome(defaultBiome);
-        } catch (Exception e) {
-            Utils.send("Could not parse biome " + defaultBiome + " using PLAINS instead.");
-            Settings.defaultBiome = Biome.getBiome(Biome.PLAINS);
-        }
 
         // System utils eg., Default world protection, cancel teleport distance
         // ************ Protection Settings ****************
@@ -182,10 +129,8 @@ public class ConfigManager {
         Settings.defaultWorldSettings.clear();
         Settings.defaultIslandSettings.clear();
         Settings.defaultSpawnSettings.clear();
-        Settings.visitorSettings.clear();
         ConfigSection protectionWorld = cfg.getSections("protection.world");
-        for (Iterator<String> it = protectionWorld.getKeys(false).iterator(); it.hasNext(); ) {
-            String setting = it.next();
+        for (String setting : protectionWorld.getKeys(false)) {
             try {
                 SettingsFlag flag = SettingsFlag.valueOf(setting.toUpperCase());
                 boolean value = cfg.getBoolean("protection.world." + flag.name());
@@ -218,8 +163,7 @@ public class ConfigManager {
         }
         ASkyBlock.get().setAvailableLocales(availableLocales);
         // GridProtection
-        Settings.shouldTeleportSpawn = cfg.getBoolean("grid.teleportSpawn", false);
-        Utils.send(TextFormat.YELLOW + "Seccessfully checked config.yml");
+        Utils.send(TextFormat.YELLOW + "Successfully checked config.yml");
     }
 
     private static void scheduleCheck(boolean flag, Config cfg) {
@@ -229,11 +173,9 @@ public class ConfigManager {
             if (plugin != null && !plugin.isEnabled()) {
                 Utils.send("&eScheduling Economy instance due to 'plugin not enabled'");
                 // schedule another delayed task
-                TaskManager.runTaskLater(() -> {
-                    scheduleCheck(true, cfg);
-                }, 3); // 3 sec
+                TaskManager.runTaskLater(() -> scheduleCheck(true, cfg), 3); // 3 sec
             } else if (plugin != null && plugin.isEnabled()) {
-                Utils.send("&eSeccessfully created an instance with Economy plugin");
+                Utils.send("&eSuccessfully created an instance with Economy plugin");
                 ASkyBlock.econ = new EconomyAPI();
                 Settings.useEconomy = true;
             } else {

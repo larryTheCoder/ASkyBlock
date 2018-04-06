@@ -28,6 +28,7 @@ import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.utils.MainLogger;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.storage.WorldSettings;
 import com.larryTheCoder.utils.Pair;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
@@ -59,9 +60,11 @@ public class DeleteIslandTask implements Runnable {
     public void run() {
         // Use chunk instead of using loop
         // Deleting island now faster ~99%
-        Server.getInstance().dispatchCommand(player, "is leave"); // Easy
+        if (pd.onIsland(player.getServer().getPlayer(player.getName()))) {
+            Server.getInstance().dispatchCommand(player, "is leave"); // Easy
+        }
         Level level = plugin.getServer().getLevelByName(pd.getLevelName());
-
+        WorldSettings settings = plugin.getSettings(level.getName());
         if (level == null) {
             Utils.send("ERROR: Cannot find the level " + pd.getLevelName());
             Utils.send("The sender who execute this: " + pd.getOwner());
@@ -70,17 +73,17 @@ public class DeleteIslandTask implements Runnable {
 
         // Determine if chunks need to be cleaned up or not
         boolean cleanUpBlocks = false;
-        if (Settings.islandDistance - pd.getProtectionSize() < 16) {
+        if (settings.getIslandDistance() - pd.getProtectionSize() < 16) {
             cleanUpBlocks = true;
         }
 
-        int range = pd.getProtectionSize() / 2 * +1;
+        int range = pd.getProtectionSize() / 2;
         int minX = pd.getMinProtectedX();
         int minZ = pd.getMinProtectedZ();
         int maxX = pd.getMinProtectedX() + pd.getProtectionSize();
         int maxZ = pd.getMinProtectedZ() + pd.getProtectionSize();
 
-        int islandSpacing = Settings.islandDistance - pd.getProtectionSize();
+        int islandSpacing = plugin.getSettings(level.getName()).getIslandDistance() - pd.getProtectionSize();
         int minxX = (pd.getCenter().getFloorX() - range - islandSpacing);
         int minzZ = (pd.getCenter().getFloorZ() - range - islandSpacing);
         int maxxX = (pd.getCenter().getFloorX() + range + islandSpacing);
@@ -119,8 +122,7 @@ public class DeleteIslandTask implements Runnable {
                     deb.debug("DEBUG: max z coord in chunk is more than absolute max! " + maxzZ);
                     regen = false;
                 }
-                deb.debug("" + (level.getChunk(x, z).getX() << 4));
-                deb.debug("" + (level.getChunk(x, z).getZ() << 4));
+
                 Utils.loadChunkAt(new Position(x, 0, z, level));
 
                 if (regen) {
@@ -145,9 +147,9 @@ public class DeleteIslandTask implements Runnable {
                 public void run() {
                     Iterator<BaseFullChunk> iChunk = chunksToRemoved.iterator();
                     int count = 0;
-                    while (iChunk.hasNext() && count++ < Settings.cleanrate) {
+                    while (iChunk.hasNext() && count++ < Settings.cleanRate) {
                         BaseFullChunk chunk = iChunk.next();
-                        for (int y = Settings.seaLevel; y < 255 - Settings.seaLevel; y++) {
+                        for (int y = settings.getSeaLevel(); y < 255 - settings.getSeaLevel(); y++) {
                             for (int x = 0; x < 16; x++) {
                                 for (int z = 0; z < 16; z++) {
                                     chunk.setBlock(x, y, z, 0); // AIR! SOLUTION! TREATING!
@@ -175,13 +177,13 @@ public class DeleteIslandTask implements Runnable {
         // Clear up any chunks
         if (!chunksToClear.isEmpty()) {
             Utils.send("&eIsland delete Task-2: There are &a" + chunksToClear.size() + " &echunks that need to be cleared up.");
-            Utils.send("&eClean rate is &a" + Settings.cleanrate + " &echunks per second. Should take ~" + Math.round(chunksToClear.size() / Settings.cleanrate) + "s");
+            Utils.send("&eClean rate is &a" + Settings.cleanRate + " &echunks per second. Should take ~" + Math.round(chunksToClear.size() / Settings.cleanRate) + "s");
             new NukkitRunnable() {
                 @Override
                 public void run() {
                     Iterator<Pair> it = chunksToClear.iterator();
                     int count = 0;
-                    while (it.hasNext() && count++ < Settings.cleanrate) {
+                    while (it.hasNext() && count++ < Settings.cleanRate) {
                         Pair pair = it.next();
                         for (int x = 0; x < 16; x++) {
                             for (int z = 0; z < 16; z++) {
@@ -190,9 +192,9 @@ public class DeleteIslandTask implements Runnable {
                                 int zCoord = pair.getRight() * 16 + z;
                                 if (pd.inIslandSpace(xCoord, zCoord)) {
                                     // Delete all the chunks here
-                                    for (int y = 0; y < 255 - Settings.seaLevel; y++) {
+                                    for (int y = 0; y < 255 - settings.getSeaLevel(); y++) {
                                         // Overworld
-                                        Vector3 vec = new Vector3(xCoord, y + Settings.seaLevel, zCoord);
+                                        Vector3 vec = new Vector3(xCoord, y + settings.getSeaLevel(), zCoord);
                                         level.setBlock(vec, Block.get(Block.AIR), true, true);
                                     }
                                 }
@@ -210,7 +212,10 @@ public class DeleteIslandTask implements Runnable {
         }
 
         // Remove from database
-        ASkyBlock.get().getDatabase().deleteIsland(pd);
+        boolean result = ASkyBlock.get().getDatabase().deleteIsland(pd);
+        if (!result) {
+            Utils.sendDebug("Unable to delete player island data from database");
+        }
     }
 
 }

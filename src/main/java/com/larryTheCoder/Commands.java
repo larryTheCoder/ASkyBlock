@@ -28,7 +28,10 @@ import com.larryTheCoder.command.chat.MessageSubCommand;
 import com.larryTheCoder.command.generic.ExpelSubCommand;
 import com.larryTheCoder.command.generic.LeaveSubCommand;
 import com.larryTheCoder.command.island.*;
-import com.larryTheCoder.command.management.*;
+import com.larryTheCoder.command.management.AcceptSubCommand;
+import com.larryTheCoder.command.management.DenySubCommand;
+import com.larryTheCoder.command.management.InviteSubCommand;
+import com.larryTheCoder.command.management.SettingsSubCommand;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.utils.Utils;
 
@@ -44,7 +47,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Commands extends PluginCommand<ASkyBlock> {
 
     private final List<SubCommand> commands = new ArrayList<>();
-    private final List<String> listOfPlayers = new ArrayList<>();
     private final ConcurrentHashMap<String, Integer> SubCommand = new ConcurrentHashMap<>();
     private final ASkyBlock plugin;
 
@@ -109,7 +111,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
                     sender.sendMessage(ASkyBlock.get().getPrefix() + TextFormat.RED + "Usage:" + TextFormat.GRAY + " /is " + command.getName() + " " + command.getUsage().replace("&", "§"));
                 }
             } else if (p == null) {
-                sender.sendMessage(plugin.getLocale(p).errorUseInGame);
+                sender.sendMessage(plugin.getLocale(null).errorUseInGame);
             } else {
                 sender.sendMessage(plugin.getLocale(p).errorNoPermission);
             }
@@ -123,7 +125,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
         return plugin.getLocale(key);
     }
 
-    public boolean sendHelp(CommandSender sender, String[] args) {
+    private boolean sendHelp(CommandSender sender, String[] args) {
         if (args.length == 0 || !args[0].equalsIgnoreCase("help")) {
             if (args.length == 0) {
                 sender.sendMessage("§cUnknown command use /is help for a list of commands");
@@ -132,25 +134,17 @@ public class Commands extends PluginCommand<ASkyBlock> {
             switch (args[0]) {
                 case "version":
                 case "ver":
-                    sender.sendMessage("§aASkyBlock Module " + ASkyBlock.moduleVersion + " Build 7");
+                    sender.sendMessage("§aASkyBlock Module " + ASkyBlock.moduleVersion + " Build 9");
                     sender.sendMessage("§aVendor Type: " + System.getProperty("os.name"));
                     sender.sendMessage("§aJava Module Version: " + System.getProperty("java.version"));
                     break;
                 case "about":
-                    sender.sendMessage("§aA Fresh Nukkit SkyBlock module for MCPE " + ProtocolInfo.MINECRAFT_VERSION);
+                    sender.sendMessage("§aA Fresh Nukkit SkyBlock module for MCBE " + ProtocolInfo.MINECRAFT_VERSION);
                     sender.sendMessage("§aThis game inspired from a plugin called ASkyBlock.");
                     sender.sendMessage("§aSame as this plugin but it only in PC. The most powerful Java game in the world");
                     sender.sendMessage("§aHopefully that you can contribute more with us at: ");
                     sender.sendMessage("§eGitHub: §ahttps://github.com/TheSolidCrafter/ASkyBlock-Nukkit");
                     sender.sendMessage("§ePayPal: §ahttp://www.paypal.me/DoubleCheese");
-                    break;
-                case "author":
-                    sender.sendMessage("§aThank you for contributing with us! §eYou will always be remembered");
-                    sender.sendMessage("§a- larryTheCoder   => §eOwner");
-                    sender.sendMessage("§a- NycuRO          => §eOwner");
-                    sender.sendMessage("§a- PikyCZ          => §eMember");
-                    sender.sendMessage("§a- Skull3x         => §eMember");
-                    sender.sendMessage("§a- Adam1609        => §eMember");
                     break;
                 default:
                     sender.sendMessage("§cUnknown command use /is help for a list of commands");
@@ -163,15 +157,15 @@ public class Commands extends PluginCommand<ASkyBlock> {
             if (SubCommand.containsKey(args[1].toLowerCase())) {
                 // Show help for #IRC
                 SubCommand sub = commands.get(SubCommand.get(args[1].toLowerCase()));
-                String command = "";
+                StringBuilder command = new StringBuilder();
                 for (String arg : sub.getAliases()) {
-                    if (!command.equals("")) {
-                        command += " ";
+                    if (!command.toString().equals("")) {
+                        command.append(" ");
                     }
-                    command += arg;
+                    command.append(arg);
                 }
-                if (command.isEmpty()) {
-                    command = "none";
+                if (command.length() == 0) {
+                    command = new StringBuilder("none");
                 }
                 String usage = sub.getUsage();
                 if (sub.getUsage().isEmpty()) {
