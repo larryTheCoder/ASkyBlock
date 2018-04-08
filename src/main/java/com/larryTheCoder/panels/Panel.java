@@ -43,7 +43,8 @@ import java.util.*;
 /**
  * Plugin Panel controller class
  * <p>
- * Used to interface the player easier than before
+ * Used to interface the player easier than before.
+ * No getPrefix() Prefix used in this class. Interface made easy
  */
 public class Panel implements Listener {
 
@@ -70,7 +71,7 @@ public class Panel implements Listener {
             case TYPE_ISLAND:
                 // Check if the player closed this form
                 if (event.getWindow().wasClosed()) {
-                    p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).panelCancelled);
+                    p.sendMessage(plugin.getLocale(p).panelCancelled);
                     break;
                 }
 
@@ -107,7 +108,7 @@ public class Panel implements Listener {
             case TYPE_CHALLENGES:
                 // Check if the player closed this form
                 if (event.getWindow().wasClosed()) {
-                    p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).panelCancelled);
+                    p.sendMessage(plugin.getLocale(p).panelCancelled);
                     break;
                 }
 
@@ -121,7 +122,7 @@ public class Panel implements Listener {
             case TYPE_HOMES:
                 // Check if the player closed this form
                 if (event.getWindow().wasClosed()) {
-                    p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).panelCancelled);
+                    p.sendMessage(plugin.getLocale(p).panelCancelled);
                     break;
                 }
 
@@ -136,7 +137,7 @@ public class Panel implements Listener {
             case FIRST_TIME_SETTING:
                 // Check if the player closed this form
                 if (event.getWindow().wasClosed()) {
-                    p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).panelCancelled);
+                    p.sendMessage(plugin.getLocale(p).panelCancelled);
                     break;
                 }
 
@@ -150,7 +151,7 @@ public class Panel implements Listener {
             case SECOND_TIME_SETTING:
                 // Check if the player closed this form
                 if (event.getWindow().wasClosed()) {
-                    p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).panelCancelled);
+                    p.sendMessage(plugin.getLocale(p).panelCancelled);
                     break;
                 }
                 FormWindowCustom secondTime = (FormWindowCustom) event.getWindow();
@@ -160,7 +161,7 @@ public class Panel implements Listener {
                 int idea = 1;
                 IslandData pd = plugin.getDatabase().getIsland(p.getName(), mapIslandId.get(p));
                 if (pd == null) {
-                    p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorResponseUnknown);
+                    p.sendMessage(plugin.getLocale(p).errorResponseUnknown);
                     break;
                 }
                 boolean lock = settingResponse.getToggleResponse(idea++);
@@ -175,7 +176,7 @@ public class Panel implements Listener {
             case FIRST_TIME_DELETE:
                 // Check if the player closed this form
                 if (event.getWindow().wasClosed()) {
-                    p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).panelCancelled);
+                    p.sendMessage(plugin.getLocale(p).panelCancelled);
                     break;
                 }
 
@@ -189,7 +190,7 @@ public class Panel implements Listener {
             case SECOND_TIME_DELETE:
                 // Check if the player closed this form
                 if (event.getWindow().wasClosed()) {
-                    p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).panelCancelled);
+                    p.sendMessage(plugin.getLocale(p).panelCancelled);
                     break;
                 }
 
@@ -225,7 +226,7 @@ public class Panel implements Listener {
         for (String level : plugin.getLevels()) {
             List<IslandData> maxPlotsOfPlayers = plugin.getDatabase().getIslands(player.getName(), level);
             settings = plugin.getSettings(level);
-            if (settings.getMaximumIsland() < 0 || maxPlotsOfPlayers.size() < settings.getMaximumIsland()) {
+            if (settings.getMaximumIsland() < 0 || maxPlotsOfPlayers.size() <= settings.getMaximumIsland()) {
                 worldName.add(level);
             }
         }
@@ -240,7 +241,7 @@ public class Panel implements Listener {
         }
 
         if (worldName.isEmpty()) {
-            player.sendMessage(plugin.getPrefix() + plugin.getLocale(player).errorMaxIsland.replace("[maxplot]", "" + PlotPlayer.size()));
+            player.sendMessage(plugin.getLocale(player).errorMaxIsland.replace("[maxplot]", "" + PlotPlayer.size()));
             return;
         }
 
@@ -299,7 +300,7 @@ public class Panel implements Listener {
         }
         mapIslandId.put(p, pd.getId());
 
-        FormWindowModal confirm = new FormWindowModal("Delete", getLocale(p).deleteIslandSure, "Delete my island", "Cancel");
+        FormWindowModal confirm = new FormWindowModal("Delete", getLocale(p).deleteIslandSure, "§cDelete my island", "Cancel");
 
         int id = p.showFormWindow(confirm);
         panelDataId.put(id, PanelType.SECOND_TIME_DELETE);

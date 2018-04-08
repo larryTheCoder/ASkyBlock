@@ -274,7 +274,7 @@ public class ASkyBlock extends PluginBase {
     private void initDatabase() {
         if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {
             try {
-                db = new ASConnection(this, new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")), true);
+                db = new ASConnection(this, new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")));
             } catch (SQLException ex) {
                 JDBCUtilities.printSQLException(ex);
             } catch (ClassNotFoundException | InterruptedException ex) {
@@ -282,11 +282,11 @@ public class ASkyBlock extends PluginBase {
             }
         } else {
             try {
-                db = new ASConnection(this, new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")), true);
+                db = new ASConnection(this, new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")));
             } catch (SQLException ex) {
                 JDBCUtilities.printSQLException(ex);
             } catch (ClassNotFoundException | InterruptedException ex) {
-                Utils.send("Unable to create MySql database");
+                Utils.send("Unable to create Sqlite database");
             }
         }
     }
@@ -385,8 +385,8 @@ public class ASkyBlock extends PluginBase {
 
     private void recheck() {
         boolean update = false;
-        File file;
-        Config cfgg = new Config(file = new File(ASkyBlock.get().getDataFolder(), "config.yml"), Config.YAML);
+        File file = new File(ASkyBlock.get().getDataFolder(), "config.yml");
+        Config cfgg = new Config(file, Config.YAML);
         if (!cfgg.getString("version").equalsIgnoreCase(ConfigManager.CONFIG_VERSION)) {
             Utils.send("&cOutdated config! Creating new one");
             Utils.send("&aYour old config will be renamed into config.old!");

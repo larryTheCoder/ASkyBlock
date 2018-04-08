@@ -72,9 +72,9 @@ public final class ASlocales {
     public String errorUnknownPlayer = "§cThat player is unknown.";
     public String errorNoPermission = "§cYou don't have permission to use that command!";
     public String errorNoIsland = "§cYou do not have an island!";
-    public String errorNoIslandExists = "§cYou don't have an island with home number ";
     public String errorNoIslandOther = "§cThat player does not have an island!";
     public String errorCommandNotReady = "§cYou can't use that command right now.";
+    public String errorCommandBlocked = "§cYou can't use that command here.";
     public String errorOfflinePlayer = "§cThat player is offline or doesn't exist.";
     public String errorNotOnIsland = "§cYou are not in your/other's island space!";
     public String errorTooLong = "§cToo long. Maximum size is [length].";
@@ -130,7 +130,7 @@ public final class ASlocales {
     public String newInvitation = "§aNew invitation from [player]'s island";
     public String acceptedFrom = "§eYou accepted [player]'s invitation.";
     public String acceptedTo = "§e[player] has accepted your invitation!";
-    public String panelCancelled = "§eYou cancelled your island panel!";
+    public String panelCancelled = "§cYou cancelled your island panel!";
     // Titles
     public String islandSubTitle = "Welcome back to [player] island!";
     public String islandDonate = "§aSource code made by §e@larryTheCoder";
@@ -149,8 +149,8 @@ public final class ASlocales {
     public String panelChallengesHeader = "§aChoose your toppings! All of these are your challenges to complete! You will be awarded with an amazing prize!";
     public String panelHomeHeader = "§dHere are all of the list of your islands. Choose one of these to [function]";
     public String panelSettingHeader = "§eYou can make an simple changes for your island. You can set your island any time.";
-    public String deleteIslandSure = "§eAre you sure to delete your island? This is an irreversible!";
-    public String deleteIslandCancelled = "§aYou just cancelled your delete island confirmation";
+    public String deleteIslandSure = "§aAre you sure to delete your island? This is an irreversible!";
+    public String deleteIslandCancelled = "§cYou just cancelled your delete island confirmation";
     // Public error
     public String errorResponseUnknown = "§eAn error just occured. Try again later";
 

@@ -180,12 +180,11 @@ public class Utils {
         if (append.isEmpty()) {
             return new HashMap<>();
         }
-        HashMap errs = new HashMap<>();
+        HashMap<Object, Object> errs = new HashMap<>();
         String[] at = append.split(", ");
         for (String string : at) {
             String[] at2 = string.split(":");
-            ArrayList<String> atd = new ArrayList<>();
-            atd.addAll(Arrays.asList(at2));
+            ArrayList<String> atd = new ArrayList<>(Arrays.asList(at2));
             errs.put(atd.get(0), atd.get(1));
         }
         return errs;

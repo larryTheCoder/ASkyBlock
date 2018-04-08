@@ -547,7 +547,6 @@ public final class SchematicHandler {
     private void setDefaultValue(int id) {
         schemaConfiguration.computeIfAbsent(id, k -> new HashMap<>());
         schemaConfiguration.get(id).clear();
-        schemaConfiguration.get(id).put(Configuration.BIOME, EnumBiome.PLAINS.biome);
         schemaConfiguration.get(id).put(Configuration.DEFAULT, false);
         schemaConfiguration.get(id).put(Configuration.BLOCK_SPAWN, null);
         schemaConfiguration.get(id).put(Configuration.DESCRIPTION, "Best cozy world");
@@ -619,7 +618,6 @@ public final class SchematicHandler {
         this.setIslandValue(id, Configuration.PERMISSION, permission);
         this.setIslandValue(id, Configuration.USE_CONFIG_CHEST, useConfigChest);
         this.setIslandValue(id, Configuration.RATING, rating);
-        this.setIslandValue(id, Configuration.BIOME, EnumBiome.valueOf(biome));
         this.setIslandValue(id, Configuration.PASTE_ENTITIES, usePasteEntity);
     }
 
@@ -752,7 +750,6 @@ public final class SchematicHandler {
         RATING,
         USE_CONFIG_CHEST,
         PASTE_ENTITIES,
-        BIOME,
         DEFAULT
     }
 }

@@ -1385,9 +1385,9 @@ public class IslandGuard implements Listener {
         // load player inventory if exsits
         Player p = ex.getPlayer();
         plugin.getInventory().loadPlayerInventory(p);
-        // Load player datatatatata tadaaaa
+        // Load player data
         if (plugin.getPlayerInfo(p) == null) {
-            com.larryTheCoder.utils.Utils.send(p.getName() + " &adata doesn`t exsits. Creating new ones");
+            Utils.send(p.getName() + " &adata doesn`t exsits. Creating new ones");
             plugin.getDatabase().createPlayer(p.getName());
         }
         // Load messages
@@ -1409,8 +1409,18 @@ public class IslandGuard implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onPlayerCommand(PlayerCommandPreprocessEvent e){
-        // todo
+    public void onPlayerCommand(PlayerCommandPreprocessEvent ex) {
+        Player p = ex.getPlayer();
+        String command = ex.getMessage().substring(1);
+        if (!inWorld(p) && !Settings.bannedCommands.contains(command)) {
+            return;
+        }
+        if (p.isOp()) {
+            p.sendMessage(plugin.getLocale(p).adminOverride);
+            return;
+        }
+        p.sendMessage(plugin.getLocale(p).errorCommandBlocked);
+        ex.setCancelled();
     }
 
     private String getPrefix() {

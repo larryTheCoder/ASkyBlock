@@ -28,8 +28,8 @@ import com.larryTheCoder.utils.Utils;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Full sql database
@@ -48,21 +48,18 @@ public final class ASConnection {
     private boolean enableFastCache;
     private boolean mySQL;
 
-    public ASConnection(ASkyBlock plugin, AbstractDatabase database, boolean debug) throws SQLException, ClassNotFoundException, InterruptedException {
-        // Performace upgrade: Cache
+    public ASConnection(ASkyBlock plugin, AbstractDatabase database) throws SQLException, ClassNotFoundException, InterruptedException {
+        // Performance upgrade: Cache
         this.plugin = plugin;
         this.db = database;
         this.con = database.openConnection();
         this.mySQL = database instanceof MySQLDatabase;
         this.enableFastCache = ASkyBlock.get().getConfig().getBoolean("fastCache");
-        this.createTables(true);
+        this.createTables();
         // MySQL Support
         TaskManager.runTaskAsync(() -> {
             long last = System.currentTimeMillis();
-            while (true) {
-                if (closed) {
-                    break;
-                }
+            while (!closed) {
                 if (mySQL && System.currentTimeMillis() - last > 550000 || !isValid()) {
                     last = System.currentTimeMillis();
                     reconnect();
@@ -77,7 +74,7 @@ public final class ASConnection {
         });
     }
 
-    private void createTables(boolean updateCheck) throws SQLException, ClassNotFoundException, InterruptedException {
+    private void createTables() throws SQLException {
         if (closed) {
             String[] tables = new String[]{"island", "worlds", "players"};
             DatabaseMetaData meta = this.con.getMetaData();
@@ -92,7 +89,7 @@ public final class ASConnection {
             if (create == 0) {
                 return;
             }
-            // A lot of updates will comming
+            // A lot of updates will coming
             try (Statement set = this.con.createStatement()) {
                 //createdDate updatedDate votes
                 set.addBatch("CREATE TABLE IF NOT EXISTS `island` (`id` INTEGER,"
@@ -139,6 +136,14 @@ public final class ASConnection {
             Utils.send("§cYou might to stop server for this kind of problem to fix this error");
             Utils.send("&cError Code: 0x4f");
         }
+    }
+
+    /**
+     * Release the array from system
+     * Keep the server from lag
+     */
+    public void free() {
+        islandCache.clear();
     }
 
     private boolean isValid() {
@@ -188,7 +193,6 @@ public final class ASConnection {
             stmt.setInt(3, z);
             stmt.addBatch();
             stmt.executeBatch();
-            stmt.close();
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
@@ -217,7 +221,6 @@ public final class ASConnection {
                 islandCache.add(database);
             }
 
-            stmt.close();
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
@@ -244,7 +247,6 @@ public final class ASConnection {
             while (set.next()) {
                 pd.add(new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn")));
             }
-            stmt.close();
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
@@ -275,7 +277,6 @@ public final class ASConnection {
             while (set.next()) {
                 pd.add(new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn")));
             }
-            stmt.close();
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
@@ -302,7 +303,6 @@ public final class ASConnection {
                 return null;
             }
             pd = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
-            stmt.close();
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
@@ -328,7 +328,6 @@ public final class ASConnection {
                 return null;
             }
             pd = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
-            stmt.close();
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
@@ -368,8 +367,6 @@ public final class ASConnection {
             }
             set.next();
             pd = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
-
-            stmt.close();
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
@@ -394,8 +391,6 @@ public final class ASConnection {
             }
             set.next();
             pd = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
-
-            stmt.close();
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
@@ -530,7 +525,7 @@ public final class ASConnection {
     }
 
     public PlayerData getPlayerData(String st) {
-        // TESTED SECCESS
+        // TESTED SUCCESS
         PlayerData pd = null;
         try (Statement kt = con.createStatement()) {
             ResultSet set = kt.executeQuery("SELECT * FROM `players` WHERE `player` = '" + st + "'");
@@ -541,8 +536,8 @@ public final class ASConnection {
                     set.getString("player"),
                     set.getInt("homes"),
                     Utils.stringToArray(set.getString("members"), ", "),
-                    Utils.stringToMap(set.getString("challengelist")),
-                    Utils.stringToMap(set.getString("challengelisttimes")),
+                    (HashMap<String, Boolean>) Utils.stringToMap(set.getString("challengelist")),
+                    (HashMap<String, Integer>) Utils.stringToMap(set.getString("challengelisttimes")),
                     set.getInt("islandlvl"),
                     set.getBoolean("inTeam"),
                     set.getString("teamLeader"),
@@ -556,7 +551,8 @@ public final class ASConnection {
         return pd;
     }
 
-    public boolean createPlayer(String p) {
+
+    public void createPlayer(String p) {
         // TESTED SECCESS
         try (PreparedStatement set = con.prepareStatement("INSERT INTO `players` ("
                 + "`player`, "
@@ -589,17 +585,14 @@ public final class ASConnection {
             set.addBatch();
 
             set.executeBatch();
-            set.close();
-            return true;
         } catch (BatchUpdateException b) {
             JDBCUtilities.printBatchUpdateException(b);
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
-        return false;
     }
 
-    public boolean savePlayerData(PlayerData pd) {
+    public void savePlayerData(PlayerData pd) {
         // TESTED SECCESS
         try (PreparedStatement stmt = con.prepareStatement(
                 "UPDATE `players` SET "
@@ -630,34 +623,8 @@ public final class ASConnection {
             stmt.setString(12, pd.pubLocale);
             stmt.addBatch();
             stmt.executeBatch();
-
-            stmt.close();
-            return true;
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }
-        return false;
-    }
-
-    ///------------ FACTION DATA ------------
-
-    public int getFactionCount() {
-        int currentCount = 0;
-        try (Statement stmt = con.createStatement()) {
-            ResultSet set = stmt.executeQuery("SELECT * FROM `faction`");
-            if (set.isClosed()) return 0;
-            while (set.next()) currentCount++;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return currentCount;
-    }
-
-    public boolean createFaction(String player) {
-        int id = getFactionCount();
-        UUID uuid = UUID.fromString(Integer.toString(id) + player); // Most secure UUID Versions 5
-
-        return false;
     }
 }

@@ -51,14 +51,16 @@ public class SimpleFancyTitle extends Task {
             return;
         }
 
+        double shouldDo = Math.sqrt(Math.pow(lastPos.x - p.x, 2) + Math.pow(lastPos.z - p.z, 2));
         // Now let wait till player moved or something
         // Do not count on it height. It might be falling from spawn pedestal
-        shouldLoopBack = !plugin.inIslandWorld(p) || p.distance(lastPos) >= 0.3;
+        shouldLoopBack = !plugin.inIslandWorld(p) || !(shouldDo >= 0.5);
 
         if (shouldLoopBack) {
             // This class interfered to task class
             // Keep this task in here until player moved
             TaskManager.runTaskLater(this, 20);
+            lastPos = p.clone();
             Utils.sendDebug("Tasking again");
             Utils.sendDebug(lastPos.toString() + " " + p.toString());
             return;

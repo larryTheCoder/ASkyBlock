@@ -21,14 +21,20 @@ package com.larryTheCoder;
  */
 public class PluginTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> {
 
+    private int time = 0;
 
-    public PluginTask(ASkyBlock plugin) {
+    PluginTask(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
     public void onRun(int currentTick) {
+        time++;
         owner.getInvitationHandler().tick();
+        // Release every 1 Hour
+        if (time == 3600) {
+            owner.getDatabase().free();
+        }
     }
 
 }
