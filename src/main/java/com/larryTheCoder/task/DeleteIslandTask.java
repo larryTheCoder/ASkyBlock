@@ -45,7 +45,6 @@ import java.util.List;
  */
 public class DeleteIslandTask implements Runnable {
 
-    public final MainLogger deb = Server.getInstance().getLogger();
     private final IslandData pd;
     private final CommandSender player;
     private final ASkyBlock plugin;
@@ -107,19 +106,19 @@ public class DeleteIslandTask implements Runnable {
                 boolean regen = true;
 
                 if ((level.getChunk(x, z, true).getX() << 4) < minxX) {
-                    deb.debug("DEBUG: min x coord is less than absolute min! " + minxX);
+                    Utils.sendDebug("DEBUG: min x coord is less than absolute min! " + minxX);
                     regen = false;
                 }
                 if ((level.getChunk(x, z, true).getZ() << 4) < minzZ) {
-                    deb.debug("DEBUG: min z coord is less than absolute min! " + minzZ);
+                    Utils.sendDebug("DEBUG: min z coord is less than absolute min! " + minzZ);
                     regen = false;
                 }
                 if ((level.getChunk(x, z, true).getX() << 4) > maxxX) {
-                    deb.debug("DEBUG: max x coord is more than absolute max! " + maxxX);
+                    Utils.sendDebug("DEBUG: max x coord is more than absolute max! " + maxxX);
                     regen = false;
                 }
                 if ((level.getChunk(x, z, true).getZ() << 4) > maxzZ) {
-                    deb.debug("DEBUG: max z coord in chunk is more than absolute max! " + maxzZ);
+                    Utils.sendDebug("DEBUG: max z coord in chunk is more than absolute max! " + maxzZ);
                     regen = false;
                 }
 
@@ -167,7 +166,6 @@ public class DeleteIslandTask implements Runnable {
                     }
                     if (chunksToRemoved.isEmpty()) {
                         this.cancel();
-                        return;
                     }
                 }
 

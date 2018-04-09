@@ -30,8 +30,8 @@ import java.util.HashMap;
  */
 public class BlockMinecraftId {
 
-    public static final HashMap<String, Integer> WETOME = new HashMap<>();
-    public static final HashMap<String, Integer> POT_ITEM_LISTS;
+    static final HashMap<String, Integer> WETOME = new HashMap<>();
+    static final HashMap<String, Integer> POT_ITEM_LISTS;
 
     static {
         POT_ITEM_LISTS = new HashMap<>();
@@ -118,8 +118,6 @@ public class BlockMinecraftId {
         WETOME.put("REPEATER", Item.REPEATER);
         WETOME.put("SKULL", Item.SKULL);
         WETOME.put("SPAWN_EGG", Item.SPAWN_EGG);
-        WETOME.put("STONE_BRICK_STAIRS", Item.BRICK_STAIRS);
-        WETOME.put("STONE_BRICK_STAIRS", Item.STONE_BRICK_STAIRS);
         WETOME.put("STONE_SHOVEL", Item.STONE_SHOVEL);
         WETOME.put("STONE_SLAB", Item.SLAB);
         WETOME.put("STONE_STAIRS", Item.COBBLESTONE_STAIRS);

@@ -637,63 +637,81 @@ public final class SchematicHandler {
      * @param pos Position of the palace where the island will generates
      */
     private void createIsland(Position pos) {
-        int locX = pos.getFloorX();
-        int locY = pos.getFloorY();
-        int locZ = pos.getFloorZ();
-        Level level = pos.getLevel();
-
+        int groundHeight = pos.getFloorY();
+        int X = pos.getFloorX();
+        int Z = pos.getFloorZ();
+        Level world = pos.level;
         // bedrock - ensures island are not overwritten
-        level.setBlockIdAt(locX, locY, locZ, Block.BEDROCK);
-
-        // Other layers
-        // Looking at direction:
-        //    UP            LEFT
-        // * + + + *     * + + + *
-        // + + + + +     * + + + *
-        // + + + + +       * + *
-        // * + + + *         #
-        // * = Half cutting, # = Bedrock;
-
-        // First down upper (First layer)
-        level.setBlockIdAt(locX, locY + 1, locZ, Block.DIRT);
-        level.setBlockIdAt(locX + 1, locY + 1, locZ, Block.DIRT);
-        level.setBlockIdAt(locX, locY + 1, locZ + 1, Block.DIRT);
-        level.setBlockIdAt(locX - 1, locY + 1, locZ, Block.DIRT);
-        level.setBlockIdAt(locX, locY + 1, locZ - 1, Block.DIRT);
-
-        // Second half-top layer (Second layer)
-        for (int x = locX - 3; x < locX + 3; x++) {
-            for (int z = locZ - 3; z < locZ + 3; z++) {
-                level.setBlockIdAt(x, locY + 2, z, Block.DIRT);
-                level.setBlockIdAt(x, locY + 3, z, Block.GRASS);
+        for (int x = X; x < X + 1; ++x) {
+            for (int z = Z; z < Z + 1; ++z) {
+                world.setBlockIdAt(x, groundHeight, z, Block.BEDROCK);
             }
         }
-
-
+        // Add some dirt and grass
+        for (int x = X - 1; x < X + 2; ++x) {
+            for (int z = X - 1; z < X + 2; ++z) {
+                world.setBlockIdAt(x, groundHeight + 1, z, Block.DIRT);
+                world.setBlockIdAt(x, groundHeight + 2, z, Block.DIRT);
+            }
+        }
+        for (int x = X - 2; x < X + 3; ++x) {
+            for (int z = Z - 2; z < Z + 3; ++z) {
+                world.setBlockIdAt(x, groundHeight + 3, z, Block.DIRT);
+                world.setBlockIdAt(x, groundHeight + 4, z, Block.DIRT);
+            }
+        }
+        for (int x = X - 3; x < X + 4; ++x) {
+            for (int z = Z - 3; z < Z + 4; ++z) {
+                world.setBlockIdAt(x, groundHeight + 5, z, Block.DIRT);
+                world.setBlockIdAt(x, groundHeight + 6, z, Block.GRASS);
+            }
+        }
         // Then cut off the corners to make it round-ish
-        for (int x_space = locX - 3; x_space <= locX + 3; x_space += 4) {
-            for (int z_space = locZ - 3; z_space <= locZ + 3; z_space += 4) {
-                level.setBlockIdAt(x_space, locY + 2, z_space, Block.AIR);
-                level.setBlockIdAt(x_space, locY + 3, z_space, Block.AIR);
+        for (int x_space = X - 3; x_space <= X + 3; x_space += 6) {
+            for (int z_space = Z - 3; z_space <= Z + 3; z_space += 6) {
+                world.setBlockIdAt(x_space, groundHeight + 5, z_space, Block.AIR);
+                world.setBlockIdAt(x_space, groundHeight + 6, z_space, Block.AIR);
             }
         }
+
+        for (int x_space = X - 2; x_space <= X + 2; x_space += 4) {
+            for (int z_space = Z - 2; z_space <= Z + 2; z_space += 4) {
+                world.setBlockIdAt(x_space, groundHeight + 3, z_space, Block.AIR);
+            }
+
+        }
+
+        for (int x_space = X - 1; x_space <= X + 1; x_space += 2) {
+            for (int z_space = Z - 1; z_space <= Z + 1; z_space += 2) {
+                world.setBlockIdAt(x_space, groundHeight + 1, z_space, Block.AIR);
+            }
+        }
+        // Sand
+        world.setBlockIdAt(X, groundHeight + 1, Z, Block.SAND);
+        world.setBlockIdAt(X, groundHeight + 2, Z, Block.SAND);
+        world.setBlockIdAt(X, groundHeight + 3, Z, Block.SAND);
+        world.setBlockIdAt(X, groundHeight + 4, Z, Block.SAND);
+        world.setBlockIdAt(X, groundHeight + 5, Z, Block.SAND);
 
         // Done making island base Joe! Now we place the sweets (Tree)
-        ObjectTree.growTree(level, locX, locY + 4, locZ, new NukkitRandom(), BlockSapling.OAK);
+        ObjectTree.growTree(world, X, groundHeight + 7, Z, new NukkitRandom(), BlockSapling.OAK);
 
-        // Ok Joe! Tree had been magically summon! Now place the stuff we used
-        BaseFullChunk chunk = level.getChunk(locX >> 4, locZ >> 4);
-        level.setBlockIdAt(locX + 1, locY + 4, locZ + 1, Block.CHEST);
+        this.initChest(world, X, groundHeight + 7, Z + 1);
+    }
+
+    private void initChest(Level lvl, int x, int y, int z) {
+        BaseFullChunk chunk = lvl.getChunk(x >> 4, z >> 4);
+        lvl.setBlockIdAt(x, y, z, Block.CHEST);
 
         cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
                 .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
                 .putString("id", BlockEntity.CHEST)
-                .putInt("x", locX)
-                .putInt("y", locY)
-                .putInt("z", locZ);
+                .putInt("x", x)
+                .putInt("y", y)
+                .putInt("z", z);
 
         BlockEntityChest e = new BlockEntityChest(chunk, nbt);
-        level.addBlockEntity(e);
+        lvl.addBlockEntity(e);
         e.spawnToAll();
 
         // Items
@@ -716,8 +734,10 @@ public final class SchematicHandler {
             items.put(8, Item.get(Item.SAPLING, 0, 1));
             items.put(9, Item.get(Item.STRING, 0, 12));
             items.put(10, Item.get(Item.POISONOUS_POTATO, 0, 32));
+            items.put(11, Item.get(Item.CACTUS, 0, 1));
             e.getInventory().setContents(items);
         }
+
     }
 
     public List<String> getSchemaList() {

@@ -68,9 +68,9 @@ public class SimpleFancyTitle extends Task {
 
         IslandData ownership = plugin.getIslandInfo(p.getLocation());
         if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
-            p.setSubtitle(TextFormat.GOLD + plugin.getLocale(p).islandSupport.replace("[player]", ownership.getOwner()));
+            p.setSubtitle(TextFormat.GOLD + plugin.getLocale(p).islandSubTitle.replace("[player]", ownership.getOwner()));
         }
-        if (!plugin.getLocale(p).islandSupport.isEmpty()) {
+        if (!plugin.getLocale(p).islandTitle.isEmpty()) {
             p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", ownership.getOwner()));
         }
         if (!plugin.getLocale(p).islandDonate.isEmpty() && !plugin.getLocale(p).islandURL.isEmpty()) {

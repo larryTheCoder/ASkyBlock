@@ -231,7 +231,7 @@ public class ASkyBlock extends PluginBase {
             start();
         }
         getServer().getLogger().info(getPrefix() + "§cBETA Build detected, use with precautions.");
-        getServer().getLogger().info(getPrefix() + "§aASkyBlock has seccessfully enabled!");
+        getServer().getLogger().info(getPrefix() + "§aASkyBlock has successfully enabled!");
     }
 
     public ArrayList<String> getLevels() {

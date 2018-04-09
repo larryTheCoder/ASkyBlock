@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2017 Adam Matthew 
  *
- * This program is free software: you can redistribute it and/or modify
+ * This program is free software", you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -17,6 +17,7 @@
 package com.larryTheCoder.locales;
 
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 
 import java.io.File;
@@ -54,12 +55,7 @@ public final class ASlocales {
         "yellow",
         "white"
     ));
-    public String changingObsidiantoLava;
-    public String acidLore;
-    public String acidBucket;
-    public String acidBottle;
-    public String drankAcidAndDied;
-    public String drankAcid;
+
     public String firstIslandFree = "§aYour first island are free!";
     public String nextIslandPrice = "§aNext time you may need $§e[price] to buy other island";
     // Help defaults
@@ -94,7 +90,7 @@ public final class ASlocales {
     public String errorFailedCritical = "§cFailed to attempt this command. Contact admin!";
     public String errorLevelGenerated = "§cThe level has already generated";
     public String errorNotEnoughMoney = "§cYou don't have enough money! Default price: $[price]";
-    public Object errorIslandPC = "§cCannot attempt to generate level. PC Type of schematic";
+    public String errorIslandPC = "§cCannot attempt to generate level. PC Type of schematic";
     // Commands messages
     public String kickSuccess = "§aKicked [player] from SkyBlock world!";
     public String createSuccess = "§aSuccessfully created you an island!";
@@ -103,7 +99,6 @@ public final class ASlocales {
     public String setWorldSuccess = "§aSuccessfully changed island world location!";
     public String setHomeSuccess = "§aSuccessfully changed island home location!";
     public String generalSuccess = "§aSuccess!";
-    public String helpMessage = "§aNeed help? Use: /[com] help.";
     public String biomeChangeComplete = "§aChanged your island biome to: [biome]";
     // Teleport messages
     public String teleportDelay = "§aYou will be teleported in {0} seconds.";
@@ -132,7 +127,7 @@ public final class ASlocales {
     public String acceptedTo = "§e[player] has accepted your invitation!";
     public String panelCancelled = "§cYou cancelled your island panel!";
     // Titles
-    public String islandSubTitle = "Welcome back to [player] island!";
+    public String islandSubTitle = "&eNice and cosy";
     public String islandDonate = "§aSource code made by §e@larryTheCoder";
     public String islandURL = "§aLink: http://github.com/larryTheCoder/ASkyBlock-Nukkit";
     public String islandSupport = "§aLove it? Give us a star on GitHub!";
@@ -165,9 +160,9 @@ public final class ASlocales {
     /**
      * Creates a locale object full of localized strings for a language
      *
-     * @param plugin
+     * @param plugin ASkyBlock class
      * @param localeName - name of the yml file that will be used
-     * @param index
+     * @param index The count of the file processed
      */
     public ASlocales(ASkyBlock plugin, String localeName, int index) {
         this.plugin = plugin;
@@ -181,7 +176,7 @@ public final class ASlocales {
     }
 
     /**
-     * @param localeName
+     * @param localeName Locale name
      * @return locale Config object
      */
     public Config getLocale(String localeName) {
@@ -194,14 +189,11 @@ public final class ASlocales {
     /**
      * Reloads the locale file
      *
-     * @param localeName
+     * @param localeName Locale name
      */
-    public void reloadLocale(String localeName) {
+    private void reloadLocale(String localeName) {
         // Make directory if it doesn't exist
         File localeDir = new File(plugin.getDataFolder() + File.separator + "locale");
-        if (!localeDir.exists()) {
-            localeDir.mkdir();
-        }
         if (localeFile == null) {
             localeFile = new File(localeDir.getPath(), localeName + ".yml");
         }
@@ -234,23 +226,99 @@ public final class ASlocales {
      * Reloads the locale file
      */
     private void loadLocale() {
-        // TODO: complete this plugin
-    }
-
-    /**
-     * Checks that the color supplied is a valid color
-     *
-     * @param string
-     * @return color
-     */
-    private String colorCheck(String string) {
-        string = string.toLowerCase();
-        if (TITLE_COLORS.contains(string)) {
-            return string;
-        }
-        plugin.getLogger().warning("Title color " + string + " is unknown. Use one from this list:");
-        TITLE_COLORS.forEach((color) -> plugin.getLogger().warning(color));
-        return "white";
+        // Island economy command
+        firstIslandFree = TextFormat.colorize('&', locale.getString("firstIslandFree", "§aYour first island are free!"));
+        nextIslandPrice = TextFormat.colorize('&', locale.getString("nextIslandPrice", "§aNext time you may need $§e[price] to buy other island"));
+        // Help defaults
+        adminHelpGenerate = TextFormat.colorize('&', locale.getString("adminHelpGenerate", "§aAttempt to create a new level."));
+        adminHelpKick = TextFormat.colorize('&', locale.getString("adminHelpKick", "§aTo kick player from island worlds."));
+        adminHelpRename = TextFormat.colorize('&', locale.getString("adminHelpRename", "§aAttempt to rename other player's island."));
+        adminHelpSpawn = TextFormat.colorize('&', locale.getString("adminHelpSpawn", "§aSet the island's spawn point!"));
+        adminHelpDelete = TextFormat.colorize('&', locale.getString("adminHelpDelete", "§aDelete other player island"));
+        // Errors defaults
+        errorUnknownPlayer = TextFormat.colorize('&', locale.getString("errorUnknownPlayer", "§cThat player is unknown."));
+        errorNoPermission = TextFormat.colorize('&', locale.getString("errorNoPermission", "§cYou don't have permission to use that command!"));
+        errorNoIsland = TextFormat.colorize('&', locale.getString("errorNoIsland", "§cYou do not have an island!"));
+        errorNoIslandOther = TextFormat.colorize('&', locale.getString("errorNoIslandOther", "§cThat player does not have an island!"));
+        errorCommandNotReady = TextFormat.colorize('&', locale.getString("errorCommandNotReady", "§cYou can't use that command right now."));
+        errorCommandBlocked = TextFormat.colorize('&', locale.getString("errorCommandBlocked", "§cYou can't use that command here."));
+        errorOfflinePlayer = TextFormat.colorize('&', locale.getString("errorOfflinePlayer", "§cThat player is offline or doesn't exist."));
+        errorNotOnIsland = TextFormat.colorize('&', locale.getString("errorNotOnIsland", "§cYou are not in your/other's island space!"));
+        errorTooLong = TextFormat.colorize('&', locale.getString("errorTooLong", "§cToo long. Maximum size is [length]."));
+        errorTooShort = TextFormat.colorize('&', locale.getString("errorTooShort", "§cToo short. Minimum size is [length]."));
+        adminSetSpawnOverride = TextFormat.colorize('&', locale.getString("adminSetSpawnOverride", "§cThere a player owned this plot. Admin override this command"));
+        errorTooSoon = TextFormat.colorize('&', locale.getString("errorTooSoon", "§cYou need to wait [secs] to [cmd] your island"));
+        errorUseInGame = TextFormat.colorize('&', locale.getString("errorUseInGame", "§cThis command must be used in-game."));
+        errorWrongWorld = TextFormat.colorize('&', locale.getString("errorWrongWorld", "§cYou cannot do that in this world."));
+        errorUnknownWorld = TextFormat.colorize('&', locale.getString("errorUnknownWorld", "§cUnknown world. Possible worlds are:"));
+        errorMaxIsland = TextFormat.colorize('&', locale.getString("errorMaxIsland", "§cSorry you cant create island at this world any more"));
+        errorNotPending = TextFormat.colorize('&', locale.getString("errorNotPending", "§cNo invitation pending! Try again later"));
+        errorInTeam = TextFormat.colorize('&', locale.getString("errorInTeam", "§cThe player [player] are already in team!"));
+        errorBlockedByAPI = TextFormat.colorize('&', locale.getString("errorBlockedByAPI", "§cA plugin using the API blocked this action."));
+        errorKickOwner = TextFormat.colorize('&', locale.getString("errorKickOwner", "§cYou cant kick yourself out your own island!"));
+        errorAdminOnly = TextFormat.colorize('&', locale.getString("errorAdminOnly", "§cYou cant kick admins from your island!"));
+        errorFailedNormal = TextFormat.colorize('&', locale.getString("errorFailedNormal", "§cInvalid or wrong parameters"));
+        errorFailedCritical = TextFormat.colorize('&', locale.getString("errorFailedCritical", "§cFailed to attempt this command. Contact admin!"));
+        errorLevelGenerated = TextFormat.colorize('&', locale.getString("errorLevelGenerated", "§cThe level has already generated"));
+        errorNotEnoughMoney = TextFormat.colorize('&', locale.getString("errorNotEnoughMoney", "§cYou don't have enough money! Default price: $[price]"));
+        errorIslandPC = TextFormat.colorize('&', locale.getString("errorIslandPC", "§cCannot attempt to generate level. PC Type of schematic"));
+        // Commands messages
+        kickSuccess = TextFormat.colorize('&', locale.getString("kickSuccess", "§aKicked [player] from SkyBlock world!"));
+        createSuccess = TextFormat.colorize('&', locale.getString("createSuccess", "§aSuccessfully created you an island!"));
+        resetSuccess = TextFormat.colorize('&', locale.getString("resetSuccess", "§aSuccessfully cleared your island!"));
+        renameSuccess = TextFormat.colorize('&', locale.getString("renameSuccess", "§aSuccessfully renamed island!"));
+        setWorldSuccess = TextFormat.colorize('&', locale.getString("setWorldSuccess", "§aSuccessfully changed island world location!"));
+        setHomeSuccess = TextFormat.colorize('&', locale.getString("setHomeSuccess", "§aSuccessfully changed island home location!"));
+        generalSuccess = TextFormat.colorize('&', locale.getString("generalSuccess", "§aSuccess!"));
+        biomeChangeComplete = TextFormat.colorize('&', locale.getString("biomeChangeComplete", "§aChanged your island biome to: [biome]"));
+        // Teleport messages
+        teleportDelay = TextFormat.colorize('&', locale.getString("teleportDelay", "§aYou will be teleported in {0} seconds."));
+        teleportCancelled = TextFormat.colorize('&', locale.getString("teleportCancelled", "§cTeleport cancelled"));
+        // Admin commands message
+        adminOverride = TextFormat.colorize('&', locale.getString("adminOverride", "§aYou override this command"));
+        adminDeleteIslandError = TextFormat.colorize('&', locale.getString("adminDeleteIslandError", "§cUse §ldelete confirm §r§cto delete the [player]'s island."));
+        adminDeleteIslandnoid = TextFormat.colorize('&', locale.getString("adminDeleteIslandnoid", "§cCannot identify island."));
+        adminDeleteIslandUse = TextFormat.colorize('&', locale.getString("adminDeleteIslandUse", "§rUse §ldelete [name] §r§cto delete the player instead."));
+        adminSetSpawnOwnedBy = TextFormat.colorize('&', locale.getString("adminSetSpawnOwnedBy", "§cThis island space is owned by [name]"));
+        // Team messages
+        teamChatStatusOff = TextFormat.colorize('&', locale.getString("teamChatStatusOff", "§aTeam chat is off"));
+        teamChatStatusOn = TextFormat.colorize('&', locale.getString("teamChatStatusOn", "§aTeam chat is on"));
+        teamChatNoTeamAround = TextFormat.colorize('&', locale.getString("teamChatNoTeamAround", "§cNone of your team are online!"));
+        // Others
+        hangInThere = TextFormat.colorize('&', locale.getString("hangInThere", "§eHang in there. Finding your best safe teleport position..."));
+        deleteRemoving = TextFormat.colorize('&', locale.getString("deleteRemoving", "§cRemoving [name]'s island."));
+        kickedFromOwner = TextFormat.colorize('&', locale.getString("kickedFromOwner", "§eYou were kicked from island owned by [name]."));
+        kickedFromAdmin = TextFormat.colorize('&', locale.getString("kickedFromAdmin", "§eYou were kicked by Admin on duty."));
+        kickedFromTeam = TextFormat.colorize('&', locale.getString("kickedFromTeam", "§eYou were kicked from [name]'s team"));
+        newsHeadline = TextFormat.colorize('&', locale.getString("newsHeadline", "§aWhile you were §eOffline§a:"));
+        newsEmpty = TextFormat.colorize('&', locale.getString("newsEmpty", "§aThere no messages for you today. Check back later!"));
+        newNews = TextFormat.colorize('&', locale.getString("newNews", "§eWelcome back! There's [count] news today! Use /is messages to see all messages"));
+        newInvitation = TextFormat.colorize('&', locale.getString("newInvitation", "§aNew invitation from [player]'s island"));
+        acceptedFrom = TextFormat.colorize('&', locale.getString("acceptedFrom", "§eYou accepted [player]'s invitation."));
+        acceptedTo = TextFormat.colorize('&', locale.getString("acceptedTo", "§e[player] has accepted your invitation!"));
+        panelCancelled = TextFormat.colorize('&', locale.getString("panelCancelled", "§cYou cancelled your island panel!"));
+        // Titles
+        islandSubTitle = TextFormat.colorize('&', locale.getString("islandSubTitle", "&eNice and cosy"));
+        islandDonate = TextFormat.colorize('&', locale.getString("islandDonate", "§aSource code made by §e@larryTheCoder"));
+        islandURL = TextFormat.colorize('&', locale.getString("islandURL", "§aLink: http://github.com/larryTheCoder/ASkyBlock-Nukkit"));
+        islandSupport = TextFormat.colorize('&', locale.getString("islandSupport", "§aLove it? Give us a star on GitHub!"));
+        islandTitle = TextFormat.colorize('&', locale.getString("islandTitle", "[player]'s island"));
+        groundNoAir = TextFormat.colorize('&', locale.getString("groundNoAir", "§eWhat do you think you are? You can't set home on air!"));
+        // Guard island
+        islandProtected = TextFormat.colorize('&', locale.getString("islandProtected", "§cThat island is protected"));
+        // Panels
+        panelIslandHeader = TextFormat.colorize('&', locale.getString("panelIslandHeader", "§eWelcome to the Island Panel. Please fill in these forms."));
+        panelIslandHome = TextFormat.colorize('&', locale.getString("panelIslandHome", "§dYour Home Name."));
+        panelIslandTemplate = TextFormat.colorize('&', locale.getString("panelIslandTemplate", "§dIsland Templates"));
+        panelIslandDefault = TextFormat.colorize('&', locale.getString("panelIslandDefault", "§eThese are your island Settings."));
+        panelIslandWorld = TextFormat.colorize('&', locale.getString("panelIslandWorld", "§dChoose your world"));
+        panelChallengesHeader = TextFormat.colorize('&', locale.getString("panelChallengesHeader", "§aChoose your toppings! All of these are your challenges to complete! You will be awarded with an amazing prize!"));
+        panelHomeHeader = TextFormat.colorize('&', locale.getString("panelHomeHeader", "§dHere are all of the list of your islands. Choose one of these to [function]"));
+        panelSettingHeader = TextFormat.colorize('&', locale.getString("panelSettingHeader", "§eYou can make an simple changes for your island. You can set your island any time."));
+        deleteIslandSure = TextFormat.colorize('&', locale.getString("deleteIslandSure", "§aAre you sure to delete your island? This is an irreversible!"));
+        deleteIslandCancelled = TextFormat.colorize('&', locale.getString("deleteIslandCancelled", "§cYou just cancelled your delete island confirmation"));
+        // Public error
+        errorResponseUnknown = TextFormat.colorize('&', locale.getString("errorResponseUnknown", "§eAn error just occured. Try again later"));
     }
 
     /**

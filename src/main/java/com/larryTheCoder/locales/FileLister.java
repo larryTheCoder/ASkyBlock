@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -35,7 +36,7 @@ import java.util.jar.JarFile;
  */
 public final class FileLister {
 
-    private final static String FOLDERPATH = "locale";
+    private final static String FOLDER_PATH = "locale";
     private final ASkyBlock plugin;
 
     public FileLister(ASkyBlock plugin) {
@@ -46,13 +47,13 @@ public final class FileLister {
         List<String> result = new ArrayList<>();
 
         // Check if the locale folder exists
-        File localeDir = new File(plugin.getDataFolder(), FOLDERPATH);
+        File localeDir = new File(plugin.getDataFolder(), FOLDER_PATH);
         if (localeDir.exists()) {
             FilenameFilter ymlFilter = (File dir, String name) -> {
                 String lowercaseName = name.toLowerCase();
                 return lowercaseName.endsWith(".yml");
             };
-            for (String fileName : localeDir.list(ymlFilter)) {
+            for (String fileName : Objects.requireNonNull(localeDir.list(ymlFilter))) {
                 result.add(fileName.replace(".yml", ""));
             }
             if (!result.isEmpty()) {
@@ -60,7 +61,7 @@ public final class FileLister {
             }
         }
         // Else look in the JAR
-        File jarfile = null;
+        File jarfile;
 
         /**
          * Get the jar file from the plugin.
@@ -89,7 +90,7 @@ public final class FileLister {
                 /**
                  * Not in the folder.
                  */
-                if (!path.startsWith(FOLDERPATH)) {
+                if (!path.startsWith(FOLDER_PATH)) {
                     continue;
                 }
 
