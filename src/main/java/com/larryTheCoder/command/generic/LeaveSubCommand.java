@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Adam Matthew 
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ package com.larryTheCoder.command.generic;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.level.Location;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.storage.WorldSettings;
@@ -75,9 +76,9 @@ public class LeaveSubCommand extends SubCommand {
         getPlugin().getInventory().loadPlayerInventory(pt);
         // default spawn world
         if (getPlugin().getDatabase().getSpawn() != null) {
-            pt.teleport(getPlugin().getDatabase().getSpawn().getCenter());
+            pt.teleportImmediate(getPlugin().getDatabase().getSpawn().getHome());
         } else {
-            pt.teleport(getPlugin().getServer().getDefaultLevel().getSafeSpawn());
+            pt.teleportImmediate(Location.fromObject(getPlugin().getServer().getDefaultLevel().getSafeSpawn()));
         }
         return true;
     }

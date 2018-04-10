@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Adam Matthew 
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -158,7 +158,7 @@ public final class ChallangesCMD extends Command {
             if (i >= (pageNumber - 1) * pageHeight + 1 && i <= Math.min(names.size(), pageNumber * pageHeight)) {
                 sender.sendMessage(TextFormat.GREEN + "Challenges Name: " + TextFormat.YELLOW + cn);
                 sender.sendMessage(TextFormat.GREEN + "Max Level: " + TextFormat.YELLOW
-                    + getChallengeConfig().getString("challenges.challengeList." + cn + ".level", ""));
+                        + getChallengeConfig().getString("challenges.challengeList." + cn + ".level", ""));
                 String desc = TextFormat.colorize('&', getChallengeConfig().getString("challenges.challengeList." + cn + ".description", "").replace("[label]", "is"));
                 List<String> result = new ArrayList<>();
                 if (desc.contains("|")) {
@@ -368,7 +368,7 @@ public final class ChallangesCMD extends Command {
         // Utils.send("DEBUG: 2");
         // Check if it is repeatable
         if (checkChallenge(player, challenge)
-            && !getChallengeConfig().getBoolean("challenges.challengeList." + challenge + ".repeatable")) {
+                && !getChallengeConfig().getBoolean("challenges.challengeList." + challenge + ".repeatable")) {
             player.sendMessage(plugin.getPrefix() + TextFormat.RED + "This challange is not repeatable!");
             return false;
         }
@@ -376,7 +376,7 @@ public final class ChallangesCMD extends Command {
         // If the challenge is an island type and already done, then this too is
         // not repeatable
         if (checkChallenge(player, challenge)
-            && getChallengeConfig().getString("challenges.challengeList." + challenge + ".type").equalsIgnoreCase("island")) {
+                && getChallengeConfig().getString("challenges.challengeList." + challenge + ".type").equalsIgnoreCase("island")) {
             player.sendMessage(plugin.getPrefix() + TextFormat.RED + "This challange is not repeatable!");
             return false;
         }
@@ -437,13 +437,13 @@ public final class ChallangesCMD extends Command {
                 return true;
             }
             player.sendMessage(TextFormat.RED
-                + "Your island must be level [level] to complete this challenge!".replace("[level]",
-                String.valueOf(getChallengeConfig().getInt("challenges.challengeList." + challenge + ".requiredItems"))));
+                    + "Your island must be level [level] to complete this challenge!".replace("[level]",
+                    String.valueOf(getChallengeConfig().getInt("challenges.challengeList." + challenge + ".requiredItems"))));
             return false;
         }
         player.sendMessage(TextFormat.RED + "Command not ready yet");
         Utils.send(TextFormat.RED
-            + "The challenge " + challenge + " is of an unknown type " + getChallengeConfig().getString("challenges.challengeList." + challenge + ".type"));
+                + "The challenge " + challenge + " is of an unknown type " + getChallengeConfig().getString("challenges.challengeList." + challenge + ".type"));
         Utils.send(TextFormat.RED + "Types should be 'island', 'inventory' or 'level'");
         return false;
     }
@@ -815,7 +815,7 @@ public final class ChallangesCMD extends Command {
                     Item[] leftOver = player.getInventory().removeItem(i);
                     if (leftOver.length != 0) {
                         Utils.send(TextFormat.RED
-                            + "Exploit? Could not remove the following in challenge " + challenge + " for player " + player.getName() + ":");
+                                + "Exploit? Could not remove the following in challenge " + challenge + " for player " + player.getName() + ":");
                         for (Item left : leftOver) {
                             Utils.send(TextFormat.GREEN + left.toString());
                         }
@@ -828,8 +828,8 @@ public final class ChallangesCMD extends Command {
                     if (!er) {
 
                         Utils.send(TextFormat.RED
-                            + "Exploit? Could not remove $" + moneyReq + " from " + player.getName()
-                            + " in challenge " + challenge);
+                                + "Exploit? Could not remove $" + moneyReq + " from " + player.getName()
+                                + " in challenge " + challenge);
                     }
                 }
             }
@@ -863,7 +863,7 @@ public final class ChallangesCMD extends Command {
         String rewardText;
         // If the friendly name is available use it
         String challengeName = TextFormat.colorize('&', getChallengeConfig().getString("challenges.challengeList." + challenge + ".friendlyname",
-            challenge.substring(0, 1).toUpperCase() + challenge.substring(1)));
+                challenge.substring(0, 1).toUpperCase() + challenge.substring(1)));
 
         // Gather the rewards due
         // If player has done a challenge already, the rewards are different
@@ -873,15 +873,15 @@ public final class ChallangesCMD extends Command {
             if (Settings.broadcastMessages) {
                 plugin.getServer().getOnlinePlayers().values().stream().forEach((p) -> {
                     p.sendMessage(
-                        TextFormat.GOLD + "[name] just completed a challange: [challenge] !".replace("[name]", player.getDisplayName()).replace("[challenge]", challengeName));
+                            TextFormat.GOLD + "[name] just completed a challange: [challenge] !".replace("[name]", player.getDisplayName()).replace("[challenge]", challengeName));
                 });
             }
             plugin.getMessages().tellOfflineTeam(player.getName(),
-                TextFormat.GOLD + "[name] just completed a challange: [challenge] !".replace("[name]", player.getName()).replace("[challenge]", challengeName));
+                    TextFormat.GOLD + "[name] just completed a challange: [challenge] !".replace("[name]", player.getName()).replace("[challenge]", challengeName));
             itemRewards = getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".itemReward", "").split(" ");
             moneyReward = getChallengeConfig().getDouble("challenges.challengeList." + challenge.toLowerCase() + ".moneyReward", 0D);
             rewardText = TextFormat.colorize('&',
-                getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".rewardText", "Goodies!"));
+                    getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".rewardText", "Goodies!"));
             expReward = getChallengeConfig().getInt("challenges.challengeList." + challenge + ".expReward", 0);
         } else {
             // Repeat challenge
@@ -889,7 +889,7 @@ public final class ChallangesCMD extends Command {
             itemRewards = getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".repeatItemReward", "").split(" ");
             moneyReward = getChallengeConfig().getDouble("challenges.challengeList." + challenge.toLowerCase() + ".repeatMoneyReward", 0);
             rewardText = TextFormat.colorize('&',
-                getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".repeatRewardText", "Goodies!"));
+                    getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".repeatRewardText", "Goodies!"));
             expReward = getChallengeConfig().getInt("challenges.challengeList." + challenge + ".repeatExpReward", 0);
         }
         // Report the rewards and give out exp, money and permissions if

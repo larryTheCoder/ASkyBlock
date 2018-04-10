@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Adam Matthew 
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -185,9 +185,9 @@ public class IslandData implements Cloneable {
 
             if (target.getLevel().getName().equalsIgnoreCase(levelName)) {
                 if (target.getFloorX() >= getMinProtectedX()
-                    && target.getFloorX() <= (getMinProtectedX() + protectionRange)
-                    && target.getFloorZ() >= getMinProtectedZ()
-                    && target.getFloorZ() <= (getMinProtectedZ() + protectionRange)) {
+                        && target.getFloorX() <= (getMinProtectedX() + protectionRange)
+                        && target.getFloorZ() >= getMinProtectedZ()
+                        && target.getFloorZ() <= (getMinProtectedZ() + protectionRange)) {
                     return true;
                 }
             }
@@ -300,7 +300,7 @@ public class IslandData implements Cloneable {
 
     public boolean inIslandSpace(int x, int z) {
         return x >= getCenter().getFloorX() - protectionRange / 2 && x < getCenter().getFloorX() + protectionRange / 2 && z >= getCenter().getFloorZ() - protectionRange / 2
-            && z < getCenter().getFloorZ() + protectionRange / 2;
+                && z < getCenter().getFloorZ() + protectionRange / 2;
     }
 
     public String getName() {

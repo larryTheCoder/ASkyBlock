@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Adam Matthew 
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -364,9 +364,11 @@ public class IslandBlock extends BlockMinecraftId {
                         short itemType = (short) ((CompoundTag) item).getValue().get("id").getValue();
                         short itemDamage = (short) ((CompoundTag) item).getValue().get("Damage").getValue();
                         byte itemAmount = (byte) ((CompoundTag) item).getValue().get("Count").getValue();
+                        Item itemConfirm = Item.get(itemType, (int) itemDamage, itemAmount);
                         byte itemSlot = (byte) ((CompoundTag) item).getValue().get("Slot").getValue();
-                        chestContents.put((int) itemSlot, Item.get(itemType, (int) itemDamage, itemAmount));
-
+                        if (itemConfirm.getId() != 0 && !itemConfirm.getName().equalsIgnoreCase("Unknown")) {
+                            chestContents.put((int) itemSlot, itemConfirm);
+                        }
                     } catch (ClassCastException ex) {
                         // Id is a material
                         String itemType = (String) ((CompoundTag) item).getValue().get("id").getValue();
@@ -386,7 +388,10 @@ public class IslandBlock extends BlockMinecraftId {
                                 byte itemAmount = (byte) ((CompoundTag) item).getValue().get("Count").getValue();
                                 short itemDamage = (short) ((CompoundTag) item).getValue().get("Damage").getValue();
                                 byte itemSlot = (byte) ((CompoundTag) item).getValue().get("Slot").getValue();
-                                chestContents.put((int) itemSlot, Item.get(itemMaterial, (int) itemDamage, itemAmount));
+                                Item itemConfirm = Item.get(itemMaterial, (int) itemDamage, itemAmount);
+                                if (itemConfirm.getId() != 0 && !itemConfirm.getName().equalsIgnoreCase("Unknown")) {
+                                    chestContents.put((int) itemSlot, itemConfirm);
+                                }
                             }
                         } catch (Exception exx) {
                             Utils.send("Could not parse item [" + itemType.substring(10).toUpperCase() + "] in schematic");
@@ -411,8 +416,8 @@ public class IslandBlock extends BlockMinecraftId {
     /**
      * Paste this block at blockLoc
      *
-     * @param p         The player who created this island
-     * @param blockLoc  The block location
+     * @param p        The player who created this island
+     * @param blockLoc The block location
      */
     void paste(Player p, Position blockLoc, EnumBiome biome) {
         Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);

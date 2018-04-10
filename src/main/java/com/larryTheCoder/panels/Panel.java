@@ -35,9 +35,11 @@ import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.schematic.SchematicHandler;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.storage.WorldSettings;
-import com.larryTheCoder.utils.Settings;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -87,7 +89,7 @@ public class Panel implements Listener {
 
                 // 6 - 5
                 // The island schematic ID respond
-                int id = 1; // Keep this 1 so they wont be inside of my UN-FINISHED island
+                int id = 1;
                 if (!ASkyBlock.get().getSchematics().isUseDefaultGeneration()) {
                     FormResponseData form = response.getDropdownResponse(responseId++); // Dropdown respond
 
@@ -245,11 +247,11 @@ public class Panel implements Listener {
             return;
         }
 
-        UUID uuid = UUID.randomUUID();
+        int homes = plugin.getDatabase().getIslands(player.getName()).size();
         FormWindowCustom panelIsland = new FormWindowCustom("Island Menu");
 
         panelIsland.addElement(new ElementLabel(getLocale(player).panelIslandHeader));
-        panelIsland.addElement(new ElementInput(getLocale(player).panelIslandHome, "", uuid.toString())); // Use UUID to avoid same home name
+        panelIsland.addElement(new ElementInput(getLocale(player).panelIslandHome, "", "Home #" + (homes + 1)));
         panelIsland.addElement(new ElementDropdown(getLocale(player).panelIslandWorld, worldName));
 
         SchematicHandler bindTo = ASkyBlock.get().getSchematics();

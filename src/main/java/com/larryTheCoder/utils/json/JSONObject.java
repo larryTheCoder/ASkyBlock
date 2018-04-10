@@ -28,8 +28,8 @@ import java.util.Map.Entry;
  * as null.
  * <p>
  * The <code>put</code> methods add or replace values in an object. For example,
- * <p>
- * <p>
+ *
+ *
  * <pre>
  * myString = new JSONObject().put(&quot;JSON&quot;, &quot;Hello, World!&quot;).toString();
  * </pre>
@@ -536,18 +536,18 @@ public class JSONObject {
                 return NULL;
             }
             if ((object instanceof JSONObject)
-                || (object instanceof JSONArray)
-                || NULL.equals(object)
-                || (object instanceof JSONString)
-                || (object instanceof Byte)
-                || (object instanceof Character)
-                || (object instanceof Short)
-                || (object instanceof Integer)
-                || (object instanceof Long)
-                || (object instanceof Boolean)
-                || (object instanceof Float)
-                || (object instanceof Double)
-                || (object instanceof String)) {
+                    || (object instanceof JSONArray)
+                    || NULL.equals(object)
+                    || (object instanceof JSONString)
+                    || (object instanceof Byte)
+                    || (object instanceof Character)
+                    || (object instanceof Short)
+                    || (object instanceof Integer)
+                    || (object instanceof Long)
+                    || (object instanceof Boolean)
+                    || (object instanceof Float)
+                    || (object instanceof Double)
+                    || (object instanceof String)) {
                 return object;
             }
             if (object instanceof Collection) {

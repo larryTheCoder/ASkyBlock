@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Adam Matthew 
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software", you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,22 +38,22 @@ import java.util.Set;
 public final class ASlocales {
 
     private final static Set<String> TITLE_COLORS = new HashSet<>(Arrays.asList(
-        "black",
-        "dark_blue",
-        "dark_green",
-        "dark_aqua",
-        "dark_red",
-        "dark_purple",
-        "gold",
-        "gray",
-        "dark_gray",
-        "blue",
-        "green",
-        "aqua",
-        "red",
-        "light_purple",
-        "yellow",
-        "white"
+            "black",
+            "dark_blue",
+            "dark_green",
+            "dark_aqua",
+            "dark_red",
+            "dark_purple",
+            "gold",
+            "gray",
+            "dark_gray",
+            "blue",
+            "green",
+            "aqua",
+            "red",
+            "light_purple",
+            "yellow",
+            "white"
     ));
 
     public String firstIslandFree = "§aYour first island are free!";
@@ -160,9 +160,9 @@ public final class ASlocales {
     /**
      * Creates a locale object full of localized strings for a language
      *
-     * @param plugin ASkyBlock class
+     * @param plugin     ASkyBlock class
      * @param localeName - name of the yml file that will be used
-     * @param index The count of the file processed
+     * @param index      The count of the file processed
      */
     public ASlocales(ASkyBlock plugin, String localeName, int index) {
         this.plugin = plugin;

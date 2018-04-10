@@ -24,13 +24,13 @@ import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.utils.Utils;
 
 public class SimpleFancyTitle extends Task {
 
     private ASkyBlock plugin;
     private Player p;
     private Position lastPos;
+    private int times = 0;
 
     public SimpleFancyTitle(ASkyBlock plugin, Player player) {
         this.plugin = plugin;
@@ -57,12 +57,15 @@ public class SimpleFancyTitle extends Task {
         shouldLoopBack = !plugin.inIslandWorld(p) || !(shouldDo >= 0.5);
 
         if (shouldLoopBack) {
+            // If player still not moving or something. Cancel this task
+            if (times >= 30) {
+                return;
+            }
             // This class interfered to task class
             // Keep this task in here until player moved
             TaskManager.runTaskLater(this, 20);
             lastPos = p.clone();
-            Utils.sendDebug("Tasking again");
-            Utils.sendDebug(lastPos.toString() + " " + p.toString());
+            times++;
             return;
         }
 
@@ -79,7 +82,5 @@ public class SimpleFancyTitle extends Task {
             //p.sendMessage(plugin.getLocale(p).islandSupport);
             //p.sendMessage(plugin.getLocale(p).islandURL);
         }
-        // Cancel the task (Complete the repeat task)
-        this.cancel();
     }
 }

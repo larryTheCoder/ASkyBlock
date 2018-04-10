@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Adam Matthew 
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,9 @@ import cn.nukkit.command.PluginCommand;
 import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.command.SubCommand;
-import com.larryTheCoder.command.chat.ChatSubCommand;
-import com.larryTheCoder.command.chat.MessageSubCommand;
 import com.larryTheCoder.command.generic.ExpelSubCommand;
 import com.larryTheCoder.command.generic.LeaveSubCommand;
 import com.larryTheCoder.command.island.*;
-import com.larryTheCoder.command.management.AcceptSubCommand;
-import com.larryTheCoder.command.management.DenySubCommand;
-import com.larryTheCoder.command.management.InviteSubCommand;
 import com.larryTheCoder.command.management.SettingsSubCommand;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.utils.Utils;
@@ -50,26 +45,25 @@ public class Commands extends PluginCommand<ASkyBlock> {
     private final ConcurrentHashMap<String, Integer> SubCommand = new ConcurrentHashMap<>();
     private final ASkyBlock plugin;
 
-    @SuppressWarnings({"unchecked", "OverridableMethodCallInConstructor"})
-    public Commands(ASkyBlock plugin) {
+    Commands(ASkyBlock plugin) {
         super("is", plugin);
         this.setAliases(new String[]{"sky", "island", "skyblock"});
         this.setPermission("is.command");
         this.setDescription("SkyBlock main command");
         this.plugin = plugin;
 
-        // A-Z
-        this.loadSubCommand(new AcceptSubCommand(getPlugin()));
-        this.loadSubCommand(new ChatSubCommand(getPlugin()));
+        // Todo: add the partner (Team) for players
+//        this.loadSubCommand(new AcceptSubCommand(getPlugin()));
+//        this.loadSubCommand(new ChatSubCommand(getPlugin()));
+//        this.loadSubCommand(new DenySubCommand(getPlugin()));
+//        this.loadSubCommand(new InviteSubCommand(getPlugin()));
+//        this.loadSubCommand(new MessageSubCommand(getPlugin()));
         this.loadSubCommand(new CreateISubCommand(getPlugin()));
         this.loadSubCommand(new DeleteSubCommand(getPlugin()));
-        this.loadSubCommand(new DenySubCommand(getPlugin()));
         this.loadSubCommand(new ExpelSubCommand(getPlugin()));
         this.loadSubCommand(new HomeSubCommand(getPlugin()));
         this.loadSubCommand(new InfoSubCommand(getPlugin()));
-        this.loadSubCommand(new InviteSubCommand(getPlugin()));
         this.loadSubCommand(new LeaveSubCommand(getPlugin()));
-        this.loadSubCommand(new MessageSubCommand(getPlugin()));
         this.loadSubCommand(new SetHomeSubCommand(getPlugin()));
         this.loadSubCommand(new SettingsSubCommand(getPlugin()));
         this.loadSubCommand(new TeleportSubCommand(getPlugin()));
@@ -134,17 +128,17 @@ public class Commands extends PluginCommand<ASkyBlock> {
             switch (args[0]) {
                 case "version":
                 case "ver":
-                    sender.sendMessage("§aASkyBlock Module " + ASkyBlock.moduleVersion + " Build 9");
-                    sender.sendMessage("§aVendor Type: " + System.getProperty("os.name"));
-                    sender.sendMessage("§aJava Module Version: " + System.getProperty("java.version"));
+                    sender.sendMessage("§aASkyBlock Module §7" + ASkyBlock.moduleVersion + " Build 9");
+                    sender.sendMessage("§aVendor Type: §7" + System.getProperty("os.name"));
+                    sender.sendMessage("§aJava Module Version: §7" + System.getProperty("java.version"));
                     break;
                 case "about":
-                    sender.sendMessage("§aA Fresh Nukkit SkyBlock module for MCBE " + ProtocolInfo.MINECRAFT_VERSION);
-                    sender.sendMessage("§aThis game inspired from a plugin called ASkyBlock.");
+                    sender.sendMessage("§7A Fresh Nukkit SkyBlock module for MCBE " + ProtocolInfo.MINECRAFT_VERSION);
+                    sender.sendMessage("§7This game inspired from a plugin called B-SkyBlock. (Better SkyBlock)");
                     sender.sendMessage("§aSame as this plugin but it only in PC. The most powerful Java game in the world");
-                    sender.sendMessage("§aHopefully that you can contribute more with us at: ");
-                    sender.sendMessage("§eGitHub: §ahttps://github.com/TheSolidCrafter/ASkyBlock-Nukkit");
-                    sender.sendMessage("§ePayPal: §ahttp://www.paypal.me/DoubleCheese");
+                    sender.sendMessage("§eHopefully that you can contribute more with us at: ");
+                    sender.sendMessage("§eGitHub: §dhttps://github.com/TheSolidCrafter/ASkyBlock-Nukkit");
+                    sender.sendMessage("§eDonate: §dhttp://www.paypal.me/DoubleCheese");
                     break;
                 default:
                     sender.sendMessage("§cUnknown command use /is help for a list of commands");
@@ -196,9 +190,6 @@ public class Commands extends PluginCommand<ASkyBlock> {
 
         List<String> helpList = new ArrayList<>();
 
-        helpList.add(""); // Really weird Java Machine bug (Usually this will be stored in List but not)
-        helpList.add("");
-        helpList.add("§dBefore creating island, Checkout /is templates to see some cool island templates");
         helpList.add("");
 
         for (SubCommand cmd : commands) {
@@ -209,22 +200,10 @@ public class Commands extends PluginCommand<ASkyBlock> {
         }
         helpList.add("§eis version" + TextFormat.GRAY + " => §aGets the current module version.");
         helpList.add("§eis about" + TextFormat.GRAY + " => §aListen to what this author say.");
-        helpList.add("§eis author" + TextFormat.GRAY + " => §aThanks for your contributions.");
 
         if (sender.hasPermission("is.admin.command")) {
             helpList.add("§eisa" + TextFormat.GRAY + " => §aThe admin command Module");
         }
-
-        helpList.add("");
-        helpList.add("§eHere is the another tips for your new island.");
-        helpList.add("§eYou can break your island but not others island.");
-        helpList.add("§eYou also can made an ally to able players come your island.");
-        helpList.add("§ePeople cannot enter your island, break, grief any blocks in your island without permission.\"");
-        helpList.add("");
-        helpList.add("§eYou may not understand some commands but you will get it soon.");
-        helpList.add("§eAdmin or OP can do anything on your island (Including deleting).");
-        helpList.add("§eYou can kick player but not OP's");
-        helpList.add("§eYou can chat with your team privately but the Admin can spying on you");
 
         int totalPage = helpList.size() % pageHeight == 0 ? helpList.size() / pageHeight : helpList.size() / pageHeight + 1;
         pageNumber = Math.min(pageNumber, totalPage);
@@ -232,7 +211,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
             pageNumber = 1;
         }
 
-        sender.sendMessage("§e--- §eSkyBlock Help Page §a" + pageNumber + " §eof §a" + totalPage + " §e---");
+        sender.sendMessage("§7--- §dSkyBlock §eHelp Page §a" + pageNumber + " §eof §a" + totalPage + " §7---");
 
         int i = 0;
         for (String list : helpList) {

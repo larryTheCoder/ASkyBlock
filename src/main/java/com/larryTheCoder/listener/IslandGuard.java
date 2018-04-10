@@ -189,8 +189,8 @@ public class IslandGuard implements Listener {
             // Lock check
             if (islandTo.isLocked()) {//|| plugin.getPlayers().isBanned(islandTo.getOwner(), player)) {
                 if (!islandTo.getMembers().contains(player.getName()) && !player.isOp()
-                    && !player.hasPermission("is.mod.bypassprotect")
-                    && !player.hasPermission("is.mod.bypasslock")) {
+                        && !player.hasPermission("is.mod.bypassprotect")
+                        && !player.hasPermission("is.mod.bypasslock")) {
                     player.sendMessage(plugin.getPrefix() + TextFormat.RED + "This island is locked");
 
                     // Get the vector away from this island
@@ -284,7 +284,7 @@ public class IslandGuard implements Listener {
         }
         // Only do something if there is a definite x or z movement
         if (e.getTo().getFloorX() - e.getFrom().getFloorX() == 0 && e.getTo().getFloorZ() - e.getFrom()
-            .getFloorZ() == 0) {
+                .getFloorZ() == 0) {
             return;
         }
         final IslandData islandTo = plugin.getGrid().getProtectedIslandAt(e.getTo());
@@ -306,8 +306,8 @@ public class IslandGuard implements Listener {
             // Lock check
             if (islandTo.isLocked()) {
                 if (!islandTo.getMembers().contains(p.getName()) && !p.isOp()
-                    && !p.hasPermission("is.mod.bypassprotect")
-                    && !p.hasPermission("is.mod.bypasslock")) {
+                        && !p.hasPermission("is.mod.bypassprotect")
+                        && !p.hasPermission("is.mod.bypasslock")) {
                     if (p.riding != null) {
                         // Dismount
                         ((EntityVehicle) p.riding).mountEntity(p);
@@ -720,7 +720,7 @@ public class IslandGuard implements Listener {
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.PLACE_BLOCKS)) {
                         if (e.getItem().equals(MINECART) || e.getItem().equals(MINECART_WITH_CHEST) || e.getItem().equals(MINECART_WITH_HOPPER)
-                            || e.getItem().equals(MINECART_WITH_TNT)) {
+                                || e.getItem().equals(MINECART_WITH_TNT)) {
                             e.setCancelled(true);
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             return;
@@ -808,24 +808,24 @@ public class IslandGuard implements Listener {
             // This check protects against an exploit in 1.7.9 against cactus
             // and sugar cane
             if (e.getItem().equals(WOODEN_DOOR)
-                || e.getItem().equals(CHEST)
-                || e.getItem().equals(TRAPPED_CHEST)
-                || e.getItem().equals(IRON_DOOR)) {
+                    || e.getItem().equals(CHEST)
+                    || e.getItem().equals(TRAPPED_CHEST)
+                    || e.getItem().equals(IRON_DOOR)) {
                 if ((island == null && Settings.defaultWorldSettings.get(IslandData.SettingsFlag.PLACE_BLOCKS))
-                    || (island != null && !island.getIgsFlag(IslandData.SettingsFlag.PLACE_BLOCKS))) {
+                        || (island != null && !island.getIgsFlag(IslandData.SettingsFlag.PLACE_BLOCKS))) {
                     p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                     e.setCancelled(true);
                 }
             } else if (e.getItem().getName().contains("BOAT") && (e.getBlock() != null && !BlockUtil.isFluid(e.getBlock()))) {
                 // Trying to put a boat on non-liquid
                 if ((island == null && Settings.defaultWorldSettings.get(IslandData.SettingsFlag.PLACE_BLOCKS))
-                    || (island != null && !island.getIgsFlag(IslandData.SettingsFlag.PLACE_BLOCKS))) {
+                        || (island != null && !island.getIgsFlag(IslandData.SettingsFlag.PLACE_BLOCKS))) {
                     p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                     e.setCancelled(true);
                 }
             } else if (e.getItem().equals(ENDER_PEARL)) {
                 if ((island == null && Settings.defaultWorldSettings.get(IslandData.SettingsFlag.ENDER_PEARL))
-                    || (island != null && !island.getIgsFlag(IslandData.SettingsFlag.ENDER_PEARL))) {
+                        || (island != null && !island.getIgsFlag(IslandData.SettingsFlag.ENDER_PEARL))) {
                     p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                     e.setCancelled(true);
                 }
@@ -1207,7 +1207,7 @@ public class IslandGuard implements Listener {
             deb.debug("DEBUG: " + p.getInventory().getItemInHand());
             // Handle name tags and dyes
             if (p.getInventory().getItemInHand() != null && (p.getInventory().getItemInHand().getId() == NAME_TAG
-                || p.getInventory().getItemInHand().getId() == Item.DYE)) {
+                    || p.getInventory().getItemInHand().getId() == Item.DYE)) {
                 p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                 e.setCancelled(true);
             }
@@ -1301,9 +1301,9 @@ public class IslandGuard implements Listener {
 
                     // Check if this is allowed
                     if (e.getEntity() != null
-                        && e.getEntity() instanceof Player
-                        && (((Player) e.getEntity()).isOp()
-                        || ((Player) e.getEntity()).hasPermission("is.mod.bypass"))) {
+                            && e.getEntity() instanceof Player
+                            && (((Player) e.getEntity()).isOp()
+                            || ((Player) e.getEntity()).hasPermission("is.mod.bypass"))) {
                         return;
                     }
                     if (!actionAllowed(e.getBlock().getLocation(), IslandData.SettingsFlag.FIRE)) {
@@ -1350,10 +1350,10 @@ public class IslandGuard implements Listener {
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onPlateStep(PlayerInteractEvent e) {
         if (!inWorld(e.getPlayer())
-            || e.getAction() != PlayerInteractEvent.Action.PHYSICAL
-            || e.getPlayer().isOp()
-            || e.getPlayer().hasPermission("is.mod.bypassprotect")
-            || plugin.getGrid().playerIsOnIsland(e.getPlayer())) {
+                || e.getAction() != PlayerInteractEvent.Action.PHYSICAL
+                || e.getPlayer().isOp()
+                || e.getPlayer().hasPermission("is.mod.bypassprotect")
+                || plugin.getGrid().playerIsOnIsland(e.getPlayer())) {
             deb.debug("DEBUG: Haz permission to do this");
             return;
         }

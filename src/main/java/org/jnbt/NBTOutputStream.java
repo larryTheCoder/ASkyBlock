@@ -230,7 +230,7 @@ public final class NBTOutputStream implements Closeable {
      * @throws IOException if an I/O error occurs.
      */
     private void writeEndTagPayload(EndTag tag) {
-    /* empty */
+        /* empty */
     }
 
     @Override

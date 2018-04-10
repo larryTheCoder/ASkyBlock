@@ -213,8 +213,6 @@ public class AdminCMD extends Command {
             IslandData pd = plugin.getDatabase().getSpawn();
             pd.setSpawn(false);
             plugin.getDatabase().saveIsland(pd);
-            sender.sendMessage(TextFormat.GREEN + plugin.getLocale(p).generalSuccess);
-            return;
         }
         // Save this island
         IslandData pd = plugin.getIslandInfo(p.getLocation());

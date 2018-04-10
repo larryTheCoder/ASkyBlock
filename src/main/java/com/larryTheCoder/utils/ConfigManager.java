@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Adam Matthew 
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ package com.larryTheCoder.utils;
 
 import cn.nukkit.Server;
 import cn.nukkit.item.Item;
-import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.plugin.Plugin;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
@@ -32,9 +31,7 @@ import com.larryTheCoder.task.TaskManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * @author Adam Matthew
@@ -72,8 +69,6 @@ public class ConfigManager {
         Settings.reset = cfg.getInt("island.reset", 0);
         Settings.gameMode = cfg.getInt("island.gameMode", 0);
         Settings.memberTimeOut = cfg.getInt("island.timeOut", 0);
-        // Companion names
-        List<String> companionNames = cfg.getStringList("island.companionnames");
         //Chest Items
         Settings.resetTime = cfg.getInt("island.deleteTiming", 0);
         String chestItems = cfg.getString("island.items.chestItems", "");
@@ -169,7 +164,7 @@ public class ConfigManager {
     private static void scheduleCheck(boolean flag, Config cfg) {
         if (flag) {
             Plugin plugin = ASkyBlock.get().getServer().getPluginManager()
-                .getPlugin("EconomyAPI");
+                    .getPlugin("EconomyAPI");
             if (plugin != null && !plugin.isEnabled()) {
                 Utils.send("&eScheduling Economy instance due to 'plugin not enabled'");
                 // schedule another delayed task

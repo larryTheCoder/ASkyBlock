@@ -18,7 +18,6 @@
 package com.larryTheCoder.storage;
 
 import cn.nukkit.level.Level;
-import com.larryTheCoder.utils.Settings;
 
 public class WorldSettings {
 

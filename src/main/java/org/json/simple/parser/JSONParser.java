@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * Parser for JSON text. Please note that JSONParser is NOT thread-safe.
  *
- * @author FangYidong<fangyidong@yahoo.com.cn>
+ * @author FangYidong<fangyidong       @       yahoo.com.cn>
  */
 public class JSONParser {
     public static final int S_INIT = 0;
@@ -81,7 +81,7 @@ public class JSONParser {
         } catch (IOException ie) {
             /*
              * Actually it will never happen.
-			 */
+             */
             throw new ParseException(-1, ParseException.ERROR_UNEXPECTED_EXCEPTION, ie);
         }
     }
@@ -295,7 +295,7 @@ public class JSONParser {
         } catch (IOException ie) {
             /*
              * Actually it will never happen.
-			 */
+             */
             throw new ParseException(-1, ParseException.ERROR_UNEXPECTED_EXCEPTION, ie);
         }
     }
@@ -438,10 +438,10 @@ public class JSONParser {
                         break;
 
                     case S_IN_PAIR_VALUE:
-                    /*
-                     * S_IN_PAIR_VALUE is just a marker to indicate the end of an object entry, it doesn't proccess any token,
-					 * therefore delay consuming token until next round.
-					 */
+                        /*
+                         * S_IN_PAIR_VALUE is just a marker to indicate the end of an object entry, it doesn't proccess any token,
+                         * therefore delay consuming token until next round.
+                         */
                         statusStack.removeFirst();
                         status = peekStatus(statusStack);
                         if (!contentHandler.endObjectEntry())

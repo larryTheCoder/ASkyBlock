@@ -363,7 +363,7 @@ class XML {
             } else {
                 string = escape(object.toString());
                 return (tagName == null) ? '"' + string + '"' :
-                    string.isEmpty() ? '<' + tagName + "/>" : '<' + tagName + '>' + string + "</" + tagName + '>';
+                        string.isEmpty() ? '<' + tagName + "/>" : '<' + tagName + '>' + string + "</" + tagName + '>';
             }
         }
     }

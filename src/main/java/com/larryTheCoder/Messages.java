@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Adam Matthew 
+ * Copyright (C) 2017 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ public class Messages {
     /**
      * @param plugin
      */
-    public Messages(ASkyBlock plugin) {
+    Messages(ASkyBlock plugin) {
         this.plugin = plugin;
     }
 
@@ -66,7 +66,7 @@ public class Messages {
         messages.remove(p);
     }
 
-    public void saveMessages() {
+    void saveMessages() {
         if (messageStore == null) {
             return;
         }
@@ -74,9 +74,7 @@ public class Messages {
         try {
             // Convert to a serialized string
             final HashMap<String, Object> offlineMessages = new HashMap<>();
-            messages.keySet().stream().forEach((p) -> {
-                offlineMessages.put(p.toString(), messages.get(p));
-            });
+            messages.keySet().forEach((p) -> offlineMessages.put(p, messages.get(p)));
             // Convert to YAML
             messageStore.set("messages", offlineMessages);
             Utils.saveYamlFile(messageStore, "messages.yml");
@@ -85,24 +83,20 @@ public class Messages {
         }
     }
 
-    public boolean loadMessages() {
+    void loadMessages() {
         Utils.send("&7Loading offline messages...");
         try {
             messageStore = Utils.loadYamlFile("messages.yml");
-            if (messageStore.getSections("messages") == null) {
-            }
             HashMap<String, Object> temp = messageStore.getSections("messages");
-            temp.keySet().stream().forEach((s) -> {
+            temp.keySet().forEach((s) -> {
                 List<String> messageList = messageStore.getStringList("messages." + s);
                 if (!messageList.isEmpty()) {
                     messages.put(s, messageList);
                 }
             });
 
-            return true;
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
     }
 
@@ -119,12 +113,11 @@ public class Messages {
     /**
      * Stores a message for player
      *
-     * @param p
-     * @param playerMessages
+     * @param p              The Player name
+     * @param playerMessages Message to be given for the player
      */
     public void put(String p, List<String> playerMessages) {
         messages.put(p, playerMessages);
-
     }
 
     /**
