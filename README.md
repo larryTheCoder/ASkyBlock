@@ -1,5 +1,5 @@
 ## ASkyBlock
-[![Circle-CI](https://circleci.com/gh/TheSolidCrafter/ASkyBlock-Nukkit.svg?style=shield)](https://circleci.com/gh/TheSolidCrafters/ASkyBlock-Nukkit)
+[![Circle-CI](https://circleci.com/gh/TheSolidCrafter/ASkyBlock-Nukkit.svg?style=shield)](https://circleci.com/gh/TheSolidCrafter/ASkyBlock-Nukkit)
 
 Introduction
 -------------
