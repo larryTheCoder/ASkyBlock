@@ -64,6 +64,7 @@ public class Panel implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onPlayerRespondForm(PlayerFormRespondedEvent event) {
+        if (event.getResponse() == null) return;
         Player p = event.getPlayer();
         int formId = event.getFormID();
         PanelType type = panelDataId.get(formId);
