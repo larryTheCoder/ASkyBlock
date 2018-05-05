@@ -68,6 +68,7 @@ public class Panel implements Listener {
         Player p = event.getPlayer();
         int formId = event.getFormID();
         PanelType type = panelDataId.get(formId);
+        if (type == null) return;
 
         switch (type) {
             // island features
