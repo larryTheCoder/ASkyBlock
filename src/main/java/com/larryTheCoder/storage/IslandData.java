@@ -164,7 +164,7 @@ public class IslandData implements Cloneable {
     public ArrayList<String> getMembers() {
         PlayerData pd = ASkyBlock.get().getDatabase().getPlayerData(this.owner);
         if (pd == null) {
-            return Lists.newArrayList(new String());
+            return Lists.newArrayList();
         }
         return pd.members;
     }

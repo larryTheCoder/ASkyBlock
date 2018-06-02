@@ -36,7 +36,7 @@ import java.util.List;
  *
  * @author Adam Matthew
  */
-public final class ASConnection {
+public final class SqliteConn {
 
     private final AbstractDatabase db;
     // Faster to search islands ~75%
@@ -48,7 +48,7 @@ public final class ASConnection {
     private boolean enableFastCache;
     private boolean mySQL;
 
-    public ASConnection(ASkyBlock plugin, AbstractDatabase database) throws SQLException, ClassNotFoundException, InterruptedException {
+    public SqliteConn(ASkyBlock plugin, AbstractDatabase database) throws SQLException, ClassNotFoundException {
         // Performance upgrade: Cache
         this.plugin = plugin;
         this.db = database;

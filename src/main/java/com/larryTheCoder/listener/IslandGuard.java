@@ -85,7 +85,7 @@ public class IslandGuard implements Listener {
      * @param entity
      * @return
      */
-    protected boolean inWorld(Entity entity) {
+    private boolean inWorld(Entity entity) {
         return inWorld(entity.getLocation());
     }
 
@@ -95,7 +95,7 @@ public class IslandGuard implements Listener {
      * @param block
      * @return true if in the island world
      */
-    protected boolean inWorld(Block block) {
+    private boolean inWorld(Block block) {
         return inWorld(block.getLocation());
     }
 
@@ -106,8 +106,8 @@ public class IslandGuard implements Listener {
      * @param loc
      * @return true if in the island world
      */
-    protected boolean inWorld(Location loc) {
-        return ASkyBlock.get().level.contains(loc.getLevel().getName());
+    private boolean inWorld(Location loc) {
+        return ASkyBlock.get().getLevels().contains(loc.getLevel().getName());
     }
 
     /**
@@ -120,20 +120,26 @@ public class IslandGuard implements Listener {
      */
     private boolean actionAllowed(Player player, Location location, IslandData.SettingsFlag flag) {
         if (player == null) {
+            deb.debug("Checking others");
             return actionAllowed(location, flag);
         }
         // This permission bypasses protection
         if (player.isOp() || player.hasPermission("is.mod.bypassprotect")) {
+            deb.debug("Has Permission to bypass");
             return true;
         }
         IslandData island = plugin.getGrid().getProtectedIslandAt(location);
         if (island.getOwner() == null) {
+            deb.debug("No owner within the island");
             return false;
         }
-        if (island.getIgsFlag(flag) || island.getOwner().equalsIgnoreCase(player.getName())) {
+        // todo fix getIgsFlag for islands
+        if (island.getOwner().equalsIgnoreCase(player.getName())) {
+            deb.debug("This is player island");
             return true;
         }
-        return Settings.defaultWorldSettings.get(flag);
+        deb.debug("Using incremental saving flag");
+        return false; // Settings.defaultWorldSettings.get(flag);
     }
 
     /**
@@ -1104,7 +1110,7 @@ public class IslandGuard implements Listener {
      * @param e
      */
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onPlayerBlockPlace(final BlockPlaceEvent e) {
+    public void onBlockPlace(final BlockPlaceEvent e) {
         deb.debug("DEBUG: " + e.getEventName());
         if (e.getPlayer() == null) {
             deb.debug("DEBUG: player is null");
@@ -1124,7 +1130,7 @@ public class IslandGuard implements Listener {
             // Outside of island protection zone
             if (island == null) {
                 if (!Settings.defaultWorldSettings.get(IslandData.SettingsFlag.PLACE_BLOCKS)) {
-                    e.getPlayer().sendMessage(plugin.getLocale(e.getPlayer()).islandProtected);
+                    e.getPlayer().sendMessage(plugin.getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                     e.setCancelled(true);
                 }
                 return;
@@ -1133,7 +1139,7 @@ public class IslandGuard implements Listener {
                 // Maybe in team or else
             } else {
                 // Visitor
-                e.getPlayer().sendMessage(plugin.getLocale(e.getPlayer()).islandProtected);
+                e.getPlayer().sendMessage(plugin.getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                 e.setCancelled(true);
             }
         }
@@ -1354,7 +1360,6 @@ public class IslandGuard implements Listener {
                 || e.getPlayer().isOp()
                 || e.getPlayer().hasPermission("is.mod.bypassprotect")
                 || plugin.getGrid().playerIsOnIsland(e.getPlayer())) {
-            deb.debug("DEBUG: Haz permission to do this");
             return;
         }
         // Check island

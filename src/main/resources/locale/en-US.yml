@@ -3,7 +3,6 @@
 # the one at http://yaml-online-parser.appspot.com                                        #
 ###########################################################################################
 # Note: looking for translators to help translate all of these
-# It will not be used until further update
 ---
 firstIslandFree: "§aYour first island are free!"
 nextIslandPrice: "§aNext time you may need $§e[price] to buy other island"

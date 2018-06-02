@@ -30,7 +30,7 @@ import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.command.AdminCMD;
 import com.larryTheCoder.command.ChallangesCMD;
-import com.larryTheCoder.database.ASConnection;
+import com.larryTheCoder.database.SqliteConn;
 import com.larryTheCoder.database.JDBCUtilities;
 import com.larryTheCoder.database.variables.MySQLDatabase;
 import com.larryTheCoder.database.variables.SQLiteDatabase;
@@ -81,7 +81,7 @@ public class ASkyBlock extends PluginBase {
     private Config cfg;
     private Config worldConfig;
     // Managers
-    private ASConnection db = null;
+    private SqliteConn db = null;
     private ChatHandler chatHandler;
     private InvitationHandler invitationHandler;
     private IslandManager manager;
@@ -105,7 +105,7 @@ public class ASkyBlock extends PluginBase {
         return object;
     }
 
-    public ASConnection getDatabase() {
+    public SqliteConn getDatabase() {
         return db;
     }
 
@@ -274,18 +274,18 @@ public class ASkyBlock extends PluginBase {
     private void initDatabase() {
         if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {
             try {
-                db = new ASConnection(this, new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")));
+                db = new SqliteConn(this, new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")));
             } catch (SQLException ex) {
                 JDBCUtilities.printSQLException(ex);
-            } catch (ClassNotFoundException | InterruptedException ex) {
+            } catch (ClassNotFoundException ex) {
                 Utils.send("Unable to create MySql database");
             }
         } else {
             try {
-                db = new ASConnection(this, new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")));
+                db = new SqliteConn(this, new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")));
             } catch (SQLException ex) {
                 JDBCUtilities.printSQLException(ex);
-            } catch (ClassNotFoundException | InterruptedException ex) {
+            } catch (ClassNotFoundException ex) {
                 Utils.send("Unable to create Sqlite database");
             }
         }

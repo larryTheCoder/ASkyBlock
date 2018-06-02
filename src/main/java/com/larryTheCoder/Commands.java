@@ -25,6 +25,7 @@ import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.command.generic.ExpelSubCommand;
 import com.larryTheCoder.command.generic.LeaveSubCommand;
+import com.larryTheCoder.command.generic.LocaleSubCommand;
 import com.larryTheCoder.command.island.*;
 import com.larryTheCoder.command.management.SettingsSubCommand;
 import com.larryTheCoder.locales.ASlocales;
@@ -58,6 +59,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
 //        this.loadSubCommand(new DenySubCommand(getPlugin()));
 //        this.loadSubCommand(new InviteSubCommand(getPlugin()));
 //        this.loadSubCommand(new MessageSubCommand(getPlugin()));
+        this.loadSubCommand(new LocaleSubCommand(getPlugin()));
         this.loadSubCommand(new CreateISubCommand(getPlugin()));
         this.loadSubCommand(new DeleteSubCommand(getPlugin()));
         this.loadSubCommand(new ExpelSubCommand(getPlugin()));
@@ -126,6 +128,9 @@ public class Commands extends PluginCommand<ASkyBlock> {
                 return true;
             }
             switch (args[0]) {
+//                case "pos":
+//                    sender.sendMessage(sender.toString());
+//                    break;
                 case "version":
                 case "ver":
                     sender.sendMessage("§aASkyBlock Module §7" + ASkyBlock.moduleVersion + " Build 9");
