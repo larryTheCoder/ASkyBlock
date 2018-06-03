@@ -72,7 +72,7 @@ public final class SchematicHandler {
     // Use build-in island generation
     private boolean useDefaultGeneration = false;
     // Plugin instance
-    private ASkyBlock plugin;
+    private final ASkyBlock plugin;
 
     public SchematicHandler(ASkyBlock plugin, File path) {
         Objects.requireNonNull(plugin, "ASkyBlock instance cannot be null");
@@ -516,7 +516,7 @@ public final class SchematicHandler {
      * @param id The id of the block
      * @return An array of the listed blocks
      */
-    public List<IslandBlock> getIslandBlocks(int id) {
+    private List<IslandBlock> getIslandBlocks(int id) {
         return islandBlocks.get(id);
     }
 

@@ -6,7 +6,7 @@ package com.larryTheCoder.utils.json;
  * @author JSON.org
  * @version 2014-05-03
  */
-public class HTTPTokener extends JSONTokener {
+class HTTPTokener extends JSONTokener {
     /**
      * Construct an HTTPTokener from a string.
      *

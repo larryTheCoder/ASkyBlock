@@ -28,7 +28,7 @@ import com.larryTheCoder.storage.IslandData;
 /**
  * @author Adam Matthew
  */
-public class ASkyBlockEvent extends Event {
+class ASkyBlockEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
     private final Player player;
@@ -38,7 +38,7 @@ public class ASkyBlockEvent extends Event {
      * @param player
      * @param island
      */
-    public ASkyBlockEvent(Player player, IslandData island) {
+    ASkyBlockEvent(Player player, IslandData island) {
         this.player = player;
         this.island = island;
     }

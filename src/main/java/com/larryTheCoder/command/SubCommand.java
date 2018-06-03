@@ -35,7 +35,7 @@ public abstract class SubCommand {
     public final MainLogger deb = Server.getInstance().getLogger();
     private final ASkyBlock plugin;
 
-    public SubCommand(ASkyBlock plugin) {
+    protected SubCommand(ASkyBlock plugin) {
         if (plugin == null) {
             Server.getInstance().getLogger().error("plugin cant be null");
         }
@@ -45,15 +45,15 @@ public abstract class SubCommand {
     /**
      * @return Adam Matthew\ASkyBlock
      */
-    public ASkyBlock getPlugin() {
+    protected ASkyBlock getPlugin() {
         return plugin;
     }
 
-    public ASlocales getLocale(Player key) {
+    protected ASlocales getLocale(Player key) {
         return plugin.getLocale(key);
     }
 
-    public String getPrefix() {
+    protected String getPrefix() {
         return plugin.getPrefix();
     }
 

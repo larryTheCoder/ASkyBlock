@@ -9,7 +9,7 @@ import java.util.Iterator;
  * @author JSON.org
  * @version 2014-05-03
  */
-public class JSONML {
+class JSONML {
     /**
      * Parse XML values and store them in a JSONArray.
      *
@@ -203,7 +203,7 @@ public class JSONML {
      * @return A JSONArray containing the structured data from the XML string.
      * @throws JSONException
      */
-    public static JSONArray toJSONArray(XMLTokener x) throws JSONException {
+    private static JSONArray toJSONArray(XMLTokener x) throws JSONException {
         return (JSONArray) parse(x, true, null);
     }
 
@@ -219,7 +219,7 @@ public class JSONML {
      * @return A JSONObject containing the structured data from the XML string.
      * @throws JSONException
      */
-    public static JSONObject toJSONObject(XMLTokener x) throws JSONException {
+    private static JSONObject toJSONObject(XMLTokener x) throws JSONException {
         return (JSONObject) parse(x, false, null);
     }
 
@@ -246,7 +246,7 @@ public class JSONML {
      * @return An XML string.
      * @throws JSONException
      */
-    public static String toString(JSONArray ja) throws JSONException {
+    private static String toString(JSONArray ja) throws JSONException {
         int i;
         JSONObject jo;
         String key;
@@ -321,7 +321,7 @@ public class JSONML {
      * @return An XML string.
      * @throws JSONException
      */
-    public static String toString(JSONObject jo) throws JSONException {
+    private static String toString(JSONObject jo) throws JSONException {
         StringBuilder sb = new StringBuilder();
         int i;
         JSONArray ja;

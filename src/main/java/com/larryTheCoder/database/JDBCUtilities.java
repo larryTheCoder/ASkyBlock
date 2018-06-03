@@ -39,7 +39,7 @@ public class JDBCUtilities {
         JDBCUtilities.printWarnings(stmt.getWarnings());
     }
 
-    public static void printWarnings(SQLWarning warning) throws SQLException {
+    private static void printWarnings(SQLWarning warning) {
         if (warning != null) {
             ASkyBlock.get().getServer().getLogger().notice("\n---Warning---\n");
             while (warning != null) {
@@ -53,7 +53,7 @@ public class JDBCUtilities {
         }
     }
 
-    public static boolean ignoreSQLException(String sqlState) {
+    private static boolean ignoreSQLException(String sqlState) {
         if (sqlState == null) {
             ASkyBlock.get().getServer().getLogger().notice("The SQL state is not defined!");
             return false;
@@ -73,15 +73,15 @@ public class JDBCUtilities {
         ASkyBlock.get().getServer().getLogger().notice("Vendor:  " + b.getErrorCode());
         System.err.print("Update counts:  ");
         int[] updateCounts = b.getUpdateCounts();
-        for (int i = 0; i < updateCounts.length; i++) {
-            System.err.print(updateCounts[i] + "   ");
+        for (int updateCount : updateCounts) {
+            System.err.print(updateCount + "   ");
         }
     }
 
     public static void printSQLException(SQLException ex) {
         for (Throwable e : ex) {
             if (e instanceof SQLException) {
-                if (ignoreSQLException(((SQLException) e).getSQLState()) == false) {
+                if (!ignoreSQLException(((SQLException) e).getSQLState())) {
                     e.printStackTrace(System.err);
                     ASkyBlock.get().getServer().getLogger().notice("SQLState: " + ((SQLException) e).getSQLState());
                     ASkyBlock.get().getServer().getLogger().notice("Error Code: " + ((SQLException) e).getErrorCode());

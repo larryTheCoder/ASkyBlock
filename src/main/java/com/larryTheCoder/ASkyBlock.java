@@ -70,12 +70,12 @@ import java.util.List;
 public class ASkyBlock extends PluginBase {
 
     public static Economy econ;
-    public static String moduleVersion = "ad7b3e9c";
+    public static final String moduleVersion = "ad7b3e9c";
     private static ASkyBlock object;
     // Arrays
-    public int[] version;
+    private int[] version;
     public ArrayList<WorldSettings> level = new ArrayList<>();
-    public ArrayList<String> loadedLevel = new ArrayList<>();
+    public final ArrayList<String> loadedLevel = new ArrayList<>();
     private SchematicHandler schematics;
     // Configs
     private Config cfg;
@@ -224,7 +224,7 @@ public class ASkyBlock extends PluginBase {
         initDatabase();
         // Wohooo! Fast! Unique and Colorful!
         generateLevel(); // Regenerate The world
-        getServer().getLogger().info(getPrefix() + "§7Enabling ASkyBlock - Founders Edition (API 21)");
+        getServer().getLogger().info(getPrefix() + "§7Enabling ASkyBlock - Founders Edition (API 22)");
         if (cfg.getBoolean("fastLoad")) {
             TaskManager.runTaskLater(this::start, 100);
         } else {
@@ -245,7 +245,6 @@ public class ASkyBlock extends PluginBase {
     private void start() {
         initIslands();
         registerObject();
-        test();
     }
 
     public WorldSettings getSettings(String level) {
@@ -489,10 +488,5 @@ public class ASkyBlock extends PluginBase {
 
     public SchematicHandler getSchematics() {
         return schematics;
-    }
-
-    private void test() {
-        //Position pos = new Position(100, 100, 100, Server.getInstance().getLevelByName("SkyBlock"));
-        //this.getSchematics().pasteSchematic(null, pos , 1, EnumBiome.PLAINS);
     }
 }

@@ -29,12 +29,12 @@ import java.util.HashMap;
  */
 public class PlayerData implements Cloneable {
 
-    public int homes;
-    public int resetleft;
-    public String playerName;
+    public final int homes;
+    public final int resetleft;
+    public final String playerName;
     public int islandLevel;
-    public HashMap<String, Boolean> challengeList = new HashMap<>();
-    public HashMap<String, Integer> challengeListTimes = new HashMap<>();
+    public final HashMap<String, Boolean> challengeList = new HashMap<>();
+    public final HashMap<String, Integer> challengeListTimes = new HashMap<>();
     public ArrayList<String> banList = new ArrayList<>();
     public String pubLocale;
     // Team Data

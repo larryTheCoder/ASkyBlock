@@ -24,7 +24,7 @@ import cn.nukkit.math.Vector3;
  * <p>
  * EntityObject class
  */
-public class EntityObject {
+class EntityObject {
 
     private Vector3 location;
     private byte color;

@@ -8,11 +8,11 @@ import java.util.Iterator;
  * @author JSON.org
  * @version 2014-05-03
  */
-public class HTTP {
+class HTTP {
     /**
      * Carriage return/line feed.
      */
-    public static final String CRLF = "\r\n";
+    private static final String CRLF = "\r\n";
 
     public static JSONObject toJSONObject(final String string) throws JSONException {
         final JSONObject jo = new JSONObject();

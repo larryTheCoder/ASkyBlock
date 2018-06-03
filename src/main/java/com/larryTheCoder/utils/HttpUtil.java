@@ -16,7 +16,7 @@ public class HttpUtil {
                 buffer.append(chars, 0, read);
             }
             return buffer.toString();
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
         return null;
     }

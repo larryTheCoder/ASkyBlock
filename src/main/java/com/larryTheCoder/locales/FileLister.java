@@ -63,9 +63,6 @@ public final class FileLister {
         // Else look in the JAR
         File jarfile;
 
-        /**
-         * Get the jar file from the plugin.
-         */
         try {
             Method method = PluginBase.class.getDeclaredMethod("getFile");
             method.setAccessible(true);
@@ -75,21 +72,12 @@ public final class FileLister {
             throw new IOException(e);
         }
 
-        /**
-         * Loop through all the entries.
-         */
         try (JarFile jar = new JarFile(jarfile)) {
-            /**
-             * Loop through all the entries.
-             */
             Enumeration<JarEntry> entries = jar.entries();
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
                 String path = entry.getName();
 
-                /**
-                 * Not in the folder.
-                 */
                 if (!path.startsWith(FOLDER_PATH)) {
                     continue;
                 }

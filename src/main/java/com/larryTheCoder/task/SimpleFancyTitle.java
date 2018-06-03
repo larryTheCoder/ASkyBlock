@@ -27,8 +27,8 @@ import com.larryTheCoder.storage.IslandData;
 
 public class SimpleFancyTitle extends Task {
 
-    private ASkyBlock plugin;
-    private Player p;
+    private final ASkyBlock plugin;
+    private final Player p;
     private Position lastPos;
     private int times = 0;
 

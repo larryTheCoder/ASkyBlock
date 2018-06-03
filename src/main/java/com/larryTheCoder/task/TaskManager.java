@@ -116,7 +116,7 @@ public class TaskManager {
         return sync(function, Integer.MAX_VALUE);
     }
 
-    public <T> T sync(final RunnableVal<T> function, int timeout) {
+    private <T> T sync(final RunnableVal<T> function, int timeout) {
         final AtomicBoolean running = new AtomicBoolean(true);
         RunnableVal<RuntimeException> run = new RunnableVal<RuntimeException>() {
             @Override
@@ -155,7 +155,7 @@ public class TaskManager {
         return function.value;
     }
 
-    public int taskRepeat(Runnable r, int interval) {
+    private int taskRepeat(Runnable r, int interval) {
         TaskHandler task = ASkyBlock.get().getServer().getScheduler().scheduleRepeatingTask(ASkyBlock.get(), r, interval, false);
         return task.getTaskId();
     }
@@ -166,28 +166,28 @@ public class TaskManager {
         return task.getTaskId();
     }
 
-    public void taskAsync(Runnable r) {
+    private void taskAsync(Runnable r) {
         if (r == null) {
             return;
         }
         ASkyBlock.get().getServer().getScheduler().scheduleTask(ASkyBlock.get(), r, true);
     }
 
-    public void task(Runnable r) {
+    private void task(Runnable r) {
         if (r == null) {
             return;
         }
         ASkyBlock.get().getServer().getScheduler().scheduleTask(ASkyBlock.get(), r, false);
     }
 
-    public void taskLater(Runnable r, int delay) {
+    private void taskLater(Runnable r, int delay) {
         if (r == null) {
             return;
         }
         ASkyBlock.get().getServer().getScheduler().scheduleDelayedTask(ASkyBlock.get(), r, delay);
     }
 
-    public void taskLaterAsync(Runnable r, int delay) {
+    private void taskLaterAsync(Runnable r, int delay) {
         ASkyBlock.get().getServer().getScheduler().scheduleDelayedTask(ASkyBlock.get(), r, delay, true);
     }
 

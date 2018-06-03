@@ -22,11 +22,11 @@ public class ConsoleColors {
      * String ANSI_UNDERLINE = "\033[0m"; public static final String ANSI_ITALIC
      * = "\033[3m]";
      */
-    public static String fromChatColor(final String color) {
+    private static String fromChatColor(final String color) {
         return chatColor(color).getLin();
     }
 
-    public static ConsoleColor chatColor(final String color) {
+    private static ConsoleColor chatColor(final String color) {
         switch (color) {
             case "&r":
                 return ConsoleColor.RESET;
@@ -73,7 +73,7 @@ public class ConsoleColors {
             this.lin = lin;
         }
 
-        public String getLin() {
+        String getLin() {
             return lin;
         }
     }

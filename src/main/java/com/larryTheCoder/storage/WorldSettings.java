@@ -21,13 +21,13 @@ import cn.nukkit.level.Level;
 
 public class WorldSettings {
 
-    private Level level;
-    private String permission;
-    private int plotMax;
-    private int plotSize;
-    private boolean stopTime;
-    private int seaLevel;
-    private int plotRange;
+    private final Level level;
+    private final String permission;
+    private final int plotMax;
+    private final int plotSize;
+    private final boolean stopTime;
+    private final int seaLevel;
+    private final int plotRange;
 
     public WorldSettings(Level level) {
         this.level = level;

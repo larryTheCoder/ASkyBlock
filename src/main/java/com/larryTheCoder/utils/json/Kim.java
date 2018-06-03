@@ -26,11 +26,11 @@ package com.larryTheCoder.utils.json;
  *
  * @version 2013-04-18
  */
-public class Kim {
+class Kim {
     /**
      * The number of bytes in the kim. The number of bytes can be as much as three times the number of characters.
      */
-    public int length = 0;
+    private int length = 0;
     /**
      * The byte array containing the kim's content.
      */
@@ -51,7 +51,7 @@ public class Kim {
      * @param from  The index of the first byte.
      * @param thru  The index of the last byte plus one.
      */
-    public Kim(final byte[] bytes, final int from, final int thru) {
+    private Kim(final byte[] bytes, final int from, final int thru) {
         // As the bytes are copied into the new kim, a hashcode is computed
         // using a
         // modified Fletcher code.
@@ -180,7 +180,7 @@ public class Kim {
      * @return 1, 2, or 3
      * @throws JSONException if the character is not representable in a kim.
      */
-    public static int characterSize(final int character) throws JSONException {
+    private static int characterSize(final int character) throws JSONException {
         if ((character < 0) || (character > 0x10FFFF)) {
             throw new JSONException("Bad character " + character);
         }
@@ -195,7 +195,7 @@ public class Kim {
      * @return a Unicode character between 0 and 0x10FFFF.
      * @throws JSONException if at does not point to a valid character.
      */
-    public int characterAt(final int at) throws JSONException {
+    private int characterAt(final int at) throws JSONException {
         final int c = get(at);
         if ((c & 0x80) == 0) {
             return c;
@@ -257,7 +257,7 @@ public class Kim {
      * @return The byte.
      * @throws JSONException if there is no byte at that position.
      */
-    public int get(final int at) throws JSONException {
+    private int get(final int at) throws JSONException {
         if ((at < 0) || (at > length)) {
             throw new JSONException("Bad character at " + at);
         }

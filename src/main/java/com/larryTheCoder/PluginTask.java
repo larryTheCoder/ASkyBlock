@@ -19,7 +19,7 @@ package com.larryTheCoder;
 /**
  * @author Adam Matthew
  */
-public class PluginTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> {
+class PluginTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> {
 
     private int time = 0;
 

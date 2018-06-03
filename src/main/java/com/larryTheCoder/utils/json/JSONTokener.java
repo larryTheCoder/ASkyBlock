@@ -9,7 +9,7 @@ import java.io.*;
  * @author JSON.org
  * @version 2014-05-03
  */
-public class JSONTokener {
+class JSONTokener {
     private final Reader reader;
     private long character;
     private boolean eof;
@@ -23,7 +23,7 @@ public class JSONTokener {
      *
      * @param reader A reader.
      */
-    public JSONTokener(final Reader reader) {
+    private JSONTokener(final Reader reader) {
         this.reader = reader.markSupported() ? reader : new BufferedReader(reader);
         eof = false;
         usePrevious = false;
@@ -84,7 +84,7 @@ public class JSONTokener {
         eof = false;
     }
 
-    public boolean end() {
+    boolean end() {
         return eof && !usePrevious;
     }
 
@@ -144,12 +144,11 @@ public class JSONTokener {
      * @return The character.
      * @throws JSONException if the character does not match.
      */
-    public char next(final char c) throws JSONException {
+    public void next(final char c) throws JSONException {
         final char n = this.next();
         if (n != c) {
             throw syntaxError("Expected '" + c + "' and instead saw '" + n + "'");
         }
-        return n;
     }
 
     /**
@@ -159,7 +158,7 @@ public class JSONTokener {
      * @return A string of n characters.
      * @throws JSONException Substring bounds error if there are not n characters remaining in the source string.
      */
-    public String next(final int n) throws JSONException {
+    private String next(final int n) throws JSONException {
         if (n == 0) {
             return "";
         }
@@ -199,7 +198,7 @@ public class JSONTokener {
      * @return A String.
      * @throws JSONException Unterminated string.
      */
-    public String nextString(final char quote) throws JSONException {
+    private String nextString(final char quote) throws JSONException {
         char c;
         final StringBuilder sb = new StringBuilder();
         for (; ; ) {

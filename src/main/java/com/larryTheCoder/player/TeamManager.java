@@ -47,7 +47,7 @@ public class TeamManager {
         return plugin.getPlayerInfo(p).inTeam;
     }
 
-    public boolean addTeam(Player leader, Player member) {
+    public void addTeam(Player leader, Player member) {
         boolean done = false;
         PlayerData te = plugin.getPlayerInfo(leader);
         te.members.add(member.getName());
@@ -57,7 +57,6 @@ public class TeamManager {
                 break;
             }
         }
-        return done;
     }
 
     public boolean kickTeam(Player leader, Player member, String message) {
@@ -110,6 +109,6 @@ public class TeamManager {
 
     public boolean inTeam(String team) {
         PlayerData pd = plugin.getDatabase().getPlayerData(team);
-        return pd.inTeam == true;
+        return pd.inTeam;
     }
 }

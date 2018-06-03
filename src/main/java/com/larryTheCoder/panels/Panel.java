@@ -53,8 +53,8 @@ public class Panel implements Listener {
     private final ASkyBlock plugin;
 
     // Confirmation panels
-    private Map<Integer, PanelType> panelDataId = new HashMap<>();
-    private Map<Player, Integer> mapIslandId = new HashMap<>();
+    private final Map<Integer, PanelType> panelDataId = new HashMap<>();
+    private final Map<Player, Integer> mapIslandId = new HashMap<>();
 
     public Panel(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -345,7 +345,7 @@ public class Panel implements Listener {
         panelDataId.put(id, PanelType.SECOND_TIME_SETTING);
     }
 
-    public ASlocales getLocale(Player p) {
+    private ASlocales getLocale(Player p) {
         return plugin.getLocale(p);
     }
 

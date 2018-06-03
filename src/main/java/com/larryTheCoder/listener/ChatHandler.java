@@ -38,7 +38,7 @@ public class ChatHandler implements Listener {
     private final ASkyBlock plugin;
     private final ConcurrentHashMap<Player, String> playerLevels;
     private final ConcurrentHashMap<UUID, String> playerChallengeLevels;
-    private ConcurrentHashMap<Player, Boolean> teamChatUsers;
+    private final ConcurrentHashMap<Player, Boolean> teamChatUsers;
 
     public ChatHandler(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -49,9 +49,7 @@ public class ChatHandler implements Listener {
         plugin.getServer().getOnlinePlayers().values().stream().map((player) -> {
             playerLevels.put(player, String.valueOf(plugin.getIslandLevel(player)));
             return player;
-        }).forEachOrdered((player) -> {
-            playerChallengeLevels.put(player.getUniqueId(), plugin.getChallenges().getChallengeLevel(player));
-        });
+        }).forEachOrdered((player) -> playerChallengeLevels.put(player.getUniqueId(), plugin.getChallenges().getChallengeLevel(player)));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -68,9 +66,7 @@ public class ChatHandler implements Listener {
             event.setCancelled(true);
             // Queue the sync task because you cannot use HashMaps asynchronously. Delaying to the next tick
             // won't be a major issue for synch events either.
-            Server.getInstance().getScheduler().scheduleTask(plugin, () -> {
-                teamChat(event, event.getMessage());
-            });
+            Server.getInstance().getScheduler().scheduleTask(plugin, () -> teamChat(event, event.getMessage()));
         }
     }
 

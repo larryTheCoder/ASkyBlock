@@ -149,19 +149,19 @@ public class IslandManager {
         return checkIsland(p, 1);
     }
 
-    public boolean checkIsland(Player p, int homes) {
+    private boolean checkIsland(Player p, int homes) {
         return plugin.getDatabase().getIsland(p.getName(), homes) != null;
     }
 
-    public boolean createIsland(Player p) {
-        return this.createIsland(p, 1, "");
+    private void createIsland(Player p) {
+        this.createIsland(p, 1, "");
     }
 
-    public boolean createIsland(Player p, int templateId, String home) {
-        return this.createIsland(p, templateId, home, plugin.getDefaultWorld(), false, EnumBiome.PLAINS, false);
+    private void createIsland(Player p, int templateId, String home) {
+        this.createIsland(p, templateId, home, plugin.getDefaultWorld(), false, EnumBiome.PLAINS, false);
     }
 
-    public boolean createIsland(Player p, int templateId, String levelName, String home, boolean locked, EnumBiome biome, boolean teleport) {
+    public void createIsland(Player p, int templateId, String levelName, String home, boolean locked, EnumBiome biome, boolean teleport) {
         if (Settings.useEconomy) {
             double money = ASkyBlock.econ.getMoney(p);
             if (Settings.islandCost > money && Settings.islandCost != money) {
@@ -171,7 +171,7 @@ public class IslandManager {
                     p.sendMessage(plugin.getLocale(p).nextIslandPrice.replace("[price]", Double.toString(Settings.islandCost)));
                 } else {
                     p.sendMessage(plugin.getLocale(p).errorNotEnoughMoney.replace("[price]", Double.toString(Settings.islandCost)));
-                    return true;
+                    return;
                 }
             }
         }
@@ -189,17 +189,22 @@ public class IslandManager {
             if (pd == null) {
                 Location locIsland = new Location(wx, wy, wz, world);
                 pd = claim(p, locIsland, home, locked);
+                if (pd == null) {
+                    p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorFailedCritical);
+                    Utils.send("Unable to claim level at:" + locIsland.toString());
+                    return;
+                }
                 // Call an event
                 IslandCreateEvent event = new IslandCreateEvent(p, templateId, pd);
                 plugin.getServer().getPluginManager().callEvent(event);
                 if (event.isCancelled()) {
                     p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorBlockedByAPI);
-                    return true;
+                    return;
                 }
 
                 if (!ASkyBlock.get().getSchematics().pasteSchematic(p, locIsland, templateId, biome)) {
                     p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorFailedCritical);
-                    return false;
+                    return;
                 }
 
                 boolean result = plugin.getDatabase().createIsland(pd);
@@ -207,15 +212,14 @@ public class IslandManager {
                     p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).createSuccess);
                 } else {
                     p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorFailedCritical);
-                    return false;
+                    return;
                 }
                 if (teleport) {
                     plugin.getGrid().homeTeleport(p, pd.getId());
                 }
-                return true;
+                return;
             }
         }
-        return false;
     }
 
     private IslandData claim(Player p, Location loc, String home, boolean locked) {
@@ -271,28 +275,6 @@ public class IslandManager {
         return plugin.getLevels().contains(level.getName());
     }
 
-    public boolean CanPlayerAccess(Player p, Location loc) {
-        String pName = p.getName();
-        if (p.isOp()) {
-            return true;
-        }
-        if (!checkIslandAt(loc.getLevel())) {
-            return true;
-        }
-        IslandData pd = GetIslandAt(loc);
-        if (pd == null) {
-            return false;
-        }
-        if (pd.getOwner() == null) {
-            return false;
-        }
-        if (pd.getOwner().equals(pName)) {
-            return true;
-        }
-        PlayerData pd2 = plugin.getPlayerInfo(p);
-        return pd2.members.contains(pName);
-    }
-
     public IslandData GetIslandAt(Location loc) {
         if (!checkIslandAt(loc.getLevel())) {
             return null;
@@ -331,6 +313,10 @@ public class IslandManager {
 
     public void teleportPlayer(Player p, String arg) {
         IslandData pd = ASkyBlock.get().getDatabase().getIsland(arg, 1);
+        if (pd == null) {
+            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNoIslandOther);
+            return;
+        }
         if (pd.getOwner() != null) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorOfflinePlayer.replace("[player]", arg));
             return;
@@ -357,7 +343,6 @@ public class IslandManager {
             // In a protected zone but is on the list of acceptable players
             // Otherwise return false
             return island.onIsland(local) || island.getMembers().contains(player.getName());
-        } else {
         }
         // Not in the grid, so do it the old way
         // Make a list of test locations and test them

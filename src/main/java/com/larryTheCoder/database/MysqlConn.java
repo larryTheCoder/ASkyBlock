@@ -6,7 +6,7 @@ package com.larryTheCoder.database;
  *
  * @author Adam Matthew
  */
-public final class MysqlConn {
+final class MysqlConn {
 
 
 }

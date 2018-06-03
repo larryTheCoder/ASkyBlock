@@ -8,12 +8,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class HastebinUtility {
+class HastebinUtility {
 
-    public static final String BIN_URL = "http://hastebin.com/documents", USER_AGENT = "Mozilla/5.0";
-    public static final Pattern PATTERN = Pattern.compile("\\{\"key\":\"([\\S\\s]*)\"}");
+    private static final String BIN_URL = "http://hastebin.com/documents";
+    private static final String USER_AGENT = "Mozilla/5.0";
+    private static final Pattern PATTERN = Pattern.compile("\\{\"key\":\"([\\S\\s]*)\"}");
 
-    public static String upload(final String string) throws IOException {
+    private static String upload(final String string) throws IOException {
         final URL url = new URL(BIN_URL);
         final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 

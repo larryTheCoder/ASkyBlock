@@ -19,6 +19,6 @@ package com.larryTheCoder.utils;
 /**
  * @author Adam Matthew
  */
-public class MoneyUtils {
+class MoneyUtils {
     //todo
 }

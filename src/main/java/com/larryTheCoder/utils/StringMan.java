@@ -55,7 +55,7 @@ public class StringMan {
         return count;
     }
 
-    public static String getString(Object obj) {
+    private static String getString(Object obj) {
         if (obj == null) {
             return "null";
         }
@@ -63,19 +63,19 @@ public class StringMan {
             return (String) obj;
         }
         if (obj.getClass().isArray()) {
-            String result = "";
+            StringBuilder result = new StringBuilder();
             String prefix = "";
 
             for (int i = 0; i < Array.getLength(obj); i++) {
-                result += prefix + getString(Array.get(obj, i));
+                result.append(prefix).append(getString(Array.get(obj, i)));
                 prefix = ",";
             }
             return "( " + result + " )";
         } else if (obj instanceof Collection<?>) {
-            String result = "";
+            StringBuilder result = new StringBuilder();
             String prefix = "";
             for (Object element : (Collection<?>) obj) {
-                result += prefix + getString(element);
+                result.append(prefix).append(getString(element));
                 prefix = ",";
             }
             return "[ " + result + " ]";
@@ -162,13 +162,7 @@ public class StringMan {
 
     public static String joinOrdered(Collection<?> collection, String delimiter) {
         Object[] array = collection.toArray();
-        Arrays.sort(array, new Comparator<Object>() {
-            @Override
-            public int compare(Object a, Object b) {
-                return a.hashCode() - b.hashCode();
-            }
-
-        });
+        Arrays.sort(array, (a, b) -> a.hashCode() - b.hashCode());
         return join(array, delimiter);
     }
 
@@ -176,7 +170,7 @@ public class StringMan {
         return join(collection.toArray(), delimiter + "");
     }
 
-    public static boolean isAsciiPrintable(char c) {
+    private static boolean isAsciiPrintable(char c) {
         return (c >= ' ') && (c < '');
     }
 
@@ -262,11 +256,11 @@ public class StringMan {
         return false;
     }
 
-    public static boolean isEqual(String a, String b) {
+    private static boolean isEqual(String a, String b) {
         return (a == b) || ((a != null) && (b != null) && (a.length() == b.length()) && (a.hashCode() == b.hashCode()) && a.equals(b));
     }
 
-    public static boolean isEqualIgnoreCase(String a, String b) {
+    private static boolean isEqualIgnoreCase(String a, String b) {
         return (a == b) || ((a != null) && (b != null) && (a.length() == b.length()) && a.equalsIgnoreCase(b));
     }
 

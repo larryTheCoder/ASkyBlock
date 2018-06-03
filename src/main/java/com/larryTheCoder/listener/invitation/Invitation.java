@@ -77,7 +77,7 @@ public class Invitation {
         receiver.sendMessage(plugin.getPrefix() + TextFormat.YELLOW + "You denied " + sender.getName() + "'s invitation!");
     }
 
-    public void expire() {
+    private void expire() {
         sender.sendMessage(plugin.getPrefix() + TextFormat.YELLOW + "The invitation to " + sender.getName() + " expired!");
         handler.removeInvitation(this);
     }

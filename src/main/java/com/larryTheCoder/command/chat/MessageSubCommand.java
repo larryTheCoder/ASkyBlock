@@ -66,10 +66,7 @@ public class MessageSubCommand extends SubCommand {
         List<String> list = getPlugin().getMessages().getMessages(p.getName());
         if (!list.isEmpty()) {
             p.sendMessage(getPlugin().getLocale(p).newsHeadline);
-            list.forEach((alist) -> {
-                p.sendMessage("- §e" + alist);
-
-            });
+            list.forEach((alist) -> p.sendMessage("- §e" + alist));
             getPlugin().getMessages().clearMessages(p.getName());
         } else {
             p.sendMessage(getPrefix() + getPlugin().getLocale(p).newsEmpty);

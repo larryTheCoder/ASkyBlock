@@ -263,7 +263,7 @@ class XML {
      * @return A string.
      * @throws JSONException
      */
-    public static String toString(Object object) throws JSONException {
+    private static String toString(Object object) throws JSONException {
         return toString(object, null);
     }
 
@@ -275,7 +275,7 @@ class XML {
      * @return A string.
      * @throws JSONException
      */
-    public static String toString(Object object, String tagName) throws JSONException {
+    private static String toString(Object object, String tagName) throws JSONException {
         StringBuilder sb = new StringBuilder();
         int i;
         JSONArray ja;

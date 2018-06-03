@@ -34,16 +34,16 @@ import java.util.Arrays;
  */
 public class Updater {
 
-    public static URL getUpdate() {
+    public static void getUpdate() {
         try {
             if (HttpUtil.readUrl("https://api.github.com/repos/larryTheCoder/ASkyBlock-Nukkit/releases/latest") == null) {
                 Utils.send("&eUnable to check update! Are you offline?");
-                return null;
+                return;
             }
             String str = HttpUtil.readUrl("https://api.github.com/repos/larryTheCoder/ASkyBlock-Nukkit/releases/latest");
             JSONObject release = new JSONObject(str);
             JSONArray assets = (JSONArray) release.get("assets");
-            String downloadURL = String.format(ASkyBlock.get().getDescription().getFullName() + "-%s.jar");
+            String downloadURL = ASkyBlock.get().getDescription().getFullName() + "-%s.jar";
             for (int i = 0; i < assets.length(); i++) {
                 JSONObject asset = assets.getJSONObject(i);
                 String name = asset.getString("name");
@@ -60,12 +60,13 @@ public class Updater {
                         if (ASkyBlock.get().checkVersion(ASkyBlock.get().getPluginVersion(), version)) {
                             if (!ASkyBlock.get().getPluginVersionString().contains("-SNAPSHOT") || !Arrays.equals(ASkyBlock.get().getVersion(), version)) {
                                 ASkyBlock.get().getLogger().info("&7ASkyBlock is already up to date!");
-                                return null;
+                                return;
                             }
                         }
                         Utils.send("&6 ASkyBlock " + StringMan.join(split, ".") + " is available:");
                         Utils.send("&8 - &3Download at: &7" + downloadURL);
-                        return new URL(asset.getString("browser_download_url"));
+                        new URL(asset.getString("browser_download_url"));
+                        return;
                     } catch (MalformedURLException e) {
                         Utils.send("&dCould not check for updates (1)");
                         Utils.send("&7 - Manually check for updates: https://github.com/larryTheCoder/ASkyBlock-Nukkit/releases");
@@ -75,6 +76,5 @@ public class Updater {
         } catch (JSONException | NumberFormatException ex) {
             Utils.send("&aYou are running the latest version of ASkyBlock!");
         }
-        return null;
     }
 }

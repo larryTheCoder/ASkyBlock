@@ -40,9 +40,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TeleportLogic implements Listener {
 
-    public static List<String> list = Lists.newArrayList();
-    public static Map<String, Integer> time = Maps.newHashMap();
-    public static int teleportDelay;
+    private static final List<String> list = Lists.newArrayList();
+    private static final Map<String, Integer> time = Maps.newHashMap();
+    private static int teleportDelay;
     private final ASkyBlock plugin;
     private final Map<UUID, PendingTeleport> pendingTPs = new ConcurrentHashMap<>();
     private final double cancelDistance;
@@ -123,7 +123,7 @@ public class TeleportLogic implements Listener {
             return task;
         }
 
-        public void playerMoved(Player player) {
+        void playerMoved(Player player) {
             Location newLocation = player.getLocation();
             if (location != null && location.getLevel().equals(newLocation.getLevel())) {
                 double distance = location.distance(newLocation);

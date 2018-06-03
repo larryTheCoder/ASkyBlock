@@ -6,7 +6,7 @@ package com.larryTheCoder.utils.json;
  * <code>JSONWriter.value(</code>Object<code>)</code>. The <code>toJSONString</code> method will be used instead of the
  * default behavior of using the Object's <code>toString()</code> method and quoting the result.
  */
-public interface JSONString {
+interface JSONString {
     /**
      * The <code>toJSONString</code> method allows a class to produce its own JSON serialization.
      *

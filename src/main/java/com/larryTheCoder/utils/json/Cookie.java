@@ -7,7 +7,7 @@ package com.larryTheCoder.utils.json;
  * @author JSON.org
  * @version 2014-05-03
  */
-public class Cookie {
+class Cookie {
     /**
      * Produce a copy of a string in which the characters '+', '%', '=', ';' and control characters are replaced with
      * "%hh". This is a gentle form of URL encoding, attempting to cause as little distortion to the string as possible.

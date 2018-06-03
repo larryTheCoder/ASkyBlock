@@ -38,7 +38,7 @@ public class JSONWriter {
     /**
      * The writer that will receive the output.
      */
-    protected final Writer writer;
+    final Writer writer;
     /**
      * The object/array stack.
      */
@@ -46,7 +46,7 @@ public class JSONWriter {
     /**
      * The current mode. Values: 'a' (array), 'd' (done), 'i' (initial), 'k' (key), 'o' (object).
      */
-    protected char mode;
+    char mode;
     /**
      * The comma flag determines if a comma should be output before the next value.
      */
@@ -59,7 +59,7 @@ public class JSONWriter {
     /**
      * Make a fresh JSONWriter. It can be used to build one JSON text.
      */
-    public JSONWriter(final Writer w) {
+    JSONWriter(final Writer w) {
         comma = false;
         mode = 'i';
         stack = new JSONObject[maxdepth];
@@ -282,7 +282,7 @@ public class JSONWriter {
      * @return this
      * @throws JSONException If the value is out of sequence.
      */
-    public JSONWriter value(final Object object) throws JSONException {
+    private JSONWriter value(final Object object) throws JSONException {
         return append(JSONObject.valueToString(object));
     }
 }

@@ -200,8 +200,8 @@ public class GridManager {
      * @param player The target
      * @return true if the home teleport is successful
      */
-    public boolean homeTeleport(final Player player) {
-        return homeTeleport(player, 1);
+    public void homeTeleport(final Player player) {
+        homeTeleport(player, 1);
     }
 
     /**

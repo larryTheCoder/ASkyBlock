@@ -8,11 +8,11 @@ import java.util.HashMap;
  * @author JSON.org
  * @version 2014-05-03
  */
-public class XMLTokener extends JSONTokener {
+class XMLTokener extends JSONTokener {
     /**
      * The table of entity values. It initially contains Character values for amp, apos, gt, lt, quot.
      */
-    public static final HashMap<String, Character> entity;
+    private static final HashMap<String, Character> entity;
 
     static {
         entity = new HashMap<>(8);
@@ -95,7 +95,7 @@ public class XMLTokener extends JSONTokener {
      * @return A Character or an entity String if the entity is not recognized.
      * @throws JSONException If missing ';' in XML entity.
      */
-    public Object nextEntity(final char ampersand) throws JSONException {
+    private Object nextEntity(final char ampersand) throws JSONException {
         final StringBuilder sb = new StringBuilder();
         for (; ; ) {
             final char c = next();

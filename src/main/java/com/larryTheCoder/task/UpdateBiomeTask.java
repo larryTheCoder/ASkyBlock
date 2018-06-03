@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class UpdateBiomeTask extends Task {
+class UpdateBiomeTask extends Task {
 
     private final IslandData pd;
     private final CommandSender player;

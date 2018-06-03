@@ -15,5 +15,5 @@ public abstract class RunnableVal<T> implements Runnable {
         run(this.value);
     }
 
-    public abstract void run(T value);
+    protected abstract void run(T value);
 }

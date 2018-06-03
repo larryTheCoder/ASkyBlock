@@ -29,7 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 
-public class UpdaterQuery {
+class UpdaterQuery {
 
     private final ASkyBlock plugin;
     private URL DownloadURL;
@@ -44,18 +44,18 @@ public class UpdaterQuery {
      *
      * @return boolean (True if updated to latest or false that the URL cannot be retrieved)
      */
-    public boolean tickUpdate() {
+    private void tickUpdate() {
         // Slightly that this is an unofficial release
         if (HttpUtil.readUrl("https://api.github.com/repos/larryTheCoder/ASkyBlock-Nukkit/releases/latest") == null) {
             Utils.send("&eHead trace of the latest release object cannot be read (Unofficial release or Offline)");
-            return false;
+            return;
         }
         // Well, I Should remove that notice above if there is an update from GitHub database
         try {
             String str = HttpUtil.readUrl("https://api.github.com/repos/larryTheCoder/ASkyBlock-Nukkit/releases/latest");
             JSONObject release = new JSONObject(str);
             JSONArray assets = (JSONArray) release.get("assets");
-            String downloadURL = String.format(plugin.getDescription().getFullName() + "-%s.jar");
+            String downloadURL = plugin.getDescription().getFullName() + "-%s.jar";
             for (int i = 0; i < assets.length(); i++) {
                 JSONObject asset = assets.getJSONObject(i);
                 String name = asset.getString("name");
@@ -72,13 +72,13 @@ public class UpdaterQuery {
                         if (plugin.checkVersion(plugin.getPluginVersion(), version)) {
                             if (!plugin.getPluginVersionString().contains("-SNAPSHOT") || !Arrays.equals(plugin.getVersion(), version)) {
                                 plugin.getLogger().info("&7ASkyBlock is already up to date!");
-                                return true;
+                                return;
                             }
                         }
                         Utils.send("&6 ASkyBlock " + StringMan.join(split, ".") + " is available:");
                         Utils.send("&8 - &3Download at: &7" + downloadURL);
                         DownloadURL = new URL(asset.getString("browser_download_url"));
-                        return true;
+                        return;
                     } catch (MalformedURLException e) {
                         Utils.send("&dCould not check for updates (1)");
                         Utils.send("&7 - Manually check for updates: https://github.com/larryTheCoder/ASkyBlock-Nukkit/releases");
@@ -88,6 +88,5 @@ public class UpdaterQuery {
         } catch (JSONException | NumberFormatException ex) {
             Utils.send("&aYou are running the latest version of ASkyBlock!");
         }
-        return false;
     }
 }

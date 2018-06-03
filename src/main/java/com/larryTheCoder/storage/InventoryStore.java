@@ -28,7 +28,7 @@ import java.util.Map;
  * @author Adam Matthew
  */
 class InventoryStore {
-    private ArrayList<Item[]> armor = new ArrayList<>();
+    private final ArrayList<Item[]> armor = new ArrayList<>();
     private Map<Integer, Item> inventory = new HashMap<>();
 
     public InventoryStore(Map<Integer, Item> contents, Item[] armorContents) {
@@ -44,9 +44,7 @@ class InventoryStore {
      * @param inventory the inventory to set
      */
     public void setInventory(Map<Integer, Item> inventory) {
-        inventory.entrySet().stream().forEach((ev) -> {
-            this.inventory.put(ev.getKey(), ev.getValue());
-        });
+        inventory.entrySet().stream().forEach((ev) -> this.inventory.put(ev.getKey(), ev.getValue()));
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField")

@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Adam Matthew
  */
-public class Commands extends PluginCommand<ASkyBlock> {
+class Commands extends PluginCommand<ASkyBlock> {
 
     private final List<SubCommand> commands = new ArrayList<>();
     private final ConcurrentHashMap<String, Integer> SubCommand = new ConcurrentHashMap<>();
@@ -117,7 +117,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
         return true;
     }
 
-    public ASlocales getLocale(Player key) {
+    private ASlocales getLocale(Player key) {
         return plugin.getLocale(key);
     }
 

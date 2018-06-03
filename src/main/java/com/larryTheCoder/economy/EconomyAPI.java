@@ -28,9 +28,7 @@ public class EconomyAPI implements Economy {
         double money = me.onebone.economyapi.EconomyAPI.getInstance().myMoney(p);
         if (money < amount) {
             int ret = me.onebone.economyapi.EconomyAPI.getInstance().reduceMoney(p, amount);
-            if (ret == me.onebone.economyapi.EconomyAPI.RET_SUCCESS) {
-                return true;
-            }
+            return ret == me.onebone.economyapi.EconomyAPI.RET_SUCCESS;
         }
         return false;
     }

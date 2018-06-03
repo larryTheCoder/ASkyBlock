@@ -50,7 +50,7 @@ import static com.larryTheCoder.utils.Utils.loadChunkAt;
  *
  * @author Adam Matthew
  */
-public class IslandBlock extends BlockMinecraftId {
+class IslandBlock extends BlockMinecraftId {
 
     private final int x;
     private final int y;
@@ -131,17 +131,6 @@ public class IslandBlock extends BlockMinecraftId {
     void setBlock(int s, byte b) {
         this.typeId = (short) s;
         this.data = b;
-    }
-
-    /**
-     * Sets this block up with all the skull data required
-     *
-     * @param map
-     * @param dataValue
-     */
-    void setSkull(Map<String, Tag> map, int dataValue) {
-        //skull = new SkullBlock();
-        //skull.prep(map, dataValue);
     }
 
     void setFlowerPot(Map<String, Tag> tileData) {
@@ -303,7 +292,7 @@ public class IslandBlock extends BlockMinecraftId {
                                 // any previous formatting
                                 {
                                     if (format.length() > 1) {
-                                        lineTextBuilder.append(TextFormat.RESET).append(format.substring(format.indexOf('"') + 1, format.lastIndexOf('"')));
+                                        lineTextBuilder.append(TextFormat.RESET).append(format, format.indexOf('"') + 1, format.lastIndexOf('"'));
                                     }
                                 }
                             }

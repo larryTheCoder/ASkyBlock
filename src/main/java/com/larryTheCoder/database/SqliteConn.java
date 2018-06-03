@@ -44,7 +44,7 @@ public final class SqliteConn {
     private Connection con;
     private boolean closed = true;
     private IslandData islandSpawn;
-    private ASkyBlock plugin;
+    private final ASkyBlock plugin;
     private boolean enableFastCache;
     private boolean mySQL;
 

@@ -28,7 +28,7 @@ import java.sql.*;
 public class SQLiteDatabase implements AbstractDatabase {
 
     private Connection connection;
-    private String dbLocation;
+    private final String dbLocation;
 
     public SQLiteDatabase(File data) {
         this.dbLocation = data.getAbsolutePath();

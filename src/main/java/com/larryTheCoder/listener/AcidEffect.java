@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * @author Adam Matthew
  */
-public class AcidEffect implements Listener {
+class AcidEffect implements Listener {
 
     private final ASkyBlock plugin;
     private final List<Player> burningPlayers = new ArrayList<>();

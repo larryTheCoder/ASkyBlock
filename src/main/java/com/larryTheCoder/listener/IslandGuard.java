@@ -33,7 +33,6 @@ import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityExplodeEvent;
 import cn.nukkit.event.inventory.CraftItemEvent;
 import cn.nukkit.event.player.*;
-import cn.nukkit.event.potion.PotionCollideEvent;
 import cn.nukkit.event.vehicle.VehicleMoveEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
@@ -66,7 +65,7 @@ public class IslandGuard implements Listener {
 
     private final ASkyBlock plugin;
     private final HashMap<UUID, Vector3> onPlate = new HashMap<>();
-    private MainLogger deb = Server.getInstance().getLogger();
+    private final MainLogger deb = Server.getInstance().getLogger();
 
     /**
      * Island guard main instance Listener is under development
@@ -822,7 +821,7 @@ public class IslandGuard implements Listener {
                     p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                     e.setCancelled(true);
                 }
-            } else if (e.getItem().getName().contains("BOAT") && (e.getBlock() != null && !BlockUtil.isFluid(e.getBlock()))) {
+            } else if (e.getItem().getName().contains("BOAT") && (e.getBlock() != null && BlockUtil.isFluid(e.getBlock()))) {
                 // Trying to put a boat on non-liquid
                 if ((island == null && Settings.defaultWorldSettings.get(IslandData.SettingsFlag.PLACE_BLOCKS))
                         || (island != null && !island.getIgsFlag(IslandData.SettingsFlag.PLACE_BLOCKS))) {
@@ -865,7 +864,7 @@ public class IslandGuard implements Listener {
                     // Not allowed
                     p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                     e.setCancelled(true);
-                } catch (Exception ex) {
+                } catch (Exception ignored) {
                 }
             }
             // Everything else is okay
@@ -902,9 +901,7 @@ public class IslandGuard implements Listener {
                         }
                     }
                     // Now delete them
-                    toberemoved.forEach((b) -> {
-                        e.getBlockList().remove(b);
-                    });
+                    toberemoved.forEach((b) -> e.getBlockList().remove(b));
                 }
             }
             return;
@@ -954,9 +951,7 @@ public class IslandGuard implements Listener {
                             }
                         }
                         // Now delete them
-                        toberemoved.forEach((b) -> {
-                            e.getBlockList().remove(b);
-                        });
+                        toberemoved.forEach((b) -> e.getBlockList().remove(b));
                     }
                 }
                 break;
@@ -982,9 +977,7 @@ public class IslandGuard implements Listener {
                             }
                         }
                         // Now delete them
-                        toberemoved.forEach((b) -> {
-                            e.getBlockList().remove(b);
-                        });
+                        toberemoved.forEach((b) -> e.getBlockList().remove(b));
                     }
                 }
                 break;
@@ -1143,9 +1136,6 @@ public class IslandGuard implements Listener {
                 e.setCancelled(true);
             }
         }
-    }
-
-    public void onSplashPotion(PotionCollideEvent event) {
     }
 
     /**

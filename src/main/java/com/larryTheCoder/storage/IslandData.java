@@ -140,7 +140,7 @@ public class IslandData implements Cloneable {
      * @see java.lang.Object#clone()
      */
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public Object clone() {
         try {
             return super.clone();
         } catch (CloneNotSupportedException e) {
@@ -184,12 +184,10 @@ public class IslandData implements Cloneable {
             //plugin.getLogger().info("DEBUG: max x = " + (getMinProtectedX() + protectionRange) + " max z = " + (minProtectedZ + protectionRange));
 
             if (target.getLevel().getName().equalsIgnoreCase(levelName)) {
-                if (target.getFloorX() >= getMinProtectedX()
+                return target.getFloorX() >= getMinProtectedX()
                         && target.getFloorX() <= (getMinProtectedX() + protectionRange)
                         && target.getFloorZ() >= getMinProtectedZ()
-                        && target.getFloorZ() <= (getMinProtectedZ() + protectionRange)) {
-                    return true;
-                }
+                        && target.getFloorZ() <= (getMinProtectedZ() + protectionRange);
             }
         }
         return false;
@@ -227,7 +225,7 @@ public class IslandData implements Cloneable {
      * Resets the protection settings to their default as set in config.yml for
      * this island
      */
-    public void setIgsDefaults() {
+    private void setIgsDefaults() {
         for (SettingsFlag flag : SettingsFlag.values()) {
             if (!Settings.defaultIslandSettings.containsKey(flag)) {
                 // Default default
@@ -252,9 +250,7 @@ public class IslandData implements Cloneable {
         //plugin.getLogger().info("DEBUG: igs = " + igs.toString());
         try {
             ArrayList<Boolean> FANTASTIC = new ArrayList<>();
-            for (Boolean f : igs.values()) {
-                FANTASTIC.add(f);
-            }
+            FANTASTIC.addAll(igs.values());
             result = Utils.arrayToString(FANTASTIC);
         } catch (Exception e) {
             e.printStackTrace();
@@ -283,7 +279,7 @@ public class IslandData implements Cloneable {
      * Reset spawn protection settings to their default as set in config.yml for
      * this island
      */
-    public void setSpawnDefaults() {
+    private void setSpawnDefaults() {
         for (SettingsFlag flag : SettingsFlag.values()) {
             if (!Settings.defaultSpawnSettings.containsKey(flag)) {
                 // Default default

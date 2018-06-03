@@ -36,10 +36,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Utils {
 
-    public static String SCHEMATIC_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "schematics";
-    public static String LOCALES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "locale";
-    public static String DIRECTORY = ASkyBlock.get().getDataFolder() + File.separator;
-    private static ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap<>();
+    public static final String SCHEMATIC_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "schematics";
+    public static final String LOCALES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "locale";
+    public static final String DIRECTORY = ASkyBlock.get().getDataFolder() + File.separator;
+    private static final ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap<>();
 
     public static Config loadYamlFile(String file) {
         File yamlFile = new File(DIRECTORY + file);
@@ -194,7 +194,7 @@ public class Utils {
         StringBuilder buf = new StringBuilder();
 
         HashMap<Object, Object> errs = (HashMap<Object, Object>) err;
-        errs.entrySet().stream().forEach((fer) -> {
+        errs.entrySet().forEach((fer) -> {
             if (buf.length() > 0) {
                 buf.append(", ");
             }
@@ -208,7 +208,7 @@ public class Utils {
             return "";
         }
         StringBuilder buf = new StringBuilder();
-        arr.stream().forEach((str) -> {
+        arr.forEach((str) -> {
             if (buf.length() > 0) {
                 buf.append(", ");
             }
@@ -222,8 +222,7 @@ public class Utils {
             return new ArrayList<>();
         }
         String[] at = charc.split(commas);
-        ArrayList<String> atd = new ArrayList<>();
-        atd.addAll(Arrays.asList(at));
+        ArrayList<String> atd = new ArrayList<>(Arrays.asList(at));
         return atd;
     }
     // MAPPING STRINGS ---- End ----
@@ -240,10 +239,10 @@ public class Utils {
         return true;
     }
 
-    public static boolean EnsureDirectory(String dirName) {
+    public static void EnsureDirectory(String dirName) {
         File pDir = new File(dirName);
         if (pDir.isDirectory()) {
-            return false;
+            return;
         }
         try {
             Server.getInstance().getLogger().info("§aCreating directory: " + dirName);
@@ -251,7 +250,6 @@ public class Utils {
         } catch (Throwable exc) {
             Server.getInstance().getLogger().info("§eEnsureDirectory " + dirName + ": " + exc.toString());
         }
-        return true;
     }
 
     public static void send(String msg) {
@@ -262,7 +260,7 @@ public class Utils {
         }
     }
 
-    public static String convertTimer(long ms) {
+    private static String convertTimer(long ms) {
         int secs = (int) (ms / 1000 % 60);
         int mins = (int) (ms / 1000 / 60 % 60);
         return String.format("%02dm %02ds", mins, secs);

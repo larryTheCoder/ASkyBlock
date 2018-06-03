@@ -33,7 +33,7 @@ import java.util.HashMap;
 public class InvitationHandler {
 
     private final ASkyBlock plugin;
-    private HashMap<Player, Invitation> invitation = new HashMap<>();
+    private final HashMap<Player, Invitation> invitation = new HashMap<>();
 
     public InvitationHandler(ASkyBlock main) {
         plugin = main;
@@ -82,9 +82,7 @@ public class InvitationHandler {
 
     public void tick() {
         if (Settings.memberTimeOut != -1) {
-            invitation.values().stream().forEach((inv) -> {
-                inv.tick();
-            });
+            invitation.values().forEach(Invitation::tick);
         }
 
     }

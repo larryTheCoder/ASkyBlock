@@ -46,7 +46,7 @@ public class JSONArray {
      * Construct an empty JSONArray.
      */
     public JSONArray() {
-        this.myArrayList = new ArrayList<Object>();
+        this.myArrayList = new ArrayList<>();
     }
 
     /**
@@ -103,7 +103,7 @@ public class JSONArray {
      * @param collection A Collection.
      */
     public JSONArray(Collection<Object> collection) {
-        this.myArrayList = new ArrayList<Object>();
+        this.myArrayList = new ArrayList<>();
         if (collection != null) {
             for (Object aCollection : collection) {
                 this.myArrayList.add(JSONObject.wrap(aCollection));
@@ -150,7 +150,7 @@ public class JSONArray {
      * @return The truth.
      * @throws JSONException If there is no value for the index or if the value is not convertible to boolean.
      */
-    public boolean getBoolean(int index) throws JSONException {
+    private boolean getBoolean(int index) throws JSONException {
         Object object = get(index);
         if (object.equals(Boolean.FALSE) || ((object instanceof String) && ((String) object).equalsIgnoreCase("false"))) {
             return false;
@@ -167,7 +167,7 @@ public class JSONArray {
      * @return The value.
      * @throws JSONException If the key is not found or if the value cannot be converted to a number.
      */
-    public double getDouble(int index) throws JSONException {
+    private double getDouble(int index) throws JSONException {
         Object object = get(index);
         try {
             return object instanceof Number ? ((Number) object).doubleValue() : Double.parseDouble((String) object);
@@ -183,7 +183,7 @@ public class JSONArray {
      * @return The value.
      * @throws JSONException If the key is not found or if the value is not a number.
      */
-    public int getInt(int index) throws JSONException {
+    private int getInt(int index) throws JSONException {
         Object object = get(index);
         try {
             return object instanceof Number ? ((Number) object).intValue() : Integer.parseInt((String) object);
@@ -229,7 +229,7 @@ public class JSONArray {
      * @return The value.
      * @throws JSONException If the key is not found or if the value cannot be converted to a number.
      */
-    public long getLong(int index) throws JSONException {
+    private long getLong(int index) throws JSONException {
         Object object = get(index);
         try {
             return object instanceof Number ? ((Number) object).longValue() : Long.parseLong((String) object);
@@ -321,7 +321,7 @@ public class JSONArray {
      * @param defaultValue A boolean default.
      * @return The truth.
      */
-    public boolean optBoolean(int index, boolean defaultValue) {
+    private boolean optBoolean(int index, boolean defaultValue) {
         try {
             return getBoolean(index);
         } catch (JSONException ignored) {
@@ -348,7 +348,7 @@ public class JSONArray {
      * @param defaultValue The default value.
      * @return The value.
      */
-    public double optDouble(int index, double defaultValue) {
+    private double optDouble(int index, double defaultValue) {
         try {
             return getDouble(index);
         } catch (JSONException ignored) {
@@ -375,7 +375,7 @@ public class JSONArray {
      * @param defaultValue The default value.
      * @return The value.
      */
-    public int optInt(int index, int defaultValue) {
+    private int optInt(int index, int defaultValue) {
         try {
             return getInt(index);
         } catch (JSONException ignored) {
@@ -426,7 +426,7 @@ public class JSONArray {
      * @param defaultValue The default value.
      * @return The value.
      */
-    public long optLong(int index, long defaultValue) {
+    private long optLong(int index, long defaultValue) {
         try {
             return getLong(index);
         } catch (JSONException ignored) {
@@ -454,7 +454,7 @@ public class JSONArray {
      * @param defaultValue The default value.
      * @return A String value.
      */
-    public String optString(int index, String defaultValue) {
+    private String optString(int index, String defaultValue) {
         Object object = opt(index);
         return JSONObject.NULL.equals(object) ? defaultValue : object.toString();
     }
@@ -640,7 +640,7 @@ public class JSONArray {
      * @return this.
      * @throws JSONException If the index is negative or if the the value is an invalid number.
      */
-    public JSONArray put(int index, Object value) throws JSONException {
+    private void put(int index, Object value) throws JSONException {
         JSONObject.testValidity(value);
         if (index < 0) {
             throw new JSONException("JSONArray[" + index + "] not found.");
@@ -653,7 +653,6 @@ public class JSONArray {
             }
             this.put(value);
         }
-        return this;
     }
 
     /**
@@ -744,7 +743,7 @@ public class JSONArray {
      * bracket)</small>.
      * @throws JSONException
      */
-    public String toString(int indentFactor) throws JSONException {
+    private String toString(int indentFactor) throws JSONException {
         StringWriter sw = new StringWriter();
         synchronized (sw.getBuffer()) {
             return this.write(sw, indentFactor, 0).toString();

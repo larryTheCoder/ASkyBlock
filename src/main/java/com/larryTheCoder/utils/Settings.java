@@ -36,7 +36,7 @@ public class Settings {
     public static int islandHeight = 60;
     public static int islandMaxNameLong;
     public static int cleanRate;
-    public static ArrayList<String> bannedCommands = new ArrayList<>();
+    public static final ArrayList<String> bannedCommands = new ArrayList<>();
     public static int reset = 3;
     public static int gameMode;
     public static int memberTimeOut;
@@ -55,15 +55,15 @@ public class Settings {
     /**
      * Default world protection settings
      */
-    public static HashMap<SettingsFlag, Boolean> defaultWorldSettings = new HashMap<>();
+    public static final HashMap<SettingsFlag, Boolean> defaultWorldSettings = new HashMap<>();
     /**
      * Default island protection settings
      */
-    public static HashMap<SettingsFlag, Boolean> defaultIslandSettings = new HashMap<>();
+    public static final HashMap<SettingsFlag, Boolean> defaultIslandSettings = new HashMap<>();
     /**
      * Default spawn protection settings
      */
-    public static HashMap<SettingsFlag, Boolean> defaultSpawnSettings = new HashMap<>();
+    public static final HashMap<SettingsFlag, Boolean> defaultSpawnSettings = new HashMap<>();
 
     public static boolean allowTNTDamage;
     public static boolean allowChestDamage;

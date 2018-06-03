@@ -1,8 +1,8 @@
 package com.larryTheCoder.utils.object;
 
 public abstract class RunnableVal2<T, U> implements Runnable {
-    public T value1;
-    public U value2;
+    private T value1;
+    private U value2;
 
     public RunnableVal2() {
     }

@@ -1,6 +1,6 @@
 package com.larryTheCoder.utils;
 
-public class ByteArrayUtilities {
+class ByteArrayUtilities {
 
     public static byte[] integerToBytes(int i) {
         byte[] bytes = new byte[4];

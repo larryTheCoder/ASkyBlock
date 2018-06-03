@@ -65,21 +65,21 @@ public final class ASlocales {
     public String adminHelpSpawn = "§aSet the island's spawn point!";
     public String adminHelpDelete = "§aDelete other player island";
     // Errors defaults
-    public String errorUnknownPlayer = "§cThat player is unknown.";
+    private String errorUnknownPlayer = "§cThat player is unknown.";
     public String errorNoPermission = "§cYou don't have permission to use that command!";
     public String errorNoIsland = "§cYou do not have an island!";
     public String errorNoIslandOther = "§cThat player does not have an island!";
-    public String errorCommandNotReady = "§cYou can't use that command right now.";
+    private String errorCommandNotReady = "§cYou can't use that command right now.";
     public String errorCommandBlocked = "§cYou can't use that command here.";
     public String errorOfflinePlayer = "§cThat player is offline or doesn't exist.";
     public String errorNotOnIsland = "§cYou are not in your/other's island space!";
-    public String errorTooLong = "§cToo long. Maximum size is [length].";
-    public String errorTooShort = "§cToo short. Minimum size is [length].";
+    private String errorTooLong = "§cToo long. Maximum size is [length].";
+    private String errorTooShort = "§cToo short. Minimum size is [length].";
     public String adminSetSpawnOverride = "§cThere a player owned this plot. Admin override this command";
     public String errorTooSoon = "§cYou need to wait [secs] to [cmd] your island";
     public String errorUseInGame = "§cThis command must be used in-game.";
     public String errorWrongWorld = "§cYou cannot do that in this world.";
-    public String errorUnknownWorld = "§cUnknown world. Possible worlds are:";
+    private String errorUnknownWorld = "§cUnknown world. Possible worlds are:";
     public String errorMaxIsland = "§cSorry you cant create island at this world any more";
     public String errorNotPending = "§cNo invitation pending! Try again later";
     public String errorInTeam = "§cThe player [player] are already in team!";
@@ -96,7 +96,7 @@ public final class ASlocales {
     public String createSuccess = "§aSuccessfully created you an island!";
     public String resetSuccess = "§aSuccessfully cleared your island!";
     public String renameSuccess = "§aSuccessfully renamed island!";
-    public String setWorldSuccess = "§aSuccessfully changed island world location!";
+    private String setWorldSuccess = "§aSuccessfully changed island world location!";
     public String setHomeSuccess = "§aSuccessfully changed island home location!";
     public String generalSuccess = "§aSuccess!";
     public String biomeChangeComplete = "§aChanged your island biome to: [biome]";
@@ -130,7 +130,7 @@ public final class ASlocales {
     public String islandSubTitle = "&eNice and cosy";
     public String islandDonate = "§aSource code made by §e@larryTheCoder";
     public String islandURL = "§aLink: http://github.com/larryTheCoder/ASkyBlock-Nukkit";
-    public String islandSupport = "§aLove it? Give us a star on GitHub!";
+    private String islandSupport = "§aLove it? Give us a star on GitHub!";
     public String islandTitle = "[player]'s island";
     public String groundNoAir = "§eWhat do you think you are? You can't set home on air!";
     // Guard island
@@ -152,10 +152,10 @@ public final class ASlocales {
     // Localization Strings
     private Config locale = null;
     private File localeFile = null;
-    private ASkyBlock plugin;
+    private final ASkyBlock plugin;
     private Locale localeObject;
-    private String localeName;
-    private int index;
+    private final String localeName;
+    private final int index;
 
     /**
      * Creates a locale object full of localized strings for a language
@@ -179,11 +179,10 @@ public final class ASlocales {
      * @param localeName Locale name
      * @return locale Config object
      */
-    public Config getLocale(String localeName) {
+    private void getLocale(String localeName) {
         if (this.locale == null) {
             reloadLocale(localeName);
         }
-        return locale;
     }
 
     /**

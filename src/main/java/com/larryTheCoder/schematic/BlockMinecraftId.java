@@ -28,7 +28,7 @@ import java.util.HashMap;
  * This is to ensure that the block will returns to its real block
  * ex: wood slab returns to detector rail
  */
-public class BlockMinecraftId {
+class BlockMinecraftId {
 
     static final HashMap<String, Integer> WETOME = new HashMap<>();
     static final HashMap<String, Integer> POT_ITEM_LISTS;
