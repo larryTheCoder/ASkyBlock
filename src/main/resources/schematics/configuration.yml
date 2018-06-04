@@ -41,10 +41,45 @@ schematicList:
       # Rating
       RATING: 1.8
       # Biome
-      BIOME: "Plains"
+      BIOME: "PLAINS"
       # Default priority
       DEFAULT_PRIORITY: true
-    # Harder schematic (3)
+    # This is the order of your schematic (2)
+    featured:
+      # This is an example of the island name
+      FILE_NAME: "island.schematic"
+      # This island name
+      # You can use & as color codes
+      NAME: "&aFeatured &cOne"
+      # This is an example of a description
+      # This will be used in sign and others (Must be not long 25 char, otherwise the sign will be empty)
+      DESCRIPTION: "The featured island for starters. Great resource with extreme height."
+      # Permission base
+      PERMISSION: "is.create"
+      # Rating
+      RATING: 5
+      # Biome
+      BIOME: "FOREST"
+      # Default priority
+      DEFAULT_PRIORITY: true
+    # Double island (3)
+    double:
+      FILE_NAME: "double.schematic"
+      # This island name
+      NAME: "&aIsland &dDuo"
+      # This is an example of a description
+      DESCRIPTION: "Pretty much for double islands. Two close islands. Double more fun. But a little easier. Credit: Antal1609"
+      # Permission base
+      # This is your permission
+      PERMISSION: "is.create"
+      # Rating
+      RATING: 9
+      # Schematics can have biome set when they are created
+      BIOME: "FOREST"
+      # Default priority
+      # You cant double the default
+      DEFAULT_PRIORITY: false
+    # Harder schematic (4)
     hareder:
       FILE_NAME: "harder.schematic"
       # This island an example for epic name
