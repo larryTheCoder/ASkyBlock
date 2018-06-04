@@ -44,23 +44,6 @@ schematicList:
       BIOME: "Plains"
       # Default priority
       DEFAULT_PRIORITY: true
-    # Double island (2)
-    double:
-      FILE_NAME: "double.schematic"
-      # This island name
-      NAME: "&aIsland &dDuo"
-      # This is an example of a description
-      DESCRIPTION: "Pretty much for double islands. Two close islands. Double more fun. But a little easier. Credit: Antal1609"
-      # Permission base
-      # This is your permission
-      PERMISSION: "is.create"
-      # Rating
-      RATING: 9
-      # Schematics can have biome set when they are created
-      BIOME: "FOREST"
-      # Default priority
-      # You cant double the default
-      DEFAULT_PRIORITY: false
     # Harder schematic (3)
     hareder:
       FILE_NAME: "harder.schematic"

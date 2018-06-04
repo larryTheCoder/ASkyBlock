@@ -372,9 +372,7 @@ public class ASkyBlock extends PluginBase {
         }
 
         saveResource("schematics/island.schematic", false);
-        saveResource("schematics/double.schematic", false);
         saveResource("schematics/harder.schematic", false);
-        saveResource("schematics/nether.schematic", false);
 
         cfg = new Config(new File(getDataFolder(), "config.yml"), Config.YAML);
         worldConfig = new Config(new File(getDataFolder(), "worlds.yml"), Config.YAML);

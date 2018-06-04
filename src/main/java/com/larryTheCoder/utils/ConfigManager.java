@@ -163,12 +163,12 @@ public class ConfigManager {
 
     private static void scheduleCheck(boolean flag, Config cfg) {
         if (flag) {
-            Plugin plugin = ASkyBlock.get().getServer().getPluginManager()
-                    .getPlugin("EconomyAPI");
+            Plugin plugin = ASkyBlock.get().getServer().getPluginManager().getPlugin("EconomyAPI");
             if (plugin != null && !plugin.isEnabled()) {
                 Utils.send("&eScheduling Economy instance due to 'plugin not enabled'");
                 // schedule another delayed task
-                TaskManager.runTaskLater(() -> scheduleCheck(true, cfg), 3); // 3 sec
+                TaskManager.runTaskLater(() -> scheduleCheck(true, cfg), 60); // 3 sec
+                return;
             } else if (plugin != null && plugin.isEnabled()) {
                 Utils.send("&eSuccessfully created an instance with Economy plugin");
                 ASkyBlock.econ = new EconomyAPI();

@@ -62,7 +62,7 @@ public class TaskManager {
      * Run task later.
      *
      * @param runnable The task
-     * @param delay    The delay in ticks
+     * @param delay    The delay in ticks (milliseconds)
      */
     public static void runTaskLater(Runnable runnable, int delay) {
         if (runnable != null) {

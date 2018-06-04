@@ -199,10 +199,7 @@ public class IslandGuard implements Listener {
                     player.sendMessage(plugin.getPrefix() + TextFormat.RED + "This island is locked");
 
                     // Get the vector away from this island
-                    Vector3 v = e.getVehicle().subtract(islandTo.getCenter()).normalize();
-                    v.x *= 1.2;
-                    v.z *= 1.2;
-                    e.getVehicle().setMotion(v);
+                    // TODO: Possible getaway?
                     return;
                 }
             }
@@ -318,10 +315,7 @@ public class IslandGuard implements Listener {
                         ((EntityVehicle) p.riding).mountEntity(p);
                         e.setCancelled(true);
                     } else {
-                        Vector3 v = p.subtract(islandTo.getCenter()).normalize();
-                        v.x *= 1.2;
-                        v.z *= 1.2;
-                        p.setMotion(v);
+                        // todo: Motion reflection
                     }
                     return;
                 }

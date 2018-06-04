@@ -61,6 +61,10 @@ public class SkyBlockGenerator extends Generator {
         }
 
         WorldSettings settings = ASkyBlock.get().getSettings(chunk.getProvider().getLevel().getName());
+        // Sometime it could be null.
+        if (settings == null) {
+            return;
+        }
         // making island in this section has been removed
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
