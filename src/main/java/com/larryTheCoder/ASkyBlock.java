@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Adam Matthew
+ * Copyright (C) 2016-2018 Adam Matthew
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,6 @@ import java.util.List;
 public class ASkyBlock extends PluginBase {
 
     public static Economy econ;
-    public static final String moduleVersion = "ad7b3e9c";
     private static ASkyBlock object;
     // Arrays
     private int[] version;
