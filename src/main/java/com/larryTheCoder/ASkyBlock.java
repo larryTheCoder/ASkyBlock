@@ -456,9 +456,11 @@ public class ASkyBlock extends PluginBase {
                 worldSettings = new WorldSettings(permission, level, 5, plotSize, plotRange, false, seaLevel);
                 cfg.set(levelName + ".permission", permission);
                 cfg.set(levelName + ".maxHome", 5);
+                cfg.set(levelName + ".plotSize", plotSize);
                 cfg.set(levelName + ".protectionRange", plotRange);
                 cfg.set(levelName + ".stopTime", false);
                 cfg.set(levelName + ".seaLevel", seaLevel);
+                cfg.save();
             }
 
             settings.add(worldSettings);

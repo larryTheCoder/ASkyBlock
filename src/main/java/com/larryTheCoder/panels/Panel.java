@@ -64,11 +64,18 @@ public class Panel implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onPlayerRespondForm(PlayerFormRespondedEvent event) {
-        if (event.getResponse() == null) return;
+        // Check if the response was null
+        if (event.getResponse() == null) {
+            return;
+        }
         Player p = event.getPlayer();
         int formId = event.getFormID();
+        // Check if there is data in list
+        // Otherwise there is another form running
+        if (!panelDataId.containsKey(formId)) {
+            return;
+        }
         PanelType type = panelDataId.get(formId);
-        if (type == null) return;
 
         switch (type) {
             // island features

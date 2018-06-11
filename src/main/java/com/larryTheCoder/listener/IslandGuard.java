@@ -434,12 +434,12 @@ public class IslandGuard implements Listener {
                                 return;
                             }
                         } else {
-                            if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.FIRE_EXTINGUISH)) {
-                            } else {
+                            //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.FIRE_EXTINGUISH)) {
+                            //} else {
                                 p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                                 e.setCancelled(true);
                                 return;
-                            }
+                            //}
                         }
                     }
                 }
@@ -452,10 +452,10 @@ public class IslandGuard implements Listener {
             // Handle Shulker Boxes
             if (e.getBlock().getName().contains("SHULKER_BOX")) {
                 if (island == null) {
-                    if (!Settings.defaultWorldSettings.get(IslandData.SettingsFlag.CHEST)) {
+                    //if (!Settings.defaultWorldSettings.get(IslandData.SettingsFlag.CHEST)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                         e.setCancelled(true);
-                    }
+                    //}
                 } else if (!island.getIgsFlag(IslandData.SettingsFlag.CHEST)) {
                     p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                     e.setCancelled(true);
@@ -465,10 +465,10 @@ public class IslandGuard implements Listener {
             // Handle fireworks
             if (e.getItem() != null && e.getItem().equals(Item.FIRE_CHARGE)) {
                 if (island == null) {
-                    if (!Settings.defaultWorldSettings.get(IslandData.SettingsFlag.PLACE_BLOCKS)) {
+                    //if (!Settings.defaultWorldSettings.get(IslandData.SettingsFlag.PLACE_BLOCKS)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                         e.setCancelled(true);
-                    }
+                    //}
                 } else if (!island.getIgsFlag(IslandData.SettingsFlag.PLACE_BLOCKS)) {
                     p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                     e.setCancelled(true);
@@ -485,13 +485,13 @@ public class IslandGuard implements Listener {
                 case JUNGLE_DOOR:
                 case TRAPDOOR:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.DOOR)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.DOOR)) {
+                        //    return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
                             return;
-                        }
+                       // }
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.DOOR)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
@@ -506,13 +506,13 @@ public class IslandGuard implements Listener {
                 case FENCE_GATE_BIRCH:
                 case FENCE_GATE_JUNGLE:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.GATE)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.GATE)) {
+                         //   return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
                             return;
-                        }
+                        //}
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.GATE)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
@@ -546,13 +546,13 @@ public class IslandGuard implements Listener {
                     break;
                 case GRASS:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.CROP_TRAMPLE)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.CROP_TRAMPLE)) {
+                        //   return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
                             return;
-                        }
+                        //}
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.CROP_TRAMPLE)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
@@ -563,13 +563,13 @@ public class IslandGuard implements Listener {
                 case BREWING_STAND:
                 case CAULDRON:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.BREWING)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.BREWING)) {
+                        //    return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
                             return;
-                        }
+                        //}
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.BREWING)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
@@ -584,13 +584,13 @@ public class IslandGuard implements Listener {
                 case DAYLIGHT_DETECTOR:
                 case DAYLIGHT_DETECTOR_INVERTED:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.REDSTONE)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.REDSTONE)) {
+                        //    return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
                             return;
-                        }
+                        //}
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.REDSTONE)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
@@ -600,13 +600,13 @@ public class IslandGuard implements Listener {
                     break;
                 case ENCHANTMENT_TABLE:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.ENCHANTING)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.ENCHANTING)) {
+                        //    return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
                             return;
-                        }
+                        //}
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.ENCHANTING)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
@@ -617,13 +617,13 @@ public class IslandGuard implements Listener {
                 case FURNACE:
                 case BURNING_FURNACE:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.FURNACE)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.FURNACE)) {
+                        //    return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
                             return;
-                        }
+                        //}
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.FURNACE)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
@@ -637,13 +637,13 @@ public class IslandGuard implements Listener {
                     break;
                 case NOTEBLOCK:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.MUSIC)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.MUSIC)) {
+                        //    return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
                             return;
-                        }
+                        //}
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.MUSIC)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
@@ -657,13 +657,13 @@ public class IslandGuard implements Listener {
                 case WOODEN_BUTTON:
                 case LEVER:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.LEVER_BUTTON)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.LEVER_BUTTON)) {
+                         //   return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
                             return;
-                        }
+                        //}
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.LEVER_BUTTON)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
@@ -675,13 +675,13 @@ public class IslandGuard implements Listener {
                     break;
                 case WORKBENCH:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.CRAFTING)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.CRAFTING)) {
+                         //   return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
                             return;
-                        }
+                        //}
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.CRAFTING)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
@@ -691,13 +691,13 @@ public class IslandGuard implements Listener {
                     break;
                 case ANVIL:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.ANVIL)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.ANVIL)) {
+                         //   return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
                             return;
-                        }
+                        //}
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.ANVIL)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
@@ -711,10 +711,10 @@ public class IslandGuard implements Listener {
                 case ACTIVATOR_RAIL:
                     // If they are not on an island, it's protected
                     if (island == null) {
-                        if (!Settings.defaultWorldSettings.get(IslandData.SettingsFlag.PLACE_BLOCKS)) {
+                        //if (!Settings.defaultWorldSettings.get(IslandData.SettingsFlag.PLACE_BLOCKS)) {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
-                        }
+                        //}
                         return;
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.PLACE_BLOCKS)) {
@@ -727,13 +727,13 @@ public class IslandGuard implements Listener {
                     }
                 case BEACON:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.BEACON)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.BEACON)) {
+                         //   return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
                             return;
-                        }
+                        //}
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.BEACON)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
@@ -743,14 +743,14 @@ public class IslandGuard implements Listener {
                     break;
                 case CAKE_BLOCK:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.BREAK_BLOCKS)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.BREAK_BLOCKS)) {
+                        //    return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.getPlayer().getFoodData().setLevel(e.getPlayer().getFoodData().getLevel() - 2);
                             e.setCancelled(true);
                             return;
-                        }
+                        //}
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.BREAK_BLOCKS)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
@@ -761,13 +761,13 @@ public class IslandGuard implements Listener {
                     break;
                 case DRAGON_EGG:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.BREAK_BLOCKS)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.BREAK_BLOCKS)) {
+                        //    return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
                             return;
-                        }
+                        //}
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.BREAK_BLOCKS)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
@@ -777,13 +777,13 @@ public class IslandGuard implements Listener {
                     break;
                 case MONSTER_SPAWNER:
                     if (island == null) {
-                        if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.BREAK_BLOCKS)) {
-                            return;
-                        } else {
+                        //if (Settings.defaultWorldSettings.get(IslandData.SettingsFlag.BREAK_BLOCKS)) {
+                        //    return;
+                        //} else {
                             p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                             e.setCancelled(true);
                             return;
-                        }
+                        //}
                     }
                     if (!island.getIgsFlag(IslandData.SettingsFlag.BREAK_BLOCKS)) {
                         p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);

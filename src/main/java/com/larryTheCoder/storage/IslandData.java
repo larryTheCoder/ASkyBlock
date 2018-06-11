@@ -357,10 +357,6 @@ public class IslandData implements Cloneable {
         return hash;
     }
 
-
-    /**
-     * Island Guard Setting flags Covers island, spawn and system settings
-     */
     public enum SettingsFlag {
         /**
          * Water is acid above sea level
