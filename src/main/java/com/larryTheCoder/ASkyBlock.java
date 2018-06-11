@@ -38,7 +38,7 @@ import com.larryTheCoder.economy.Economy;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
 import com.larryTheCoder.listener.ChatHandler;
-import com.larryTheCoder.listener.IslandGuard;
+import com.larryTheCoder.listener.IslandListener;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.panels.Panel;
@@ -305,7 +305,8 @@ public class ASkyBlock extends PluginBase {
         msgs = new Messages(this);
         msgs.loadMessages();
         getServer().getPluginManager().registerEvents(chatHandler, this);
-        pm.registerEvents(new IslandGuard(this), this);
+        //pm.registerEvents(new IslandGuard(this), this);
+        pm.registerEvents(new IslandListener(this), this);
         ServerScheduler pd = getServer().getScheduler();
         pd.scheduleRepeatingTask(new PluginTask(this), 20); // tick every 1 sec
     }

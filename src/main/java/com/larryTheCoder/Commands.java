@@ -133,7 +133,7 @@ class Commands extends PluginCommand<ASkyBlock> {
 //                    break;
                 case "version":
                 case "ver":
-                    sender.sendMessage("§aASkyBlock Module §7" + ASkyBlock.moduleVersion + " Build 9");
+                    sender.sendMessage("§aASkyBlock Module §7f5c4156 Build 10");
                     sender.sendMessage("§aVendor Type: §7" + System.getProperty("os.name"));
                     sender.sendMessage("§aJava Module Version: §7" + System.getProperty("java.version"));
                     break;
