@@ -6,8 +6,8 @@
     <name>ASkyBlock</name>
     <groupId>larryTheCoder</groupId>
     <artifactId>SkyBlock</artifactId>
-    <version>0.3.7-BETA</version>
-    <description>The First Minecraft BE SkyBlock minigame</description>
+    <version>0.3.9-STABLE</version>
+    <description>Minecraft BE SkyBlock minigame plugin for Nukkit</description>
     <inceptionYear>2016</inceptionYear>
 
     <licenses>

@@ -2,9 +2,8 @@ checkout:
   post:
     - git submodule sync
     - git submodule update --init
-    - mvn clean
-    - mvn package
-    - cp -R ./target/SkyBlock-0.3.7-BETA.jar $CIRCLE_ARTIFACTS
+    - mvn clean package
+    - cp -R ./target/SkyBlock-0.3.9-STABLE.jar $CIRCLE_ARTIFACTS
 
 machine:
   java:
