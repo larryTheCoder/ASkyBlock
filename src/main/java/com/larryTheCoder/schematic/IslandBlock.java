@@ -410,11 +410,14 @@ class IslandBlock extends BlockMinecraftId {
      */
     void paste(Player p, Position blockLoc, EnumBiome biome) {
         Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
-        loadChunkAt(loc);
         blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, true);
         blockLoc.getLevel().setBiomeId(loc.getFloorX(), loc.getFloorZ(), (byte) biome.id);
 
-        // BlockEntities
+        while (!loc.getLevel().getChunk((int) loc.getX() >> 4, (int) loc.getZ() >> 4).isLoaded()) {
+            loadChunkAt(loc);
+        }
+
+        // Usually when the chunk is loaded it will be fully loaded, no need task anymore
         if (signText != null) {
             // Various bug fixed (Nukkit bug)
             BaseFullChunk chunk = blockLoc.getLevel().getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);

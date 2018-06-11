@@ -113,8 +113,7 @@ public class IslandManager {
         if (plugin.getDatabase().getSpawn() != null) {
             pVictim.teleport(plugin.getDatabase().getSpawn().getCenter());
         } else {
-            Utils.send("The default spawn world not found. Please use /is "
-                    + "setspawn in-game. Using default world");
+            Utils.send("The default spawn world not found. Please use /is setspawn in-game. Using default world");
             pVictim.teleport(plugin.getServer().getDefaultLevel().getSafeSpawn());
         }
     }
@@ -146,19 +145,11 @@ public class IslandManager {
     }
 
     public boolean checkIsland(Player p) {
-        return checkIsland(p, 1);
-    }
-
-    private boolean checkIsland(Player p, int homes) {
-        return plugin.getDatabase().getIsland(p.getName(), homes) != null;
+        return plugin.getDatabase().getIsland(p.getName(), 1) != null;
     }
 
     private void createIsland(Player p) {
-        this.createIsland(p, 1, "");
-    }
-
-    private void createIsland(Player p, int templateId, String home) {
-        this.createIsland(p, templateId, home, plugin.getDefaultWorld(), false, EnumBiome.PLAINS, false);
+        this.createIsland(p, 1, "", plugin.getDefaultWorld(), false, EnumBiome.PLAINS, false);
     }
 
     public void createIsland(Player p, int templateId, String levelName, String home, boolean locked, EnumBiome biome, boolean teleport) {
@@ -267,6 +258,10 @@ public class IslandManager {
 
         // Reset then wait :P
         TaskManager.runTask(new DeleteIslandTask(plugin, pd, p));
+
+        PlayerData pda = plugin.getPlayerInfo(p);
+        pda.resetleft++;
+        plugin.getDatabase().savePlayerData(pda);
 
         p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).resetSuccess.replace("[mili]", "" + Settings.resetTime));
     }

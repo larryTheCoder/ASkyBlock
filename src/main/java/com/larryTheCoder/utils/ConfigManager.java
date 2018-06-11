@@ -38,7 +38,7 @@ import java.util.HashMap;
  */
 public class ConfigManager {
 
-    public static final String CONFIG_VERSION = "ad7b3e9c";
+    public static final String CONFIG_VERSION = "MicroGitHub";
 
     /**
      * Loads the various settings from the config.yml file into the plugin
@@ -87,7 +87,7 @@ public class ConfigManager {
                         mat = Item.fromString(amountData[0].toUpperCase());
                     }
                     if (amountData.length == 2) {
-                        tempChest[i] = new Item(mat.getId(), Integer.parseInt(amountData[1]));
+                        tempChest[i] = new Item(mat.getId(), 0, Integer.parseInt(amountData[1]));
                     } else if (amountData.length == 3) {
                         tempChest[i] = new Item(mat.getId(), Integer.parseInt(amountData[2]), Integer.parseInt(amountData[1]));
                     }
@@ -152,7 +152,7 @@ public class ConfigManager {
             Utils.send("&cCould not add locales!");
         }
         if (!availableLocales.containsKey(Settings.defaultLanguage)) {
-            Utils.send("&c'" + Settings.defaultLanguage + ".yml' not found in /locale folder. Using /locale/en-US.yml");
+            Utils.send("&c'" + Settings.defaultLanguage + ".yml' not found in /locale folder. Using /locale/en_US.yml");
             Settings.defaultLanguage = "en-US";
             availableLocales.put(Settings.defaultLanguage, new ASlocales(ASkyBlock.get(), Settings.defaultLanguage, 0));
         }

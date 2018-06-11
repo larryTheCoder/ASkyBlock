@@ -30,7 +30,7 @@ import java.util.HashMap;
 public class PlayerData implements Cloneable {
 
     public final int homes;
-    public final int resetleft;
+    public int resetleft;
     public final String playerName;
     public int islandLevel;
     public final HashMap<String, Boolean> challengeList = new HashMap<>();

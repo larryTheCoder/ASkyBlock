@@ -8,7 +8,7 @@
 ---
 
 ## Do not change this
-version: "ad7b3e9c"
+version: "MicroGitHub"
 
 ## Game Prefix.
 Prefix: "&d[&eASkyBlock&d] &e"
@@ -19,8 +19,9 @@ allowUpdate: false
 ## Locale language
 ##  Locale is CASE_SENSITIVE!
 ##  Available locales are:
-##    en-US.
-defaultlanguage: "en-US"
+##    en_US - English by larryTheCoder.
+##    de_DE - German by UnexMC
+defaultlanguage: "en_US"
 # Team chatting
 teamChat: true
 # Enable FastLoad. This usually task the plugin to load

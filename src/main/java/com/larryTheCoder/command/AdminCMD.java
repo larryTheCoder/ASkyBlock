@@ -20,6 +20,7 @@ import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
+import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.SkyBlockGenerator;
@@ -29,6 +30,7 @@ import com.larryTheCoder.task.DeleteIslandTask;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Utils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,8 +84,16 @@ public class AdminCMD extends Command {
                 } else if (!plugin.getServer().isLevelGenerated(args[1])) {
                     plugin.getServer().generateLevel(args[1], System.currentTimeMillis(), SkyBlockGenerator.class);
                     plugin.getServer().loadLevel(args[1]);
-                    plugin.level.add(new WorldSettings(plugin.getServer().getLevelByName(args[1])));
+                    WorldSettings world = new WorldSettings(plugin.getServer().getLevelByName(args[1]));
+                    Config cfg = new Config(new File(plugin.getDataFolder(), "worlds.yml"), Config.YAML);
+                    cfg.set(args[1] + ".permission", world.getPermission());
+                    cfg.set(args[1] + ".maxHome", world.getMaximumIsland());
+                    cfg.set(args[1] + ".protectionRange", world.getProtectionRange());
+                    cfg.set(args[1] + ".stopTime", world.isStopTime());
+                    cfg.set(args[1] + ".seaLevel", world.getSeaLevel());
+                    cfg.save();
                     plugin.saveLevel(false);
+                    plugin.level.add(world);
                     sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).generalSuccess);
                     return true;
                 }

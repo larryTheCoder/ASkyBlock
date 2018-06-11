@@ -696,13 +696,23 @@ public final class SchematicHandler {
         // Done making island base Joe! Now we place the sweets (Tree)
         ObjectTree.growTree(world, X, groundHeight + 7, Z, new NukkitRandom(), BlockSapling.OAK);
 
-        this.initChest(world, X, groundHeight + 7, Z + 1);
+        initChest(world, X, groundHeight + 7, Z + 1);
     }
 
     private void initChest(Level lvl, int x, int y, int z) {
         BaseFullChunk chunk = lvl.getChunk(x >> 4, z >> 4);
         lvl.setBlockIdAt(x, y, z, Block.CHEST);
 
+        while (!chunk.isLoaded()) {
+            try {
+                chunk.load(true);
+            } catch (IOException ex) {
+                ex.fillInStackTrace();
+            }
+        }
+
+        // Chunk is fully loaded, no need to rerun the task, when it fully
+        // loaded it will be loaded.
         cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
                 .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
                 .putString("id", BlockEntity.CHEST)

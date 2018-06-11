@@ -65,6 +65,7 @@ public final class ASlocales {
     public String adminHelpSpawn = "§aSet the island's spawn point!";
     public String adminHelpDelete = "§aDelete other player island";
     // Errors defaults
+    public String errorMaxReset = "§cYou had reached the limit for island delectation.";
     private String errorUnknownPlayer = "§cThat player is unknown.";
     public String errorNoPermission = "§cYou don't have permission to use that command!";
     public String errorNoIsland = "§cYou do not have an island!";
@@ -235,6 +236,7 @@ public final class ASlocales {
         adminHelpSpawn = TextFormat.colorize('&', locale.getString("adminHelpSpawn", "§aSet the island's spawn point!"));
         adminHelpDelete = TextFormat.colorize('&', locale.getString("adminHelpDelete", "§aDelete other player island"));
         // Errors defaults
+        errorMaxReset = TextFormat.colorize('&', locale.getString("errorMaxReset", "§cYou had reached the limit for island delectation."));
         errorUnknownPlayer = TextFormat.colorize('&', locale.getString("errorUnknownPlayer", "§cThat player is unknown."));
         errorNoPermission = TextFormat.colorize('&', locale.getString("errorNoPermission", "§cYou don't have permission to use that command!"));
         errorNoIsland = TextFormat.colorize('&', locale.getString("errorNoIsland", "§cYou do not have an island!"));

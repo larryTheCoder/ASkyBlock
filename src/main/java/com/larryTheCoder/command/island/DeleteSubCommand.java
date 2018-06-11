@@ -20,6 +20,8 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
+import com.larryTheCoder.player.PlayerData;
+import com.larryTheCoder.utils.Settings;
 
 /**
  * @author Adam Matthew
@@ -58,6 +60,12 @@ public class DeleteSubCommand extends SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = getPlugin().getServer().getPlayer(sender.getName());
+//        TODO: MULTIPLE WORLD SUPPORT?
+//        PlayerData pda = getPlugin().getPlayerInfo(p);
+//        if (pda.resetleft > Settings.reset) {
+//            p.sendMessage(getPrefix() + getPlugin().getLocale(p).errorMaxReset);
+//            return true;
+//        }
         getPlugin().getPanel().addDeleteFormOverlay(p);
         return true;
     }
