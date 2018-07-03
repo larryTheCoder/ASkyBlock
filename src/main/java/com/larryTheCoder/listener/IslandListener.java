@@ -320,14 +320,14 @@ public class IslandListener implements Listener {
     public void onPlayerCommand(PlayerCommandPreprocessEvent ex) {
         Player p = ex.getPlayer();
         String command = ex.getMessage().substring(1);
-        if (notInWorld(p) && !Settings.bannedCommands.contains(command)) {
-            return;
-        }
-        if (p.isOp()) {
-            p.sendMessage(plugin.getLocale(p).adminOverride);
-            return;
-        }
-        p.sendMessage(plugin.getLocale(p).errorCommandBlocked);
-        ex.setCancelled();
+//        if (notInWorld(p) && !Settings.bannedCommands.contains(command)) {
+//            return;
+//        }
+//        if (p.isOp()) {
+//            p.sendMessage(plugin.getLocale(p).adminOverride);
+//            return;
+//        }
+//        p.sendMessage(plugin.getLocale(p).errorCommandBlocked);
+//        ex.setCancelled();
     }
 }
