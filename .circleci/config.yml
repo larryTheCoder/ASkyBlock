@@ -1,0 +1,17 @@
+version: 2
+jobs:
+  java8:
+    docker:
+      - image: circleci/openjdk:8-jdk
+
+    working_directory: ~/java8
+
+    environment:
+      JVM_OPTS: -Xmx1g
+      TERM: dumb
+
+    steps:
+      - git submodule sync
+      - git submodule update --init
+      - mvn clean package
+      - cp -R ./target/SkyBlock-0.4.6-STABLE.jar $CIRCLE_ARTIFACTS
