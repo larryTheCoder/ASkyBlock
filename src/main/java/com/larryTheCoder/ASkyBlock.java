@@ -30,8 +30,8 @@ import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.command.AdminCMD;
 import com.larryTheCoder.command.ChallangesCMD;
-import com.larryTheCoder.database.SqliteConn;
 import com.larryTheCoder.database.JDBCUtilities;
+import com.larryTheCoder.database.SqliteConn;
 import com.larryTheCoder.database.variables.MySQLDatabase;
 import com.larryTheCoder.database.variables.SQLiteDatabase;
 import com.larryTheCoder.economy.Economy;
@@ -72,7 +72,6 @@ public class ASkyBlock extends PluginBase {
     public static Economy econ;
     private static ASkyBlock object;
     // Arrays
-    private int[] version;
     public ArrayList<WorldSettings> level = new ArrayList<>();
     public final ArrayList<String> loadedLevel = new ArrayList<>();
     private SchematicHandler schematics;
@@ -173,28 +172,6 @@ public class ASkyBlock extends PluginBase {
         return getIslandInfo(player.getName());
     }
 
-    public String getPluginVersionString() {
-        return getDescription().getVersion();
-    }
-
-    public int[] getPluginVersion() {
-        String ver = getDescription().getVersion();
-        if (ver.contains("-")) {
-            ver = ver.split("-")[0];
-        }
-        String[] split = ver.split("\\.");
-        return new int[]{Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2])};
-    }
-
-    public boolean checkVersion(int[] version, int... version2) {
-        return version[0] > version2[0] || version[0] == version2[0] && version[1] > version2[1] || version[0] == version2[0]
-                && version[1] == version2[1] && version[2] >= version2[2];
-    }
-
-    public int[] getVersion() {
-        return version;
-    }
-
     /**
      * Get if debugging enabled
      *
@@ -229,8 +206,16 @@ public class ASkyBlock extends PluginBase {
         } else {
             start();
         }
+        test();
         getServer().getLogger().info(getPrefix() + "§cBETA Build detected, use with precautions.");
         getServer().getLogger().info(getPrefix() + "§aASkyBlock has successfully enabled!");
+    }
+
+    private void test() {
+//        ArrayList<IslandData> pd = this.getDatabase().getAllIsland();
+//        for (IslandData pd3 : pd) {
+//            Utils.sendDebug(pd3.getIgsSettings().getSettings());
+//        }
     }
 
     public ArrayList<String> getLevels() {

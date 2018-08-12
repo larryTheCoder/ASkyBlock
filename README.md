@@ -23,7 +23,6 @@ Links
 
 Installation
 -------------
-This plugin require a DbLib plugin that can be found in `lib/` directory.
 We recommended to use latest DbLib plugin.
 
 * DbLib

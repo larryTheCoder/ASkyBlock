@@ -17,7 +17,7 @@
 package com.larryTheCoder.utils;
 
 import cn.nukkit.item.Item;
-import com.larryTheCoder.storage.IslandData.SettingsFlag;
+import com.larryTheCoder.storage.IslandSettings.SettingsFlag;
 
 import java.util.*;
 

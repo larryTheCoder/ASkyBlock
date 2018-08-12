@@ -26,7 +26,7 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.economy.EconomyAPI;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.locales.FileLister;
-import com.larryTheCoder.storage.IslandData.SettingsFlag;
+import com.larryTheCoder.storage.IslandSettings.SettingsFlag;
 import com.larryTheCoder.task.TaskManager;
 
 import java.io.File;
@@ -124,7 +124,7 @@ public class ConfigManager {
         Settings.defaultWorldSettings.clear();
         Settings.defaultIslandSettings.clear();
         Settings.defaultSpawnSettings.clear();
-        ConfigSection protectionWorld = cfg.getSections("protection.world");
+        ConfigSection protectionWorld = cfg.getSection("protection.world");
         for (String setting : protectionWorld.getKeys(false)) {
             try {
                 SettingsFlag flag = SettingsFlag.valueOf(setting.toUpperCase());
@@ -132,6 +132,7 @@ public class ConfigManager {
                 Settings.defaultWorldSettings.put(flag, value);
                 Settings.defaultSpawnSettings.put(flag, value);
                 Settings.defaultIslandSettings.put(flag, value);
+
             } catch (Exception e) {
                 Utils.send("Unknown setting in config.yml:protection.world " + setting.toUpperCase() + " skipping...");
             }

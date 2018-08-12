@@ -6,7 +6,7 @@
     <name>ASkyBlock</name>
     <groupId>larryTheCoder</groupId>
     <artifactId>SkyBlock</artifactId>
-    <version>0.3.9-STABLE</version>
+    <version>0.4.6-STABLE</version>
     <description>Minecraft BE SkyBlock minigame plugin for Nukkit</description>
     <inceptionYear>2016</inceptionYear>
 
@@ -17,6 +17,22 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <!-- Fist time ever using public repo -->
+    <repositories>
+        <repository>
+            <id>nukkitX</id>
+            <url>https://repo.nukkitx.com/main/</url>
+        </repository>
+        <repository>
+            <id>nukkit-ru</id>
+            <url>http://repo.nukkit.ru</url>
+        </repository>
+        <repository>
+            <id>onebone</id>
+            <url>http://jenkins.onebone.me/plugin/repository/everything/</url>
+        </repository>
+    </repositories>
 
     <properties>
         <!-- Project properties -->
@@ -32,32 +48,23 @@
             <groupId>cn.nukkit</groupId>
             <artifactId>nukkit</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/nukkit-1.0-SNAPSHOT.jar</systemPath>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
-        <!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
-        <!-- D:\Backup Desktop\Nukkit\plugins\ASkyBlock-Maven\lib\EconomyAPI-1.0.1.jar -->
-        <dependency>
-            <groupId>EconomyAPI</groupId>
-            <artifactId>EconomyAPI</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/EconomyAPI-1.0.1.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>dblib</groupId>
+            <groupId>me.onebone</groupId>
+            <artifactId>economyapi</artifactId>
+            <version>1.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>ru.nukkit.dblib</groupId>
             <artifactId>DbLib</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <optional>true</optional>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/DbLib.jar</systemPath>
         </dependency>
     </dependencies>
 
     <build>
         <defaultGoal>clean package install</defaultGoal>
-        <finalName>SkyBlock-${version}</finalName>
+        <finalName>SkyBlock-${project.version}</finalName>
         <resources>
             <resource>
                 <directory>.</directory>

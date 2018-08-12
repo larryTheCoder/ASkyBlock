@@ -131,6 +131,9 @@ public final class ChallangesCMD extends Command {
                             ChallengeLevelCompleteEvent event = new ChallengeLevelCompleteEvent(p, oldLevel, newLevel, rewardedItems);
                             plugin.getServer().getPluginManager().callEvent(event);
 
+                            // Add island level
+
+
                         }
                     }
                 }

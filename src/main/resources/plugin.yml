@@ -1,5 +1,5 @@
 name: "ASkyBlock"
-version: "0.3.9-STABLE"
+version: ${project.version}
 author: "Adam Matthew"
 api: ["1.0.0"]
 main: com.larryTheCoder.ASkyBlock

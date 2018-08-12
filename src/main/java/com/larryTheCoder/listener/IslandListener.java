@@ -28,7 +28,9 @@ import cn.nukkit.event.block.BlockPlaceEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityExplodeEvent;
 import cn.nukkit.event.inventory.CraftItemEvent;
+import cn.nukkit.event.inventory.InventoryOpenEvent;
 import cn.nukkit.event.player.*;
+import cn.nukkit.inventory.InventoryType;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.MainLogger;
@@ -37,12 +39,12 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.IslandEnterEvent;
 import com.larryTheCoder.events.IslandExitEvent;
 import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
 import java.util.List;
 
 import static cn.nukkit.block.BlockID.ENDER_CHEST;
+import static cn.nukkit.inventory.InventoryType.PLAYER;
 
 /**
  * Rewrite class for IslandGuard messy code
@@ -152,14 +154,6 @@ public class IslandListener implements Listener {
             final IslandExitEvent event = new IslandExitEvent(p, islandFrom, e.getFrom());
             plugin.getServer().getPluginManager().callEvent(event);
         } else if (islandTo != null && islandFrom != null && !islandTo.equals(islandFrom)) {
-            // Adjacent islands or overlapping protections
-            if (islandFrom.getOwner() != null) {
-                //p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving " + islandFrom.getName() + "'s island");
-            }
-            if (islandTo.getOwner() != null) {
-                //p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering " + islandTo.getName() + "'s island");
-            }
-
             // Fire exit event
             final IslandExitEvent event = new IslandExitEvent(p, islandFrom, e.getFrom());
             plugin.getServer().getPluginManager().callEvent(event);
@@ -207,6 +201,22 @@ public class IslandListener implements Listener {
         e.setCancelled();
     }
 
+    @EventHandler(priority = EventPriority.LOW)
+    public void onInventoryOpen(InventoryOpenEvent e) {
+        Player p = e.getPlayer();
+        if (notInWorld(p.getLocation())) {
+            return;
+        }
+
+        if (plugin.getIsland().locationIsOnIsland(p, p.getLocation()) || e.getInventory().getType() == PLAYER) {
+            // You can do anything on your island
+            return;
+        }
+
+        p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
+        e.setCancelled();
+    }
+
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onExplosion(EntityExplodeEvent e) {
         if (notInWorld(e.getPosition().getLocation())) {
@@ -225,6 +235,11 @@ public class IslandListener implements Listener {
         // As what I said, no need stupid checks
         e.getBlockList().clear();
         e.setCancelled();
+    }
+
+    public boolean isInventoryAllowed(InventoryType event) {
+        // todo: Here we check the config with the inventory
+        return false;
     }
 
     /**
@@ -318,16 +333,6 @@ public class IslandListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerCommand(PlayerCommandPreprocessEvent ex) {
-        Player p = ex.getPlayer();
-        String command = ex.getMessage().substring(1);
-//        if (notInWorld(p) && !Settings.bannedCommands.contains(command)) {
-//            return;
-//        }
-//        if (p.isOp()) {
-//            p.sendMessage(plugin.getLocale(p).adminOverride);
-//            return;
-//        }
-//        p.sendMessage(plugin.getLocale(p).errorCommandBlocked);
-//        ex.setCancelled();
+        // todo: Block player messages.
     }
 }

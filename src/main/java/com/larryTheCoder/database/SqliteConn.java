@@ -36,16 +36,12 @@ import java.util.List;
  *
  * @author Adam Matthew
  */
-public final class SqliteConn {
+public final class SqliteConn extends Database {
 
     private final AbstractDatabase db;
-    // Faster to search islands ~75%
-    private final ArrayList<IslandData> islandCache = new ArrayList<>();
     private Connection con;
     private boolean closed = true;
-    private IslandData islandSpawn;
     private final ASkyBlock plugin;
-    private boolean enableFastCache;
     private boolean mySQL;
 
     public SqliteConn(ASkyBlock plugin, AbstractDatabase database) throws SQLException, ClassNotFoundException {
@@ -54,7 +50,6 @@ public final class SqliteConn {
         this.db = database;
         this.con = database.openConnection();
         this.mySQL = database instanceof MySQLDatabase;
-        this.enableFastCache = ASkyBlock.get().getConfig().getBoolean("fastCache");
         this.createTables();
         // MySQL Support
         TaskManager.runTaskAsync(() -> {
@@ -138,14 +133,6 @@ public final class SqliteConn {
         }
     }
 
-    /**
-     * Release the array from system
-     * Keep the server from lag
-     */
-    public void free() {
-        islandCache.clear();
-    }
-
     private boolean isValid() {
         try {
             if (con.isClosed()) {
@@ -172,17 +159,7 @@ public final class SqliteConn {
         }
     }
 
-    public void removeIslandFromCache(IslandData pd) {
-        if (enableFastCache) {
-            for (IslandData pde : islandCache) {
-                if (pde.getIslandId() == pd.getIslandId()) {
-                    islandCache.remove(pde);
-                    break;
-                }
-            }
-        }
-    }
-
+    @Override
     public void setSpawnPosition(Position pos) {
         int x = pos.getFloorX();
         int y = pos.getFloorY();
@@ -198,6 +175,7 @@ public final class SqliteConn {
         }
     }
 
+    @Override
     public IslandData getIslandLocation(String levelName, int X, int Z) {
         int id = plugin.getIsland().generateIslandKey(X, Z, levelName);
         IslandData database = new IslandData(levelName, X, Z, plugin.getSettings(levelName).getProtectionRange());
@@ -227,6 +205,23 @@ public final class SqliteConn {
         return database;
     }
 
+    public ArrayList<IslandData> getAllIsland() {
+        ArrayList<IslandData> pd = new ArrayList<>();
+        try (Statement stmt = con.createStatement()) {
+            ResultSet set = stmt.executeQuery("SELECT * FROM `island` ");
+            if (set.isClosed()) {
+                return pd;
+            }
+            while (set.next()) {
+                pd.add(new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn")));
+            }
+        } catch (SQLException ex) {
+            JDBCUtilities.printSQLException(ex);
+        }
+        return pd;
+    }
+
+    @Override
     public ArrayList<IslandData> getIslands(String owner) {
         ArrayList<IslandData> pd = new ArrayList<>();
         if (enableFastCache) {
@@ -257,6 +252,7 @@ public final class SqliteConn {
         return pd;
     }
 
+    @Override
     public ArrayList<IslandData> getIslands(String owner, String levelName) {
         ArrayList<IslandData> pd = new ArrayList<>();
         if (enableFastCache) {
@@ -287,6 +283,7 @@ public final class SqliteConn {
         return pd;
     }
 
+    @Override
     public IslandData getIsland(String name, int homes) {
         // safe block
         IslandData pd = null;
@@ -312,6 +309,7 @@ public final class SqliteConn {
         return pd;
     }
 
+    @Override
     public IslandData getIsland(String name, String homeName) {
         // safe block
         IslandData pd = null;
@@ -337,6 +335,7 @@ public final class SqliteConn {
         return pd;
     }
 
+    @Override
     public boolean deleteIsland(IslandData pd) {
         if (enableFastCache) {
             islandCache.remove(pd);
@@ -354,6 +353,7 @@ public final class SqliteConn {
         return false;
     }
 
+    @Override
     public IslandData getSpawn() {
         // safe block
         IslandData pd = null;
@@ -374,6 +374,7 @@ public final class SqliteConn {
         return pd;
     }
 
+    @Override
     public IslandData getIslandById(int id) {
         // safe block
         IslandData pd = null;
@@ -400,6 +401,7 @@ public final class SqliteConn {
         return pd;
     }
 
+    @Override
     public void close() {
         Utils.send("&7Closing databases...");
         try {
@@ -413,6 +415,7 @@ public final class SqliteConn {
         }
     }
 
+    @Override
     public boolean createIsland(IslandData pd) {
         try (PreparedStatement set = con.prepareStatement("INSERT INTO `island` (`id`, `islandId`, `x`, `y`, `z`, `isSpawn`, `psize`, `owner`, `name`, `world`, `biome`, `locked`, `protection`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
             set.setInt(1, pd.getId());
@@ -427,7 +430,7 @@ public final class SqliteConn {
             set.setString(10, pd.getLevelName());
             set.setString(11, pd.getBiome());
             set.setBoolean(12, pd.isLocked());
-            set.setString(13, pd.getSettings());
+            set.setString(13, pd.getIgsSettings().getSettings());
             set.addBatch();
             set.executeBatch();
             set.close();
@@ -443,6 +446,7 @@ public final class SqliteConn {
         return false;
     }
 
+    @Override
     public boolean saveIsland(IslandData pd) {
         if (enableFastCache) {
             for (IslandData pde : islandCache) {
@@ -457,7 +461,7 @@ public final class SqliteConn {
             stmt.setString(2, pd.getBiome());
             stmt.setBoolean(3, pd.isLocked());
             stmt.setBoolean(4, pd.isSpawn());
-            stmt.setString(5, pd.getSettings());
+            stmt.setString(5, pd.getIgsSettings().getSettings());
             stmt.setInt(6, pd.homeX);
             stmt.setInt(7, pd.homeY);
             stmt.setInt(8, pd.homeZ);
@@ -474,6 +478,7 @@ public final class SqliteConn {
         return false;
     }
 
+    @Override
     public ArrayList<String> getWorlds() {
         ArrayList<String> world = new ArrayList<>();
         try (Statement kt = con.createStatement()) {
@@ -490,6 +495,7 @@ public final class SqliteConn {
         return world;
     }
 
+    @Override
     public boolean saveWorlds(ArrayList<String> pd) {
         try (PreparedStatement set = con.prepareStatement("INSERT INTO `worlds` (`world`) VALUES (?);")) {
             ArrayList<String> second = getWorlds();
@@ -508,6 +514,7 @@ public final class SqliteConn {
         return false;
     }
 
+    @Override
     public List<String> getPlayersData() {
         List<String> playersData = new ArrayList<>();
         try (Statement kt = con.createStatement()) {
@@ -524,6 +531,7 @@ public final class SqliteConn {
         return playersData;
     }
 
+    @Override
     public PlayerData getPlayerData(String st) {
         // TESTED SUCCESS
         PlayerData pd = null;
@@ -551,7 +559,7 @@ public final class SqliteConn {
         return pd;
     }
 
-
+    @Override
     public void createPlayer(String p) {
         // TESTED SECCESS
         try (PreparedStatement set = con.prepareStatement("INSERT INTO `players` ("
@@ -592,6 +600,7 @@ public final class SqliteConn {
         }
     }
 
+    @Override
     public void savePlayerData(PlayerData pd) {
         // TESTED SECCESS
         try (PreparedStatement stmt = con.prepareStatement(

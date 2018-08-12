@@ -37,7 +37,6 @@ class AcidEffect implements Listener {
     private final ASkyBlock plugin;
     private final List<Player> burningPlayers = new ArrayList<>();
     private final List<Player> wetPlayers = new ArrayList<>();
-    private boolean isRaining = false;
 
     public AcidEffect(final ASkyBlock pluginI) {
         plugin = pluginI;
@@ -137,6 +136,6 @@ class AcidEffect implements Listener {
         if (!plugin.level.contains(e.getLevel().getName())) {
             return;
         }
-        this.isRaining = e.toWeatherState();
+        boolean isRaining = e.toWeatherState();
     }
 }

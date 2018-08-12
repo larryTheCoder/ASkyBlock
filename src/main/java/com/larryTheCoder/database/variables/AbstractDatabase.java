@@ -73,11 +73,11 @@ public interface AbstractDatabase {
 
     /**
      * Executes an Update SQL Query.
-     * See {@link Statement#executeUpdate(String)}.
+     * See {@link java.sql.Statement#execute(String)}.
      * If the connection is closed, it will be opened.
      *
      * @param query Query to be run
-     * @return Result Code, see {@link Statement#executeUpdate(String)}
+     * @return Result Code, see {@link java.sql.Statement#execute(String)}
      * @throws SQLException           If the query cannot be executed
      * @throws ClassNotFoundException If the driver cannot be found; see {@link #openConnection()}
      */
