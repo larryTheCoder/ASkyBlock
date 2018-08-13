@@ -39,12 +39,14 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.IslandEnterEvent;
 import com.larryTheCoder.events.IslandExitEvent;
 import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.storage.IslandSettings;
+import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
 import java.util.List;
 
 import static cn.nukkit.block.BlockID.ENDER_CHEST;
-import static cn.nukkit.inventory.InventoryType.PLAYER;
+import static cn.nukkit.inventory.InventoryType.*;
 
 /**
  * Rewrite class for IslandGuard messy code
@@ -71,15 +73,31 @@ public class IslandListener implements Listener {
     }
 
     /**
+     * Action allowed in this location
+     *
+     * @param location The location to be checked
+     * @param flag     Kind of flag to be checked
+     * @return true if allowed
+     */
+    private boolean actionAllowed(Location location, IslandSettings.SettingsFlag flag) {
+        IslandData island = plugin.getGrid().getProtectedIslandAt(location);
+        if (island != null && island.getIgsSettings().getIgsFlag(flag)) {
+            return true;
+        }
+        // Sometimes this can be null (So default is false)
+        return Settings.defaultWorldSettings.get(flag) == null ? false : Settings.defaultWorldSettings.get(flag);
+    }
+
+    /**
      * Checks if action is allowed for player in location for flag
      *
      * @param player   The player or entity
      * @param location The location to be checked
      * @return true if allowed
      */
-    private boolean actionAllowed(Player player, Location location) {
+    private boolean actionAllowed(Player player, Location location, IslandSettings.SettingsFlag flag) {
         if (player == null) {
-            return false;
+            return actionAllowed(location, flag);
         }
         // This permission bypasses protection
         if (player.isOp() || player.hasPermission("is.mod.bypassprotect")) {
@@ -90,8 +108,12 @@ public class IslandListener implements Listener {
             return false;
         }
 
-        // todo fix getIgsFlag for islands
-        return island.getOwner().equalsIgnoreCase(player.getName());
+        if (island.getOwner().equalsIgnoreCase(player.getName())) {
+            return true;
+        }
+
+        // Fixed
+        return Settings.defaultWorldSettings.get(flag);
     }
 
     private String getPrefix() {
@@ -201,22 +223,6 @@ public class IslandListener implements Listener {
         e.setCancelled();
     }
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onInventoryOpen(InventoryOpenEvent e) {
-        Player p = e.getPlayer();
-        if (notInWorld(p.getLocation())) {
-            return;
-        }
-
-        if (plugin.getIsland().locationIsOnIsland(p, p.getLocation()) || e.getInventory().getType() == PLAYER) {
-            // You can do anything on your island
-            return;
-        }
-
-        p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
-        e.setCancelled();
-    }
-
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onExplosion(EntityExplodeEvent e) {
         if (notInWorld(e.getPosition().getLocation())) {
@@ -224,7 +230,7 @@ public class IslandListener implements Listener {
         }
         if (e.getEntity() instanceof EntityPrimedTNT && ((EntityPrimedTNT) e.getEntity()).getSource() instanceof Player) {
             Player p = (Player) ((EntityPrimedTNT) e.getEntity()).getSource();
-            if (actionAllowed(p, e.getEntity().getLocation())) {
+            if (actionAllowed(p, e.getEntity().getLocation(), IslandSettings.SettingsFlag.PLACE_BLOCKS)) {
                 return;
             }
             if (p.isOp() && p.hasPermission("is.mod.bypassprotect")) {
@@ -235,11 +241,6 @@ public class IslandListener implements Listener {
         // As what I said, no need stupid checks
         e.getBlockList().clear();
         e.setCancelled();
-    }
-
-    public boolean isInventoryAllowed(InventoryType event) {
-        // todo: Here we check the config with the inventory
-        return false;
     }
 
     /**
@@ -261,7 +262,7 @@ public class IslandListener implements Listener {
         if (notInWorld(e.getPlayer())) {
             return;
         }
-        if (actionAllowed(e.getPlayer(), e.getBlock().getLocation())) {
+        if (actionAllowed(e.getPlayer(), e.getBlock().getLocation(), IslandSettings.SettingsFlag.PLACE_BLOCKS)) {
             return;
         }
 
@@ -275,7 +276,7 @@ public class IslandListener implements Listener {
         if (notInWorld(e.getPlayer())) {
             return;
         }
-        if (actionAllowed(e.getPlayer(), e.getBlock().getLocation())) {
+        if (actionAllowed(e.getPlayer(), e.getBlock().getLocation(), IslandSettings.SettingsFlag.BREAK_BLOCKS)) {
             return;
         }
 

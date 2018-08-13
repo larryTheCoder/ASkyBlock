@@ -325,38 +325,27 @@ public class IslandManager {
         plugin.getTeleportLogic().safeTeleport(p, home, false, pd.getId());
     }
 
+    /**
+     * Check either the location given is the player
+     * island
+     *
+     * @param player The player to be check
+     * @param loc    Location to be checked
+     * @return true if the location is player's island
+     */
     public boolean locationIsOnIsland(Player player, Vector3 loc) {
         if (player == null) {
             return false;
         }
         Location local = new Location(loc.x, loc.y, loc.z, player.getLevel());
-        WorldSettings settings = plugin.getSettings(local.getLevel().getName());
         // Get the player's island from the grid if it exists
         IslandData island = GetIslandAt(local);
         if (island != null) {
             // On an island in the grid
             // In a protected zone but is on the list of acceptable players
             // Otherwise return false
-            return island.onIsland(local) || island.getMembers().contains(player.getName());
+            return island.onIsland(local) && (island.getMembers().contains(player.getName()) || island.getOwner().equalsIgnoreCase(player.getName()));
         }
-        // Not in the grid, so do it the old way
-        // Make a list of test locations and test them
-        Set<Location> islandTestLocations = new HashSet<>();
-        if (checkIsland(player)) {
-            islandTestLocations.add(plugin.getIslandInfo(player).getHome());
-        } else if (plugin.getTManager().hasTeam(player)) {
-            islandTestLocations.add(plugin.getPlayerInfo(player).getTeamIslandLocation());
-        }
-        // Check any coop locations
-//        islandTestLocations.addAll(CoopPlay.getInstance().getCoopIslands(player));
-//        if (islandTestLocations.isEmpty()) {
-//            return false;
-//        }
-        // Run through all the locations
-        return islandTestLocations.stream().filter((islandTestLocation) -> (local.getLevel().getName().equalsIgnoreCase(islandTestLocation.level.getName())))
-                .anyMatch((islandTestLocation) -> (loc.getX() >= islandTestLocation.getX() - settings.getProtectionRange() / 2
-                        && loc.getX() < islandTestLocation.getX() + settings.getProtectionRange() / 2
-                        && loc.getZ() >= islandTestLocation.getZ() - settings.getProtectionRange() / 2
-                        && loc.getZ() < islandTestLocation.getZ() + settings.getProtectionRange() / 2));
+        return false;
     }
 }

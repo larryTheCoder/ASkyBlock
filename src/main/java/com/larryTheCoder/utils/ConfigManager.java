@@ -128,7 +128,7 @@ public class ConfigManager {
         for (String setting : protectionWorld.getKeys(false)) {
             try {
                 SettingsFlag flag = SettingsFlag.valueOf(setting.toUpperCase());
-                boolean value = cfg.getBoolean("protection.world." + flag.name());
+                boolean value = cfg.getBoolean("protection.world." + setting);
                 Settings.defaultWorldSettings.put(flag, value);
                 Settings.defaultSpawnSettings.put(flag, value);
                 Settings.defaultIslandSettings.put(flag, value);

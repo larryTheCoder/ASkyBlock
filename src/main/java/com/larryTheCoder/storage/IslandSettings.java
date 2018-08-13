@@ -45,9 +45,23 @@ public class IslandSettings {
         }
     }
 
-    IslandSettings(IslandData pd) {
+    public IslandSettings(IslandData pd) {
         this.pd = pd;
         this.setIgsDefaults();
+    }
+
+    /**
+     * Get the Island Guard flag status
+     *
+     * @param flag The flag to be checked
+     * @return true or false, or false if flag is not in the list
+     */
+    public boolean getIgsFlag(SettingsFlag flag) {
+        Utils.sendDebug("DEBUG: asking for " + flag + " = " + igs.get(flag));
+        if (this.igs.containsKey(flag)) {
+            return igs.get(flag);
+        }
+        return false;
     }
 
     /**
@@ -148,6 +162,7 @@ public class IslandSettings {
         ACID_DAMAGE,
         /**
          * Anvil use
+         * [Added]
          */
         ANVIL,
         /**
@@ -164,6 +179,7 @@ public class IslandSettings {
         BED,
         /**
          * Can break blocks
+         * [Added]
          */
         BREAK_BLOCKS,
         /**
@@ -172,6 +188,7 @@ public class IslandSettings {
         BREEDING,
         /**
          * Can use brewing stand
+         * [Added]
          */
         BREWING,
         /**
@@ -188,6 +205,7 @@ public class IslandSettings {
         COLLECT_WATER,
         /**
          * Can open chests or hoppers or dispensers
+         * [Added]
          */
         CHEST,
         /**
@@ -196,6 +214,7 @@ public class IslandSettings {
         CHORUS_FRUIT,
         /**
          * Can use the work bench
+         * [Added]
          */
         CRAFTING,
         /**
@@ -216,6 +235,7 @@ public class IslandSettings {
         EGGS,
         /**
          * Can use the enchanting table
+         * [Added]
          */
         ENCHANTING,
         /**
