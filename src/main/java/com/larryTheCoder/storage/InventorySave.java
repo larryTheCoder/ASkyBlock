@@ -19,7 +19,6 @@ package com.larryTheCoder.storage;
 
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
-import com.larryTheCoder.ASkyBlock;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -28,16 +27,13 @@ import java.util.UUID;
  * @author Adam Matthew
  */
 public class InventorySave {
-    private static final InventorySave object = new InventorySave(ASkyBlock.get());
+
+    private static InventorySave object;
     private final HashMap<UUID, InventoryStore> inventories;
 
-    /**
-     * Saves the inventory of a player
-     *
-     * @param plugin
-     */
-    public InventorySave(ASkyBlock plugin) {
+    public InventorySave() {
         inventories = new HashMap<>();
+        object = this;
     }
 
     public static InventorySave getInstance() {
@@ -47,10 +43,9 @@ public class InventorySave {
     /**
      * Save player's inventory
      *
-     * @param player
+     * @param player The player to be saved
      */
     public void savePlayerInventory(Player player) {
-        //plugin.getLogger().info("DEBUG: Saving inventory");
         // Save the player's armor and things
         inventories.put(player.getUniqueId(), new InventoryStore(player.getInventory().getContents(), player.getInventory().getArmorContents()));
     }
@@ -58,29 +53,32 @@ public class InventorySave {
     /**
      * Clears any saved inventory
      *
-     * @param player
+     * @param player The player to be cleared
      */
     public void clearSavedInventory(Player player) {
-        //plugin.getLogger().info("DEBUG: Clearing inventory");
         inventories.remove(player.getUniqueId());
     }
 
     /**
+     * Clears all data in the inventory list
+     */
+    public void clearSavedInventory() {
+        inventories.clear();
+    }
+    /**
      * Load the player's inventory
      *
-     * @param player
+     * @param player The player to be loaded
      */
     public void loadPlayerInventory(Player player) {
-        //plugin.getLogger().info("DEBUG: Loading inventory");
         // Get the info for this player
         if (inventories.containsKey(player.getUniqueId())) {
             InventoryStore inv = inventories.get(player.getUniqueId());
-            //plugin.getLogger().info("DEBUG: player is known");
             player.getInventory().setContents(inv.getInventory());
             for (Item[] ec : inv.getArmor()) {
                 player.getInventory().setArmorContents(ec);
             }
-            inventories.remove(player.getUniqueId());
+            clearSavedInventory(player);
         }
     }
 

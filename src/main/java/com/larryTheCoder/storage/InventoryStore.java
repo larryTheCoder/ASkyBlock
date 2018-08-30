@@ -21,7 +21,6 @@ import cn.nukkit.item.Item;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -29,9 +28,9 @@ import java.util.Map;
  */
 class InventoryStore {
     private final ArrayList<Item[]> armor = new ArrayList<>();
-    private Map<Integer, Item> inventory = new HashMap<>();
+    private Map<Integer, Item> inventory;
 
-    public InventoryStore(Map<Integer, Item> contents, Item[] armorContents) {
+    InventoryStore(Map<Integer, Item> contents, Item[] armorContents) {
         this.inventory = contents;
         this.armor.add(armorContents);
     }
@@ -40,23 +39,9 @@ class InventoryStore {
         return Collections.unmodifiableMap(inventory);
     }
 
-    /**
-     * @param inventory the inventory to set
-     */
-    public void setInventory(Map<Integer, Item> inventory) {
-        inventory.entrySet().stream().forEach((ev) -> this.inventory.put(ev.getKey(), ev.getValue()));
-    }
-
     @SuppressWarnings("ReturnOfCollectionOrArrayField")
-    public ArrayList<Item[]> getArmor() {
+    ArrayList<Item[]> getArmor() {
         return armor;
-    }
-
-    /**
-     * @param armor the armor to set
-     */
-    public void setArmor(Item[] armor) {
-        this.armor.add(armor);
     }
 
 }

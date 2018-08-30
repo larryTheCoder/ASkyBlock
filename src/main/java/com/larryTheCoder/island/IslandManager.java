@@ -182,7 +182,7 @@ public class IslandManager {
                 pd = claim(p, locIsland, home, locked);
                 if (pd == null) {
                     p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorFailedCritical);
-                    Utils.send("Unable to claim level at:" + locIsland.toString());
+                    Utils.send("&cUnable to claim level at:" + locIsland.toString());
                     return;
                 }
                 // Call an event

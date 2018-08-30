@@ -22,6 +22,7 @@ import cn.nukkit.level.Location;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.storage.WorldSettings;
+import com.larryTheCoder.utils.Settings;
 
 /**
  * @author Adam Matthew
@@ -73,12 +74,14 @@ public class LeaveSubCommand extends SubCommand {
                 pt.setGamemode(0);
             }
         }
-        getPlugin().getInventory().loadPlayerInventory(pt);
+        if (Settings.saveInventory) {
+            getPlugin().getInventory().loadPlayerInventory(pt);
+        }
         // default spawn world
         if (getPlugin().getDatabase().getSpawn() != null) {
-            pt.teleportImmediate(getPlugin().getDatabase().getSpawn().getHome());
+            pt.teleport(getPlugin().getDatabase().getSpawn().getHome());
         } else {
-            pt.teleportImmediate(Location.fromObject(getPlugin().getServer().getDefaultLevel().getSafeSpawn()));
+            pt.teleport(Location.fromObject(getPlugin().getServer().getDefaultLevel().getSafeSpawn()));
         }
         return true;
     }

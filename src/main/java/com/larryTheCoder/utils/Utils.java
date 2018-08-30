@@ -18,12 +18,16 @@ package com.larryTheCoder.utils;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.block.*;
+import cn.nukkit.item.*;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.storage.IslandSettings;
+import com.larryTheCoder.storage.SettingsFlag;
 
 import java.io.File;
 import java.util.*;
@@ -176,6 +180,16 @@ public class Utils {
     }
 
     // MAPPING STRINGS ---- Start ----
+
+    /**
+     * This function changes string to map
+     * Warning: This function has been detected to be an error and false casting
+     * please do not use this
+     *
+     * @param append String to be serialized
+     * @return HashMap
+     */
+    @Deprecated
     public static HashMap stringToMap(String append) {
         if (append.isEmpty()) {
             return new HashMap<>();
@@ -190,6 +204,14 @@ public class Utils {
         return errs;
     }
 
+    /**
+     * Warning: Using this way is not safe, use other method to get the
+     * hash right
+     *
+     * @param err HashMap or Map to be string
+     * @return String value
+     */
+    @Deprecated
     public static String hashToString(Map err) {
         StringBuilder buf = new StringBuilder();
 
@@ -203,7 +225,14 @@ public class Utils {
         return buf.toString();
     }
 
-    public static String arrayToString(List arr) {
+    /**
+     * This method changes an array to be string
+     * This function only applicable for string
+     *
+     * @param arr ArrayList or List class
+     * @return String, empty if the array is null or empty
+     */
+    public static String arrayToString(List<String> arr) {
         if (arr == null || arr.isEmpty()) {
             return "";
         }
@@ -217,14 +246,21 @@ public class Utils {
         return buf.toString();
     }
 
-    public static ArrayList<String> stringToArray(String charc, String commas) {
-        if (charc.isEmpty()) {
+    /**
+     * Serialize the string to an array
+     *
+     * @param string String to be decoded
+     * @param commas Prefix or sub-prefix
+     * @return A clean list of array
+     */
+    public static ArrayList<String> stringToArray(String string, String commas) {
+        if (string.isEmpty()) {
             return new ArrayList<>();
         }
-        String[] at = charc.split(commas);
-        ArrayList<String> atd = new ArrayList<>(Arrays.asList(at));
-        return atd;
+        String[] at = string.split(commas);
+        return new ArrayList<>(Arrays.asList(at));
     }
+
     // MAPPING STRINGS ---- End ----
 
     public static boolean isNumeric(final String str) {
@@ -317,6 +353,130 @@ public class Utils {
             result.add(color + line);
         }
         return result;
+    }
+
+
+    /**
+     * Check physical activity of the player
+     *
+     * @param p    Player
+     * @param type Block
+     * @return true if the action is allowed
+     */
+    public static boolean actionPhysical(Player p, Block type) {
+        // Settings priority
+        IslandSettings data;
+        if (ASkyBlock.get().getIslandInfo(p.getLocation()) != null) {
+            data = ASkyBlock.get().getIslandInfo(p.getLocation()).getIgsSettings();
+        } else {
+            data = new IslandSettings(null);
+        }
+
+        // Checked nukkit source code, the only things that triggers PHYSICAL
+        // Is these dudes.
+        if (type instanceof BlockFarmland) {
+            return data.getIgsFlag(SettingsFlag.BREAK_BLOCKS);
+        } else {
+            return data.getIgsFlag(SettingsFlag.PRESSURE_PLATE);
+        }
+    }
+
+    /**
+     * Check either interacting with an item is allowed
+     * Sometimes this item could be air
+     *
+     * @param p    The Player
+     * @param type The player's item that uses to interact
+     * @return true if the interacting is allowed
+     */
+    public static boolean isItemAllowed(Player p, Item type) {
+        // User is placing a block, let the other event
+        // Do its task, avoiding too much data gathering
+        if (type.canBePlaced()) {
+            return true;
+        }
+
+        // Check if the island have the settings
+        IslandSettings data;
+        if (ASkyBlock.get().getIslandInfo(p.getLocation()) != null) {
+            data = ASkyBlock.get().getIslandInfo(p.getLocation()).getIgsSettings();
+        } else {
+            data = new IslandSettings(null);
+        }
+
+        if (type instanceof ItemEgg) {
+            Utils.sendDebug("User is interacting with chicken egg");
+            return data.getIgsFlag(SettingsFlag.EGGS);
+        } else if (type instanceof ItemSpawnEgg) {
+            Utils.sendDebug("User is interacting with spawn egg");
+            return data.getIgsFlag(SettingsFlag.SPAWN_EGGS);
+        } else if (type instanceof ItemShears) {
+            // FIXME: This should check if the player is shearing the sheep, not shearing the wood
+            //return data.getIgsFlag(SettingsFlag.SHEARING);
+            Utils.sendDebug("Using shears, not yet implemented for interaction");
+        } else if (type instanceof ItemFlintSteel) {
+            Utils.sendDebug("User is interacting with flint and steel");
+            return data.getIgsFlag(SettingsFlag.FIRE);
+        }
+
+        return false;
+    }
+
+    public static boolean isInventoryAllowed(Player p, Block type) {
+        // Classic
+        if (type.getId() == 0) {
+            return true;
+        }
+
+        // Check if the island have the settings
+        IslandSettings data;
+        if (ASkyBlock.get().getIslandInfo(p.getLocation()) != null) {
+            sendDebug("DEBUG: Settings available");
+            data = ASkyBlock.get().getIslandInfo(p.getLocation()).getIgsSettings();
+        } else {
+            sendDebug("DEBUG: Settings unavailable");
+            data = new IslandSettings(null);
+        }
+
+        if (type instanceof BlockAnvil) {
+            sendDebug("DEBUG: Type of check is anvil");
+            return data.getIgsFlag(SettingsFlag.ANVIL);
+        } else if (type instanceof BlockChest || type instanceof BlockHopper || type instanceof BlockDispenser) {
+            sendDebug("DEBUG: Type of check is chest");
+            return data.getIgsFlag(SettingsFlag.CHEST);
+        } else if (type instanceof BlockCraftingTable) {
+            sendDebug("DEBUG: Type of check is workbench");
+            return data.getIgsFlag(SettingsFlag.CRAFTING);
+        } else if (type instanceof BlockBrewingStand) {
+            sendDebug("DEBUG: Type of check is brewing stand");
+            return data.getIgsFlag(SettingsFlag.BREWING);
+        } else if (type instanceof BlockFurnace || type instanceof BlockFurnaceBurning) {
+            sendDebug("DEBUG: Type of check is furnace");
+            return data.getIgsFlag(SettingsFlag.FURNACE);
+        } else if (type instanceof BlockEnchantingTable) {
+            sendDebug("DEBUG: Type of check is enchantment table");
+            return data.getIgsFlag(SettingsFlag.ENCHANTING);
+        } else if (type instanceof BlockBed) {
+            sendDebug("DEBUG: Type of check is bed");
+            return data.getIgsFlag(SettingsFlag.BED);
+        } else if (type instanceof BlockFire) {
+            sendDebug("DEBUG: Type of check is fire");
+            return data.getIgsFlag(SettingsFlag.FIRE_EXTINGUISH);
+        } else if (type instanceof BlockFenceGate) {
+            sendDebug("DEBUG: Type of check is gate");
+            return data.getIgsFlag(SettingsFlag.GATE);
+        } else if (type instanceof BlockButton || type instanceof BlockLever) {
+            sendDebug("DEBUG: Type of check is lever");
+            return data.getIgsFlag(SettingsFlag.LEVER_BUTTON);
+        } else if (type instanceof BlockJukebox || type instanceof BlockNoteblock) {
+            sendDebug("DEBUG: Type of check is noteblock / jukeblock");
+            return data.getIgsFlag(SettingsFlag.MUSIC);
+        } else if (type instanceof BlockDoor || type instanceof BlockTrapdoor) {
+            sendDebug("DEBUG: Type of check is noteblock / jukeblock");
+            return data.getIgsFlag(SettingsFlag.DOOR);
+        }
+
+        return false;
     }
 
     public static void sendDebug(String message) {

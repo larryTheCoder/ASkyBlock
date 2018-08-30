@@ -68,7 +68,7 @@ public class TeleportLogic implements Listener {
         Utils.loadChunkAt(targetLoc);
 
         if (player.hasPermission("is.bypass.wait") || (teleportDelay == 0) || force) {
-            player.teleportImmediate(targetLoc);
+            player.teleport(targetLoc);
         } else {
             player.sendMessage(plugin.getPrefix() + plugin.getLocale(player).teleportDelay.replace("{0}", "" + teleportDelay));
             TaskHandler task = plugin.getServer().getScheduler().scheduleDelayedTask(plugin, () -> {
@@ -82,7 +82,7 @@ public class TeleportLogic implements Listener {
                 } else {
                     player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Teleported to your island #" + home);
                 }
-                player.teleportImmediate(targetLoc.add(0, 0.35)); // Adjust spawn hieght
+                player.teleport(targetLoc.add(0, 0.35)); // Adjust spawn hieght
                 // Teleport in default gameMode
                 if (Settings.gameMode != -1) {
                     player.setGamemode(Settings.gameMode);

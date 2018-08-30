@@ -99,6 +99,16 @@ public class AdminCMD extends Command {
                 }
                 sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorLevelGenerated);
                 break;
+            case "clear":
+                if (!sender.hasPermission("is.admin.clear")) {
+                    sender.sendMessage(plugin.getLocale(p).errorNoPermission);
+                    break;
+                }
+                plugin.getInventory().clearSavedInventory();
+                plugin.getDatabase().free();
+                sender.sendMessage(TextFormat.RED + "Cleared memory usage.");
+                sender.sendMessage(TextFormat.RED + "Warning: Player data may be lost during this cleanup");
+                break;
             case "kick":
                 if (args.length <= 1) {
                     sender.sendMessage(plugin.getPrefix() + "§aUsage: /" + commandLabel + " kick <player>");
@@ -175,7 +185,7 @@ public class AdminCMD extends Command {
                 this.setSpawn(sender);
                 break;
             case "addmessage":
-                if (!sender.hasPermission("is.admin.delete")) {
+                if (!sender.hasPermission("is.admin.addmessage")) {
                     sender.sendMessage(plugin.getLocale(p).errorNoPermission);
                     break;
                 }
@@ -259,7 +269,7 @@ public class AdminCMD extends Command {
 
         List<String> helpList = new ArrayList<>();
 
-        helpList.add(""); // Really weird Java Machine bug (Usually this will be stored in List but not)
+        helpList.add(""); // Nope its not just math
 
         if (sender.hasPermission("is.admin.rename")) {
             helpList.add("&e" + label + " rename &7=> &a" + plugin.getLocale(p).adminHelpRename);
@@ -281,9 +291,17 @@ public class AdminCMD extends Command {
             helpList.add("&e" + label + " delete &7=> &a" + plugin.getLocale(p).adminHelpDelete);
         }
 
+        if (sender.hasPermission("is.admin.addmessage")) {
+            helpList.add("&e" + label + " addmessage &7=> &a" + plugin.getLocale(p).adminHelpMessage);
+        }
+
+        if (sender.hasPermission("is.admin.clear")) {
+            helpList.add("&e" + label + " clear &7=> &a" + plugin.getLocale(p).adminHelpClear);
+        }
+
         if (label.length() > 4) {
             helpList.add("");
-            helpList.add("&eTired to use looooong commands of isadmin? You can use 'isa' for aliases!");
+            helpList.add("&eYou can use 'isa' for 'isadmin' aliases");
         }
 
         int totalPage = helpList.size() % pageHeight == 0 ? helpList.size() / pageHeight : helpList.size() / pageHeight + 1;

@@ -100,7 +100,7 @@ public final class SqliteConn extends Database {
                         + "`owner` VARCHAR NOT NULL,"
                         + "`name` VARCHAR NOT NULL,"
                         + "`world` VARCHAR NOT NULL,"
-                        + "`protection` VARCHAR NOT NULL,"
+                        + "`protection` VARCHAR(780) NOT NULL,"
                         + "`biome` VARCHAR NOT NULL,"
                         + "`locked` INTEGER NOT NULL)");
                 //+ "`active` INTEGER NOT NULL)");
@@ -450,7 +450,7 @@ public final class SqliteConn extends Database {
     public boolean saveIsland(IslandData pd) {
         if (enableFastCache) {
             for (IslandData pde : islandCache) {
-                if (pde.getIslandId() == pd.getIslandId()) {
+                if (pde.getIslandId() == pd.getIslandId() && pde.getOwner().equalsIgnoreCase(pd.getOwner())) {
                     islandCache.remove(pde);
                     break;
                 }
@@ -540,6 +540,7 @@ public final class SqliteConn extends Database {
             if (set.isClosed()) {
                 return null;
             }
+            // TODO: Fix the casting issue on this
             pd = new PlayerData(
                     set.getString("player"),
                     set.getInt("homes"),
@@ -561,7 +562,7 @@ public final class SqliteConn extends Database {
 
     @Override
     public void createPlayer(String p) {
-        // TESTED SECCESS
+        // TODO: Fix the casting issue on this
         try (PreparedStatement set = con.prepareStatement("INSERT INTO `players` ("
                 + "`player`, "
                 + "`homes`, "
@@ -616,7 +617,7 @@ public final class SqliteConn extends Database {
                         + "`challengelist` = ?, "
                         + "`challengelisttimes` = ?, "
                         + "`name` = ?, "
-                        + "`locale` = ?, "
+                        + "`locale` = ? "
                         + "WHERE `player` = '" + pd.playerName + "'")) {
             stmt.setInt(1, pd.homes);
             stmt.setInt(2, pd.resetleft);

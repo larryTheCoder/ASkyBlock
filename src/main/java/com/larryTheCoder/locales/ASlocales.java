@@ -64,6 +64,8 @@ public final class ASlocales {
     public String adminHelpRename = "§aAttempt to rename other player's island.";
     public String adminHelpSpawn = "§aSet the island's spawn point!";
     public String adminHelpDelete = "§aDelete other player island";
+    public String adminHelpMessage = "§aAdd a message for all skyblock users";
+    public String adminHelpClear = "§aFlushes all he memory in the plugin";
     // Errors defaults
     public String errorMaxReset = "§cYou had reached the limit for island delectation.";
     private String errorUnknownPlayer = "§cThat player is unknown.";
@@ -145,6 +147,7 @@ public final class ASlocales {
     public String panelChallengesHeader = "§aChoose your toppings! All of these are your challenges to complete! You will be awarded with an amazing prize!";
     public String panelHomeHeader = "§dHere are all of the list of your islands. Choose one of these to [function]";
     public String panelSettingHeader = "§eYou can make an simple changes for your island. You can set your island any time.";
+    public String panelProtectionHeader = "§eSet you island protection settings, this applies to all visitors to your island. Some features may not available";
     public String deleteIslandSure = "§aAre you sure to delete your island? This is an irreversible!";
     public String deleteIslandCancelled = "§cYou just cancelled your delete island confirmation";
     // Public error

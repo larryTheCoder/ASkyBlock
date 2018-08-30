@@ -102,11 +102,10 @@ island:
 protection:
    # Protection Setting Flags:
    # ACID_DAMAGE, ANVIL, BEACON, BED, BREAK_BLOCKS, BREEDING, BREWING, 
-   # BUCKET, COLLECT_LAVA, COLLECT_WATER, CHEST, CHORUS_FRUIT, CRAFTING, CROP_TRAMPLE, 
+   # BUCKET, COLLECT_LAVA, COLLECT_WATER, CHEST, CRAFTING, CROP_TRAMPLE,
    # DOOR, EGGS, ENCHANTING, ENDER_PEARL, ENTER_EXIT_MESSAGES, FIRE, FIRE_EXTINGUISH, 
-   # FIRE_SPREAD, FURNACE, GATE, HORSE_INVENTORY, HORSE_RIDING, HURT_MOBS, LEASH,
-   # LEVER_BUTTON, MOB_SPAWN, PLACE_BLOCKS, PORTAL, PRESSURE_PLATE, PVP,
-   # MILKING, NETHER_PVP, REDSTONE, SPAWN_EGGS, SHEARING, VILLAGER_TRADING,
+   # FIRE_SPREAD, FURNACE, GATE, HURT_MOBS, LEASH, LEVER_BUTTON, PLACE_BLOCKS,
+   # PRESSURE_PLATE, PVP, MILKING, SPAWN_EGGS, SHEARING, VILLAGER_TRADING,
    # VISITOR_ITEM_DROP, VISITOR_ITEM_PICKUP
    #
    # -- World defaults --
@@ -135,8 +134,6 @@ protection:
      COLLECT_WATER: false
      # Allow access chests of any kind, droppers, dispensers and hoppers
      CHEST: false
-     # Allow eating or use of chorus fruit
-     CHORUS_FRUIT: false
      # Allow use of crafting benches
      CRAFTING: true
      # Allow creepers to hurt players (but not damage blocks)
@@ -163,10 +160,6 @@ protection:
      FURNACE: true
      # Allow gate use
      GATE: false
-     # Allow horse/llama inventory use - only works when riding is enabled     
-     HORSE_INVENTORY: false
-     # Allow riding of horses/llamas
-     HORSE_RIDING: false
      # Allow friendly mob hurting(cows etc.)
      HURT_MOBS: false
      # Allow monsters hurting
@@ -177,22 +170,14 @@ protection:
      LEVER_BUTTON: true
      # Cows can be milked
      MILKING: true
-     # Animals, etc. can spawn naturally
-     MOB_SPAWN: true
      # Allow monsters to spawn naturally
      MONSTER_SPAWN: true
-     # Allow PVP in the nether world
-     NETHER_PVP: false
      # Players can place blocks
      PLACE_BLOCKS: false
-     # Allow portal use
-     PORTAL: true
      # Allow pressure plate activation by players
      PRESSURE_PLATE: true
      # Allow PVP in the overworld
      PVP: false
-     # Allow adjustment of diodes or comparators
-     REDSTONE: false
      # Spawn eggs can be used
      SPAWN_EGGS: false
      # Allow sheep shearing
@@ -235,12 +220,8 @@ protection:
      FURNACE: true
      # Allow gate use
      GATE: true
-     # Allow portal use by visitors
-     PORTAL: true
      # Allow pressure plate activation by visitors (players only)
      PRESSURE_PLATE: false
-     # Allow adjustment of diodes or comparators
-     REDSTONE: false
      # Allow visitors to shear sheep
      SHEARING: false
    

@@ -20,7 +20,7 @@ package com.larryTheCoder;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.Location;
+import cn.nukkit.level.Position;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.plugin.PluginManager;
@@ -64,10 +64,16 @@ import java.util.List;
 /**
  * Author: Adam Matthew
  * <p>
- * Main class of SkyBlock Framework! Complete with API and Events. May contains
- * Nuts!
+ * High quality SkyBlock mainframe
+ * Fully documented for better looking
+ * in your eyes
  */
 public class ASkyBlock extends PluginBase {
+
+    // This function is to keep track beta build
+    // So I could barely see which is the thingy is used
+    private boolean betaBuild = true;
+    private boolean betaInsider = false;
 
     public static Economy econ;
     private static ASkyBlock object;
@@ -87,99 +93,12 @@ public class ASkyBlock extends PluginBase {
     private InventorySave inventory;
     private TeamManager managers;
     private TeleportLogic teleportLogic;
-    private ChallangesCMD cmds;
-    private Messages msgs;
+    private ChallangesCMD challengesCommand;
+    private Messages messageModule;
     private Panel panel;
 
     // Localization Strings
     private HashMap<String, ASlocales> availableLocales = new HashMap<>();
-
-    /**
-     * Return of ASkyBlock plug-in
-     *
-     * @return ASkyBlock
-     */
-    public static ASkyBlock get() {
-        return object;
-    }
-
-    public SqliteConn getDatabase() {
-        return db;
-    }
-
-    public ChatHandler getChatHandlers() {
-        return chatHandler;
-    }
-
-    public InvitationHandler getInvitationHandler() {
-        return invitationHandler;
-    }
-
-    public IslandManager getIsland() {
-        return manager;
-    }
-
-    public GridManager getGrid() {
-        return grid;
-    }
-
-    public InventorySave getInventory() {
-        return inventory;
-    }
-
-    public TeamManager getTManager() {
-        return managers;
-    }
-
-    public Panel getPanel() {
-        return panel;
-    }
-
-    public IslandData getIslandInfo(String player) {
-        return getDatabase().getIsland(player, 1);
-    }
-
-    public ChallangesCMD getChallenges() {
-        return cmds;
-    }
-
-    public boolean inIslandWorld(Player p) {
-        return getIsland().checkIslandAt(p.getLevel());
-    }
-
-    public PlayerData getPlayerInfo(Player player) {
-        return getDatabase().getPlayerData(player.getName());
-    }
-
-    public IslandData getIslandInfo(Location location) {
-        return getDatabase().getIslandLocation(location.getLevel().getName(), location.getFloorX(), location.getFloorZ());
-    }
-
-    public TeleportLogic getTeleportLogic() {
-        return teleportLogic;
-    }
-
-    public Integer getIslandLevel(Player player) {
-        PlayerData pd = getPlayerInfo(player);
-        return pd == null ? 0 : pd.getIslandLevel();
-    }
-
-    public String getDefaultWorld() {
-        return "SkyBlock";
-    }
-
-    public IslandData getIslandInfo(Player player) {
-        return getIslandInfo(player.getName());
-    }
-
-    /**
-     * Get if debugging enabled
-     *
-     * @return true if enabled
-     */
-    public boolean isDebug() {
-        return ASkyBlock.object.cfg.getBoolean("debug");
-    }
 
     @Override
     public void onLoad() {
@@ -200,44 +119,18 @@ public class ASkyBlock extends PluginBase {
         initDatabase();
         // Wohooo! Fast! Unique and Colorful!
         generateLevel(); // Regenerate The world
-        getServer().getLogger().info(getPrefix() + "§7Enabling ASkyBlock - Founders Edition (API 22)");
+        getServer().getLogger().info(getPrefix() + "§7Enabling ASkyBlock - Founders Edition (API 24)");
         if (cfg.getBoolean("fastLoad")) {
             TaskManager.runTaskLater(this::start, 100);
         } else {
             start();
         }
-        test();
-        getServer().getLogger().info(getPrefix() + "§cBETA Build detected, use with precautions.");
+        // Beta build, we test things here, be safe
+        if (isBetaBuild()) {
+            test();
+            getServer().getLogger().info(getPrefix() + "§cBETA Build detected, use with precautions.");
+        }
         getServer().getLogger().info(getPrefix() + "§aASkyBlock has successfully enabled!");
-    }
-
-    private void test() {
-//        ArrayList<IslandData> pd = this.getDatabase().getAllIsland();
-//        for (IslandData pd3 : pd) {
-//            Utils.sendDebug(pd3.getIgsSettings().getSettings());
-//        }
-    }
-
-    public ArrayList<String> getLevels() {
-        ArrayList<String> level = new ArrayList<>();
-        for (WorldSettings settings : this.level) {
-            level.add(settings.getLevel().getName());
-        }
-        return level;
-    }
-
-    private void start() {
-        initIslands();
-        registerObject();
-    }
-
-    public WorldSettings getSettings(String level) {
-        for (WorldSettings settings : this.level) {
-            if (settings.getLevel().getName().equalsIgnoreCase(level)) {
-                return settings;
-            }
-        }
-        return null;
     }
 
     @Override
@@ -245,7 +138,7 @@ public class ASkyBlock extends PluginBase {
         Utils.send("&7Saving islands framework");
         saveLevel(true);
         this.db.close();
-        msgs.saveMessages();
+        messageModule.saveMessages();
         Utils.send("&cASkyBlock has successfully disabled. Goodbye");
     }
 
@@ -254,7 +147,16 @@ public class ASkyBlock extends PluginBase {
         return cfg;
     }
 
+    private void test() {
+    }
+
+    private void start() {
+        initIslands();
+        registerObject();
+    }
+
     private void initDatabase() {
+        // TODO: Varieties of database types
         if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {
             try {
                 db = new SqliteConn(this, new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")));
@@ -279,7 +181,7 @@ public class ASkyBlock extends PluginBase {
      */
     private void initIslands() {
         getServer().getCommandMap().register("ASkyBlock", new Commands(this));
-        getServer().getCommandMap().register("ASkyBlock", this.cmds = new ChallangesCMD(this));
+        getServer().getCommandMap().register("ASkyBlock", this.challengesCommand = new ChallangesCMD(this));
         getServer().getCommandMap().register("ASkyBlock", new AdminCMD(this));
         PluginManager pm = getServer().getPluginManager();
         chatHandler = new ChatHandler(this);
@@ -287,59 +189,24 @@ public class ASkyBlock extends PluginBase {
         invitationHandler = new InvitationHandler(this);
         panel = new Panel(this);
         // This should be loaded first
-        msgs = new Messages(this);
-        msgs.loadMessages();
+        messageModule = new Messages(this);
+        messageModule.loadMessages();
         getServer().getPluginManager().registerEvents(chatHandler, this);
-        //pm.registerEvents(new IslandGuard(this), this);
         pm.registerEvents(new IslandListener(this), this);
         ServerScheduler pd = getServer().getScheduler();
         pd.scheduleRepeatingTask(new PluginTask(this), 20); // tick every 1 sec
     }
 
-    /**
-     * Reload every level that had generated
-     */
-    public void saveLevel(boolean showEnd) {
-        if (showEnd) {
-            Utils.send("&7Saving worlds...");
-        }
-        ArrayList<String> level = new ArrayList<>();
-        for (WorldSettings settings : this.level) {
-            level.add(settings.getLevel().getName());
-        }
-        boolean result = this.db.saveWorlds(level);
-        if (!result) {
-            Utils.send("&cUnable to save the world.");
-        }
-    }
-
     private void registerObject() {
         Utils.send(TextFormat.GRAY + "Loading the Island Framework");
-        loadV2Schematic();
+        schematics = new SchematicHandler(this, new File(getDataFolder(), "schematics"));
         if (Settings.checkUpdate) {
             Updater.getUpdate();
         }
         manager = new IslandManager(this);
         grid = new GridManager(this);
         managers = new TeamManager(this);
-        inventory = new InventorySave(this);
-    }
-
-    public String getPrefix() {
-        return cfg.getString("Prefix").replace("&", "§");
-    }
-
-    public ASlocales getLocale(Player p) {
-        if (p == null) {
-            return getAvailableLocales().get(Settings.defaultLanguage);
-        }
-        PlayerData pd = this.getPlayerInfo(p);
-        if (!this.getAvailableLocales().containsKey(pd.pubLocale)) {
-            Utils.send("Unknown locale: " + pd.pubLocale);
-            Utils.send("Using default: en-US");
-            return getAvailableLocales().get(Settings.defaultLanguage);
-        }
-        return getAvailableLocales().get(pd.pubLocale);
+        inventory = new InventorySave();
     }
 
     private void initConfig() {
@@ -369,17 +236,13 @@ public class ASkyBlock extends PluginBase {
     }
 
     private void recheck() {
-        boolean update = false;
         File file = new File(ASkyBlock.get().getDataFolder(), "config.yml");
-        Config cfgg = new Config(file, Config.YAML);
-        if (!cfgg.getString("version").equalsIgnoreCase(ConfigManager.CONFIG_VERSION)) {
-            Utils.send("&cOutdated config! Creating new one");
-            Utils.send("&aYour old config will be renamed into config.old!");
-            update = true;
-        }
-        if (update) {
+        Config config = new Config(file, Config.YAML);
+        if (!config.getString("version").equalsIgnoreCase(ConfigManager.CONFIG_VERSION)) {
             file.renameTo(new File(ASkyBlock.get().getDataFolder(), "config.old"));
             ASkyBlock.get().saveResource("config.yml");
+            Utils.send("&cOutdated config! Creating new one");
+            Utils.send("&aYour old config will be renamed into config.old!");
         }
         cfg.reload(); // Reload the config
     }
@@ -446,6 +309,7 @@ public class ASkyBlock extends PluginBase {
                 cfg.set(levelName + ".protectionRange", plotRange);
                 cfg.set(levelName + ".stopTime", false);
                 cfg.set(levelName + ".seaLevel", seaLevel);
+                cfg.set(levelName + ".USE_CONFIG_CHEST", true);
                 cfg.save();
             }
 
@@ -455,26 +319,345 @@ public class ASkyBlock extends PluginBase {
         this.level = settings;
     }
 
-    private void loadV2Schematic() {
-        File schematicFolder = new File(getDataFolder(), "schematics");
-
-        // Works well
-        schematics = new SchematicHandler(this, schematicFolder);
+    /**
+     * Get if debugging enabled,
+     * maybe not worth it
+     *
+     * @return true if enabled
+     */
+    public boolean isDebug() {
+        return cfg.getBoolean("debug");
     }
 
+    /**
+     * Get the list of levels that used
+     * for SkyBlock worlds
+     *
+     * @return A list of string
+     */
+    public ArrayList<String> getLevels() {
+        ArrayList<String> level = new ArrayList<>();
+        for (WorldSettings settings : this.level) {
+            level.add(settings.getLevel().getName());
+        }
+        return level;
+    }
+
+    /**
+     * Get the level settings for the
+     * SkyBlock world. Null if the world
+     * isn't a skyblock world or the world
+     * doesn't have a settings
+     *
+     * @param level String
+     * @return WorldSettings
+     */
+    public WorldSettings getSettings(String level) {
+        for (WorldSettings settings : this.level) {
+            if (settings.getLevel().getName().equalsIgnoreCase(level)) {
+                return settings;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return of the plugin prefix
+     * that made for consoles and chat messages
+     *
+     * @return String
+     */
+    public String getPrefix() {
+        return cfg.getString("Prefix").replace("&", "§");
+    }
+
+    /**
+     * Get the preferred locale for a player
+     * If the player is null, default will be used
+     *
+     * @param p Player
+     * @return ASlocales class
+     */
+    public ASlocales getLocale(Player p) {
+        if (p == null) {
+            return getAvailableLocales().get(Settings.defaultLanguage);
+        }
+        PlayerData pd = this.getPlayerInfo(p);
+        if (!this.getAvailableLocales().containsKey(pd.pubLocale)) {
+            Utils.send("&cUnknown locale: &e" + pd.pubLocale);
+            Utils.send("&cUsing default: &een-US");
+            return getAvailableLocales().get(Settings.defaultLanguage);
+        }
+        return getAvailableLocales().get(pd.pubLocale);
+    }
+
+    /**
+     * Reload every level that had generated
+     *
+     * @param showEnd Check if there should be a stop message
+     */
+    public void saveLevel(boolean showEnd) {
+        if (showEnd) {
+            Utils.send("&7Saving worlds...");
+        }
+        ArrayList<String> level = new ArrayList<>();
+        for (WorldSettings settings : this.level) {
+            level.add(settings.getLevel().getName());
+        }
+        boolean result = this.db.saveWorlds(level);
+        if (!result) {
+            Utils.send("&cUnable to save the world.");
+        }
+    }
+
+    /**
+     * Get the status of this plugin
+     * Check if its a beta build or not
+     *
+     * @return bool
+     */
+    public boolean isBetaBuild() {
+        return betaBuild;
+    }
+
+    /**
+     * Check if the user is qualified to
+     * Be an insider program, this only be used
+     * For people who agree with the agreement
+     * To use BETA build of ASkyBlock and get credit
+     *
+     * @return bool
+     */
+    public boolean isInsiderProgram() {
+        return betaInsider;
+    }
+
+    /**
+     * Return the messages module
+     *
+     * @return Messages class
+     */
     public Messages getMessages() {
-        return msgs;
+        return messageModule;
     }
 
+    /**
+     * Get all of the available locales
+     * for the plugin
+     *
+     * @return HashMap that contains String and ASlocales
+     */
     public HashMap<String, ASlocales> getAvailableLocales() {
         return availableLocales;
     }
 
+    /**
+     * Add a locale for this server
+     * You could use this if you wanted to make it
+     * private. Which its useless
+     *
+     * @param availableLocales HashMap that contains String and ASlocales
+     */
     public void setAvailableLocales(HashMap<String, ASlocales> availableLocales) {
         this.availableLocales = availableLocales;
     }
 
+    /**
+     * Returns the version 2 schematics handler
+     *
+     * @return SchematicHandler
+     */
     public SchematicHandler getSchematics() {
         return schematics;
+    }
+
+    /**
+     * Return of ASkyBlock plugin instance
+     *
+     * @return ASkyBlock
+     */
+    public static ASkyBlock get() {
+        return object;
+    }
+
+    /**
+     * Get the database handler for this plugin
+     *
+     * @return Database that associated with them
+     */
+    public SqliteConn getDatabase() {
+        return db;
+    }
+
+    /**
+     * Get the chat handler for coop islands
+     *
+     * @return ChatHandler class
+     */
+    public ChatHandler getChatHandlers() {
+        return chatHandler;
+    }
+
+    /**
+     * Get the invitation handler for coop islands
+     * This handles the timing for each users
+     *
+     * @return InvitationHandler class
+     */
+    public InvitationHandler getInvitationHandler() {
+        return invitationHandler;
+    }
+
+    /**
+     * Get the island manager that controls all
+     * aspect of the island
+     *
+     * @return IslandManager class
+     */
+    public IslandManager getIsland() {
+        return manager;
+    }
+
+    /**
+     * Get the grid manager, this is used to
+     * check if the island is orderly in grid or not.
+     *
+     * @return GridManager class
+     */
+    public GridManager getGrid() {
+        return grid;
+    }
+
+    /**
+     * Get the inventory save class which handles
+     * all the transaction when player teleports to
+     * their islands
+     *
+     * @return InventorySave
+     */
+    public InventorySave getInventory() {
+        return inventory;
+    }
+
+    /**
+     * Coop class for team management
+     * I still writing script for this class and
+     * it not mean to used in public server so do
+     * not use it.
+     *
+     * @return TeamManager class
+     */
+    public TeamManager getTManager() {
+        return managers;
+    }
+
+    /**
+     * Get the panel class, this class
+     * control the FormPanel for the plugin
+     * and manage island by easy interface
+     *
+     * @return Panel
+     */
+    public Panel getPanel() {
+        return panel;
+    }
+
+    /**
+     * Get the island info by the player class
+     * You can use this or use string instead.
+     *
+     * @param player The player class
+     * @return IslandData class
+     */
+    public IslandData getIslandInfo(Player player) {
+        return getIslandInfo(player.getName());
+    }
+
+    /**
+     * Get the island info by the position
+     * that available
+     *
+     * @param pos the position to be checked
+     * @return Island data of the location
+     */
+    public IslandData getIslandInfo(Position pos) {
+        return getDatabase().getIslandLocation(pos.getLevel().getName(), pos.getFloorX(), pos.getFloorZ());
+    }
+
+    /**
+     * Get the data for the player by
+     * string
+     *
+     * @param player The player name
+     * @return IslandData if the data is available otherwise null
+     */
+    public IslandData getIslandInfo(String player) {
+        return getDatabase().getIsland(player, 1);
+    }
+
+    /**
+     * Get the challenges module for this
+     * plugin. This class is still confirming its
+     * credibility and being checked for any bugs
+     * and error
+     *
+     * @return Challenges class
+     */
+    public ChallangesCMD getChallenges() {
+        return challengesCommand;
+    }
+
+    /**
+     * Check if the player is inside the skyblock
+     * world.
+     *
+     * @param p The player class, not string
+     * @return true if the player is inside the world
+     */
+    public boolean inIslandWorld(Player p) {
+        return getIsland().checkIslandAt(p.getLevel());
+    }
+
+    /**
+     * Get the data for the player
+     * Each data is being stored centrally
+     *
+     * @param player The player class
+     * @return PlayerData class
+     */
+    public PlayerData getPlayerInfo(Player player) {
+        return getDatabase().getPlayerData(player.getName());
+    }
+
+    /**
+     * The teleport logic for the teleportation between worlds
+     * This ensure that player isn't fall into the doom.
+     *
+     * @return TeleportLogic class
+     */
+    public TeleportLogic getTeleportLogic() {
+        return teleportLogic;
+    }
+
+    /**
+     * Get the island level for the player
+     * Coop function that still barely not working
+     *
+     * @param player The player of their island
+     * @return The value of the island level
+     */
+    public Integer getIslandLevel(Player player) {
+        PlayerData pd = getPlayerInfo(player);
+        return pd == null ? 0 : pd.getIslandLevel();
+    }
+
+    /**
+     * Get the default world that being used for this
+     * plugin.
+     *
+     * @return String
+     */
+    public String getDefaultWorld() {
+        return "SkyBlock";
     }
 }

@@ -44,6 +44,7 @@ schematicList:
       BIOME: "PLAINS"
       # Default priority
       DEFAULT_PRIORITY: true
+      USE_CONFIG_CHEST: true
     # This is the order of your schematic (2)
     featured:
       # This is an example of the island name
@@ -62,6 +63,7 @@ schematicList:
       BIOME: "FOREST"
       # Default priority
       DEFAULT_PRIORITY: true
+      USE_CONFIG_CHEST: true
     # Double island (3)
     double:
       FILE_NAME: "double.schematic"
@@ -79,6 +81,7 @@ schematicList:
       # Default priority
       # You cant double the default
       DEFAULT_PRIORITY: false
+      USE_CONFIG_CHEST: true
     # Harder schematic (4)
     hareder:
       FILE_NAME: "harder.schematic"
@@ -96,4 +99,5 @@ schematicList:
       # Default priority
       # You cant double the default
       DEFAULT_PRIORITY: false
+      USE_CONFIG_CHEST: true
     # What is your schematic ?

@@ -45,7 +45,6 @@ public class PlayerData implements Cloneable {
     public String name;
     public String leader;
 
-
     public PlayerData(String playerName, int homes, int resetleft) {
         this.playerName = playerName;
         this.homes = homes;

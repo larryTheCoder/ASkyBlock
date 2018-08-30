@@ -6,7 +6,7 @@
     <name>ASkyBlock</name>
     <groupId>larryTheCoder</groupId>
     <artifactId>SkyBlock</artifactId>
-    <version>0.4.6-STABLE</version>
+    <version>0.4.7-BETA</version>
     <description>Minecraft BE SkyBlock minigame plugin for Nukkit</description>
     <inceptionYear>2016</inceptionYear>
 
@@ -18,7 +18,7 @@
         </license>
     </licenses>
 
-    <!-- Fist time ever using public repo -->
+    <!-- First time ever using public repo -->
     <repositories>
         <repository>
             <id>nukkitX</id>

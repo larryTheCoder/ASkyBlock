@@ -18,6 +18,7 @@ package com.larryTheCoder.listener;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.block.*;
 import cn.nukkit.entity.item.EntityPrimedTNT;
 import cn.nukkit.entity.item.EntityVehicle;
 import cn.nukkit.event.EventHandler;
@@ -28,9 +29,7 @@ import cn.nukkit.event.block.BlockPlaceEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityExplodeEvent;
 import cn.nukkit.event.inventory.CraftItemEvent;
-import cn.nukkit.event.inventory.InventoryOpenEvent;
 import cn.nukkit.event.player.*;
-import cn.nukkit.inventory.InventoryType;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.MainLogger;
@@ -39,14 +38,13 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.IslandEnterEvent;
 import com.larryTheCoder.events.IslandExitEvent;
 import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.storage.IslandSettings;
+import com.larryTheCoder.storage.SettingsFlag;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
 import java.util.List;
 
 import static cn.nukkit.block.BlockID.ENDER_CHEST;
-import static cn.nukkit.inventory.InventoryType.*;
 
 /**
  * Rewrite class for IslandGuard messy code
@@ -79,13 +77,14 @@ public class IslandListener implements Listener {
      * @param flag     Kind of flag to be checked
      * @return true if allowed
      */
-    private boolean actionAllowed(Location location, IslandSettings.SettingsFlag flag) {
+    private boolean actionAllowed(Location location, SettingsFlag flag) {
         IslandData island = plugin.getGrid().getProtectedIslandAt(location);
         if (island != null && island.getIgsSettings().getIgsFlag(flag)) {
+            deb.debug("DEBUG: Action is allowed by settings");
             return true;
         }
-        // Sometimes this can be null (So default is false)
-        return Settings.defaultWorldSettings.get(flag) == null ? false : Settings.defaultWorldSettings.get(flag);
+        deb.debug("DEBUG: Action is defined by settings");
+        return Settings.defaultWorldSettings.get(flag);
     }
 
     /**
@@ -95,23 +94,33 @@ public class IslandListener implements Listener {
      * @param location The location to be checked
      * @return true if allowed
      */
-    private boolean actionAllowed(Player player, Location location, IslandSettings.SettingsFlag flag) {
+    private boolean actionAllowed(Player player, Location location, SettingsFlag flag) {
         if (player == null) {
+            deb.debug("DEBUG: Checking by default");
             return actionAllowed(location, flag);
         }
         // This permission bypasses protection
         if (player.isOp() || player.hasPermission("is.mod.bypassprotect")) {
+            deb.debug("DEBUG: Player has permission to bypass");
             return true;
         }
         IslandData island = plugin.getGrid().getProtectedIslandAt(location);
+        if (island != null && (island.getIgsSettings().getIgsFlag(flag) || island.getMembers().contains(player.getName()))) {
+            deb.debug("DEBUG: Action is allowed, flag=" + island.getIgsSettings().getIgsFlag(flag) + " member=" + island.getMembers().contains(player.getName()));
+            return true;
+        }
+
         if (island == null || island.getOwner() == null) {
+            deb.debug("DEBUG: Action not allowed: actionAllowed() check");
             return false;
         }
 
         if (island.getOwner().equalsIgnoreCase(player.getName())) {
+            deb.debug("DEBUG: Action is allowed: actionAllowed() check");
             return true;
         }
 
+        deb.debug("DEBUG: Action is defined by settings");
         // Fixed
         return Settings.defaultWorldSettings.get(flag);
     }
@@ -120,7 +129,7 @@ public class IslandListener implements Listener {
         return plugin.getPrefix();
     }
 
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOW)
     public void onPlayerMove(PlayerMoveEvent e) {
         Player p = e.getPlayer();
         if (!p.isAlive()) {
@@ -200,27 +209,135 @@ public class IslandListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onPlayerInteract(PlayerInteractEvent e) {
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBucketUseEvent(PlayerBucketFillEvent e) {
+        deb.debug("DEBUG: " + e.getEventName());
         Player p = e.getPlayer();
         if (notInWorld(p)) {
+            deb.debug("Event is not in world");
+            return;
+        }
+        if (actionAllowed(p, e.getBlockClicked().getLocation(), SettingsFlag.BUCKET)) {
+            deb.debug("Event, use bucket is allowed");
+            if (e.getBlockClicked() instanceof BlockLava && actionAllowed(p, e.getBlockClicked().getLocation(), SettingsFlag.COLLECT_LAVA)) {
+                deb.debug("Event is using Lava and its allowed");
+                return;
+            } else if (actionAllowed(p, e.getBlockClicked().getLocation(), SettingsFlag.COLLECT_WATER)) {
+                deb.debug("Event is using Water and its allowed");
+                return;
+            }
+        }
+        deb.debug("Event is not allowed");
+        e.setCancelled();
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBucketEmpty(PlayerBucketEmptyEvent e) {
+        deb.debug("DEBUG: " + e.getEventName());
+        Player p = e.getPlayer();
+        if (notInWorld(p)) {
+            deb.debug("Event is not in world");
+            return;
+        }
+        if (actionAllowed(p, e.getBlockClicked().getLocation(), SettingsFlag.BUCKET)) {
+            deb.debug("Event, use bucket is allowed");
+            if (e.getBlockClicked() instanceof BlockLava && actionAllowed(p, e.getBlockClicked().getLocation(), SettingsFlag.COLLECT_LAVA)) {
+                deb.debug("Event is using Lava and its allowed");
+                return;
+            } else if (actionAllowed(p, e.getBlockClicked().getLocation(), SettingsFlag.COLLECT_WATER)) {
+                deb.debug("Event is using Water and its allowed");
+                return;
+            }
+        }
+        deb.debug("Event is not allowed");
+        e.setCancelled();
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerDropItem(PlayerDropItemEvent e) {
+        deb.debug("DEBUG: " + e.getEventName());
+        deb.debug("DEBUG: Item is " + e.getItem().toString());
+        Player p = e.getPlayer();
+        if (notInWorld(p)) {
+            deb.debug("Event is not in world");
             return;
         }
         if (p.isOp() || p.hasPermission("is.mod.bypassprotect")) {
             return;
         }
-        if (plugin.getIsland().locationIsOnIsland(p, e.getBlock())) {
+        // Too bad that the item is not a vector3
+        if (plugin.getIsland().locationIsOnIsland(p, e.getPlayer())) {
+            deb.debug("Action is allowed: Player on island");
+            // You can do anything on your island
+            return;
+        }
+        if (actionAllowed(e.getPlayer().getLocation(), SettingsFlag.VISITOR_ITEM_DROP)) {
+            deb.debug("Action is allowed: Drop item is allowed");
+            return;
+        }
+
+        // Do not send any message, it may spam
+        e.setCancelled();
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerInteract(PlayerInteractEvent e) {
+        deb.debug("DEBUG: " + e.getEventName());
+        deb.debug("DEBUG: Block is " + e.getBlock().getName());
+        Player p = e.getPlayer();
+        if (notInWorld(p)) {
+            deb.debug("Event is not in world");
+            return;
+        }
+        if (p.isOp() || p.hasPermission("is.mod.bypassprotect")) {
+            return;
+        }
+        if (plugin.getIsland().locationIsOnIsland(p, e.getBlock()) || plugin.getIsland().locationIsOnIsland(p, p.getLocation())) {
+            deb.debug("Action is allowed: Player on island");
             // You can do anything on your island
             return;
         }
         // Player is not clicking a block, they are clicking a material so this
         // is driven by where the player is
-        if (e.getAction() != PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK && (e.getBlock() != null && plugin.getGrid().playerIsOnIsland(p))) {
+        if (e.getAction() != PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK && e.getBlock() == null) {
+            deb.debug("Action is allowed: Use clicking air");
             return;
         }
-        // No need stupid checks. Just cancel them
-        p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
-        e.setCancelled();
+
+        switch (e.getAction()) {
+            case PHYSICAL:
+                // Only 2 of them check either its a Pressure Plate or Farmlands
+                if (!Utils.actionPhysical(p, e.getBlock())) {
+                    // No need stupid checks. Just cancel them
+                    p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
+                    e.setCancelled();
+                    deb.debug("Action is blocked");
+                    return;
+                }
+                break;
+            case LEFT_CLICK_BLOCK:
+                // Player is interacting with an item. Check if it allowed
+                if (!Utils.isItemAllowed(p, e.getItem())) {
+                    // No need stupid checks. Just cancel them
+                    p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
+                    e.setCancelled();
+                    deb.debug("Action is blocked");
+                    return;
+                }
+                break;
+            case RIGHT_CLICK_BLOCK:
+                // Player is clicking on something. Check if it allowed
+                if (!Utils.isInventoryAllowed(p, e.getBlock())) {
+                    // No need stupid checks. Just cancel them
+                    p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
+                    e.setCancelled();
+                    deb.debug("Action is blocked");
+                    return;
+                }
+                break;
+        }
+
+        deb.debug("Action is allowed: Settings defined");
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -230,13 +347,14 @@ public class IslandListener implements Listener {
         }
         if (e.getEntity() instanceof EntityPrimedTNT && ((EntityPrimedTNT) e.getEntity()).getSource() instanceof Player) {
             Player p = (Player) ((EntityPrimedTNT) e.getEntity()).getSource();
-            if (actionAllowed(p, e.getEntity().getLocation(), IslandSettings.SettingsFlag.PLACE_BLOCKS)) {
+            if (actionAllowed(p, e.getEntity().getLocation(), SettingsFlag.BREAK_BLOCKS)) {
                 return;
             }
             if (p.isOp() && p.hasPermission("is.mod.bypassprotect")) {
                 return;
             }
         }
+
 
         // As what I said, no need stupid checks
         e.getBlockList().clear();
@@ -249,40 +367,53 @@ public class IslandListener implements Listener {
      *
      * @param e Event
      */
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOW)
     public void onEntityDamage(EntityDamageByEntityEvent e) {
-        // TODO: Forms with PVP Protection flags
+        // The damager is in the world but the entity who got attacked it is not? Oh no
+        if (notInWorld(e.getDamager().getLocation()) || notInWorld(e.getEntity())) {
+            return;
+        }
+        // TODO: A subject
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockPlace(BlockPlaceEvent e) {
         deb.debug("DEBUG: " + e.getEventName());
         deb.debug("DEBUG: Block is " + e.getBlock().toString());
         // Check if the player in the world
         if (notInWorld(e.getPlayer())) {
+            deb.debug("Event is not in world");
             return;
         }
-        if (actionAllowed(e.getPlayer(), e.getBlock().getLocation(), IslandSettings.SettingsFlag.PLACE_BLOCKS)) {
+
+        if (actionAllowed(e.getPlayer(), e.getBlock().getLocation(), SettingsFlag.PLACE_BLOCKS)) {
+            deb.debug("Action is allowed");
             return;
         }
 
         // Cancel them, obviously
         e.getPlayer().sendMessage(plugin.getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
-        e.setCancelled(true);
+        e.setCancelled();
+        deb.debug("Action is not allowed and cancelled");
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockBreak(final BlockBreakEvent e) {
+        deb.debug("DEBUG: " + e.getEventName());
+        deb.debug("DEBUG: Block is " + e.getBlock().toString());
         if (notInWorld(e.getPlayer())) {
+            deb.debug("Event is not in world");
             return;
         }
-        if (actionAllowed(e.getPlayer(), e.getBlock().getLocation(), IslandSettings.SettingsFlag.BREAK_BLOCKS)) {
+        if (actionAllowed(e.getPlayer(), e.getBlock().getLocation(), SettingsFlag.BREAK_BLOCKS)) {
+            deb.debug("Action is allowed");
             return;
         }
 
         // Everyone else - not allowed
         e.getPlayer().sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
-        e.setCancelled(true);
+        e.setCancelled();
+        deb.debug("Action is not allowed and cancelled");
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -332,7 +463,7 @@ public class IslandListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerCommand(PlayerCommandPreprocessEvent ex) {
         // todo: Block player messages.
     }

@@ -26,8 +26,7 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.economy.EconomyAPI;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.locales.FileLister;
-import com.larryTheCoder.storage.IslandSettings.SettingsFlag;
-import com.larryTheCoder.task.TaskManager;
+import com.larryTheCoder.storage.SettingsFlag;
 
 import java.io.File;
 import java.io.IOException;
@@ -134,7 +133,7 @@ public class ConfigManager {
                 Settings.defaultIslandSettings.put(flag, value);
 
             } catch (Exception e) {
-                Utils.send("Unknown setting in config.yml:protection.world " + setting.toUpperCase() + " skipping...");
+                Utils.send("&cUnknown setting in config.yml:protection.world " + setting.toUpperCase() + " skipping...");
             }
         }
         // Get the default language
@@ -165,13 +164,9 @@ public class ConfigManager {
     private static void scheduleCheck(boolean flag, Config cfg) {
         if (flag) {
             Plugin plugin = ASkyBlock.get().getServer().getPluginManager().getPlugin("EconomyAPI");
-            if (plugin != null && !plugin.isEnabled()) {
-                Utils.send("&eScheduling Economy instance due to 'plugin not enabled'");
-                // schedule another delayed task
-                TaskManager.runTaskLater(() -> scheduleCheck(true, cfg), 60); // 3 sec
-                return;
-            } else if (plugin != null && plugin.isEnabled()) {
-                Utils.send("&eSuccessfully created an instance with Economy plugin");
+            // Note to self: Do not attempt to create task when the server is on load
+            if (plugin != null) {
+                Utils.send("&aHooked with EconomyAPI plugin");
                 ASkyBlock.econ = new EconomyAPI();
                 Settings.useEconomy = true;
             } else {

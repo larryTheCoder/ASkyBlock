@@ -7,7 +7,7 @@ Welcome to our first Nukkit Epic-Games, SkyBlock. Perfect for a server productio
 this plugin will be free lag and bug-free. Included with special futures from other contributors from Bukkit. This
 plugin also come with a multi-language that we are still working on it. A lot of commands and feels like the real
 Bukkit plugin.
-
+``
 Build JAR file
 -------------
 - `git submodule update --init`

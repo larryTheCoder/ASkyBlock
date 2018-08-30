@@ -27,6 +27,7 @@ import com.larryTheCoder.command.generic.ExpelSubCommand;
 import com.larryTheCoder.command.generic.LeaveSubCommand;
 import com.larryTheCoder.command.generic.LocaleSubCommand;
 import com.larryTheCoder.command.island.*;
+import com.larryTheCoder.command.management.ProtectionSubCommand;
 import com.larryTheCoder.command.management.SettingsSubCommand;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.utils.Utils;
@@ -66,6 +67,7 @@ class Commands extends PluginCommand<ASkyBlock> {
         this.loadSubCommand(new HomeSubCommand(getPlugin()));
         this.loadSubCommand(new InfoSubCommand(getPlugin()));
         this.loadSubCommand(new LeaveSubCommand(getPlugin()));
+        this.loadSubCommand(new ProtectionSubCommand(getPlugin()));
         this.loadSubCommand(new SetHomeSubCommand(getPlugin()));
         this.loadSubCommand(new SettingsSubCommand(getPlugin()));
         this.loadSubCommand(new TeleportSubCommand(getPlugin()));
@@ -128,14 +130,18 @@ class Commands extends PluginCommand<ASkyBlock> {
                 return true;
             }
             switch (args[0]) {
-//                case "pos":
-//                    sender.sendMessage(sender.toString());
-//                    break;
+                case "pos":
+                    sender.sendMessage(sender.toString());
+                    break;
                 case "version":
                 case "ver":
                     sender.sendMessage("§aASkyBlock Module §7f5c4156 Build 11");
                     sender.sendMessage("§aVendor Type: §7" + System.getProperty("os.name"));
                     sender.sendMessage("§aJava Module Version: §7" + System.getProperty("java.version"));
+                    if (ASkyBlock.get().isBetaBuild() && ASkyBlock.get().isInsiderProgram()) {
+                        sender.sendMessage("§dASkyBlock BETA insider project member.");
+                        sender.sendMessage("§dInterested about BETA insider? DM me in discord: MrPotato101#0060");
+                    }
                     break;
                 case "about":
                     sender.sendMessage("§7A Fresh Nukkit SkyBlock module for MCBE " + ProtocolInfo.MINECRAFT_VERSION);

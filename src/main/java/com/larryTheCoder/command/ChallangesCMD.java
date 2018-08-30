@@ -36,7 +36,8 @@ import java.io.File;
 import java.util.*;
 
 /**
- * @author Adam Matthew
+ * TODO REWRITE HIS CODE
+ * @author tastybento
  */
 public final class ChallangesCMD extends Command {
 
