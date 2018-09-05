@@ -39,6 +39,7 @@ import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
 import com.larryTheCoder.listener.ChatHandler;
 import com.larryTheCoder.listener.IslandListener;
+import com.larryTheCoder.listener.LavaCheck;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.panels.Panel;
@@ -56,10 +57,12 @@ import com.larryTheCoder.utils.Utils;
 import com.larryTheCoder.utils.updater.Updater;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Author: Adam Matthew
@@ -72,8 +75,9 @@ public class ASkyBlock extends PluginBase {
 
     // This function is to keep track beta build
     // So I could barely see which is the thingy is used
-    private boolean betaBuild = true;
-    private boolean betaInsider = false;
+    private boolean betaBuild;
+    private boolean betaInsider;
+    private String buildNumber;
 
     public static Economy econ;
     private static ASkyBlock object;
@@ -139,6 +143,7 @@ public class ASkyBlock extends PluginBase {
         saveLevel(true);
         this.db.close();
         messageModule.saveMessages();
+        LavaCheck.clearStats();
         Utils.send("&cASkyBlock has successfully disabled. Goodbye");
     }
 
@@ -191,8 +196,10 @@ public class ASkyBlock extends PluginBase {
         // This should be loaded first
         messageModule = new Messages(this);
         messageModule.loadMessages();
-        getServer().getPluginManager().registerEvents(chatHandler, this);
+
+        pm.registerEvents(chatHandler, this);
         pm.registerEvents(new IslandListener(this), this);
+        pm.registerEvents(new LavaCheck(this), this);
         ServerScheduler pd = getServer().getScheduler();
         pd.scheduleRepeatingTask(new PluginTask(this), 20); // tick every 1 sec
     }
@@ -210,6 +217,7 @@ public class ASkyBlock extends PluginBase {
     }
 
     private void initConfig() {
+        initGitCheckup();
         Utils.EnsureDirectory(Utils.DIRECTORY);
         Utils.EnsureDirectory(Utils.LOCALES_DIRECTORY);
         Utils.EnsureDirectory(Utils.SCHEMATIC_DIRECTORY);
@@ -234,6 +242,26 @@ public class ASkyBlock extends PluginBase {
         recheck();
         ConfigManager.load();
     }
+
+    private void initGitCheckup() {
+        Properties properties = new Properties();
+        try {
+            properties.load(getClass().getClassLoader().getResourceAsStream("git.properties"));
+        } catch (IOException e) {
+            getServer().getLogger().info("§cCannot load git loader for this ASkyBlock");
+            // Wtf? Maybe this user is trying to using unofficial build of ASkyBlock?
+            // Or they just wanna to create a PR to do a fix?
+            // Hmm we will never know
+            return;
+        }
+        // To developers: Don't remove this please.
+        betaInsider = properties.getProperty("git.build.host", "").equalsIgnoreCase("Adam-PC"); // My host
+        betaBuild = Boolean.getBoolean(properties.getProperty("git.dirty")); // Git host
+        buildNumber = properties.getProperty("git.commit.id.abbrev", "");
+        getServer().getLogger().info("§7ASkyBlock build-number: " + getBuildNumber());
+        getServer().getLogger().info("§7ASkyBlock commit-number: " + properties.getProperty("git.commit.id"));
+    }
+
 
     private void recheck() {
         File file = new File(ASkyBlock.get().getDataFolder(), "config.yml");
@@ -383,12 +411,12 @@ public class ASkyBlock extends PluginBase {
             return getAvailableLocales().get(Settings.defaultLanguage);
         }
         PlayerData pd = this.getPlayerInfo(p);
-        if (!this.getAvailableLocales().containsKey(pd.pubLocale)) {
-            Utils.send("&cUnknown locale: &e" + pd.pubLocale);
+        if (!this.getAvailableLocales().containsKey(pd.getLocale())) {
+            Utils.send("&cUnknown locale: &e" + pd.getLocale());
             Utils.send("&cUsing default: &een-US");
             return getAvailableLocales().get(Settings.defaultLanguage);
         }
-        return getAvailableLocales().get(pd.pubLocale);
+        return getAvailableLocales().get(pd.getLocale());
     }
 
     /**
@@ -430,6 +458,17 @@ public class ASkyBlock extends PluginBase {
      */
     public boolean isInsiderProgram() {
         return betaInsider;
+    }
+
+    /**
+     * Check the build number for this plugin.
+     * Every build number is different based on the
+     * git commit file
+     *
+     * @return string
+     */
+    public String getBuildNumber() {
+        return buildNumber;
     }
 
     /**

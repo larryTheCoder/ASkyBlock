@@ -58,7 +58,6 @@ public class Panel implements Listener {
     // Confirmation panels
     private final Map<Integer, PanelType> panelDataId = new HashMap<>();
     private final Map<Player, Integer> mapIslandId = new HashMap<>();
-    private final Map<Player, SettingsFlag> flagOrder = new HashMap<>();
 
     public Panel(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -294,6 +293,10 @@ public class Panel implements Listener {
             List<IslandData> maxPlotsOfPlayers = plugin.getDatabase().getIslands(player.getName(), level);
             settings = plugin.getSettings(level);
             if (settings.getMaximumIsland() < 0 || maxPlotsOfPlayers.size() <= settings.getMaximumIsland()) {
+                // Now players need this permission
+                if (!player.hasPermission("is.home." + maxPlotsOfPlayers.size())) {
+                    continue;
+                }
                 worldName.add(level);
             }
         }

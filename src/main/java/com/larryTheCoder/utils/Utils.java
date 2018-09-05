@@ -30,7 +30,10 @@ import com.larryTheCoder.storage.IslandSettings;
 import com.larryTheCoder.storage.SettingsFlag;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -44,6 +47,7 @@ public class Utils {
     public static final String LOCALES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "locale";
     public static final String DIRECTORY = ASkyBlock.get().getDataFolder() + File.separator;
     private static final ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap<>();
+    private static Long x = System.nanoTime();
 
     public static Config loadYamlFile(String file) {
         File yamlFile = new File(DIRECTORY + file);
@@ -205,27 +209,6 @@ public class Utils {
     }
 
     /**
-     * Warning: Using this way is not safe, use other method to get the
-     * hash right
-     *
-     * @param err HashMap or Map to be string
-     * @return String value
-     */
-    @Deprecated
-    public static String hashToString(Map err) {
-        StringBuilder buf = new StringBuilder();
-
-        HashMap<Object, Object> errs = (HashMap<Object, Object>) err;
-        errs.entrySet().forEach((fer) -> {
-            if (buf.length() > 0) {
-                buf.append(", ");
-            }
-            buf.append(fer.getKey()).append(":").append(String.valueOf(fer.getValue()));
-        });
-        return buf.toString();
-    }
-
-    /**
      * This method changes an array to be string
      * This function only applicable for string
      *
@@ -382,6 +365,23 @@ public class Utils {
     }
 
     /**
+     * @return random long number using XORShift random number generator
+     */
+    public static long randomLong() {
+        x ^= (x << 21);
+        x ^= (x >>> 35);
+        x ^= (x << 4);
+        return Math.abs(x);
+    }
+
+    /**
+     * @return random double using XORShift random number generator
+     */
+    public static double randomDouble() {
+        return (double) randomLong() / Long.MAX_VALUE;
+    }
+
+    /**
      * Check either interacting with an item is allowed
      * Sometimes this item could be air
      *
@@ -481,5 +481,34 @@ public class Utils {
 
     public static void sendDebug(String message) {
         Server.getInstance().getLogger().debug(message);
+    }
+
+    /**
+     * Converts a name like IRON_INGOT into Iron Ingot to improve readability
+     *
+     * @param ugly The string such as IRON_INGOT
+     * @return A nicer version, such as Iron Ingot
+     * <p>
+     * Credits to mikenon on GitHub!
+     * Don't forgot about tastybento.
+     */
+    public static String prettifyText(String ugly) {
+        if (!ugly.contains("_") && (!ugly.equals(ugly.toUpperCase())))
+            return ugly;
+        StringBuilder fin = new StringBuilder();
+        ugly = ugly.toLowerCase();
+        if (ugly.contains("_")) {
+            String[] split = ugly.split("_");
+            int i = 0;
+            for (String s : split) {
+                i += 1;
+                fin.append(Character.toUpperCase(s.charAt(0))).append(s.substring(1));
+                if (i < split.length)
+                    fin.append(" ");
+            }
+        } else {
+            fin.append(Character.toUpperCase(ugly.charAt(0))).append(ugly.substring(1));
+        }
+        return fin.toString();
     }
 }

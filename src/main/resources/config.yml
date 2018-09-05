@@ -8,7 +8,7 @@
 ---
 
 ## Do not change this
-version: "MicroGitHub"
+version: "Spotify Project"
 
 ## Game Prefix.
 Prefix: "&d[&eASkyBlock&d] &e"
@@ -238,6 +238,33 @@ general:
   # Broadcast 1st time challenge completion messages to all players.
   # Change to false if the spam becomes too much.
   broadcastmessages: true
+  # Toggle Magic Cobblestone Generator
+  # If set to true, a cobble generator will not just generate cobblestone, but
+  # also blocks you have specified.
+  # Default is false, because it highly changes the gameplay.
+  usemagiccobblegen: true
+  # This won't be considered if usemagiccobblegen is set to false.
+  # You can add, remove a block or modify its probability to be generated.
+  # You can also set different probabilities from specified minimum levels
+  magiccobblegenchances:
+    # These probabilities will apply by default
+    default:
+      COBBLESTONE: 75.0
+      STONE: 10.0
+      COAL_ORE: 7.5
+      IRON_ORE: 5.0
+      DIAMOND_ORE: 2.0
+      EMERALD_ORE: 0.5
+    # These probabilities will apply if island level is higher than 500.
+    # Must have "" Otherwise an error will come out
+    "500":
+      COBBLESTONE: 50.0
+      STONE: 20.0
+      COAL_ORE: 10.0
+      IRON_ORE: 10.0
+      REDSTONE_ORE: 5.0
+      DIAMOND_ORE: 4.0
+      EMERALD_ORE: 1.0
   
 ## Database
 # Recommended to NOT change this in mid game

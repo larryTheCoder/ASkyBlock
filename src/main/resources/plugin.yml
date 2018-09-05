@@ -19,6 +19,9 @@ permissions:
     is.create:
      default: true
      description: "Create an island"
+    is.home.1:
+     default: true
+     description: "Allow the player to create an island with home 1"
     # On /is command perm
     is.command:
      default: true
@@ -131,3 +134,16 @@ permissions:
     is.admin.clear:
      default: op
      description: "Flushes all he memory in the plugin"
+    is.admin.cobblestats:
+     default: op
+     description: "Get all the cobblestone generator stats"
+    is.admin.completechallenge:
+     default: op
+     description: "Complete the challenge for a player."
+    is.admin.resetchallenge:
+     default: op
+     description: "Reset the challenge for a player."
+    is.admin.challanges:
+     default: op
+     description: "Check information on the given player."
+

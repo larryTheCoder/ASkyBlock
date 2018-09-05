@@ -16,34 +16,34 @@
  */
 package com.larryTheCoder.player;
 
-import cn.nukkit.level.Location;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * @author Adam Matthew
  */
 public class PlayerData implements Cloneable {
 
-    public final int homes;
-    public int resetleft;
-    public final String playerName;
-    public int islandLevel;
-    public final HashMap<String, Boolean> challengeList = new HashMap<>();
-    public final HashMap<String, Integer> challengeListTimes = new HashMap<>();
-    public ArrayList<String> banList = new ArrayList<>();
-    public String pubLocale;
-    // Team Data
+    // Player critical information data.
+    private final int homes;
+    private final String playerName;
+    private final HashMap<String, Boolean> challengeList = new HashMap<>();
+    private final HashMap<String, Integer> challengeListTimes = new HashMap<>();
+    // Coop team for the player user.
+    //
     public String teamLeader;
+    String leader;
+    private int resetleft;
+    private int islandLevel;
+    private ArrayList<String> banList = new ArrayList<>();
+    private String pubLocale;
     public String teamIslandLocation;
     public boolean inTeam;
     public ArrayList<String> members = new ArrayList<>();
     public String name;
-    public String leader;
 
     public PlayerData(String playerName, int homes, int resetleft) {
         this.playerName = playerName;
@@ -52,7 +52,7 @@ public class PlayerData implements Cloneable {
         this.pubLocale = Settings.defaultLanguage;
     }
 
-    public PlayerData(String playerName, int homes, ArrayList<String> members, HashMap<String, Boolean> list, HashMap<String, Integer> times, int islandlvl, boolean inTeam, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList, String locale) {
+    public PlayerData(String playerName, int homes, ArrayList<String> members, String challenges, String challengesTime, int islandlvl, boolean inTeam, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList, String locale) {
         this.homes = homes;
         this.members = members;
         this.inTeam = inTeam;
@@ -63,24 +63,87 @@ public class PlayerData implements Cloneable {
         this.playerName = playerName;
         this.banList = banList;
         this.pubLocale = locale;
+        encodeChallengeList(challenges, challengesTime); // Safe
+    }
+
+    public int getHomeNumber() {
+        return homes;
     }
 
     /**
-     * Checks if a challenge exists in the player's challenge list
+     * Gets the player name of this data.
      *
-     * @param challenge
+     * @return A player name
+     */
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    /**
+     * Get the player reset
+     *
+     * @return the value of the player reset
+     */
+    public int getPlayerReset() {
+        return resetleft;
+    }
+
+    /**
+     * Gets the reset left for this user
+     *
+     * @param resetleft The value to be set
+     */
+    public void setPlayerReset(int resetleft) {
+        this.resetleft = resetleft;
+    }
+
+    /**
+     * Get the user's island level. Its basically
+     * An XP Stats for SkyBlock
+     *
+     * @return The island level value
+     */
+    public int getIslandLevel() {
+        return islandLevel;
+    }
+
+    /**
+     * Get the user banned list for the SkyBlock users
+     * This is more likely that this user hates that person.
+     *
+     * @return A list of string of player names
+     */
+    public ArrayList<String> getBanList() {
+        return banList;
+    }
+
+    public String getLocale() {
+        return pubLocale;
+    }
+
+    /**
+     * @param locale the locale to set
+     */
+    public void setLocale(String locale) {
+        this.pubLocale = locale;
+    }
+
+    /**
+     * Checks if a challenge not exists in the player's challenge list
+     *
+     * @param challenge The challenge to be checked
      * @return true if challenge is listed in the player's challenge list,
      * otherwise false
      */
-    public boolean challengeExists(final String challenge) {
-        return challengeList.containsKey(challenge.toLowerCase());
+    public boolean challengeNotExists(final String challenge) {
+        return !challengeList.containsKey(challenge.toLowerCase());
     }
 
     /**
      * Checks if a challenge is recorded as completed in the player's challenge
      * list or not
      *
-     * @param challenge
+     * @param challenge The challenge to be checked
      * @return true if the challenge is listed as complete, false if not
      */
     public boolean checkChallenge(final String challenge) {
@@ -95,7 +158,7 @@ public class PlayerData implements Cloneable {
     /**
      * Checks how many times a challenge has been done
      *
-     * @param challenge
+     * @param challenge The challenge to be checked
      * @return number of times
      */
     public int checkChallengeTimes(final String challenge) {
@@ -108,38 +171,18 @@ public class PlayerData implements Cloneable {
     }
 
     /**
-     * @return The island level int. Note this function does not calculate the
-     * island level
-     */
-    public int getIslandLevel() {
-        return islandLevel;
-    }
-
-    /**
-     * Records the island's level. Does not calculate it
+     * Map of all of the known challenges and how many times each
+     * one has been completed. This is a view of the challenges
+     * map that only allows read operations.
      *
-     * @param i
+     * @return The list of all the challenges times
      */
-    public void setIslandLevel(final int i) {
-        islandLevel = i;
-        ASkyBlock.get().getDatabase().savePlayerData(this);
+    public Map<String, Integer> getChallengeTimes() {
+        return Collections.unmodifiableMap(challengeListTimes);
     }
 
-    public HashMap<String, Boolean> getChallengeStatus() {
-        return challengeList;
-    }
-
-    /**
-     * Called when a player leaves a team Resets inTeam, teamLeader,
-     * islandLevel, teamIslandLocation and members array
-     */
-    public void setLeaveTeam() {
-        inTeam = false;
-        teamLeader = null;
-        islandLevel = 0;
-        teamIslandLocation = null;
-        members = new ArrayList<>();
-        ASkyBlock.get().getDatabase().savePlayerData(this);
+    public Map<String, Boolean> getChallengeStatus() {
+        return Collections.unmodifiableMap(challengeList);
     }
 
     /**
@@ -147,7 +190,7 @@ public class PlayerData implements Cloneable {
      * challenge is not listed in the player's challenge list already, then it
      * will be added.
      *
-     * @param challenge
+     * @param challenge The challenge name
      */
     public void completeChallenge(final String challenge) {
         // plugin.getLogger().info("DEBUG: Complete challenge");
@@ -159,26 +202,78 @@ public class PlayerData implements Cloneable {
         }
         times++;
         challengeListTimes.put(challenge.toLowerCase(), times);
-        Utils.send(Utils.hashToString(challengeListTimes));
+        // Utils.sendDebug(decodeChallengeList("clt"));
         // plugin.getLogger().info("DEBUG: complete " + challenge + ":" +
         // challengeListTimes.get(challenge.toLowerCase()).intValue() );
-        ASkyBlock.get().getDatabase().savePlayerData(this);
     }
 
     /**
-     * @param locale the locale to set
+     * Resets a specific challenge.
+     * @param challenge the challenge name
      */
-    public void setLocale(String locale) {
-        this.pubLocale = locale;
-        ASkyBlock.get().getDatabase().savePlayerData(this);
+    public void resetChallenge(final String challenge) {
+        //plugin.getLogger().info("DEBUG: reset challenge");
+        challengeList.put(challenge, false);
+        challengeListTimes.put(challenge, 0);
     }
 
-    public Location getTeamIslandLocation() {
-        if (teamIslandLocation == null || teamIslandLocation.isEmpty()) {
-            return null;
+    /**
+     * Decode a challenge list that needs
+     * to be saved into database got
+     * a raw of data of it.
+     *
+     * @param type The type of the data needs to be decoded
+     *             either its 'cl' or 'clt'
+     * @return decoded data of the type
+     */
+    public String decodeChallengeList(String type) {
+        StringBuilder buf = new StringBuilder();
+        // Need to decode one of these
+        if (type.equalsIgnoreCase("cl")) {
+            challengeList.forEach((key, value) -> {
+                if (buf.length() > 0) {
+                    buf.append(", ");
+                }
+                buf.append(key).append(":").append(value ? "1" : "0");
+            });
+        } else if (type.equalsIgnoreCase("clt")) {
+            challengeListTimes.forEach((key, value) -> {
+                if (buf.length() > 0) {
+                    buf.append(", ");
+                }
+                buf.append(key).append(":").append(value);
+            });
+        } else {
+            Utils.send("&cUnknown challenge list: " + type + ", returning null...");
+            buf.append("null");
         }
-        Location l = Utils.getLocationString(teamIslandLocation);
-        return l;
+        return buf.toString();
+    }
+
+    private void encodeChallengeList(String challenges, String challengesTime) {
+        try {
+            // Challenges encode for PlayerData.challengeList
+            String[] at = challenges.split(", ");
+            for (String string : at) {
+                String[] at2 = string.split(":");
+                ArrayList<String> list = new ArrayList<>(Arrays.asList(at2));
+
+                boolean value = list.get(1).equalsIgnoreCase("1");
+                challengeList.put(list.get(0), value);
+            }
+
+            // Challenges encode for PlayerData.challengeListTimes
+            at = challengesTime.split(", ");
+            for (String string : at) {
+                String[] at2 = string.split(":");
+                ArrayList<String> list = new ArrayList<>(Arrays.asList(at2));
+
+                challengeListTimes.put(list.get(0), Integer.getInteger(list.get(1)));
+            }
+        } catch (Exception ignored) {
+            Utils.sendDebug("Player data is outdated, resetting its data");
+            ASkyBlock.get().getDatabase().savePlayerData(this);
+        }
     }
 
 }

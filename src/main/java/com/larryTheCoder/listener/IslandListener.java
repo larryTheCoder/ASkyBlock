@@ -18,7 +18,7 @@ package com.larryTheCoder.listener;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
-import cn.nukkit.block.*;
+import cn.nukkit.block.BlockLava;
 import cn.nukkit.entity.item.EntityPrimedTNT;
 import cn.nukkit.entity.item.EntityVehicle;
 import cn.nukkit.event.EventHandler;
@@ -31,7 +31,6 @@ import cn.nukkit.event.entity.EntityExplodeEvent;
 import cn.nukkit.event.inventory.CraftItemEvent;
 import cn.nukkit.event.player.*;
 import cn.nukkit.level.Location;
-import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
@@ -166,20 +165,22 @@ public class IslandListener implements Listener {
             // Entering
             if (islandTo.isLocked()) {
                 p.sendMessage(plugin.getPrefix() + TextFormat.RED + "This island is locked");
-                Vector3 vec = p.getMotion();
-                Vector3 vecNew = new Vector3(-vec.x, -vec.y, -vec.z);
-                p.setMotion(vecNew);
+                // TODO: Safer way to back player off
                 return;
             }
 
-            //p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering " + islandTo.getName() + "'s island");
+            if (islandTo.getIgsSettings().getIgsFlag(SettingsFlag.ENTER_EXIT_MESSAGES)) {
+                p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering " + islandTo.getName() + "'s island");
+            }
 
             // Fire entry event
             final IslandEnterEvent event = new IslandEnterEvent(p, islandTo, e.getTo());
             plugin.getServer().getPluginManager().callEvent(event);
         } else if (islandTo == null && islandFrom != null && (islandFrom.getOwner() != null || islandFrom.isSpawn())) {
             // Leaving
-            // p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving " + islandFrom.getName() + "'s island");
+            if (islandFrom.getIgsSettings().getIgsFlag(SettingsFlag.ENTER_EXIT_MESSAGES)) {
+                p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving " + islandFrom.getName() + "'s island");
+            }
 
             // Fire exit event
             final IslandExitEvent event = new IslandExitEvent(p, islandFrom, e.getFrom());
@@ -195,15 +196,10 @@ public class IslandListener implements Listener {
             // Lock check
             if (islandTo.isLocked()) {
                 if (!p.isOp() && !p.hasPermission("is.mod.bypassprotect") && !p.hasPermission("is.mod.bypasslock")) {
-                    if (p.riding != null) {
-                        // Dismount
-                        ((EntityVehicle) p.riding).mountEntity(p);
-                        e.setCancelled();
-                    } else {
-                        Vector3 vec = p.getMotion();
-                        Vector3 vecNew = new Vector3(-vec.x, -vec.y, -vec.z);
-                        p.setMotion(vecNew);
-                    }
+                    // Dismount
+                    ((EntityVehicle) p.riding).mountEntity(p);
+                    e.setCancelled();
+                    // TODO: Find a best way to back off the player from the locked island
                 }
             }
         }

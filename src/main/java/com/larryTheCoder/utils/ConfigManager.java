@@ -17,6 +17,7 @@
 package com.larryTheCoder.utils;
 
 import cn.nukkit.Server;
+import cn.nukkit.block.Block;
 import cn.nukkit.item.Item;
 import cn.nukkit.plugin.Plugin;
 import cn.nukkit.utils.Config;
@@ -24,6 +25,7 @@ import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.economy.EconomyAPI;
+import com.larryTheCoder.listener.LavaCheck;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.locales.FileLister;
 import com.larryTheCoder.storage.SettingsFlag;
@@ -31,13 +33,15 @@ import com.larryTheCoder.storage.SettingsFlag;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Adam Matthew
  */
 public class ConfigManager {
 
-    public static final String CONFIG_VERSION = "MicroGitHub";
+    public static final String CONFIG_VERSION = "Spotify Project";
 
     /**
      * Loads the various settings from the config.yml file into the plugin
@@ -138,6 +142,51 @@ public class ConfigManager {
         }
         // Get the default language
         Settings.defaultLanguage = cfg.getString("general.defaultlanguage", "en-US");
+
+        // Magic Cobble Generator Settings
+        Settings.useMagicCobbleGen = cfg.getBoolean("general.usemagiccobblegen", false);
+        if (Settings.useMagicCobbleGen) {
+            ConfigSection section = cfg.getSection("general.magiccobblegenchances");
+            if (!section.isEmpty()) {
+                // Clear the cobble gen chances so they can be reloaded
+                LavaCheck.clearChances();
+                Settings.magicCobbleGenChances = new TreeMap<>();
+                for (String level : section.getKeys(false)) {
+                    int levelInt;
+                    try {
+                        if (level.equals("default")) {
+                            levelInt = Integer.MIN_VALUE;
+                        } else {
+                            levelInt = Integer.parseInt(level);
+                        }
+                        TreeMap<Double, Block> blockMapTree = new TreeMap<>();
+                        double chanceTotal = 0;
+                        for (String block : cfg.getSection("general.magiccobblegenchances." + level).getKeys(false)) {
+                            double chance = cfg.getDouble("general.magiccobblegenchances." + level + "." + block, 0);
+                            Item item = Item.fromString(block);
+                            if (chance > 0 && item.canBePlaced()) {
+                                // Store the cumulative chance in the treemap. It does not need to add up to 100%
+                                chanceTotal += chance;
+                                blockMapTree.put(chanceTotal, Block.get(item.getId(), item.getDamage()));
+                            }
+                        }
+                        if (!blockMapTree.isEmpty()) {
+                            Settings.magicCobbleGenChances.put(levelInt, blockMapTree);
+                        }
+                        // Store the requested values as a % chance
+                        Map<Block, Double> chances = new HashMap<>();
+                        for (Map.Entry<Double, Block> en : blockMapTree.entrySet()) {
+                            double chance = cfg.getDouble("general.magiccobblegenchances." + level + "." + en.getValue(), 0D);
+                            chances.put(en.getValue(), (chance / chanceTotal) * 100);
+                        }
+                        LavaCheck.storeChances(levelInt, chances);
+                    } catch (NumberFormatException e) {
+                        // Putting the catch here means that an invalid level is skipped completely
+                        Utils.send("&cUnknown level '" + level + "' listed in magiccobblegenchances section! Must be an integer or 'default'. Skipping...");
+                    }
+                }
+            }
+        }
 
         // Load languages
         HashMap<String, ASlocales> availableLocales = new HashMap<>();

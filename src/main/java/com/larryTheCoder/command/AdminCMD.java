@@ -16,7 +16,10 @@
  */
 package com.larryTheCoder.command;
 
+import cn.nukkit.IPlayer;
 import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.block.Block;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
@@ -24,6 +27,8 @@ import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.SkyBlockGenerator;
+import com.larryTheCoder.listener.LavaCheck;
+import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.storage.WorldSettings;
 import com.larryTheCoder.task.DeleteIslandTask;
@@ -31,13 +36,12 @@ import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Utils;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.Collator;
+import java.util.*;
 
 /**
- * Admin command.
- * <p>
- * Full access to all islands (depends on player permissions)
+ * The main administrator command allows operator
+ * to change player/island/challenges behaviour.
  *
  * @author Adam Matthew
  */
@@ -80,7 +84,7 @@ public class AdminCMD extends Command {
 
                 if (plugin.loadedLevel.contains(args[1])) {
                     sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorLevelGenerated);
-                    return true;
+                    break;
                 } else if (!plugin.getServer().isLevelGenerated(args[1])) {
                     plugin.getServer().generateLevel(args[1], System.currentTimeMillis(), SkyBlockGenerator.class);
                     plugin.getServer().loadLevel(args[1]);
@@ -95,7 +99,7 @@ public class AdminCMD extends Command {
                     plugin.saveLevel(false);
                     plugin.level.add(world);
                     sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).generalSuccess);
-                    return true;
+                    break;
                 }
                 sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorLevelGenerated);
                 break;
@@ -141,48 +145,148 @@ public class AdminCMD extends Command {
                 boolean success = plugin.getDatabase().saveIsland(pd);
                 if (success) {
                     sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).renameSuccess);
-                    break;
                 } else {
                     sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorFailedNormal);
+                }
+                break;
+            case "cobblestats":
+                if (!sender.hasPermission("is.admin.cobblestats")) {
+                    sender.sendMessage(plugin.getLocale(p).errorNoPermission);
                     break;
                 }
-            case "delete":
-                if (p == null) {
-                    sender.sendMessage(plugin.getLocale(null).errorUseInGame);
+                if (LavaCheck.getStats().size() == 0) {
+                    sender.sendMessage(TextFormat.OBFUSCATED + "");
+                    break;
+                }
+                // Display by level
+                for (Integer level : LavaCheck.getStats().keySet()) {
+                    if (level == Integer.MIN_VALUE) {
+                        sender.sendMessage(plugin.getLocale(p).challengesLevel + ": Default");
+                    } else {
+                        sender.sendMessage(plugin.getLocale(p).challengesLevel + ": " + level);
+                    }
+                    // Collect and sort
+                    Collection<String> result = new TreeSet<>(Collator.getInstance());
+                    for (Block mat : LavaCheck.getStats().get(level).elementSet()) {
+                        result.add("   " + Utils.prettifyText(mat.toString()) + ": " + LavaCheck.getStats().get(level).count(mat) + "/" + LavaCheck.getStats().get(level).size() + " or "
+                                + ((int) ((double) LavaCheck.getStats().get(level).count(mat) / LavaCheck.getStats().get(level).size() * 100))
+                                + "% (config = " + String.valueOf(LavaCheck.getConfigChances(level, mat)) + "%)");
+                    }
+                    // Send to player
+                    for (String r : result) {
+                        sender.sendMessage(r);
+                    }
+                }
+                break;
+            case "completechallenge":
+                if (!sender.hasPermission("is.admin.completechallenge")) {
+                    sender.sendMessage(plugin.getLocale(p).errorNoPermission);
+                    break;
+                }
+                if (args.length <= 1) {
+                    sender.sendMessage(plugin.getPrefix() + "§aUsage: /" + commandLabel + " completechallenge <player>");
+                    break;
+                }
+                IPlayer offlinePlayer = Server.getInstance().getOfflinePlayer(args[1]);
+                PlayerData pld = plugin.getDatabase().getPlayerData(offlinePlayer.getName());
+                if (pld == null) {
+                    sender.sendMessage(TextFormat.RED + plugin.getLocale(p).errorUnknownPlayer);
+                    break;
+                }
+                if (pld.checkChallenge(args[2].toLowerCase()) || pld.challengeNotExists(args[2].toLowerCase())) {
+                    sender.sendMessage(TextFormat.RED + plugin.getLocale(p).errorChallengeDoesNotExist);
+                    break;
+                }
+                pld.completeChallenge(args[2].toLowerCase());
+                ASkyBlock.get().getDatabase().savePlayerData(pld);
+                sender.sendMessage(TextFormat.YELLOW + plugin.getLocale(p).completeChallengeCompleted
+                        .replace("[challengename]", args[2].toLowerCase())
+                        .replace("[name]", args[1]));
+                break;
+            case "resetchallenge":
+                if (!sender.hasPermission("is.admin.resetchallenge")) {
+                    sender.sendMessage(plugin.getLocale(p).errorNoPermission);
+                    break;
+                }
+                if (args.length <= 1) {
+                    sender.sendMessage(plugin.getPrefix() + "§aUsage: /" + commandLabel + " resetchallenge <player>");
                     break;
                 }
 
+                offlinePlayer = Server.getInstance().getOfflinePlayer(args[1]);
+                pld = plugin.getDatabase().getPlayerData(offlinePlayer.getName());
+                if (pld == null) {
+                    sender.sendMessage(TextFormat.RED + plugin.getLocale(p).errorUnknownPlayer);
+                    break;
+                }
+                if (!pld.checkChallenge(args[2].toLowerCase()) || pld.challengeNotExists(args[2].toLowerCase())) {
+                    sender.sendMessage(TextFormat.RED + plugin.getLocale(p).errorChallengeDoesNotExist);
+                    break;
+                }
+                pld.resetChallenge(args[2].toLowerCase());
+                sender.sendMessage(TextFormat.YELLOW + plugin.getLocale(p).resetChallengeReset
+                        .replace("[challengename]", args[2].toLowerCase())
+                        .replace("[name]", args[1]));
+                break;
+            case "delete":
                 if (!sender.hasPermission("is.admin.delete")) {
                     sender.sendMessage(plugin.getLocale(p).errorNoPermission);
                     break;
                 }
 
+                IslandData island;
+                if (p == null) {
+                    // Well its console, so they could perform it by deleting it with command isn't?
+                    if (args.length <= 2) {
+                        sender.sendMessage(plugin.getPrefix() + "§aUsage: /" + commandLabel + " delete <player> <id>");
+                        break;
+                    }
+                    int id = Integer.getInteger(args[2]);
+
+                    // Show them, lets see if this dude got a data in database
+                    offlinePlayer = Server.getInstance().getOfflinePlayer(args[1]);
+                    island = plugin.getDatabase().getIsland(offlinePlayer.getName(), id);
+                    if (island == null) {
+                        sender.sendMessage(plugin.getLocale(null).errorUnknownPlayer);
+                        break;
+                    }
+
+                    sender.sendMessage(plugin.getLocale(null).deleteRemoving.replace("[name]", "null"));
+                    deleteIslands(island, sender);
+                    break;
+                }
+
                 // Get the island I am on
-                IslandData island = plugin.getIsland().GetIslandAt(p);
+                island = plugin.getIsland().GetIslandAt(p);
 
                 if (island == null) {
                     sender.sendMessage(plugin.getLocale(p).adminDeleteIslandnoid);
-                    return true;
+                    break;
                 }
 
                 // Try to get the owner of this island
                 String owner = island.getOwner();
                 if (!args[1].equalsIgnoreCase("confirm")) {
                     sender.sendMessage(plugin.getPrefix() + plugin.getLocale(p).adminDeleteIslandError.replace("[player]", owner));
-                    return true;
+                    break;
                 }
 
                 if (owner != null) {
                     sender.sendMessage(plugin.getLocale(p).adminSetSpawnOwnedBy.replace("[name]", owner));
                     sender.sendMessage(plugin.getLocale(p).adminDeleteIslandUse.replace("[name]", owner));
-                    return true;
+                    break;
                 } else {
                     sender.sendMessage(plugin.getLocale(p).deleteRemoving.replace("[name]", "null"));
                     deleteIslands(island, sender);
                 }
                 break;
             case "setspawn":
-                this.setSpawn(sender);
+                if (!sender.hasPermission("is.admin.setspawn")) {
+                    sender.sendMessage(plugin.getLocale(p).errorNoPermission);
+                    break;
+                }
+
+                setSpawn(sender);
                 break;
             case "addmessage":
                 if (!sender.hasPermission("is.admin.addmessage")) {
@@ -207,6 +311,20 @@ public class AdminCMD extends Command {
                     list.add(msg.toString());
                     plugin.getMessages().put(pl, list);
                 }
+            case "info":
+            case "challenges":
+                if (!sender.hasPermission("is.admin.challenges")) {
+                    sender.sendMessage(plugin.getLocale(p).errorNoPermission);
+                    break;
+                }
+                if (args.length <= 1) {
+                    sender.sendMessage(plugin.getPrefix() + "§aUsage: /" + commandLabel + " info <player>");
+                    break;
+                }
+
+                // Show them, lets see if this dude got a data in database
+                showInfoChallenges(Server.getInstance().getOfflinePlayer(args[1]), sender);
+                break;
             default:
                 this.sendHelp(sender, commandLabel, args);
                 break;
@@ -219,10 +337,6 @@ public class AdminCMD extends Command {
         Player p = sender.isPlayer() ? plugin.getServer().getPlayer(sender.getName()) : null;
         if (p == null) {
             sender.sendMessage(plugin.getLocale(null).errorUseInGame);
-            return;
-        }
-        if (!sender.hasPermission("is.admin.setspawn")) {
-            sender.sendMessage(plugin.getLocale(p).errorNoPermission);
             return;
         }
         if (plugin.inIslandWorld(p) && plugin.getIslandInfo(p) != null) {
@@ -241,6 +355,44 @@ public class AdminCMD extends Command {
         sender.sendMessage(TextFormat.GREEN + plugin.getLocale(p).generalSuccess);
     }
 
+    /**
+     * Shows info on the challenge situation for player,
+     *
+     * @param player The Offline player to be checked on
+     * @param sender Sender who performed the command
+     */
+    private void showInfoChallenges(IPlayer player, CommandSender sender) {
+        PlayerData pd = plugin.getDatabase().getPlayerData(player.getName());
+        // No way
+        if (pd == null) {
+            sender.sendMessage(TextFormat.RED + plugin.getLocale(null).errorUnknownPlayer);
+            return;
+        }
+        sender.sendMessage("Name:" + TextFormat.GREEN + player.getName());
+        sender.sendMessage("UUID: " + TextFormat.YELLOW + player.getUniqueId());
+
+        // Completed challenges
+        sender.sendMessage(TextFormat.WHITE + "Challenges:");
+        Map<String, Boolean> challenges = pd.getChallengeStatus();
+        Map<String, Integer> challengeTimes = pd.getChallengeTimes();
+        if (challenges.isEmpty()) {
+            sender.sendMessage(TextFormat.RED + "Empty in here...");
+            return;
+        }
+        for (String c : challenges.keySet()) {
+            if (challengeTimes.containsKey(c)) {
+                sender.sendMessage(c + ": " + (challenges.get(c) ?
+                        TextFormat.GREEN + "Complete" :
+                        TextFormat.AQUA + "Incomplete")
+                        + "(" + pd.checkChallengeTimes(c) + ")");
+
+            } else {
+                sender.sendMessage(c + ": " + (challenges.get(c) ?
+                        TextFormat.GREEN + "Complete" :
+                        TextFormat.AQUA + "Incomplete"));
+            }
+        }
+    }
 
     /**
      * Deletes the overworld and nether islands together
@@ -267,37 +419,26 @@ public class AdminCMD extends Command {
             pageHeight = 5;
         }
 
+        sender.sendMessage(
+                "§eNotes for admins, all the command about the island related usages could be used on the island " +
+                        "instead of typing the player, this only applies to the player, not to console"
+            );
+
         List<String> helpList = new ArrayList<>();
 
         helpList.add(""); // Nope its not just math
 
-        if (sender.hasPermission("is.admin.rename")) {
-            helpList.add("&e" + label + " rename &7=> &a" + plugin.getLocale(p).adminHelpRename);
-        }
-
-        if (sender.hasPermission("is.admin.kick")) {
-            helpList.add("&e" + label + " kick &7=> &a" + plugin.getLocale(p).adminHelpKick);
-        }
-
-        if (sender.hasPermission("is.admin.generate")) {
-            helpList.add("&e" + label + " generate &7=> &a" + plugin.getLocale(p).adminHelpGenerate);
-        }
-
-        if (sender.hasPermission("is.admin.setspawn")) {
-            helpList.add("&e" + label + " setspawn &7=> &a" + plugin.getLocale(p).adminHelpSpawn);
-        }
-
-        if (sender.hasPermission("is.admin.delete")) {
-            helpList.add("&e" + label + " delete &7=> &a" + plugin.getLocale(p).adminHelpDelete);
-        }
-
-        if (sender.hasPermission("is.admin.addmessage")) {
-            helpList.add("&e" + label + " addmessage &7=> &a" + plugin.getLocale(p).adminHelpMessage);
-        }
-
-        if (sender.hasPermission("is.admin.clear")) {
-            helpList.add("&e" + label + " clear &7=> &a" + plugin.getLocale(p).adminHelpClear);
-        }
+        helpList.add("&7" + label + " rename &l&5»&r&f &a" + plugin.getLocale(p).adminHelpRename);
+        helpList.add("&7" + label + " kick &l&5»&r&f &a" + plugin.getLocale(p).adminHelpKick);
+        helpList.add("&7" + label + " generate &l&5»&r&f &a" + plugin.getLocale(p).adminHelpGenerate);
+        helpList.add("&7" + label + " setspawn &l&5»&r&f &a" + plugin.getLocale(p).adminHelpSpawn);
+        helpList.add("&7" + label + " delete &l&5»&r&f &a" + plugin.getLocale(p).adminHelpDelete);
+        helpList.add("&7" + label + " addmessage &l&5»&r&f &a" + plugin.getLocale(p).adminHelpMessage);
+        helpList.add("&7" + label + " clear &l&5»&r&f &a" + plugin.getLocale(p).adminHelpClear);
+        helpList.add("&7" + label + " cobblestats &l&5»&r&f &a" + plugin.getLocale(p).adminHelpDelete);
+        helpList.add("&7" + label + " completechallenge &l&5»&r&f &a" + plugin.getLocale(p).adminHelpMessage);
+        helpList.add("&7" + label + " resetchallenge &l&5»&r&f &a" + plugin.getLocale(p).adminHelpClear);
+        helpList.add("&7" + label + " challenges &l&5»&r&f &a" + plugin.getLocale(p).adminHelpInfo);
 
         if (label.length() > 4) {
             helpList.add("");

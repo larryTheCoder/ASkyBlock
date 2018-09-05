@@ -331,28 +331,6 @@ public class IslandData implements Cloneable {
         this.levelName = levelName;
     }
 
-    //    // Coordinates of the home spawn location
-    //    public int homeX = 0;
-    //    public int homeY = 0;
-    //    public int homeZ = 0;
-    //    private int islandId = 0;
-    //    private int id = 0;
-    //    private String levelName;
-    //    private String owner;
-    //    private String biome;
-    //    private boolean locked;
-    //    // Island information
-    //    private String name;
-    //    // Coordinates of the island area
-    //    private int centerX;
-    //    private int centerY;
-    //    private int centerZ;
-    //    // Set if this island is a spawn island
-    //    private boolean isSpawn = false;
-    //    // Protection size
-    //    private int protectionRange;
-    //    // IslandSettings
-    //    private IslandSettings settings;
     @Override
     public String toString() {
         return "IslandData(x=" + homeX + ", y=" + homeY + ", z=)";

@@ -59,19 +59,23 @@ public final class ASlocales {
     public String firstIslandFree = "§aYour first island are free!";
     public String nextIslandPrice = "§aNext time you may need $§e[price] to buy other island";
     // Help defaults
-    public String adminHelpGenerate = "§aAttempt to create a new level.";
-    public String adminHelpKick = "§aTo kick player from island worlds.";
-    public String adminHelpRename = "§aAttempt to rename other player's island.";
-    public String adminHelpSpawn = "§aSet the island's spawn point!";
-    public String adminHelpDelete = "§aDelete other player island";
-    public String adminHelpMessage = "§aAdd a message for all skyblock users";
-    public String adminHelpClear = "§aFlushes all he memory in the plugin";
+    public String adminHelpGenerate = "Attempt to create a new level.";
+    public String adminHelpKick = "To kick player from island worlds.";
+    public String adminHelpRename = "Attempt to rename other player's island.";
+    public String adminHelpSpawn = "Set the island's spawn point!";
+    public String adminHelpDelete = "Delete other player island";
+    public String adminHelpMessage = "Add a message for all skyblock users";
+    public String adminHelpClear = "Flushes all he memory in the plugin";
+    public String adminHelpInfo = "Check information on the given player";
     // Errors defaults
     public String errorMaxReset = "§cYou had reached the limit for island delectation.";
-    private String errorUnknownPlayer = "§cThat player is unknown.";
+    public String errorUnknownPlayer = "§cThat player is unknown.";
     public String errorNoPermission = "§cYou don't have permission to use that command!";
     public String errorNoIsland = "§cYou do not have an island!";
     public String errorNoIslandOther = "§cThat player does not have an island!";
+    public String errorChallengeDoesNotExist = "Challenge doesn't exist or is already completed";
+    public String completeChallengeCompleted = "[challengename] has been completed for [name]";
+    public String resetChallengeReset = "[challengename] has been reset for [name]";
     private String errorCommandNotReady = "§cYou can't use that command right now.";
     public String errorCommandBlocked = "§cYou can't use that command here.";
     public String errorOfflinePlayer = "§cThat player is offline or doesn't exist.";
@@ -129,6 +133,7 @@ public final class ASlocales {
     public String acceptedFrom = "§eYou accepted [player]'s invitation.";
     public String acceptedTo = "§e[player] has accepted your invitation!";
     public String panelCancelled = "§cYou cancelled your island panel!";
+    public String challengesLevel = "Level";
     // Titles
     public String islandSubTitle = "&eNice and cosy";
     public String islandDonate = "§aSource code made by §e@larryTheCoder";

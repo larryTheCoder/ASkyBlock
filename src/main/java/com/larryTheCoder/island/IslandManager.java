@@ -35,9 +35,7 @@ import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Adam Matthew
@@ -260,7 +258,7 @@ public class IslandManager {
         TaskManager.runTask(new DeleteIslandTask(plugin, pd, p));
 
         PlayerData pda = plugin.getPlayerInfo(p);
-        pda.resetleft++;
+        pda.setPlayerReset(pda.getPlayerReset() + 1);
         plugin.getDatabase().savePlayerData(pda);
 
         p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).resetSuccess.replace("[mili]", "" + Settings.resetTime));

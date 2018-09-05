@@ -116,6 +116,7 @@ public enum SettingsFlag {
     ENDER_PEARL("Ender pearls", 20),
     /**
      * Can toggle enter/exit names to island
+     * [Added]
      */
     ENTER_EXIT_MESSAGES("Enter exit message", 21),
     /**

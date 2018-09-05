@@ -16,6 +16,7 @@
  */
 package com.larryTheCoder.utils;
 
+import cn.nukkit.block.Block;
 import cn.nukkit.item.Item;
 import com.larryTheCoder.storage.SettingsFlag;
 
@@ -74,4 +75,7 @@ public class Settings {
     public static double islandCost = 10D;
     public static boolean firstIslandFree = true;
 
+    // Magic Cobble Generator
+    public static boolean useMagicCobbleGen;
+    public static TreeMap<Integer, TreeMap<Double, Block>> magicCobbleGenChances;
 }

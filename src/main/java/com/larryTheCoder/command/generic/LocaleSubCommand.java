@@ -22,6 +22,7 @@ import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.locales.ASlocales;
+import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.utils.Utils;
 
 import java.util.Map;
@@ -69,6 +70,7 @@ public class LocaleSubCommand extends SubCommand {
             displayLocales(p);
             return true;
         }
+        PlayerData pd = getPlugin().getPlayerInfo(p);
         if (!Utils.isNumeric(args[1])) {
             p.sendMessage(TextFormat.RED + "/is lang <#>");
             displayLocales(p);
@@ -83,7 +85,8 @@ public class LocaleSubCommand extends SubCommand {
                 }
                 for (ASlocales locale : getPlugin().getAvailableLocales().values()) {
                     if (locale.getIndex() == index) {
-                        getPlugin().getPlayerInfo(p).setLocale(locale.getLocaleName());
+                        pd.setLocale(locale.getLocaleName());
+                        ASkyBlock.get().getDatabase().savePlayerData(pd);
                         p.sendMessage(TextFormat.GREEN + getLocale(p).generalSuccess);
                         return true;
                     }
@@ -99,11 +102,6 @@ public class LocaleSubCommand extends SubCommand {
         return true;
     }
 
-    /**
-     * Shows available languages to the player
-     *
-     * @param player
-     */
     private void displayLocales(Player player) {
         TreeMap<Integer, String> langs = new TreeMap<>();
         for (ASlocales locale : getPlugin().getAvailableLocales().values()) {

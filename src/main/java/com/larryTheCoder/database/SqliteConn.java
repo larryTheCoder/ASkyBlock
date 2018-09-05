@@ -28,11 +28,12 @@ import com.larryTheCoder.utils.Utils;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
- * Full sql database
+ * Main database provider that saves
+ * Every saves all the data of the island.
+ * This is the most stable type of database.
  *
  * @author Adam Matthew
  */
@@ -203,22 +204,6 @@ public final class SqliteConn extends Database {
             JDBCUtilities.printSQLException(ex);
         }
         return database;
-    }
-
-    public ArrayList<IslandData> getAllIsland() {
-        ArrayList<IslandData> pd = new ArrayList<>();
-        try (Statement stmt = con.createStatement()) {
-            ResultSet set = stmt.executeQuery("SELECT * FROM `island` ");
-            if (set.isClosed()) {
-                return pd;
-            }
-            while (set.next()) {
-                pd.add(new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn")));
-            }
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-        return pd;
     }
 
     @Override
@@ -540,13 +525,12 @@ public final class SqliteConn extends Database {
             if (set.isClosed()) {
                 return null;
             }
-            // TODO: Fix the casting issue on this
             pd = new PlayerData(
                     set.getString("player"),
                     set.getInt("homes"),
                     Utils.stringToArray(set.getString("members"), ", "),
-                    (HashMap<String, Boolean>) Utils.stringToMap(set.getString("challengelist")),
-                    (HashMap<String, Integer>) Utils.stringToMap(set.getString("challengelisttimes")),
+                    set.getString("challengelist"),
+                    set.getString("challengelisttimes"),
                     set.getInt("islandlvl"),
                     set.getBoolean("inTeam"),
                     set.getString("teamLeader"),
@@ -578,19 +562,19 @@ public final class SqliteConn extends Database {
                 + "`name`, "
                 + "`locale`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
             PlayerData pd = new PlayerData(p, 0, Settings.reset);
-            set.setString(1, pd.playerName);
-            set.setInt(2, pd.homes);
-            set.setInt(3, pd.resetleft);
-            set.setString(4, Utils.arrayToString(pd.banList));
+            set.setString(1, pd.getPlayerName());
+            set.setInt(2, pd.getHomeNumber());
+            set.setInt(3, pd.getPlayerReset());
+            set.setString(4, Utils.arrayToString(pd.getBanList()));
             set.setString(5, pd.teamLeader);
             set.setString(6, pd.teamIslandLocation);
             set.setBoolean(7, pd.inTeam);
-            set.setInt(8, pd.islandLevel);
+            set.setInt(8, pd.getIslandLevel());
             set.setString(9, Utils.arrayToString(pd.members));
-            set.setString(10, Utils.hashToString(pd.challengeList));
-            set.setString(11, Utils.hashToString(pd.challengeListTimes));
+            set.setString(10, pd.decodeChallengeList("cl"));
+            set.setString(11, pd.decodeChallengeList("clt"));
             set.setString(12, pd.name);
-            set.setString(13, pd.pubLocale);
+            set.setString(13, pd.getLocale());
             set.addBatch();
 
             set.executeBatch();
@@ -603,7 +587,7 @@ public final class SqliteConn extends Database {
 
     @Override
     public void savePlayerData(PlayerData pd) {
-        // TESTED SECCESS
+        // TESTED SUCCESS
         try (PreparedStatement stmt = con.prepareStatement(
                 "UPDATE `players` SET "
                         + "`homes` = ?, "
@@ -618,19 +602,19 @@ public final class SqliteConn extends Database {
                         + "`challengelisttimes` = ?, "
                         + "`name` = ?, "
                         + "`locale` = ? "
-                        + "WHERE `player` = '" + pd.playerName + "'")) {
-            stmt.setInt(1, pd.homes);
-            stmt.setInt(2, pd.resetleft);
-            stmt.setString(3, Utils.arrayToString(pd.banList));
+                        + "WHERE `player` = '" + pd.getPlayerName() + "'")) {
+            stmt.setInt(1, pd.getHomeNumber());
+            stmt.setInt(2, pd.getPlayerReset());
+            stmt.setString(3, Utils.arrayToString(pd.getBanList()));
             stmt.setString(4, pd.teamLeader);
             stmt.setString(5, pd.teamIslandLocation);
             stmt.setBoolean(6, pd.inTeam);
-            stmt.setInt(7, pd.islandLevel);
+            stmt.setInt(7, pd.getIslandLevel());
             stmt.setString(8, Utils.arrayToString(pd.members));
-            stmt.setString(9, Utils.hashToString(pd.challengeList));
-            stmt.setString(10, Utils.hashToString(pd.challengeListTimes));
+            stmt.setString(9, pd.decodeChallengeList("cl"));
+            stmt.setString(10, pd.decodeChallengeList("clt"));
             stmt.setString(11, pd.name);
-            stmt.setString(12, pd.pubLocale);
+            stmt.setString(12, pd.getLocale());
             stmt.addBatch();
             stmt.executeBatch();
         } catch (SQLException ex) {
