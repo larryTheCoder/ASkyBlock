@@ -86,7 +86,7 @@ public class LocaleSubCommand extends SubCommand {
                 for (ASlocales locale : getPlugin().getAvailableLocales().values()) {
                     if (locale.getIndex() == index) {
                         pd.setLocale(locale.getLocaleName());
-                        ASkyBlock.get().getDatabase().savePlayerData(pd);
+                        pd.saveData();
                         p.sendMessage(TextFormat.GREEN + getLocale(p).generalSuccess);
                         return true;
                     }

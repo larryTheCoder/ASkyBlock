@@ -405,17 +405,17 @@ public class Utils {
         }
 
         if (type instanceof ItemEgg) {
-            Utils.sendDebug("User is interacting with chicken egg");
+            //Utils.sendDebug"User is interacting with chicken egg");
             return data.getIgsFlag(SettingsFlag.EGGS);
         } else if (type instanceof ItemSpawnEgg) {
-            Utils.sendDebug("User is interacting with spawn egg");
+            //Utils.sendDebug"User is interacting with spawn egg");
             return data.getIgsFlag(SettingsFlag.SPAWN_EGGS);
         } else if (type instanceof ItemShears) {
             // FIXME: This should check if the player is shearing the sheep, not shearing the wood
             //return data.getIgsFlag(SettingsFlag.SHEARING);
-            Utils.sendDebug("Using shears, not yet implemented for interaction");
+            //Utils.sendDebug"Using shears, not yet implemented for interaction");
         } else if (type instanceof ItemFlintSteel) {
-            Utils.sendDebug("User is interacting with flint and steel");
+            //Utils.sendDebug"User is interacting with flint and steel");
             return data.getIgsFlag(SettingsFlag.FIRE);
         }
 

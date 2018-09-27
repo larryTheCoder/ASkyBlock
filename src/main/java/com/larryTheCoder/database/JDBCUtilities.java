@@ -28,9 +28,13 @@ import java.io.StringWriter;
 import java.sql.*;
 
 /**
+ * Safe error stack trace for the plugin,
+ * Keeping the database to not interrupt the operation
+ *
  * @author Adam Matthew
  */
 public class JDBCUtilities {
+
     public static void getWarningsFromResultSet(ResultSet rs) throws SQLException {
         JDBCUtilities.printWarnings(rs.getWarnings());
     }
@@ -110,8 +114,7 @@ public class JDBCUtilities {
         }
     }
 
-    public static String convertDocumentToString(Document doc) throws
-            TransformerException {
+    public static String convertDocumentToString(Document doc) throws TransformerException {
         Transformer t = TransformerFactory.newInstance().newTransformer();
 //    t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         StringWriter sw = new StringWriter();

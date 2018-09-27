@@ -45,11 +45,11 @@ import java.util.*;
  *
  * @author Adam Matthew
  */
-public class AdminCMD extends Command {
+public class Admin extends Command {
 
     private final ASkyBlock plugin;
 
-    public AdminCMD(ASkyBlock ev) {
+    public Admin(ASkyBlock ev) {
         super("isadmin", "Island admin command", "\u00a77<parameters>", new String[]{"isa"});
         this.plugin = ev;
         // Set this command permission (This should not be known to players)
@@ -198,6 +198,7 @@ public class AdminCMD extends Command {
                     break;
                 }
                 pld.completeChallenge(args[2].toLowerCase());
+                pld.saveData();
                 ASkyBlock.get().getDatabase().savePlayerData(pld);
                 sender.sendMessage(TextFormat.YELLOW + plugin.getLocale(p).completeChallengeCompleted
                         .replace("[challengename]", args[2].toLowerCase())
@@ -224,6 +225,7 @@ public class AdminCMD extends Command {
                     break;
                 }
                 pld.resetChallenge(args[2].toLowerCase());
+                pld.saveData();
                 sender.sendMessage(TextFormat.YELLOW + plugin.getLocale(p).resetChallengeReset
                         .replace("[challengename]", args[2].toLowerCase())
                         .replace("[name]", args[1]));

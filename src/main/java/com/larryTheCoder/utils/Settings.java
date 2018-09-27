@@ -29,10 +29,10 @@ public class Settings {
 
     public static GameType GAMETYPE = GameType.SKYBLOCK;
 
-    // system variables
+    // system config
     public static List<String> challengeLevels = new ArrayList<>();
 
-    // config variables
+    // config config
     public static boolean checkUpdate;
     public static int islandHeight = 60;
     public static int islandMaxNameLong;
@@ -48,7 +48,7 @@ public class Settings {
     public static int resetTime;
     public static String defaultLanguage;
 
-    // default variables
+    // default config
     public static Set<String> challengeList = new HashSet<>();
     public static List<String> freeLevels = new ArrayList<>();
     public static int waiverAmount = 0;

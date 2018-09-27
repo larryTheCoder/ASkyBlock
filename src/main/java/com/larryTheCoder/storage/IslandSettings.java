@@ -59,7 +59,7 @@ public class IslandSettings {
      * @return true or false, or false if flag is not in the list
      */
     public boolean getIgsFlag(SettingsFlag flag) {
-        Utils.sendDebug("DEBUG: asking for " + flag + " = " + igs.get(flag));
+        //Utils.sendDebug"DEBUG: asking for " + flag + " = " + igs.get(flag));
         if (this.igs.containsKey(flag)) {
             return igs.get(flag);
         }
@@ -140,7 +140,7 @@ public class IslandSettings {
                 igs.put(SettingsFlag.getFlag(list.get(0)), value);
             }
         } catch (Exception ignored) {
-            Utils.sendDebug("Protection settings is outdated.");
+            //Utils.sendDebug"Protection settings is outdated.");
         }
     }
 

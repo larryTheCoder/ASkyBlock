@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.larryTheCoder.database.variables;
+package com.larryTheCoder.database.config;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -24,7 +24,7 @@ import java.sql.SQLException;
 /**
  * @author Adam Matthew
  */
-public interface AbstractDatabase {
+public interface AbstractConfig {
 
     Connection forceConnection() throws SQLException, ClassNotFoundException;
 

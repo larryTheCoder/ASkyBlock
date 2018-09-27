@@ -67,6 +67,20 @@ public final class ASlocales {
     public String adminHelpMessage = "Add a message for all skyblock users";
     public String adminHelpClear = "Flushes all he memory in the plugin";
     public String adminHelpInfo = "Check information on the given player";
+    // Challenges
+    public String challengesHelp1 = "§aUse /c <name> to view information about a challenge.";
+    public String challengesHelp2 = "§aUse /c complete <name> to attempt to complete that challenge.";
+    public String challengesName = "§eChallenge Name";
+    public String challengesLevel = "§eLevel";
+    public String challengesItemTakeWarning = "§cAll required items are taken when you complete this quest!";
+    public String challengesNotRepeatable = "§cThis quest is not repeatable!";
+    public String challengesFirstTimeRewards = "§aFirst time reward(s)";
+    public String challengesRepeatRewards = "§aRepeat reward(s)";
+    public String challengesExpReward = "§eExp reward";
+    public String challengesMoneyReward = "§eMoney reward";
+    public String challengesToCompleteUse = "§eTo complete this challenge, use";
+    public String challengesInvalidChallengeName = "§cInvalid challenge name! Use /c help for more information";
+    public String challengesErrorItemsNotThere = "§cAll required items must be close to you on your island!";
     // Errors defaults
     public String errorMaxReset = "§cYou had reached the limit for island delectation.";
     public String errorUnknownPlayer = "§cThat player is unknown.";
@@ -133,7 +147,6 @@ public final class ASlocales {
     public String acceptedFrom = "§eYou accepted [player]'s invitation.";
     public String acceptedTo = "§e[player] has accepted your invitation!";
     public String panelCancelled = "§cYou cancelled your island panel!";
-    public String challengesLevel = "Level";
     // Titles
     public String islandSubTitle = "&eNice and cosy";
     public String islandDonate = "§aSource code made by §e@larryTheCoder";
@@ -149,7 +162,7 @@ public final class ASlocales {
     public String panelIslandTemplate = "§dIsland Templates";
     public String panelIslandDefault = "§eThese are your island Settings.";
     public String panelIslandWorld = "§dChoose your world";
-    public String panelChallengesHeader = "§aChoose your toppings! All of these are your challenges to complete! You will be awarded with an amazing prize!";
+    public String panelChallengesHeader = "§aChoose your toppings! All of these are your quests to complete! You will be awarded with an amazing prize!";
     public String panelHomeHeader = "§dHere are all of the list of your islands. Choose one of these to [function]";
     public String panelSettingHeader = "§eYou can make an simple changes for your island. You can set your island any time.";
     public String panelProtectionHeader = "§eSet you island protection settings, this applies to all visitors to your island. Some features may not available";

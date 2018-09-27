@@ -6,7 +6,7 @@
     <name>ASkyBlock</name>
     <groupId>larryTheCoder</groupId>
     <artifactId>SkyBlock</artifactId>
-    <version>0.4.7-BETA</version>
+    <version>v0.4.8-BETA</version>
     <description>Minecraft BE SkyBlock minigame plugin for Nukkit</description>
     <inceptionYear>2016</inceptionYear>
 

@@ -41,7 +41,7 @@ import java.util.TreeMap;
  */
 public class ConfigManager {
 
-    public static final String CONFIG_VERSION = "Spotify Project";
+    public static final String CONFIG_VERSION = "Integration Failed";
 
     /**
      * Loads the various settings from the config.yml file into the plugin
@@ -141,7 +141,7 @@ public class ConfigManager {
             }
         }
         // Get the default language
-        Settings.defaultLanguage = cfg.getString("general.defaultlanguage", "en-US");
+        Settings.defaultLanguage = cfg.getString("defaultlanguage", "en_US");
 
         // Magic Cobble Generator Settings
         Settings.useMagicCobbleGen = cfg.getBoolean("general.usemagiccobblegen", false);
@@ -194,7 +194,7 @@ public class ConfigManager {
         try {
             int index = 1;
             for (String code : fl.list()) {
-                //plugin.getLogger().info("DEBUG: lang file = " + code);
+                //Utils.sendDebug("DEBUG: lang file = " + code);
                 availableLocales.put(code, new ASlocales(ASkyBlock.get(), code, index++));
             }
         } catch (IOException e1) {
@@ -202,7 +202,7 @@ public class ConfigManager {
         }
         if (!availableLocales.containsKey(Settings.defaultLanguage)) {
             Utils.send("&c'" + Settings.defaultLanguage + ".yml' not found in /locale folder. Using /locale/en_US.yml");
-            Settings.defaultLanguage = "en-US";
+            Settings.defaultLanguage = "en_US";
             availableLocales.put(Settings.defaultLanguage, new ASlocales(ASkyBlock.get(), Settings.defaultLanguage, 0));
         }
         ASkyBlock.get().setAvailableLocales(availableLocales);

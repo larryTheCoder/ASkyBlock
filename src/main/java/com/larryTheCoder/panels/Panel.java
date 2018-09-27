@@ -30,6 +30,8 @@ import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.form.window.FormWindowModal;
 import cn.nukkit.form.window.FormWindowSimple;
 import cn.nukkit.level.biome.EnumBiome;
+import cn.nukkit.utils.Config;
+import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.schematic.SchematicHandler;
@@ -37,12 +39,10 @@ import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.storage.IslandSettings;
 import com.larryTheCoder.storage.SettingsFlag;
 import com.larryTheCoder.storage.WorldSettings;
+import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -58,6 +58,7 @@ public class Panel implements Listener {
     // Confirmation panels
     private final Map<Integer, PanelType> panelDataId = new HashMap<>();
     private final Map<Player, Integer> mapIslandId = new HashMap<>();
+    private final Map<Player, Map<String, String>> challengeReorder = new HashMap<>();
 
     public Panel(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -89,9 +90,9 @@ public class Panel implements Listener {
                     break;
                 }
 
-                FormWindowCustom panelIsland = (FormWindowCustom) event.getWindow();
+                FormWindowCustom windowCustom = (FormWindowCustom) event.getWindow();
                 // Get the response form from player
-                FormResponseCustom response = panelIsland.getResponse();
+                FormResponseCustom response = windowCustom.getResponse();
 
                 // The input respond
                 int responseId = 1;
@@ -126,12 +127,32 @@ public class Panel implements Listener {
                     break;
                 }
 
-                FormWindowSimple panelChallenges = (FormWindowSimple) event.getWindow();
+                FormWindowSimple windowSimple = (FormWindowSimple) event.getWindow();
 
-                FormResponseSimple responses = panelChallenges.getResponse();
+                FormResponseSimple responsesSimple = windowSimple.getResponse();
 
-                String responseType = responses.getClickedButton().getText();
-                plugin.getServer().dispatchCommand(p, "c complete " + responseType);
+                String responseType = responsesSimple.getClickedButton().getText();
+                Map<String, String> map = challengeReorder.get(p);
+                String challenge = map.get(responseType);
+                plugin.getServer().dispatchCommand(p, "c complete " + challenge);
+                break;
+            case TYPE_CHALLENGES_SEARCH:
+                // Check if the player closed this form
+                if (event.getWindow().wasClosed()) {
+                    p.sendMessage(plugin.getLocale(p).panelCancelled);
+                    break;
+                }
+
+                windowSimple = (FormWindowSimple) event.getWindow();
+
+                responsesSimple = windowSimple.getResponse();
+
+                String role = TextFormat.clean(responsesSimple.getClickedButton().getText());
+                if (plugin.getChallenges().isLevelAvailable(p, role)) {
+                    showChallengeType(p, role);
+                } else {
+                    sendChallengeError(p);
+                }
                 break;
             case TYPE_HOMES:
                 // Check if the player closed this form
@@ -140,11 +161,11 @@ public class Panel implements Listener {
                     break;
                 }
 
-                FormWindowSimple homePanel = (FormWindowSimple) event.getWindow();
+                windowSimple = (FormWindowSimple) event.getWindow();
 
-                FormResponseSimple homeResponse = homePanel.getResponse();
+                responsesSimple = windowSimple.getResponse();
 
-                int responseHome = homeResponse.getClickedButtonId();
+                int responseHome = responsesSimple.getClickedButtonId();
                 p.sendMessage(plugin.getLocale(p).hangInThere);
                 plugin.getGrid().homeTeleport(p, responseHome + 1);
                 break;
@@ -155,11 +176,11 @@ public class Panel implements Listener {
                     break;
                 }
 
-                FormWindowSimple firstProtectionPanel = (FormWindowSimple) event.getWindow();
+                windowSimple = (FormWindowSimple) event.getWindow();
 
-                FormResponseSimple firstProtectionResponse = firstProtectionPanel.getResponse();
+                responsesSimple = windowSimple.getResponse();
 
-                int islandIde = firstProtectionResponse.getClickedButtonId();
+                int islandIde = responsesSimple.getClickedButtonId();
                 addProtectionOverlay(p, plugin.getDatabase().getIsland(p.getName(), islandIde + 1));
                 break;
             case FIRST_TIME_SETTING:
@@ -169,11 +190,11 @@ public class Panel implements Listener {
                     break;
                 }
 
-                FormWindowSimple firstSettingPanel = (FormWindowSimple) event.getWindow();
+                windowSimple = (FormWindowSimple) event.getWindow();
 
-                FormResponseSimple firstSettingResponse = firstSettingPanel.getResponse();
+                responsesSimple = windowSimple.getResponse();
 
-                int islandId = firstSettingResponse.getClickedButtonId();
+                int islandId = responsesSimple.getClickedButtonId();
                 addSettingFormOverlay(p, plugin.getDatabase().getIsland(p.getName(), islandId + 1));
                 break;
             case SECOND_TIME_SETTING:
@@ -182,9 +203,9 @@ public class Panel implements Listener {
                     p.sendMessage(plugin.getLocale(p).panelCancelled);
                     break;
                 }
-                FormWindowCustom secondTime = (FormWindowCustom) event.getWindow();
+                windowCustom = (FormWindowCustom) event.getWindow();
                 // Get the response form from player
-                FormResponseCustom settingResponse = secondTime.getResponse();
+                response = windowCustom.getResponse();
 
                 int idea = 1;
                 IslandData pd = plugin.getDatabase().getIsland(p.getName(), mapIslandId.get(p));
@@ -192,8 +213,8 @@ public class Panel implements Listener {
                     p.sendMessage(plugin.getLocale(p).errorResponseUnknown);
                     break;
                 }
-                boolean lock = settingResponse.getToggleResponse(idea++);
-                String nameIsland = settingResponse.getInputResponse(idea);
+                boolean lock = response.getToggleResponse(idea++);
+                String nameIsland = response.getInputResponse(idea);
                 if (pd.isLocked() != lock) {
                     pd.setLocked(lock);
                 }
@@ -209,9 +230,9 @@ public class Panel implements Listener {
                     break;
                 }
 
-                FormWindowSimple firstTimeDelta = (FormWindowSimple) event.getWindow();
+                windowSimple = (FormWindowSimple) event.getWindow();
 
-                FormResponseSimple delete = firstTimeDelta.getResponse();
+                FormResponseSimple delete = windowSimple.getResponse();
 
                 String islandUID = delete.getClickedButton().getText();
                 addDeleteFormOverlay(p, plugin.getDatabase().getIsland(p.getName(), islandUID));
@@ -247,10 +268,10 @@ public class Panel implements Listener {
 
                 IslandSettings pd4 = pd3.getIgsSettings();
 
-                FormWindowCustom formWindow = (FormWindowCustom) event.getWindow();
+                windowCustom = (FormWindowCustom) event.getWindow();
                 int idSc = 1;
                 int settingsId = 1;
-                for (Element element : formWindow.getElements()) {
+                for (Element element : windowCustom.getElements()) {
                     if (!(element instanceof ElementToggle)) {
                         continue;
                     }
@@ -258,13 +279,13 @@ public class Panel implements Listener {
                     String protectionType = ((ElementToggle) element).getText();
                     SettingsFlag flag = SettingsFlag.getFlag(settingsId);
                     if (flag != null) {
-                        boolean respond = formWindow.getResponse().getToggleResponse(idSc);
+                        boolean respond = windowCustom.getResponse().getToggleResponse(idSc);
                         pd4.setIgsFlag(flag, respond);
-                        Utils.sendDebug("FlagName: " + flag.getName() + " Id: " + settingsId + " Type: " + respond);
+                        //Utils.sendDebug"FlagName: " + flag.getName() + " Id: " + settingsId + " Type: " + respond);
                         idSc++;
                         settingsId++;
                     } else {
-                        Utils.sendDebug("Unhandled data " + protectionType + " for " + p.getName());
+                        //Utils.sendDebug"Unhandled data " + protectionType + " for " + p.getName());
                     }
                 }
 
@@ -273,15 +294,52 @@ public class Panel implements Listener {
         }
     }
 
-    public void addChallengesFormOverlay(Player player) {
-        FormWindowSimple panelIsland = new FormWindowSimple("Challenges Menu", getLocale(player).panelChallengesHeader);
+    private void sendChallengeError(Player player) {
+        FormWindowModal confirm = new FormWindowModal("Error", "", "Okay", "Cancel");
+        confirm.setContent("You haven't finished all the challenges for the first level yet, make sure your completed the first level to move on the other level.");
 
-        for (String toButton : plugin.getChallenges().getChallengeConfig().getSection("challenges.challengeList").getKeys(false)) {
-            panelIsland.addButton(new ElementButton(toButton));
+        player.showFormWindow(confirm);
+    }
+
+    public void addChallengesForm(Player player) {
+        FormWindowSimple panelIsland = new FormWindowSimple("Quest Entries", "§aChoose your desired levels. Each levels contains a quests. Make sure you past all the quest in the level to go on into the next one!");
+
+        for (String levels : Settings.challengeLevels) {
+            if (plugin.getChallenges().isLevelAvailable(player, levels)) {
+                panelIsland.addButton(new ElementButton(levels));
+            } else {
+                panelIsland.addButton(new ElementButton(TextFormat.RED + levels));
+            }
+        }
+
+        int id = player.showFormWindow(panelIsland);
+        panelDataId.put(id, PanelType.TYPE_CHALLENGES_SEARCH);
+    }
+
+    private void showChallengeType(Player player, String type) {
+        FormWindowSimple panelIsland = new FormWindowSimple("Quest Menu for " + type, getLocale(player).panelChallengesHeader);
+
+        HashMap<String, String> orders = new HashMap<>();
+        for (Map.Entry<String, List<String>> list : plugin.getChallenges().getChallengeList().entrySet()) {
+            if (!list.getKey().equalsIgnoreCase(type)) {
+                continue;
+            }
+
+            Config cfg = plugin.getChallenges().getChallengeConfig();
+            for (String challenge : list.getValue()) {
+                String friendlyName = cfg.getString("challengeList." + challenge + ".friendlyname");
+                String level = cfg.getString("challengeList." + challenge + ".type");
+                if (!plugin.getChallenges().hasRequired(player, challenge, level, true)) {
+                    friendlyName = TextFormat.RED + friendlyName;
+                }
+                panelIsland.addButton(new ElementButton(friendlyName));
+                orders.put(friendlyName, challenge); // Sometimes this could fudge up
+            }
         }
 
         int id = player.showFormWindow(panelIsland);
         panelDataId.put(id, PanelType.TYPE_CHALLENGES);
+        challengeReorder.put(player, orders);
     }
 
     public void addIslandFormOverlay(Player player) {
@@ -459,6 +517,7 @@ public class Panel implements Listener {
     enum PanelType {
         TYPE_ISLAND,
         TYPE_CHALLENGES,
+        TYPE_CHALLENGES_SEARCH,
         TYPE_HOMES,
         FIRST_TIME_SETTING,
         SECOND_TIME_SETTING,

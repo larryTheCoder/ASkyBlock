@@ -14,12 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.larryTheCoder.database;
+package com.larryTheCoder.database.database;
 
 import cn.nukkit.level.Position;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.database.variables.AbstractDatabase;
-import com.larryTheCoder.database.variables.MySQLDatabase;
+import com.larryTheCoder.database.Database;
+import com.larryTheCoder.database.JDBCUtilities;
+import com.larryTheCoder.database.config.AbstractConfig;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.task.TaskManager;
@@ -37,101 +38,73 @@ import java.util.List;
  *
  * @author Adam Matthew
  */
-public final class SqliteConn extends Database {
+public final class SqlConnection extends Database {
 
-    private final AbstractDatabase db;
+    private final AbstractConfig db;
+    private final ASkyBlock plugin;
     private Connection con;
     private boolean closed = true;
-    private final ASkyBlock plugin;
-    private boolean mySQL;
 
-    public SqliteConn(ASkyBlock plugin, AbstractDatabase database) throws SQLException, ClassNotFoundException {
+    public SqlConnection(ASkyBlock plugin, AbstractConfig database) throws SQLException, ClassNotFoundException {
         // Performance upgrade: Cache
         this.plugin = plugin;
         this.db = database;
         this.con = database.openConnection();
-        this.mySQL = database instanceof MySQLDatabase;
         this.createTables();
-        // MySQL Support
-        TaskManager.runTaskAsync(() -> {
-            long last = System.currentTimeMillis();
-            while (!closed) {
-                if (mySQL && System.currentTimeMillis() - last > 550000 || !isValid()) {
-                    last = System.currentTimeMillis();
-                    reconnect();
-                } else {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
     }
 
-    private void createTables() throws SQLException {
-        if (closed) {
-            String[] tables = new String[]{"island", "worlds", "players"};
-            DatabaseMetaData meta = this.con.getMetaData();
-            int create = 0;
-            for (String s : tables) {
-                try (ResultSet set = meta.getTables(null, null, s, new String[]{"TABLE"})) {
-                    if (!set.next()) {
-                        create++;
-                    }
+    private final void createTables() throws SQLException {
+        String[] tables = new String[]{"island", "worlds", "players"};
+        DatabaseMetaData meta = this.con.getMetaData();
+        int create = 0;
+        for (String s : tables) {
+            try (ResultSet set = meta.getTables(null, null, s, new String[]{"TABLE"})) {
+                if (!set.next()) {
+                    create++;
                 }
             }
-            if (create == 0) {
-                return;
-            }
-            // A lot of updates will coming
-            try (Statement set = this.con.createStatement()) {
-                //createdDate updatedDate votes
-                set.addBatch("CREATE TABLE IF NOT EXISTS `island` (`id` INTEGER,"
-                        + "`islandId` INTEGER NOT NULL,"
-                        + "`x` INTEGER NOT NULL,"
-                        + "`y` INTEGER NOT NULL,"
-                        + "`z` INTEGER NOT NULL,"
-                        + "`spawnX` INTEGER,"
-                        + "`spawnY` INTEGER,"
-                        + "`spawnZ` INTEGER,"
-                        + "`isSpawn` BOOLEAN NOT NULL,"
-                        + "`psize` INTEGER NOT NULL,"
-                        + "`owner` VARCHAR NOT NULL,"
-                        + "`name` VARCHAR NOT NULL,"
-                        + "`world` VARCHAR NOT NULL,"
-                        + "`protection` VARCHAR(780) NOT NULL,"
-                        + "`biome` VARCHAR NOT NULL,"
-                        + "`locked` INTEGER NOT NULL)");
-                //+ "`active` INTEGER NOT NULL)");
-                set.addBatch("CREATE TABLE IF NOT EXISTS `worlds` (`world` VARCHAR)");
-                set.addBatch("CREATE TABLE IF NOT EXISTS `players` (`player` VARCHAR NOT NULL,"
-                        + "`homes` INTEGER NOT NULL,"
-                        + "`resetleft` INTEGER NOT NULL,"
-                        + "`banlist` VARCHAR,"
-                        + "`teamleader` VARCHAR,"
-                        + "`teamislandlocation` VARCHAR,"
-                        + "`inteam` BOOLEAN,"
-                        + "`islandlvl` INTEGER,"
-                        + "`members` VARCHAR,"
-                        + "`challengelist` VARCHAR,"
-                        + "`challengelisttimes` VARCHAR,"
-                        + "`name` VARCHAR,"
-                        + "`locale` VARCHAR NOT NULL)");
-                set.executeBatch();
-                set.clearBatch();
-            }
-            closed = false;
-        } else if (db != null) {
-            Utils.send("§cThis a problem. The SQLManager is closed but the Database is not...");
-            Utils.send("§cYou might to stop server for this kind of problem to fix this error");
-            Utils.send("&cError Code: 0x3f");
-        } else {
-            Utils.send("§cThis a problem. The SQLManager is open but the Database is not...");
-            Utils.send("§cYou might to stop server for this kind of problem to fix this error");
-            Utils.send("&cError Code: 0x4f");
         }
+        if (create == 0) {
+            return;
+        }
+        // A lot of updates will coming
+        try (Statement set = this.con.createStatement()) {
+            //createdDate updatedDate votes
+            set.addBatch("CREATE TABLE IF NOT EXISTS `island` (`id` INTEGER,"
+                    + "`islandId` INTEGER NOT NULL,"
+                    + "`x` INTEGER NOT NULL,"
+                    + "`y` INTEGER NOT NULL,"
+                    + "`z` INTEGER NOT NULL,"
+                    + "`spawnX` INTEGER,"
+                    + "`spawnY` INTEGER,"
+                    + "`spawnZ` INTEGER,"
+                    + "`isSpawn` BOOLEAN NOT NULL,"
+                    + "`psize` INTEGER NOT NULL,"
+                    + "`owner` VARCHAR NOT NULL,"
+                    + "`name` VARCHAR NOT NULL,"
+                    + "`world` VARCHAR NOT NULL,"
+                    + "`protection` VARCHAR(780) NOT NULL,"
+                    + "`biome` VARCHAR NOT NULL,"
+                    + "`locked` INTEGER NOT NULL)");
+            //+ "`active` INTEGER NOT NULL)");
+            set.addBatch("CREATE TABLE IF NOT EXISTS `worlds` (`world` VARCHAR)");
+            set.addBatch("CREATE TABLE IF NOT EXISTS `players` (`player` VARCHAR NOT NULL,"
+                    + "`homes` INTEGER NOT NULL,"
+                    + "`resetleft` INTEGER NOT NULL,"
+                    + "`banlist` VARCHAR,"
+                    + "`teamleader` VARCHAR,"
+                    + "`teamislandlocation` VARCHAR,"
+                    + "`inteam` BOOLEAN,"
+                    + "`islandlvl` INTEGER,"
+                    + "`members` VARCHAR,"
+                    + "`challengelist` VARCHAR,"
+                    + "`challengelisttimes` VARCHAR,"
+                    + "`name` VARCHAR,"
+                    + "`locale` VARCHAR NOT NULL)");
+            set.executeBatch();
+            set.clearBatch();
+        }
+        closed = false;
     }
 
     private boolean isValid() {
@@ -537,7 +510,8 @@ public final class SqliteConn extends Database {
                     set.getString("teamIslandLocation"),
                     set.getInt("resetleft"),
                     Utils.stringToArray(set.getString("banList"), ", "),
-                    set.getString("locale"));
+                    set.getString("locale"),
+                    set.getString("name"));
         } catch (SQLException ex) {
             JDBCUtilities.printSQLException(ex);
         }

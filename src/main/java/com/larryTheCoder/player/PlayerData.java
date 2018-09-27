@@ -33,7 +33,7 @@ public class PlayerData implements Cloneable {
     private final HashMap<String, Boolean> challengeList = new HashMap<>();
     private final HashMap<String, Integer> challengeListTimes = new HashMap<>();
     // Coop team for the player user.
-    //
+    // #TBD
     public String teamLeader;
     String leader;
     private int resetleft;
@@ -50,9 +50,10 @@ public class PlayerData implements Cloneable {
         this.homes = homes;
         this.resetleft = resetleft;
         this.pubLocale = Settings.defaultLanguage;
+        setupChallengeList();
     }
 
-    public PlayerData(String playerName, int homes, ArrayList<String> members, String challenges, String challengesTime, int islandlvl, boolean inTeam, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList, String locale) {
+    public PlayerData(String playerName, int homes, ArrayList<String> members, String challenges, String challengesTime, int islandlvl, boolean inTeam, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList, String locale, String teamName) {
         this.homes = homes;
         this.members = members;
         this.inTeam = inTeam;
@@ -63,6 +64,7 @@ public class PlayerData implements Cloneable {
         this.playerName = playerName;
         this.banList = banList;
         this.pubLocale = locale;
+        this.name = teamName;
         encodeChallengeList(challenges, challengesTime); // Safe
     }
 
@@ -161,10 +163,9 @@ public class PlayerData implements Cloneable {
      * @param challenge The challenge to be checked
      * @return number of times
      */
-    public int checkChallengeTimes(final String challenge) {
+    public int checkChallengeTimes(String challenge) {
         if (challengeListTimes.containsKey(challenge.toLowerCase())) {
-            // plugin.getLogger().info("DEBUG: check " + challenge + ":" +
-            // challengeListTimes.get(challenge.toLowerCase()).intValue() );
+            //Utils.sendDebug("DEBUG: check " + challenge + ":" + challengeListTimes.get(challenge.toLowerCase()));
             return challengeListTimes.get(challenge.toLowerCase());
         }
         return 0;
@@ -251,6 +252,7 @@ public class PlayerData implements Cloneable {
     }
 
     private void encodeChallengeList(String challenges, String challengesTime) {
+        setupChallengeList();
         try {
             // Challenges encode for PlayerData.challengeList
             String[] at = challenges.split(", ");
@@ -259,7 +261,7 @@ public class PlayerData implements Cloneable {
                 ArrayList<String> list = new ArrayList<>(Arrays.asList(at2));
 
                 boolean value = list.get(1).equalsIgnoreCase("1");
-                challengeList.put(list.get(0), value);
+                challengeList.put(list.get(0).toLowerCase(), value);
             }
 
             // Challenges encode for PlayerData.challengeListTimes
@@ -268,12 +270,31 @@ public class PlayerData implements Cloneable {
                 String[] at2 = string.split(":");
                 ArrayList<String> list = new ArrayList<>(Arrays.asList(at2));
 
-                challengeListTimes.put(list.get(0), Integer.getInteger(list.get(1)));
+                challengeListTimes.put(list.get(0).toLowerCase(), Integer.parseInt(list.get(1)));
             }
         } catch (Exception ignored) {
-            Utils.sendDebug("Player data is outdated, resetting its data");
+            //Utils.sendDebug"Player data is outdated, resetting its data");
             ASkyBlock.get().getDatabase().savePlayerData(this);
         }
     }
 
+    /**
+     * Prepare the challenge list for the
+     * first time to to the user
+     */
+    private void setupChallengeList() {
+        for (String challenges : Settings.challengeList) {
+            challengeList.put(challenges, false);
+            challengeListTimes.put(challenges, 0);
+        }
+    }
+
+    /**
+     * Saves all of the data in this plugin
+     * into database without trying to use
+     * the hard way.
+     */
+    public void saveData() {
+        ASkyBlock.get().getDatabase().savePlayerData(this);
+    }
 }

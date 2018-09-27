@@ -33,11 +33,11 @@ import java.util.List;
  */
 public abstract class Database {
 
-    ArrayList<IslandData> islandCache = new ArrayList<>();
-    boolean enableFastCache;
-    IslandData islandSpawn;
+    protected ArrayList<IslandData> islandCache = new ArrayList<>();
+    protected boolean enableFastCache;
+    protected IslandData islandSpawn;
 
-    Database() {
+    protected Database() {
         this.enableFastCache = ASkyBlock.get().getConfig().getBoolean("fastCache");
     }
 

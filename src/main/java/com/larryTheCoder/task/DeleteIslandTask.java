@@ -105,19 +105,19 @@ public class DeleteIslandTask implements Runnable {
                 boolean regen = true;
 
                 if ((level.getChunk(x, z, true).getX() << 4) < minxX) {
-                    Utils.sendDebug("DEBUG: min x coord is less than absolute min! " + minxX);
+                    //Utils.sendDebug"DEBUG: min x coord is less than absolute min! " + minxX);
                     regen = false;
                 }
                 if ((level.getChunk(x, z, true).getZ() << 4) < minzZ) {
-                    Utils.sendDebug("DEBUG: min z coord is less than absolute min! " + minzZ);
+                    //Utils.sendDebug"DEBUG: min z coord is less than absolute min! " + minzZ);
                     regen = false;
                 }
                 if ((level.getChunk(x, z, true).getX() << 4) > maxxX) {
-                    Utils.sendDebug("DEBUG: max x coord is more than absolute max! " + maxxX);
+                    //Utils.sendDebug"DEBUG: max x coord is more than absolute max! " + maxxX);
                     regen = false;
                 }
                 if ((level.getChunk(x, z, true).getZ() << 4) > maxzZ) {
-                    Utils.sendDebug("DEBUG: max z coord in chunk is more than absolute max! " + maxzZ);
+                    //Utils.sendDebug"DEBUG: max z coord in chunk is more than absolute max! " + maxzZ);
                     regen = false;
                 }
 
@@ -211,7 +211,7 @@ public class DeleteIslandTask implements Runnable {
         // Remove from database
         boolean result = ASkyBlock.get().getDatabase().deleteIsland(pd);
         if (!result) {
-            Utils.sendDebug("Unable to delete player island data from database");
+            //Utils.sendDebug"Unable to delete player island data from database");
         }
     }
 

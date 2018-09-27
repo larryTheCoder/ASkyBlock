@@ -15,4 +15,4 @@ jobs:
        - run: mvn clean package
        
        - store_artifacts:
-          path: target/SkyBlock-0.4.7-BETA.jar
+          path: target/SkyBlock-v0.4.8-BETA.jar

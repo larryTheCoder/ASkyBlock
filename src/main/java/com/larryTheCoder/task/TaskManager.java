@@ -33,7 +33,7 @@ public class TaskManager {
             if (IMP == null) {
                 throw new IllegalArgumentException("disabled");
             }
-            return IMP.taskRepeat(runnable, interval);
+            return IMP.taskRepeatAsync(runnable, interval);
         }
         return -1;
     }

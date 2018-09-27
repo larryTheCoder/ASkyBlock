@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.larryTheCoder.database.variables;
+package com.larryTheCoder.database.config;
 
 import com.larryTheCoder.utils.Utils;
 
@@ -24,7 +24,7 @@ import java.sql.*;
 /**
  * @author Adam Matthew
  */
-public class MySQLDatabase implements AbstractDatabase {
+public class MySQLConfig implements AbstractConfig {
 
 
     private final String user;
@@ -43,7 +43,7 @@ public class MySQLDatabase implements AbstractDatabase {
      * @param username Username
      * @param password Password
      */
-    public MySQLDatabase(String hostname, int port, String database, String username, String password) {
+    public MySQLConfig(String hostname, int port, String database, String username, String password) {
         this.hostname = hostname;
         this.port = port;
         this.database = database;
@@ -55,8 +55,7 @@ public class MySQLDatabase implements AbstractDatabase {
     @Override
     public Connection forceConnection() throws SQLException, ClassNotFoundException {
         Class.forName("com.mysql.jdbc.Driver");
-        this.connection =
-                DriverManager.getConnection("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
+        this.connection = DriverManager.getConnection("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
         return this.connection;
     }
 
@@ -66,9 +65,8 @@ public class MySQLDatabase implements AbstractDatabase {
             return this.connection;
         }
         Class.forName("com.mysql.jdbc.Driver");
-        Utils.send("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database);
-        this.connection =
-                DriverManager.getConnection("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
+        Utils.send("&aConnecting to: jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database);
+        this.connection = DriverManager.getConnection("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
         return this.connection;
     }
 

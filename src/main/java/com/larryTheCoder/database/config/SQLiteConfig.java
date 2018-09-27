@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.larryTheCoder.database.variables;
+package com.larryTheCoder.database.config;
 
 import com.larryTheCoder.utils.Utils;
 
@@ -25,12 +25,12 @@ import java.sql.*;
 /**
  * @author Adam Matthew
  */
-public class SQLiteDatabase implements AbstractDatabase {
+public class SQLiteConfig implements AbstractConfig {
 
     private Connection connection;
     private final String dbLocation;
 
-    public SQLiteDatabase(File data) {
+    public SQLiteConfig(File data) {
         this.dbLocation = data.getAbsolutePath();
     }
 
@@ -48,7 +48,7 @@ public class SQLiteDatabase implements AbstractDatabase {
             }
         }
         try {
-            java.util.Properties info = new java.util.Properties();
+            new java.util.Properties();
             this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.dbLocation);
         } catch (SQLException ex) {
             forceConnection();

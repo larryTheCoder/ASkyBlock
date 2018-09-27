@@ -99,9 +99,9 @@ class Commands extends PluginCommand<ASkyBlock> {
             }
             return true;
         }
-        String subcommand = args[0].toLowerCase();
-        if (SubCommand.containsKey(subcommand)) {
-            SubCommand command = commands.get(SubCommand.get(subcommand));
+        String subCommand = args[0].toLowerCase();
+        if (SubCommand.containsKey(subCommand)) {
+            SubCommand command = commands.get(SubCommand.get(subCommand));
             boolean canUse = command.canUse(sender);
             if (canUse) {
                 if (!command.execute(sender, args)) {
@@ -138,9 +138,9 @@ class Commands extends PluginCommand<ASkyBlock> {
                     sender.sendMessage("§aASkyBlock Module §7f5c4156 Build 11");
                     sender.sendMessage("§aVendor Type: §7" + System.getProperty("os.name"));
                     sender.sendMessage("§aJava Module Version: §7" + System.getProperty("java.version"));
-                    if (ASkyBlock.get().isBetaBuild() && ASkyBlock.get().isInsiderProgram()) {
-                        sender.sendMessage("§dASkyBlock BETA insider project member.");
-                        sender.sendMessage("§dInterested about BETA insider? DM me in discord: MrPotato101#0060");
+                    if (ASkyBlock.get().isBetaBuild()) {
+                        sender.sendMessage("§eASkyBlock BETA insider project member.");
+                        sender.sendMessage("§eInterested about BETA insider? DM me in discord: §aMrPotato101#0060");
                     }
                     break;
                 case "about":

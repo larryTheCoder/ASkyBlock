@@ -8,7 +8,7 @@
 ---
 
 ## Do not change this
-version: "Spotify Project"
+version: "Integration Failed"
 
 ## Game Prefix.
 Prefix: "&d[&eASkyBlock&d] &e"
@@ -280,9 +280,10 @@ database:
     # you no need to put `.db` at back
     file-name: database
   MySQL:
-    # Unavailable
+    # Fully implemented, syncs and low latency connection
     port: 3306
-    database: YourDataBase
-    username: YourUserName
-    password: 1234IsNotAGoodPassword
+    prefix: "Server_1"
+    database: "ASkyBlock"
+    username: "root"
+    password: ""
     host: localhost

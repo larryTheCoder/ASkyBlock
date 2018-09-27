@@ -22,18 +22,21 @@ import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.generator.Generator;
+import cn.nukkit.plugin.Plugin;
 import cn.nukkit.plugin.PluginBase;
+import cn.nukkit.plugin.PluginDescription;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
-import com.larryTheCoder.command.AdminCMD;
-import com.larryTheCoder.command.ChallangesCMD;
-import com.larryTheCoder.database.JDBCUtilities;
-import com.larryTheCoder.database.SqliteConn;
-import com.larryTheCoder.database.variables.MySQLDatabase;
-import com.larryTheCoder.database.variables.SQLiteDatabase;
+import com.larryTheCoder.command.Admin;
+import com.larryTheCoder.command.Quests;
+import com.larryTheCoder.database.Database;
+import com.larryTheCoder.database.config.MySQLConfig;
+import com.larryTheCoder.database.config.SQLiteConfig;
+import com.larryTheCoder.database.database.MysqlConnection;
+import com.larryTheCoder.database.database.SqlConnection;
 import com.larryTheCoder.economy.Economy;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
@@ -55,6 +58,7 @@ import com.larryTheCoder.utils.ConfigManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import com.larryTheCoder.utils.updater.Updater;
+import ru.nukkit.dblib.nukkit.DbLibPlugin;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,7 +80,6 @@ public class ASkyBlock extends PluginBase {
     // This function is to keep track beta build
     // So I could barely see which is the thingy is used
     private boolean betaBuild;
-    private boolean betaInsider;
     private String buildNumber;
 
     public static Economy econ;
@@ -89,7 +92,7 @@ public class ASkyBlock extends PluginBase {
     private Config cfg;
     private Config worldConfig;
     // Managers
-    private SqliteConn db = null;
+    private Database db = null;
     private ChatHandler chatHandler;
     private InvitationHandler invitationHandler;
     private IslandManager manager;
@@ -97,10 +100,11 @@ public class ASkyBlock extends PluginBase {
     private InventorySave inventory;
     private TeamManager managers;
     private TeleportLogic teleportLogic;
-    private ChallangesCMD challengesCommand;
+    private Quests challengesCommand;
     private Messages messageModule;
     private Panel panel;
 
+    private boolean disabled = false;
     // Localization Strings
     private HashMap<String, ASlocales> availableLocales = new HashMap<>();
 
@@ -120,7 +124,13 @@ public class ASkyBlock extends PluginBase {
     @Override
     public void onEnable() {
         // A simple problem while new plugin is placed on server
+        initDependency();
         initDatabase();
+        // A Simple issue could cause a huge problem
+        if (disabled) {
+            return;
+        }
+
         // Wohooo! Fast! Unique and Colorful!
         generateLevel(); // Regenerate The world
         getServer().getLogger().info(getPrefix() + "§7Enabling ASkyBlock - Founders Edition (API 24)");
@@ -153,6 +163,22 @@ public class ASkyBlock extends PluginBase {
     }
 
     private void test() {
+  
+    }
+
+    private void initDependency() {
+        try {
+            Plugin plugin = getServer().getPluginManager().getPlugin("DbLib");
+            if (plugin instanceof DbLibPlugin) {
+                DbLibPlugin dblib = (DbLibPlugin) plugin;
+                PluginDescription description = dblib.getDescription();
+                // TODO: compare them
+            }
+        } catch (ClassCastException ex) {
+            Utils.send("&cNo valid DbLib plugin were found...");
+            getServer().getPluginManager().disablePlugin(this);
+            disabled = true;
+        }
     }
 
     private void start() {
@@ -161,22 +187,40 @@ public class ASkyBlock extends PluginBase {
     }
 
     private void initDatabase() {
-        // TODO: Varieties of database types
+        if (disabled) {
+            return;
+        }
+        // To be done: DbLib defined database, JSON, YML
+        // Warning: MySQL Database may result an error while attempting to create a connection
+        //          With the server because there is no error in it
+        boolean fireSql = false;
         if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {
             try {
-                db = new SqliteConn(this, new MySQLDatabase(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password")));
-            } catch (SQLException ex) {
-                JDBCUtilities.printSQLException(ex);
-            } catch (ClassNotFoundException ex) {
-                Utils.send("Unable to create MySql database");
+                MySQLConfig config = new MySQLConfig(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password"));
+                db = new MysqlConnection(this, config, cfg.getString("prefix", ""));
+                return;
+            } catch (SQLException | ClassNotFoundException ex) {
+                Utils.send("§cUnable to create a connection with MySQL Server... Please make sure that your server is up and running or check your config again.");
+                fireSql = true;
             }
         } else {
             try {
-                db = new SqliteConn(this, new SQLiteDatabase(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db")));
-            } catch (SQLException ex) {
-                JDBCUtilities.printSQLException(ex);
-            } catch (ClassNotFoundException ex) {
-                Utils.send("Unable to create Sqlite database");
+                SQLiteConfig config = new SQLiteConfig(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db"));
+                db = new SqlConnection(this, config);
+            } catch (SQLException | ClassNotFoundException ex) {
+                Utils.send("§cUnable to create a connection with the database for SQLite, please check back your config!");
+            }
+        }
+
+        if (fireSql) {
+            try {
+                SQLiteConfig config = new SQLiteConfig(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db"));
+                db = new SqlConnection(this, config);
+            } catch (SQLException | ClassNotFoundException ex) {
+                Utils.send("§cUnable to create a connection with the database for SQLite, please check back your config!");
+                Utils.send("§cERROR: NO DATABASE PROVIDER WERE FOUND, PLEASE FIX THIS ISSUE, PLUGIN WILL DISABLE NOW.");
+                getServer().getPluginManager().disablePlugin(this);
+                disabled = true;
             }
         }
     }
@@ -186,8 +230,8 @@ public class ASkyBlock extends PluginBase {
      */
     private void initIslands() {
         getServer().getCommandMap().register("ASkyBlock", new Commands(this));
-        getServer().getCommandMap().register("ASkyBlock", this.challengesCommand = new ChallangesCMD(this));
-        getServer().getCommandMap().register("ASkyBlock", new AdminCMD(this));
+        getServer().getCommandMap().register("ASkyBlock", this.challengesCommand = new Quests(this));
+        getServer().getCommandMap().register("ASkyBlock", new Admin(this));
         PluginManager pm = getServer().getPluginManager();
         chatHandler = new ChatHandler(this);
         teleportLogic = new TeleportLogic(this);
@@ -227,8 +271,8 @@ public class ASkyBlock extends PluginBase {
         if (getResource("worlds.yml") != null) {
             saveResource("worlds.yml");
         }
-        if (getResource("challenges.yml") != null) {
-            saveResource("challenges.yml");
+        if (getResource("quests.yml") != null) {
+            saveResource("quests.yml");
         }
 
         saveResource("schematics/island.schematic", false);
@@ -255,13 +299,11 @@ public class ASkyBlock extends PluginBase {
             return;
         }
         // To developers: Don't remove this please.
-        betaInsider = properties.getProperty("git.build.host", "").equalsIgnoreCase("Adam-PC"); // My host
-        betaBuild = Boolean.getBoolean(properties.getProperty("git.dirty")); // Git host
+        betaBuild = properties.getProperty("git.build.user.email", "").equals("larryPeter132@gmail.com"); // My host
         buildNumber = properties.getProperty("git.commit.id.abbrev", "");
         getServer().getLogger().info("§7ASkyBlock build-number: " + getBuildNumber());
         getServer().getLogger().info("§7ASkyBlock commit-number: " + properties.getProperty("git.commit.id"));
     }
-
 
     private void recheck() {
         File file = new File(ASkyBlock.get().getDataFolder(), "config.yml");
@@ -413,7 +455,7 @@ public class ASkyBlock extends PluginBase {
         PlayerData pd = this.getPlayerInfo(p);
         if (!this.getAvailableLocales().containsKey(pd.getLocale())) {
             Utils.send("&cUnknown locale: &e" + pd.getLocale());
-            Utils.send("&cUsing default: &een-US");
+            Utils.send("&cUsing default: &een_US");
             return getAvailableLocales().get(Settings.defaultLanguage);
         }
         return getAvailableLocales().get(pd.getLocale());
@@ -446,18 +488,6 @@ public class ASkyBlock extends PluginBase {
      */
     public boolean isBetaBuild() {
         return betaBuild;
-    }
-
-    /**
-     * Check if the user is qualified to
-     * Be an insider program, this only be used
-     * For people who agree with the agreement
-     * To use BETA build of ASkyBlock and get credit
-     *
-     * @return bool
-     */
-    public boolean isInsiderProgram() {
-        return betaInsider;
     }
 
     /**
@@ -524,7 +554,7 @@ public class ASkyBlock extends PluginBase {
      *
      * @return Database that associated with them
      */
-    public SqliteConn getDatabase() {
+    public Database getDatabase() {
         return db;
     }
 
@@ -640,9 +670,9 @@ public class ASkyBlock extends PluginBase {
      * credibility and being checked for any bugs
      * and error
      *
-     * @return Challenges class
+     * @return Quests class
      */
-    public ChallangesCMD getChallenges() {
+    public Quests getChallenges() {
         return challengesCommand;
     }
 
