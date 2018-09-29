@@ -65,6 +65,28 @@ public class GridManager {
     }
 
     /**
+     * Checks the surrounding of the specific area that
+     * a safe location on isSafeLocation
+     *
+     * @param l Location to be checked
+     * @return true that the surrounding is ok
+     */
+    private static boolean checkSurrounding(Position l) {
+        Block ground = l.getLevelBlock().getSide(DOWN);
+
+        for (int x = -1; x < 1; x++) {
+            for (int z = -1; z < 1; z++) {
+                Position pos = ground.add(x, 0, z);
+                Block block = pos.getLevelBlock();
+                if (!isSafeLocation(block)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
      * Checks if an online player is on their island, on a team island or on a
      * coop island
      *
@@ -125,7 +147,7 @@ public class GridManager {
      * @param number Starting home location e.g., 1
      * @return Location of a safe teleport spot or null if one cannot be found
      */
-    public Location getSafeHomeLocation(String p, int number) {
+    Location getSafeHomeLocation(String p, int number) {
         IslandData pd = plugin.getDatabase().getIsland(p, number);
         if (pd == null) {
             // Get the default home, which may be null too, but that's okay
@@ -157,7 +179,7 @@ public class GridManager {
             // To cover slabs, stairs and other half blocks, try one block above
             Location locPlusOne = locationSafe.clone();
             locPlusOne.add(new Vector3(0, 1, 0));
-            if (isSafeLocation(locPlusOne)) {
+            if (isSafeLocation(locPlusOne) && checkSurrounding(locPlusOne)) {
                 // Adjust the home location accordingly
                 pd.setHomeLocation(locPlusOne);
                 return locPlusOne;
@@ -166,7 +188,7 @@ public class GridManager {
             // Try to find all the way up
             for (int y = 0; y < 255; y++) {
                 Position locPlusY = locPlusOne.setComponents(locationSafe.getX(), y, locationSafe.getZ());
-                if (isSafeLocation(locPlusY)) {
+                if (isSafeLocation(locPlusY) && checkSurrounding(locPlusY)) {
                     // Adjust the home location accordingly
                     pd.setHomeLocation(locPlusY);
                     return locPlusY.getLocation();
@@ -180,7 +202,7 @@ public class GridManager {
                         int z = locationSafe.getFloorZ() + (dz % 2 == 0 ? dz / 2 : -dz / 2);
                         int y = locationSafe.getFloorY() + (dy % 2 == 0 ? dy / 2 : -dy / 2);
                         Position pos = locPlusOne.setComponents(x, y, z);
-                        if (isSafeLocation(pos)) {
+                        if (isSafeLocation(pos) && checkSurrounding(pos)) {
                             pd.setHomeLocation(pos);
                             return pos.getLocation();
                         }
@@ -198,7 +220,6 @@ public class GridManager {
      * then the player is sent to spawn via /is command
      *
      * @param player The target
-     * @return true if the home teleport is successful
      */
     public void homeTeleport(final Player player) {
         homeTeleport(player, 1);
@@ -210,18 +231,16 @@ public class GridManager {
      *
      * @param player The target
      * @param number Starting home location e.g., 1
-     * @return true if successful, false if not
      */
-    public boolean homeTeleport(Player player, int number) {
+    public void homeTeleport(Player player, int number) {
         Location home = getSafeHomeLocation(player.getName(), number);
         //if the home null
         if (home == null) {
             player.sendMessage(plugin.getPrefix() + TextFormat.RED + "Failed to find your island safe spawn");
-            return false;
+            return;
         }
         plugin.getTeleportLogic().safeTeleport(player, home, false, number);
         plugin.getIsland().showFancyTitle(player);
-        return true;
     }
 
     public IslandData getProtectedIslandAt(Location location) {

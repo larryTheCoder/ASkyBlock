@@ -40,7 +40,6 @@ import com.larryTheCoder.storage.IslandSettings;
 import com.larryTheCoder.storage.SettingsFlag;
 import com.larryTheCoder.storage.WorldSettings;
 import com.larryTheCoder.utils.Settings;
-import com.larryTheCoder.utils.Utils;
 
 import java.util.*;
 
@@ -117,7 +116,6 @@ public class Panel implements Listener {
                 boolean teleport = response.getToggleResponse(responseId);
 
                 plugin.getIsland().createIsland(p, id, worldName, islandName, locked, EnumBiome.PLAINS, teleport);
-                panelDataId.remove(formId);
                 break;
             // Challenges data
             case TYPE_CHALLENGES:
@@ -276,22 +274,20 @@ public class Panel implements Listener {
                         continue;
                     }
 
-                    String protectionType = ((ElementToggle) element).getText();
                     SettingsFlag flag = SettingsFlag.getFlag(settingsId);
                     if (flag != null) {
                         boolean respond = windowCustom.getResponse().getToggleResponse(idSc);
                         pd4.setIgsFlag(flag, respond);
-                        //Utils.sendDebug"FlagName: " + flag.getName() + " Id: " + settingsId + " Type: " + respond);
                         idSc++;
                         settingsId++;
-                    } else {
-                        //Utils.sendDebug"Unhandled data " + protectionType + " for " + p.getName());
                     }
                 }
 
                 plugin.getDatabase().saveIsland(pd3);
                 break;
         }
+
+        panelDataId.remove(formId);
     }
 
     private void sendChallengeError(Player player) {
