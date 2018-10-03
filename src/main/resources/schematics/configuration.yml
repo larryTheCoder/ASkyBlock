@@ -32,7 +32,7 @@ schematicList:
       FILE_NAME: "island.schematic"
       # This island name
       # You can use & as color codes
-      NAME: "&aThe Original"
+      NAME: "&eThe Original"
       # This is an example of a description
       # This will be used in sign and others (Must be not long 25 char, otherwise the sign will be empty)
       DESCRIPTION: "The default island for starters. Great resource with extreme height."
@@ -48,27 +48,24 @@ schematicList:
     # This is the order of your schematic (2)
     featured:
       # This is an example of the island name
-      FILE_NAME: "island.schematic"
+      FILE_NAME: "featured.schematic"
       # This island name
       # You can use & as color codes
-      NAME: "&aFeatured &cOne"
+      NAME: "&eFeatured &cOne"
       # This is an example of a description
       # This will be used in sign and others (Must be not long 25 char, otherwise the sign will be empty)
-      DESCRIPTION: "The featured island for starters. Great resource with extreme height."
+      DESCRIPTION: "&Wow, Featured..."
       # Permission base
       PERMISSION: "is.create"
       # Rating
       RATING: 5
       # Biome
       BIOME: "FOREST"
-      # Default priority
-      DEFAULT_PRIORITY: true
-      USE_CONFIG_CHEST: true
     # Double island (3)
     double:
       FILE_NAME: "double.schematic"
       # This island name
-      NAME: "&aIsland &dDuo"
+      NAME: "&eIsland &dDuo"
       # This is an example of a description
       DESCRIPTION: "Pretty much for double islands. Two close islands. Double more fun. But a little easier. Credit: Antal1609"
       # Permission base

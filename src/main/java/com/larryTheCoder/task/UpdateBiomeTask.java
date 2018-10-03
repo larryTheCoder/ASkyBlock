@@ -106,7 +106,7 @@ class UpdateBiomeTask extends Task {
                     }
                 }
 
-            }.runTaskTimer(plugin, 0, 20);
+            }.runTaskTimerAsynchronously(plugin, 0, 20);
         }
     }
 

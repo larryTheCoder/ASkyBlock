@@ -58,6 +58,7 @@ public class Panel implements Listener {
     private final Map<Integer, PanelType> panelDataId = new HashMap<>();
     private final Map<Player, Integer> mapIslandId = new HashMap<>();
     private final Map<Player, Map<String, String>> challengeReorder = new HashMap<>();
+    private final Map<Player, String> defaultLevel = new HashMap<>();
 
     public Panel(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -78,7 +79,7 @@ public class Panel implements Listener {
         if (!panelDataId.containsKey(formId)) {
             return;
         }
-        PanelType type = panelDataId.get(formId);
+        PanelType type = panelDataId.remove(formId);
 
         switch (type) {
             // island features
@@ -96,8 +97,14 @@ public class Panel implements Listener {
                 // The input respond
                 int responseId = 1;
                 String islandName = response.getInputResponse(responseId++);
+                String worldName;
 
-                String worldName = response.getDropdownResponse(responseId++).getElementContent(); // Dropdown respond
+                if (response.getResponse(responseId++) instanceof FormResponseData) {
+                    worldName = response.getDropdownResponse(responseId++).getElementContent(); // Dropdown respond
+                } else {
+                    worldName = defaultLevel.remove(p);
+                    responseId--;
+                }
 
                 // 6 - 5
                 // The island schematic ID respond
@@ -286,8 +293,6 @@ public class Panel implements Listener {
                 plugin.getDatabase().saveIsland(pd3);
                 break;
         }
-
-        panelDataId.remove(formId);
     }
 
     private void sendChallengeError(Player player) {
@@ -344,23 +349,15 @@ public class Panel implements Listener {
         List<IslandData> PlotPlayer = plugin.getDatabase().getIslands(player.getName());
         WorldSettings settings;
         for (String level : plugin.getLevels()) {
-            List<IslandData> maxPlotsOfPlayers = plugin.getDatabase().getIslands(player.getName(), level);
+            int islandPerLevel = plugin.getDatabase().getIslands(player.getName(), level).size();
             settings = plugin.getSettings(level);
-            if (settings.getMaximumIsland() < 0 || maxPlotsOfPlayers.size() <= settings.getMaximumIsland()) {
-                // Now players need this permission
-                if (!player.hasPermission("is.home." + maxPlotsOfPlayers.size())) {
-                    continue;
-                }
-                worldName.add(level);
+            // Now players need this permission with per level.
+            if (!player.hasPermission("is.home." + islandPerLevel) || !player.hasPermission(settings.getPermission())) {
+                continue;
             }
-        }
 
-        // Second. Check the player permission
-        // Have no permission to create island at this location
-        for (String level : worldName) {
-            settings = plugin.getSettings(level);
-            if (!player.hasPermission(settings.getPermission())) {
-                worldName.remove(level);
+            if (settings.getMaximumIsland() <= 0 || islandPerLevel <= settings.getMaximumIsland()) {
+                worldName.add(level);
             }
         }
 
@@ -374,7 +371,11 @@ public class Panel implements Listener {
 
         panelIsland.addElement(new ElementLabel(getLocale(player).panelIslandHeader));
         panelIsland.addElement(new ElementInput(getLocale(player).panelIslandHome, "", "Home #" + (homes + 1)));
-        panelIsland.addElement(new ElementDropdown(getLocale(player).panelIslandWorld, worldName));
+        if (worldName.size() > 1) {
+            panelIsland.addElement(new ElementDropdown(getLocale(player).panelIslandWorld, worldName));
+        } else {
+            defaultLevel.put(player, worldName.remove(0));
+        }
 
         SchematicHandler bindTo = ASkyBlock.get().getSchematics();
         if (!bindTo.isUseDefaultGeneration()) {

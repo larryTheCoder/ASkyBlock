@@ -178,6 +178,7 @@ public class Admin extends Command {
                     }
                 }
                 break;
+			case "cc":
             case "completechallenge":
                 if (!sender.hasPermission("is.admin.completechallenge")) {
                     sender.sendMessage(plugin.getLocale(p).errorNoPermission);
@@ -204,6 +205,7 @@ public class Admin extends Command {
                         .replace("[challengename]", args[2].toLowerCase())
                         .replace("[name]", args[1]));
                 break;
+			case "rc":
             case "resetchallenge":
                 if (!sender.hasPermission("is.admin.resetchallenge")) {
                     sender.sendMessage(plugin.getLocale(p).errorNoPermission);

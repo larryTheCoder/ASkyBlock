@@ -1,13 +1,6 @@
 ![ASkyBlock](https://github.com/TheSolidCrafter/ASkyBlock-Nukkit/blob/master/images/logo.png)
 [![Circle-CI](https://circleci.com/gh/TheSolidCrafter/ASkyBlock-Nukkit.svg?style=shield)](https://circleci.com/gh/TheSolidCrafter/ASkyBlock-Nukkit)
 
-NOTE
-----
-This plugin will no longer maintained to public, as there is some security issues with the users around to exploit the plugin. I decided to make this plugin private. Its still under maintance.
-You can download the plugin at [Nukkit website](https://nukkitx.com/resources/askyblock.79/)
-There's also a wiki so you don't get confused with the plugin [click](https://github.com/TheSolidCrafter/ASkyBlock-Nukkit/wiki)
-This repository will be used for API and etc...
-
 Introduction
 -------------
 Welcome to our first Nukkit Epic-Games, SkyBlock. Perfect for a server production and supports NukkitX! We ensure that

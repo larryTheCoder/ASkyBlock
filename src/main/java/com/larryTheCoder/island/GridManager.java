@@ -74,16 +74,19 @@ public class GridManager {
     private static boolean checkSurrounding(Position l) {
         Block ground = l.getLevelBlock().getSide(DOWN);
 
-        for (int x = -1; x < 1; x++) {
-            for (int z = -1; z < 1; z++) {
+        int safeBlock = 0;
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
                 Position pos = ground.add(x, 0, z);
                 Block block = pos.getLevelBlock();
-                if (!isSafeLocation(block)) {
-                    return false;
+                if (block.isSolid() && BlockUtil.isFluid(block)) {
+                    safeBlock++;
                 }
             }
         }
-        return true;
+
+        Utils.sendDebug("DEBUG: Safe Blocks " + safeBlock);
+        return safeBlock > 6;
     }
 
     /**
@@ -176,6 +179,8 @@ public class GridManager {
                 return locationSafe;
             }
 
+            Utils.sendDebug("Adding a block up");
+
             // To cover slabs, stairs and other half blocks, try one block above
             Location locPlusOne = locationSafe.clone();
             locPlusOne.add(new Vector3(0, 1, 0));
@@ -185,6 +190,7 @@ public class GridManager {
                 return locPlusOne;
             }
 
+            Utils.sendDebug("Trying to check all way up");
             // Try to find all the way up
             for (int y = 0; y < 255; y++) {
                 Position locPlusY = locPlusOne.setComponents(locationSafe.getX(), y, locationSafe.getZ());
@@ -195,13 +201,12 @@ public class GridManager {
                 }
             }
 
-            for (int dy = 1; dy <= pd.getProtectionSize(); dy++) {
-                for (int dx = 1; dx <= pd.getProtectionSize(); dx++) {
-                    for (int dz = 1; dz <= pd.getProtectionSize(); dz++) {
-                        int x = locationSafe.getFloorX() + (dx % 2 == 0 ? dx / 2 : -dx / 2);
-                        int z = locationSafe.getFloorZ() + (dz % 2 == 0 ? dz / 2 : -dz / 2);
-                        int y = locationSafe.getFloorY() + (dy % 2 == 0 ? dy / 2 : -dy / 2);
-                        Position pos = locPlusOne.setComponents(x, y, z);
+            Utils.sendDebug("Trying to check another way");
+            Vector3 center = pd.getCenter();
+            for (int dy = 0; dy <= 128; dy++) {
+                for (int dx = center.getFloorX() - 25; dx <= center.getFloorX() + 25; dx++) {
+                    for (int dz = center.getFloorZ() - 25; dz <= center.getFloorZ() + 25; dz++) {
+                        Position pos = locPlusOne.setComponents(dx, dy, dz);
                         if (isSafeLocation(pos) && checkSurrounding(pos)) {
                             pd.setHomeLocation(pos);
                             return pos.getLocation();

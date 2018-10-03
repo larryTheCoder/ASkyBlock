@@ -409,6 +409,7 @@ class IslandBlock extends BlockMinecraftId {
      * @param blockLoc The block location
      */
     void paste(Player p, Position blockLoc, EnumBiome biome) {
+        // TODO: try catch here
         Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
         blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, true);
         blockLoc.getLevel().setBiomeId(loc.getFloorX(), loc.getFloorZ(), (byte) biome.id);
