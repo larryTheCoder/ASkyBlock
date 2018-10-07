@@ -1,19 +1,28 @@
 /*
- * Copyright (C) 2016-2018 Adam Matthew
+ * Adapted from the Wizardry License
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2016-2018 larryTheCoder and contributors
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted to any persons and/or organizations
+ * using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or
+ * any derivatives of the work for commercial use or any other means to generate
+ * income, nor are they allowed to claim this software as their own.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * The persons and/or organizations are also disallowed from sub-licensing
+ * and/or trademarking this software without explicit permission from larryTheCoder.
  *
+ * Any persons and/or organizations using this software must disclose their
+ * source code and have it publicly available, include this license,
+ * provide sufficient credit to the original authors of the project (IE: larryTheCoder),
+ * as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR
+ * PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+ * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package com.larryTheCoder.panels;
 
@@ -38,10 +47,12 @@ import com.larryTheCoder.schematic.SchematicHandler;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.storage.IslandSettings;
 import com.larryTheCoder.storage.SettingsFlag;
-import com.larryTheCoder.storage.WorldSettings;
 import com.larryTheCoder.utils.Settings;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -49,6 +60,8 @@ import java.util.*;
  * <p>
  * Used to interface the player easier than before.
  * No getPrefix() Prefix used in this class. Interface made easy
+ *
+ * @author larryTheCoder
  */
 public class Panel implements Listener {
 
@@ -345,26 +358,8 @@ public class Panel implements Listener {
 
     public void addIslandFormOverlay(Player player) {
         // First check the availability for worlds
-        ArrayList<String> worldName = new ArrayList<>();
-        List<IslandData> PlotPlayer = plugin.getDatabase().getIslands(player.getName());
-        WorldSettings settings;
-        for (String level : plugin.getLevels()) {
-            int islandPerLevel = plugin.getDatabase().getIslands(player.getName(), level).size();
-            settings = plugin.getSettings(level);
-            // Now players need this permission with per level.
-            if (!player.hasPermission("is.home." + islandPerLevel) || !player.hasPermission(settings.getPermission())) {
-                continue;
-            }
-
-            if (settings.getMaximumIsland() <= 0 || islandPerLevel <= settings.getMaximumIsland()) {
-                worldName.add(level);
-            }
-        }
-
-        if (worldName.isEmpty()) {
-            player.sendMessage(plugin.getLocale(player).errorMaxIsland.replace("[maxplot]", "" + PlotPlayer.size()));
-            return;
-        }
+        ArrayList<String> worldName = plugin.getLevels();
+        // TODO: Check max homes
 
         int homes = plugin.getDatabase().getIslands(player.getName()).size();
         FormWindowCustom panelIsland = new FormWindowCustom("Island Menu");

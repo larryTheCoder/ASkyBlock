@@ -1,23 +1,32 @@
 /*
- * Copyright (C) 2016-2018 Adam Matthew
+ * Adapted from the Wizardry License
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2016-2018 larryTheCoder and contributors
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted to any persons and/or organizations
+ * using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or
+ * any derivatives of the work for commercial use or any other means to generate
+ * income, nor are they allowed to claim this software as their own.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * The persons and/or organizations are also disallowed from sub-licensing
+ * and/or trademarking this software without explicit permission from larryTheCoder.
+ *
+ * Any persons and/or organizations using this software must disclose their
+ * source code and have it publicly available, include this license,
+ * provide sufficient credit to the original authors of the project (IE: larryTheCoder),
+ * as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR
+ * PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+ * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package com.larryTheCoder.schematic;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntityChest;
@@ -29,7 +38,6 @@ import cn.nukkit.level.Position;
 import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.math.Vector3;
-import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
@@ -48,7 +56,8 @@ import static com.larryTheCoder.utils.Utils.loadChunkAt;
  * The package will rules every object in Schematic without this, the schematic
  * is useless
  *
- * @author Adam Matthew
+ * @author larryTheCoder
+ * @author tastybento
  */
 class IslandBlock extends BlockMinecraftId {
 
@@ -65,8 +74,6 @@ class IslandBlock extends BlockMinecraftId {
     // Pot items
     private Block potItem;
     private int potItemData;
-    // Debugging
-    private MainLogger deb = Server.getInstance().getLogger();
 
     /**
      * @param x
@@ -409,79 +416,80 @@ class IslandBlock extends BlockMinecraftId {
      * @param blockLoc The block location
      */
     void paste(Player p, Position blockLoc, EnumBiome biome) {
-        // TODO: try catch here
         Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
-        blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, true);
-        blockLoc.getLevel().setBiomeId(loc.getFloorX(), loc.getFloorZ(), (byte) biome.id);
-
         while (!loc.getLevel().getChunk((int) loc.getX() >> 4, (int) loc.getZ() >> 4).isLoaded()) {
             loadChunkAt(loc);
         }
+        try {
+            blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, true);
+            blockLoc.getLevel().setBiomeId(loc.getFloorX(), loc.getFloorZ(), (byte) biome.id);
 
-        // Usually when the chunk is loaded it will be fully loaded, no need task anymore
-        if (signText != null) {
-            // Various bug fixed (Nukkit bug)
-            BaseFullChunk chunk = blockLoc.getLevel().getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
-            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                    .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
-                    .putString("id", BlockEntity.SIGN)
-                    .putInt("x", (int) loc.x)
-                    .putInt("y", (int) loc.y)
-                    .putInt("z", (int) loc.z)
-                    .putString("Text1", signText.get(0).replace("[player]", p.getName()))
-                    .putString("Text2", signText.get(1).replace("[player]", p.getName()))
-                    .putString("Text3", signText.get(2).replace("[player]", p.getName()))
-                    .putString("Text4", signText.get(3).replace("[player]", p.getName()));
+            // Usually when the chunk is loaded it will be fully loaded, no need task anymore
+            if (signText != null) {
+                // Various bug fixed (Nukkit bug)
+                BaseFullChunk chunk = blockLoc.getLevel().getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
+                cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                        .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
+                        .putString("id", BlockEntity.SIGN)
+                        .putInt("x", (int) loc.x)
+                        .putInt("y", (int) loc.y)
+                        .putInt("z", (int) loc.z)
+                        .putString("Text1", signText.get(0).replace("[player]", p.getName()))
+                        .putString("Text2", signText.get(1).replace("[player]", p.getName()))
+                        .putString("Text3", signText.get(2).replace("[player]", p.getName()))
+                        .putString("Text4", signText.get(3).replace("[player]", p.getName()));
 
-            BlockEntitySign e = (BlockEntitySign) BlockEntity.createBlockEntity(
-                    BlockEntity.SIGN,
-                    chunk,
-                    nbt);
+                BlockEntitySign e = (BlockEntitySign) BlockEntity.createBlockEntity(
+                        BlockEntity.SIGN,
+                        chunk,
+                        nbt);
 
-            blockLoc.getLevel().addBlockEntity(e);
-            e.spawnToAll();
-        } else if (potItem != null) {
-            BaseFullChunk chunk = blockLoc.getLevel().getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
-            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                    .putString("id", BlockEntity.FLOWER_POT)
-                    .putInt("x", (int) loc.x)
-                    .putInt("y", (int) loc.y)
-                    .putInt("z", (int) loc.z)
-                    .putShort("item", potItem.getId())
-                    .putInt("data", potItemData);
+                blockLoc.getLevel().addBlockEntity(e);
+                e.spawnToAll();
+            } else if (potItem != null) {
+                BaseFullChunk chunk = blockLoc.getLevel().getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
+                cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                        .putString("id", BlockEntity.FLOWER_POT)
+                        .putInt("x", (int) loc.x)
+                        .putInt("y", (int) loc.y)
+                        .putInt("z", (int) loc.z)
+                        .putShort("item", potItem.getId())
+                        .putInt("data", potItemData);
 
-            BlockEntityFlowerPot potBlock = (BlockEntityFlowerPot) BlockEntity.createBlockEntity(
-                    BlockEntity.FLOWER_POT,
-                    chunk,
-                    nbt);
+                BlockEntityFlowerPot potBlock = (BlockEntityFlowerPot) BlockEntity.createBlockEntity(
+                        BlockEntity.FLOWER_POT,
+                        chunk,
+                        nbt);
 
-            blockLoc.getLevel().addBlockEntity(potBlock);
-        } else if (Block.get(typeId, data).getId() == Block.CHEST) {
-            BaseFullChunk chunk = blockLoc.getLevel().getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
-            cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                    .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
-                    .putString("id", BlockEntity.CHEST)
-                    .putInt("x", (int) loc.x)
-                    .putInt("y", (int) loc.y)
-                    .putInt("z", (int) loc.z);
-            BlockEntityChest e = (BlockEntityChest) BlockEntity.createBlockEntity(
-                    BlockEntity.CHEST,
-                    chunk,
-                    nbt);
-            if (ASkyBlock.get().getSchematics().isUsingDefaultChest(islandId) || chestContents.isEmpty()) {
-                int count = 0;
-                for (Item item : Settings.chestItems) {
-                    e.getInventory().setItem(count, item);
-                    count++;
+                blockLoc.getLevel().addBlockEntity(potBlock);
+            } else if (Block.get(typeId, data).getId() == Block.CHEST) {
+                BaseFullChunk chunk = blockLoc.getLevel().getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
+                cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
+                        .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
+                        .putString("id", BlockEntity.CHEST)
+                        .putInt("x", (int) loc.x)
+                        .putInt("y", (int) loc.y)
+                        .putInt("z", (int) loc.z);
+                BlockEntityChest e = (BlockEntityChest) BlockEntity.createBlockEntity(
+                        BlockEntity.CHEST,
+                        chunk,
+                        nbt);
+                if (ASkyBlock.get().getSchematics().isUsingDefaultChest(islandId) || chestContents.isEmpty()) {
+                    int count = 0;
+                    for (Item item : Settings.chestItems) {
+                        e.getInventory().setItem(count, item);
+                        count++;
+                    }
+                } else {
+                    e.getInventory().setContents(chestContents);
                 }
-            } else {
-                e.getInventory().setContents(chestContents);
+
+                blockLoc.getLevel().addBlockEntity(e);
+                e.spawnToAll();
             }
-
-            blockLoc.getLevel().addBlockEntity(e);
-            e.spawnToAll();
+        } catch (Exception ignored) {
+            Utils.sendDebug("&7Warning: Block " + typeId + ":" + data + " not found. Ignoring...");
         }
-
     }
 
     /**

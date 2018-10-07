@@ -1,20 +1,29 @@
 /*
- * Copyright (C) 2016-2018 Adam Matthew
+ * Adapted from the Wizardry License
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2016-2018 larryTheCoder and contributors
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted to any persons and/or organizations
+ * using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or
+ * any derivatives of the work for commercial use or any other means to generate
+ * income, nor are they allowed to claim this software as their own.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * The persons and/or organizations are also disallowed from sub-licensing
+ * and/or trademarking this software without explicit permission from larryTheCoder.
+ *
+ * Any persons and/or organizations using this software must disclose their
+ * source code and have it publicly available, include this license,
+ * provide sufficient credit to the original authors of the project (IE: larryTheCoder),
+ * as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR
+ * PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+ * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package com.larryTheCoder.command;
 
 import cn.nukkit.Player;
@@ -34,7 +43,10 @@ import com.larryTheCoder.utils.Utils;
 import java.io.File;
 import java.util.*;
 
-@SuppressWarnings("ALL")
+/**
+ * @author larryTheCoder
+ * @author tastybento
+ */
 public class Quests extends Command {
 
     private final ASkyBlock plugin;
@@ -730,9 +742,7 @@ public class Quests extends Command {
                 plugin.getServer().getOnlinePlayers().values().forEach((p) -> p.sendMessage(TextFormat.GOLD + "[name] just completed a Quest: [challenge] !".replace("[name]", player.getDisplayName()).replace("[challenge]", challengeName)));
             }
             // Reduce, Reuse, and fucking recycle
-            for (String reward : challengeFile.getStringList("challengeList." + challenge.toLowerCase() + ".rewardText")) {
-                rewardText.add(reward);
-            }
+            rewardText.addAll(challengeFile.getStringList("challengeList." + challenge.toLowerCase() + ".rewardText"));
             plugin.getMessages().tellOfflineTeam(player.getName(), TextFormat.GOLD + "[name] just completed a Quest: [challenge] !".replace("[name]", player.getName()).replace("[challenge]", challengeName));
             itemRewards = challengeFile.getString("challengeList." + challenge.toLowerCase() + ".itemReward", "").split(" ");
             moneyReward = challengeFile.getDouble("challengeList." + challenge.toLowerCase() + ".moneyReward", 0D);
@@ -744,9 +754,7 @@ public class Quests extends Command {
                 plugin.getServer().getOnlinePlayers().values().forEach((p) -> p.sendMessage(TextFormat.GOLD + "[name] just completed a Quest: [challenge] !".replace("[name]", player.getDisplayName()).replace("[challenge]", challengeName)));
             }
             // Reduce, Reuse, and fucking recycle
-            for (String reward : challengeFile.getStringList("challengeList." + challenge.toLowerCase() + ".repeatRewardText")) {
-                rewardText.add(reward);
-            }
+            rewardText.addAll(challengeFile.getStringList("challengeList." + challenge.toLowerCase() + ".repeatRewardText"));
             itemRewards = challengeFile.getString("challengeList." + challenge.toLowerCase() + ".repeatItemReward", "").split(" ");
             moneyReward = challengeFile.getDouble("challengeList." + challenge.toLowerCase() + ".repeatMoneyReward", 0);
             expReward = challengeFile.getInt("challengeList." + challenge + ".repeatExpReward", 0);

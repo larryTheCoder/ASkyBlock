@@ -1,6 +1,6 @@
 name: "ASkyBlock"
 version: "0.4.8-BETA"
-author: "Adam Matthew"
+author: "larryTheCoder"
 api: ["1.0.0"]
 main: com.larryTheCoder.ASkyBlock
 website: http://github.com/TheSolidCrafter/ASkyBlock-Nukkit

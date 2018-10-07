@@ -1,18 +1,28 @@
 /*
- * Copyright (C) 2016-2018 Adam Matthew
+ * Adapted from the Wizardry License
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2016-2018 larryTheCoder and contributors
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted to any persons and/or organizations
+ * using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or
+ * any derivatives of the work for commercial use or any other means to generate
+ * income, nor are they allowed to claim this software as their own.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * The persons and/or organizations are also disallowed from sub-licensing
+ * and/or trademarking this software without explicit permission from larryTheCoder.
+ *
+ * Any persons and/or organizations using this software must disclose their
+ * source code and have it publicly available, include this license,
+ * provide sufficient credit to the original authors of the project (IE: larryTheCoder),
+ * as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR
+ * PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+ * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package com.larryTheCoder.schematic;
 
@@ -45,10 +55,11 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Author: Adam Matthew
- * <p>
  * High end Minecraft: PE custom schematic generator. Stored central in integers
  * To find the schematic more efficiently.
+ *
+ * @author larryTheCoder
+ * @author tastybento
  */
 public final class SchematicHandler {
 
@@ -500,8 +511,7 @@ public final class SchematicHandler {
                 block.paste(p, pos, biome);
             }
         } catch (Exception ex) {
-            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorIslandPC);
-            // Fail-Safe
+            // catching an exception just failed?
             for (IslandBlock block : blocks) {
                 block.revert(pos);
             }
