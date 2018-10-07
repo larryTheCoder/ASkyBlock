@@ -308,7 +308,7 @@ public class ASkyBlock extends PluginBase {
             return;
         }
         // To developers: Don't remove this please.
-        betaBuild = properties.getProperty("git.build.user.email", "").equals("larryPeter132@gmail.com"); // My host
+        betaBuild = true;
         buildNumber = properties.getProperty("git.commit.id.abbrev", "");
         getServer().getLogger().info("§7ASkyBlock build-number: " + getBuildNumber());
         getServer().getLogger().info("§7ASkyBlock commit-number: " + properties.getProperty("git.commit.id"));

@@ -300,9 +300,11 @@ public class PlayerData implements Cloneable {
     }
 
     /**
-     * 
+     * Saves all of the data in this plugin
+     * into database without trying to use
+     * the hard way.
      */
     public void saveData() {
-
+        ASkyBlock.get().getDatabase().savePlayerData(this);
     }
 }
