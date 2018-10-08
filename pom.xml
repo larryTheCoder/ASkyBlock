@@ -6,14 +6,14 @@
     <name>ASkyBlock</name>
     <groupId>larryTheCoder</groupId>
     <artifactId>SkyBlock</artifactId>
-    <version>v0.4.8-BETA</version>
+    <version>v0.4.9-BETA</version>
     <description>Minecraft BE SkyBlock minigame plugin for Nukkit</description>
     <inceptionYear>2016</inceptionYear>
 
     <licenses>
         <license>
-            <name>The GNU General Public Licence version 3 (GPLv3)</name>
-            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+            <name>Wizardry License</name>
+            <url>https://tldrlegal.com/license/wizardry-license</url>
             <distribution>repo</distribution>
         </license>
     </licenses>

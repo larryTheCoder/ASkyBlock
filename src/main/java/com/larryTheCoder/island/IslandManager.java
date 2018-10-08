@@ -67,7 +67,7 @@ public class IslandManager {
                 plugin.getPanel().addIslandFormOverlay(p);
                 return;
             }
-            IslandData pd = ASkyBlock.get().getDatabase().getIsland(p.getName(), 1);
+            IslandData pd = plugin.getDatabase().getIsland(p.getName(), 1);
             if (pd == null || pd.getOwner() == null) {
                 p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorFailedCritical);
                 return;
@@ -203,11 +203,7 @@ public class IslandManager {
                     p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorBlockedByAPI);
                     return;
                 }
-
-                if (!ASkyBlock.get().getSchematics().pasteSchematic(p, locIsland, templateId, biome)) {
-                    p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorFailedCritical);
-                    return;
-                }
+                plugin.getSchematics().pasteSchematic(p, locIsland, templateId, biome);
 
                 boolean result = plugin.getDatabase().createIsland(pd);
                 if (result) {
@@ -286,7 +282,7 @@ public class IslandManager {
             return null;
         }
         int iKey = generateIslandKey(loc);
-        IslandData res = ASkyBlock.get().getDatabase().getIslandById(iKey);
+        IslandData res = plugin.getDatabase().getIslandById(iKey);
         if (res == null) {
             return null;
         }
@@ -318,7 +314,7 @@ public class IslandManager {
     }
 
     public void teleportPlayer(Player p, String arg) {
-        IslandData pd = ASkyBlock.get().getDatabase().getIsland(arg, 1);
+        IslandData pd = plugin.getDatabase().getIsland(arg, 1);
         if (pd == null) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNoIslandOther);
             return;

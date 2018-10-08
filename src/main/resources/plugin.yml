@@ -1,5 +1,5 @@
 name: "ASkyBlock"
-version: "0.4.8-BETA"
+version: "0.4.9-BETA"
 author: "larryTheCoder"
 api: ["1.0.0"]
 main: com.larryTheCoder.ASkyBlock
@@ -146,4 +146,3 @@ permissions:
     is.admin.challanges:
      default: op
      description: "Check information on the given player."
-

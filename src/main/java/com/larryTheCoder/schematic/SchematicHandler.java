@@ -496,28 +496,18 @@ public final class SchematicHandler {
      * @param pos   The position to pasting the blocks
      * @param biome The Biome
      * @param id    The island id
-     * @return True if the player island were generated|null
      */
-    public boolean pasteSchematic(Player p, Position pos, int id, EnumBiome biome) {
+    public void pasteSchematic(Player p, Position pos, int id, EnumBiome biome) {
         // Usually this will be detected by this system
         if (isUseDefaultGeneration() || islandBlocks.get(id) == null) {
             createIsland(pos);
-            return true;
+            return;
         }
 
         List<IslandBlock> blocks = getIslandBlocks(id);
-        try {
-            for (IslandBlock block : blocks) {
-                block.paste(p, pos, biome);
-            }
-        } catch (Exception ex) {
-            // catching an exception just failed?
-            for (IslandBlock block : blocks) {
-                block.revert(pos);
-            }
-            return false;
+        for (IslandBlock block : blocks) {
+            block.paste(p, pos, biome);
         }
-        return true;
     }
 
     /**
