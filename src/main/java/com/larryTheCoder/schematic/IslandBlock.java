@@ -419,7 +419,7 @@ class IslandBlock extends BlockMinecraftId {
         Vector3 loc = new Vector3(x, y, z).add(blockLoc);
         // OH! So this was the issue why the chunk isn't gonna load :/
         // Checked the return type of `loc`, its should be Vector3 not Location.
-        while (!blockLoc.getLevel().getChunk((int) loc.getX() >> 4, (int) loc.getZ() >> 4).isLoaded()) {
+        while (!blockLoc.getLevel().isChunkLoaded((int) loc.getX() >> 4, (int) loc.getZ() >> 4)) {
             loadChunkAt(new Position(loc.getFloorX(), loc.getFloorY(), loc.getFloorZ(), blockLoc.getLevel()));
         }
 
