@@ -166,7 +166,7 @@ public class LavaCheck implements Listener {
                     //Utils.sendDebug("DEBUG: material = " + en.getValue());
                     if (en != null) {
                         e.setCancelled(); // Cancel the event so they won't generate shits™
-                        block.getLevel().setBlock(block, en.getValue());
+                        block.getLevel().setBlock(e.getBlock(), en.getValue());
                         // Record stats, per level
                         if (stats.containsKey(entry.getKey())) {
                             stats.get(entry.getKey()).add(en.getValue());

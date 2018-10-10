@@ -416,10 +416,13 @@ class IslandBlock extends BlockMinecraftId {
      * @param blockLoc The block location
      */
     void paste(Player p, Position blockLoc, EnumBiome biome) {
-        Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
-        while (!loc.getLevel().getChunk((int) loc.getX() >> 4, (int) loc.getZ() >> 4).isLoaded()) {
-            loadChunkAt(loc);
+        Vector3 loc = new Vector3(x, y, z).add(blockLoc);
+        // OH! So this was the issue why the chunk isn't gonna load :/
+        // Checked the return type of `loc`, its should be Vector3 not Location.
+        while (!blockLoc.getLevel().getChunk((int) loc.getX() >> 4, (int) loc.getZ() >> 4).isLoaded()) {
+            loadChunkAt(new Position(loc.getFloorX(), loc.getFloorY(), loc.getFloorZ(), blockLoc.getLevel()));
         }
+
         try {
             blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, true);
             blockLoc.getLevel().setBiomeId(loc.getFloorX(), loc.getFloorZ(), (byte) biome.id);
