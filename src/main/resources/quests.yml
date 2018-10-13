@@ -273,6 +273,7 @@ challengeList:
     # Max times limits how many times a challenge can be done. Comment out to make unlimited
     maxtimes: 100
   grinder:
+    friendlyname: "Grinder"
     description:
     - 'Kill monsters and collect 64 rotten flesh, 32 skeleton bones, 32 string, 32 arrows, 16 gunpowder, 5 spider eyes'
     level: 'Competent'
@@ -294,6 +295,7 @@ challengeList:
     # Max times limits how many times a challenge can be done. Comment out to make unlimited
     maxtimes: 100
   farmer:
+    friendlyname: "Farmer"
     description:
     - 'Harvest 64 units of the following: wheat, sugar, melon, carrots, potatoes, pumpkin'
     icon: WHEAT
