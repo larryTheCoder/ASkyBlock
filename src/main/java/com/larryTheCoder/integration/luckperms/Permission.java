@@ -24,32 +24,8 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.economy;
 
-import cn.nukkit.Player;
+package com.larryTheCoder.integration.luckperms;
 
-/**
- * @author larryTheCoder
- */
-public class EconomyAPI implements Economy {
-
-    @Override
-    public boolean reduceMoney(Player p, double amount) {
-        double money = me.onebone.economyapi.EconomyAPI.getInstance().myMoney(p);
-        if (money < amount) {
-            int ret = me.onebone.economyapi.EconomyAPI.getInstance().reduceMoney(p, amount);
-            return ret == me.onebone.economyapi.EconomyAPI.RET_SUCCESS;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean addMoney(Player p, double amount) {
-        return me.onebone.economyapi.EconomyAPI.getInstance().addMoney(p, amount, true) == me.onebone.economyapi.EconomyAPI.RET_SUCCESS;
-    }
-
-    @Override
-    public double getMoney(Player p) {
-        return me.onebone.economyapi.EconomyAPI.getInstance().myMoney(p);
-    }
+public interface Permission {
 }

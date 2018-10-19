@@ -4,6 +4,8 @@
 # Enable this features
 # If false, the plugin will use build-in generation
 enable: true
+# Versioning, DO NOT CHANGE
+version: 1
 # Schematic list
 # Here is the hints for you (Case sensitive):
 #  - FILE_NAME*         (String):     The name of the folder (including .schematic)
@@ -18,6 +20,7 @@ enable: true
 #  - PASTE_ENTITIES     (boolean):    Still under development. But work on minecarts
 #  - BIOME              (String):     The Biome of the island. Eg: 'Plains'
 #  - DEFAULT_PRIORITY** (boolean):    Set the template to be default template
+#  - LEVEL_HANDICAP     (Integer):    Level handicap zeros the initial island level.
 #  - Note: ' * ' means required
 #          ' ** ' means required to be used once
 # You can leave other variables to indicate that you don't want them
@@ -45,56 +48,36 @@ schematicList:
       # Default priority
       DEFAULT_PRIORITY: true
       USE_CONFIG_CHEST: true
+      # level handicap
+      LEVEL_HANDICAP: 3
     # This is the order of your schematic (2)
     featured:
-      # This is an example of the island name
       FILE_NAME: "featured.schematic"
-      # This island name
-      # You can use & as color codes
       NAME: "&eFeatured &cOne"
-      # This is an example of a description
-      # This will be used in sign and others (Must be not long 25 char, otherwise the sign will be empty)
       DESCRIPTION: "&Wow, Featured..."
-      # Permission base
       PERMISSION: "is.create"
-      # Rating
       RATING: 5
-      # Biome
       BIOME: "FOREST"
+      LEVEL_HANDICAP: 13
     # Double island (3)
     double:
       FILE_NAME: "double.schematic"
-      # This island name
       NAME: "&eIsland &dDuo"
-      # This is an example of a description
       DESCRIPTION: "Pretty much for double islands. Two close islands. Double more fun. But a little easier. Credit: Antal1609"
-      # Permission base
-      # This is your permission
       PERMISSION: "is.create"
-      # Rating
       RATING: 9
-      # Schematics can have biome set when they are created
       BIOME: "FOREST"
-      # Default priority
-      # You cant double the default
       DEFAULT_PRIORITY: false
       USE_CONFIG_CHEST: true
+      LEVEL_HANDICAP: 3
     # Harder schematic (4)
-    hareder:
+    extrahard:
       FILE_NAME: "harder.schematic"
-      # This island an example for epic name
       NAME: "&lBlack &bDiamonds"
-      # This is an example of a description
       DESCRIPTION: "&cExperts only! &aMinimal resources. &aWith a few diamonds."
-      # Permission base
-      # This is your permission
       PERMISSION: "is.create"
-      # Rating
       RATING: 1
-      # Biome
       BIOME: "FOREST"
-      # Default priority
-      # You cant double the default
       DEFAULT_PRIORITY: false
       USE_CONFIG_CHEST: true
-    # What is your schematic ?
+      LEVEL_HANDICAP: 1

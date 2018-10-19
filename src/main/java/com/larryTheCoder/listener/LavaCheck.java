@@ -122,42 +122,53 @@ public class LavaCheck implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onCleanstoneGen(BlockFromToEvent e) {
+        //Utils.sendDebug("DEBUG: " + e.getEventName());
+        //Utils.sendDebug("From material is " + e.getBlock().toString());
+        //Utils.sendDebug("To material is " + e.getTo().toString());
+        //Utils.sendDebug("Magic cobble generator event");
         // If magic cobble gen isn't used
         if (!Settings.useMagicCobbleGen) {
+            //Utils.sendDebug("Not enabled");
             return;
         }
         // Do this only in the SkyBlock world
         if (notInWorld(e.getBlock().getLocation())) {
+            //Utils.sendDebug("Not in the world");
             return;
         }
         Block block = e.getBlock();
         if (block.getId() == WATER || block.getId() == STILL_WATER || block.getId() == LAVA || block.getId() == STILL_LAVA) {
             Block toBlock = e.getTo();
-            BlockLiquid blockLiq = (BlockLiquid) block;
-
             // The block that flowed into will always became a
             // cobblestone & stone, which is weird always
-            if (toBlock.getId() == COBBLESTONE || toBlock.getId() == OBSIDIAN || toBlock.getId() == STONE) {
-                Vector3 flowedFrom = blockLiq.add(blockLiq.getFlowVector());
+            if (toBlock.getId() == COBBLESTONE || toBlock.getId() == STONE) {
 
-                int level = Integer.MIN_VALUE;
+                int l = Integer.MIN_VALUE;
                 IslandData pd = plugin.getIslandInfo(block.getLocation());
                 if (pd != null && pd.getOwner() != null) {
                     PlayerData pd2 = plugin.getDatabase().getPlayerData(pd.getOwner());
                     if (pd2 != null) {
-                        level = pd2.getIslandLevel();
+                        l = pd2.getIslandLevel();
                     }
                 }
+                //Utils.sendDebug("Island level: " + l);
 
+                final int level = l;
+
+                //Utils.sendDebug("DEBUG: Block: " + block.getId());
+                //Utils.sendDebug("DEBUG: Cobble generated. Island level = " + level);
                 if (!Settings.magicCobbleGenChances.isEmpty()) {
                     Map.Entry<Integer, TreeMap<Double, Block>> entry = Settings.magicCobbleGenChances.floorEntry(level);
                     double maxValue = entry.getValue().lastKey();
                     double rnd = Utils.randomDouble() * maxValue;
                     Map.Entry<Double, Block> en = entry.getValue().ceilingEntry(rnd);
-
+                    //Utils.sendDebug("DEBUG: " + entry.getValue().toString());
+                    //Utils.sendDebug("DEBUG: Cobble generated. Island level = " + level);
+                    //Utils.sendDebug("DEBUG: rnd = " + rnd + "/" + maxValue);
+                    //Utils.sendDebug("DEBUG: material = " + en.getValue());
                     if (en != null) {
-                        e.setCancelled();
-                        block.getLevel().setBlock(flowedFrom, en.getValue());
+                        e.setCancelled(); // Cancel the event so they won't generate shits™
+                        block.getLevel().setBlock(block, en.getValue());
                         // Record stats, per level
                         if (stats.containsKey(entry.getKey())) {
                             stats.get(entry.getKey()).add(en.getValue());

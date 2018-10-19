@@ -24,14 +24,18 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.task;
+package com.larryTheCoder.integration.economy;
 
-import cn.nukkit.scheduler.AsyncTask;
+import cn.nukkit.Player;
 
-public class UpdatePluginAsync extends AsyncTask {
+/**
+ * @author larryTheCoder
+ */
+public interface Economy {
 
-    @Override
-    public void onRun() {
+    boolean reduceMoney(Player p, double amount);
 
-    }
+    boolean addMoney(Player p, double amount);
+
+    double getMoney(Player p);
 }

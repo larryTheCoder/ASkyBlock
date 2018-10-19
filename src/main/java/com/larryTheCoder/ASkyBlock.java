@@ -46,7 +46,7 @@ import com.larryTheCoder.database.config.MySQLConfig;
 import com.larryTheCoder.database.config.SQLiteConfig;
 import com.larryTheCoder.database.database.MysqlConnection;
 import com.larryTheCoder.database.database.SqlConnection;
-import com.larryTheCoder.economy.Economy;
+import com.larryTheCoder.integration.economy.Economy;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
 import com.larryTheCoder.listener.ChatHandler;
@@ -62,6 +62,7 @@ import com.larryTheCoder.schematic.SchematicHandler;
 import com.larryTheCoder.storage.InventorySave;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.storage.WorldSettings;
+import com.larryTheCoder.task.LevelCalcTask;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.ConfigManager;
 import com.larryTheCoder.utils.Settings;
@@ -249,6 +250,7 @@ public class ASkyBlock extends PluginBase {
         // This should be loaded first
         messageModule = new Messages(this);
         messageModule.loadMessages();
+        //new LevelCalcTask(this);
 
         pm.registerEvents(chatHandler, this);
         pm.registerEvents(new IslandListener(this), this);

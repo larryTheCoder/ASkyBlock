@@ -34,7 +34,7 @@ import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.economy.EconomyAPI;
+import com.larryTheCoder.integration.economy.EconomyAPI;
 import com.larryTheCoder.listener.LavaCheck;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.locales.FileLister;

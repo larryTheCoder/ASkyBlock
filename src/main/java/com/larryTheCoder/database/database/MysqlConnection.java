@@ -89,6 +89,7 @@ public class MysqlConnection extends Database {
         if (closed) {
             return;
         }
+        // Verify tables integrity
         String[] tables = new String[]{"_island", "_worlds", "_players"};
         DatabaseMetaData meta = connection.getMetaData();
         int create = 0;

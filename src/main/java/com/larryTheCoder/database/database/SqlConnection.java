@@ -59,13 +59,14 @@ public final class SqlConnection extends Database {
         this.plugin = plugin;
         this.db = database;
         this.con = database.openConnection();
-        this.createTables();
+        this.verifyTable();
     }
 
-    private final void createTables() throws SQLException {
+    private void verifyTable() throws SQLException {
         String[] tables = new String[]{"island", "worlds", "players"};
         DatabaseMetaData meta = this.con.getMetaData();
         int create = 0;
+        // Verify tables.
         for (String s : tables) {
             try (ResultSet set = meta.getTables(null, null, s, new String[]{"TABLE"})) {
                 if (!set.next()) {

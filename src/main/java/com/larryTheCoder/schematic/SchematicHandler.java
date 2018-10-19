@@ -82,13 +82,9 @@ public final class SchematicHandler {
     private Integer defaultIsland = -1;
     // Use build-in island generation
     private boolean useDefaultGeneration = false;
-    // Plugin instance
-    private final ASkyBlock plugin;
 
     public SchematicHandler(ASkyBlock plugin, File path) {
         Objects.requireNonNull(plugin, "ASkyBlock instance cannot be null");
-
-        this.plugin = plugin;
 
         if (path == null) {
             useDefaultGeneration = true;
@@ -129,6 +125,12 @@ public final class SchematicHandler {
             Utils.send("&eYou are now using build-in island generation.");
             Utils.send("&eYou also can use schematic to paste island (Without WorldEdit)!");
             return;
+        }
+
+        if(configFolder.getInt("version", 0) < 1){
+            Utils.send("&cOutdated schematic config version. Updating to a new ones");
+            configPath.renameTo(new File(ASkyBlock.get().getDataFolder(), "config.old"));
+            ASkyBlock.get().saveResource("schematics/configuration.yml");
         }
 
         Utils.send("&7Starting Schematic Resource Pack."); // Schematic base-framework
@@ -573,7 +575,7 @@ public final class SchematicHandler {
     }
 
     /**
-     * @param id
+     * @param id The ID of the schematic
      */
     private void prepareIslandValue(int id) {
         String key = configKey.get(id);
@@ -584,7 +586,7 @@ public final class SchematicHandler {
         String description = section.getString("DESCRIPTION", "The island");
         String islandName = section.getString("NAME", "Island");
         String permission = section.getString("PERMISSION", "");
-        String biome = section.getString("BIOME", "Plains");
+        String biome = section.getString("BIOME", "Plains"); // TODO: Support biomes
         double rating = section.getDouble("RATING", 0);
         boolean defaultPriority = section.getBoolean("DEFAULT_PRIORITY");
         boolean useConfigChest = section.getBoolean("USE_CONFIG_CHEST", false);
@@ -625,7 +627,7 @@ public final class SchematicHandler {
      * Return if the schematic using the default chest in config
      *
      * @param id The schematic id
-     * @return A boolean
+     * @return true if the schematic uses default chest
      */
     public boolean isUsingDefaultChest(int id) {
         return (boolean) schemaConfiguration.get(id).get(Configuration.USE_CONFIG_CHEST);

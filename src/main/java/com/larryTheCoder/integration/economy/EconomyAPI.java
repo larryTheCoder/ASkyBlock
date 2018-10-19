@@ -24,14 +24,32 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.task;
+package com.larryTheCoder.integration.economy;
 
-import cn.nukkit.scheduler.AsyncTask;
+import cn.nukkit.Player;
 
-public class UpdatePluginAsync extends AsyncTask {
+/**
+ * @author larryTheCoder
+ */
+public class EconomyAPI implements Economy {
 
     @Override
-    public void onRun() {
+    public boolean reduceMoney(Player p, double amount) {
+        double money = me.onebone.economyapi.EconomyAPI.getInstance().myMoney(p);
+        if (money < amount) {
+            int ret = me.onebone.economyapi.EconomyAPI.getInstance().reduceMoney(p, amount);
+            return ret == me.onebone.economyapi.EconomyAPI.RET_SUCCESS;
+        }
+        return false;
+    }
 
+    @Override
+    public boolean addMoney(Player p, double amount) {
+        return me.onebone.economyapi.EconomyAPI.getInstance().addMoney(p, amount, true) == me.onebone.economyapi.EconomyAPI.RET_SUCCESS;
+    }
+
+    @Override
+    public double getMoney(Player p) {
+        return me.onebone.economyapi.EconomyAPI.getInstance().myMoney(p);
     }
 }
