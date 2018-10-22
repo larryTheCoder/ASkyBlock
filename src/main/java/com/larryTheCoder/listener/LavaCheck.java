@@ -33,6 +33,9 @@ import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockFromToEvent;
 import cn.nukkit.level.Location;
+import cn.nukkit.level.Sound;
+import cn.nukkit.level.particle.SmokeParticle;
+import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
@@ -42,9 +45,8 @@ import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static cn.nukkit.block.BlockID.*;
 
@@ -57,6 +59,7 @@ public class LavaCheck implements Listener {
     private static Map<Integer, Multiset<Block>> stats = new HashMap<>();
     private static Map<Integer, Map<Block, Double>> configChances = new HashMap<>();
     private final ASkyBlock plugin;
+    private List<Vector3> isOnTick = new ArrayList<>();
 
     public LavaCheck(ASkyBlock aSkyBlock) {
         plugin = aSkyBlock;
@@ -120,67 +123,76 @@ public class LavaCheck implements Listener {
         return !ASkyBlock.get().getLevels().contains(loc.getLevel().getName());
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onCleanstoneGen(BlockFromToEvent e) {
-        //Utils.sendDebug("DEBUG: " + e.getEventName());
-        //Utils.sendDebug("From material is " + e.getBlock().toString());
-        //Utils.sendDebug("To material is " + e.getTo().toString());
-        //Utils.sendDebug("Magic cobble generator event");
         // If magic cobble gen isn't used
         if (!Settings.useMagicCobbleGen) {
-            //Utils.sendDebug("Not enabled");
             return;
         }
         // Do this only in the SkyBlock world
         if (notInWorld(e.getBlock().getLocation())) {
-            //Utils.sendDebug("Not in the world");
             return;
         }
-        Block block = e.getBlock();
+
+        Block block = e.getTo();
         if (block.getId() == WATER || block.getId() == STILL_WATER || block.getId() == LAVA || block.getId() == STILL_LAVA) {
-            Block toBlock = e.getTo();
-            // The block that flowed into will always became a
-            // cobblestone & stone, which is weird always
-            if (toBlock.getId() == COBBLESTONE || toBlock.getId() == STONE) {
+            BlockLiquid blockLiq = (BlockLiquid) block;
 
-                int l = Integer.MIN_VALUE;
-                IslandData pd = plugin.getIslandInfo(block.getLocation());
-                if (pd != null && pd.getOwner() != null) {
-                    PlayerData pd2 = plugin.getDatabase().getPlayerData(pd.getOwner());
-                    if (pd2 != null) {
-                        l = pd2.getIslandLevel();
-                    }
+            // This is a very weird thing to be reproduce.
+            // #BlameNukkit :/
+            Block flowedFrom = e.getBlock();
+
+            if (!generatesCobble(block, flowedFrom)) {
+                return;
+            }
+
+            int level = Integer.MIN_VALUE;
+            IslandData pd = plugin.getIslandInfo(e.getBlock());
+            if (pd != null && pd.getOwner() != null) {
+                PlayerData pd2 = plugin.getDatabase().getPlayerData(pd.getOwner());
+                if (pd2 != null) {
+                    level = pd2.getIslandLevel();
                 }
-                //Utils.sendDebug("Island level: " + l);
+            }
 
-                final int level = l;
+            if (!Settings.magicCobbleGenChances.isEmpty()) {
+                Map.Entry<Integer, TreeMap<Double, Block>> entry = Settings.magicCobbleGenChances.floorEntry(level);
+                double maxValue = entry.getValue().lastKey();
+                double rnd = Utils.randomDouble() * maxValue;
+                Map.Entry<Double, Block> en = entry.getValue().ceilingEntry(rnd);
 
-                //Utils.sendDebug("DEBUG: Block: " + block.getId());
-                //Utils.sendDebug("DEBUG: Cobble generated. Island level = " + level);
-                if (!Settings.magicCobbleGenChances.isEmpty()) {
-                    Map.Entry<Integer, TreeMap<Double, Block>> entry = Settings.magicCobbleGenChances.floorEntry(level);
-                    double maxValue = entry.getValue().lastKey();
-                    double rnd = Utils.randomDouble() * maxValue;
-                    Map.Entry<Double, Block> en = entry.getValue().ceilingEntry(rnd);
-                    //Utils.sendDebug("DEBUG: " + entry.getValue().toString());
-                    //Utils.sendDebug("DEBUG: Cobble generated. Island level = " + level);
-                    //Utils.sendDebug("DEBUG: rnd = " + rnd + "/" + maxValue);
-                    //Utils.sendDebug("DEBUG: material = " + en.getValue());
-                    if (en != null) {
-                        e.setCancelled(); // Cancel the event so they won't generate shits™
-                        block.getLevel().setBlock(block, en.getValue());
-                        // Record stats, per level
-                        if (stats.containsKey(entry.getKey())) {
-                            stats.get(entry.getKey()).add(en.getValue());
-                        } else {
-                            Multiset<Block> set = HashMultiset.create();
-                            set.add(en.getValue());
-                            stats.put(entry.getKey(), set);
-                        }
+                if (en != null) {
+                    e.setCancelled();
+                    flowedFrom.getLevel().setBlock(flowedFrom, en.getValue());
+                    flowedFrom.getLevel().addSound(flowedFrom.add(0.5, 0.5, 0.5), Sound.RANDOM_FIZZ, 1, 2.6F + (ThreadLocalRandom.current().nextFloat() - ThreadLocalRandom.current().nextFloat()) * 0.8F);
+
+                    for (int i = 0; i < 8; ++i) {
+                        flowedFrom.getLevel().addParticle(new SmokeParticle(flowedFrom.add(Math.random(), 1.2, Math.random())));
+                    }
+
+                    // Record stats, per level
+                    if (stats.containsKey(entry.getKey())) {
+                        stats.get(entry.getKey()).add(en.getValue());
+                    } else {
+                        Multiset<Block> set = HashMultiset.create();
+                        set.add(en.getValue());
+                        stats.put(entry.getKey(), set);
                     }
                 }
             }
         }
+    }
+
+    public boolean generatesCobble(Block block, Block toBlock) {
+        int mirrorID1 = block.getId() == WATER || block.getId() == STILL_WATER ? LAVA : WATER;
+        int mirrorID2 = block.getId() == WATER || block.getId() == STILL_WATER ? STILL_LAVA : STILL_WATER;
+        for (BlockFace face : BlockFace.values()) {
+            Block r = toBlock.getSide(face);
+            if (r.getId() == mirrorID1 || r.getId() == mirrorID2) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
