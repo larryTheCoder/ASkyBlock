@@ -48,6 +48,7 @@ public class PlayerData implements Cloneable {
     String leader;
     private int resetleft;
     private int islandLevel;
+    private int deaths;
     private ArrayList<String> banList = new ArrayList<>();
     private String pubLocale;
     public String teamIslandLocation;
@@ -63,7 +64,7 @@ public class PlayerData implements Cloneable {
         setupChallengeList();
     }
 
-    public PlayerData(String playerName, int homes, ArrayList<String> members, String challenges, String challengesTime, int islandlvl, boolean inTeam, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList, String locale, String teamName) {
+    public PlayerData(String playerName, int homes, ArrayList<String> members, String challenges, String challengesTime, int islandlvl, boolean inTeam, int deaths, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList, String locale, String teamName) {
         this.homes = homes;
         this.members = members;
         this.inTeam = inTeam;
@@ -75,6 +76,7 @@ public class PlayerData implements Cloneable {
         this.banList = banList;
         this.pubLocale = locale;
         this.name = teamName;
+        this.deaths = deaths;
         encodeChallengeList(challenges, challengesTime); // Safe
     }
 
@@ -306,5 +308,22 @@ public class PlayerData implements Cloneable {
      */
     public void saveData() {
         ASkyBlock.get().getDatabase().savePlayerData(this);
+    }
+
+    /**
+     * Checks if the player is in a team
+     *
+     * @return true if the player does
+     */
+    public boolean hasTeam() {
+        return inTeam;
+    }
+
+    public int getDeaths() {
+        return deaths;
+    }
+
+    public void addDeath() {
+        this.deaths++;
     }
 }

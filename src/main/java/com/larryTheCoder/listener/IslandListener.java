@@ -27,7 +27,6 @@
 package com.larryTheCoder.listener;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.block.BlockLava;
 import cn.nukkit.entity.item.EntityPrimedTNT;
 import cn.nukkit.entity.item.EntityVehicle;
@@ -41,7 +40,6 @@ import cn.nukkit.event.entity.EntityExplodeEvent;
 import cn.nukkit.event.inventory.CraftItemEvent;
 import cn.nukkit.event.player.*;
 import cn.nukkit.level.Location;
-import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.IslandEnterEvent;
@@ -50,8 +48,6 @@ import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.storage.SettingsFlag;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
-
-import java.util.List;
 
 import static cn.nukkit.block.BlockID.ENDER_CHEST;
 
@@ -64,7 +60,6 @@ import static cn.nukkit.block.BlockID.ENDER_CHEST;
 public class IslandListener implements Listener {
 
     private final ASkyBlock plugin;
-    private final MainLogger deb = Server.getInstance().getLogger();
 
     public IslandListener(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -380,9 +375,9 @@ public class IslandListener implements Listener {
     @EventHandler(priority = EventPriority.LOW)
     public void onEntityDamage(EntityDamageByEntityEvent e) {
         // The damager is in the world but the entity who got attacked it is not? Oh no
-        if (notInWorld(e.getDamager().getLocation()) || notInWorld(e.getEntity())) {
-            return;
-        }
+//        if (notInWorld(e.getDamager().getLocation()) || notInWorld(e.getEntity())) {
+//            return;
+//        }
         // TODO: A subject
     }
 
@@ -436,45 +431,5 @@ public class IslandListener implements Listener {
             player.sendMessage(plugin.getLocale(player).errorNoPermission);
             event.setCancelled(true);
         }
-    }
-
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onPlayerLogin(PlayerPreLoginEvent ex) {
-        Player p = ex.getPlayer();
-        plugin.getIslandInfo(p);
-    }
-
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onPlayerJoin(PlayerJoinEvent ex) {
-        // load player inventory if exists
-        Player p = ex.getPlayer();
-        plugin.getInventory().loadPlayerInventory(p);
-        // Load player data
-        if (plugin.getPlayerInfo(p) == null) {
-            Utils.send(p.getName() + "&a data doesn't exists. Creating new ones");
-            plugin.getDatabase().createPlayer(p.getName());
-        }
-
-        // Load messages
-        List<String> news = plugin.getMessages().getMessages(p.getName());
-
-        if (news != null && news.isEmpty()) {
-            p.sendMessage(plugin.getLocale(p).newNews.replace("[count]", Integer.toString(news.size())));
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onPlayerLeave(PlayerQuitEvent ex) {
-        Player p = ex.getPlayer();
-        IslandData pd = plugin.getIslandInfo(p);
-        if (pd != null) {
-            // Remove the island data from cache provides the memory to server
-            plugin.getDatabase().removeIslandFromCache(pd);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onPlayerCommand(PlayerCommandPreprocessEvent ex) {
-        // todo: Block player messages.
     }
 }

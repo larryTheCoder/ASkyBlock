@@ -83,7 +83,7 @@ public class InviteSubCommand extends SubCommand {
         }
         PlayerData pdinv = ASkyBlock.get().getPlayerInfo(invite);
         PlayerData pd = ASkyBlock.get().getPlayerInfo(p);
-        if (pdinv.inTeam) {
+        if (pdinv.hasTeam()) {
             sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
             return false;
         }

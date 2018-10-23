@@ -140,6 +140,7 @@ public class MysqlConnection extends Database {
                     + "`locale` VARCHAR(64) NOT NULL,"
                     + "`banlist` VARCHAR(1024),"
                     + "`teamleader` VARCHAR(1024),"
+                    + "`deaths` INTEGER DEFAULT 0,"
                     + "`teamislandlocation` VARCHAR(1024),"
                     + "`members` VARCHAR(8192),"
                     + "`challengelist` VARCHAR(8192),"
@@ -899,7 +900,7 @@ public class MysqlConnection extends Database {
             set = stmt.executeQuery("SELECT * FROM `" + prefix + "_players` WHERE `player` = '" + st + "'");
 
             if (!set.isClosed()) {
-                pd = new PlayerData(set.getString("player"), set.getInt("homes"), Utils.stringToArray(set.getString("members"), ", "), set.getString("challengelist"), set.getString("challengelisttimes"), set.getInt("islandlvl"), set.getBoolean("inTeam"), set.getString("teamLeader"), set.getString("teamIslandLocation"), set.getInt("resetleft"), Utils.stringToArray(set.getString("banList"), ", "), set.getString("locale"), set.getString("teamName"));
+                pd = new PlayerData(set.getString("player"), set.getInt("homes"), Utils.stringToArray(set.getString("members"), ", "), set.getString("challengelist"), set.getString("challengelisttimes"), set.getInt("islandlvl"), set.getBoolean("inTeam"), set.getInt("deaths"), set.getString("teamLeader"), set.getString("teamIslandLocation"), set.getInt("resetleft"), Utils.stringToArray(set.getString("banList"), ", "), set.getString("locale"), set.getString("teamName"));
             }
         } catch (SQLException ex) {
             try {
@@ -954,7 +955,7 @@ public class MysqlConnection extends Database {
             stmt.setString(4, Utils.arrayToString(pd.getBanList()));
             stmt.setString(5, pd.teamLeader);
             stmt.setString(6, pd.teamIslandLocation);
-            stmt.setBoolean(7, pd.inTeam);
+            stmt.setBoolean(7, pd.hasTeam());
             stmt.setInt(8, pd.getIslandLevel());
             stmt.setString(9, Utils.arrayToString(pd.members));
             stmt.setString(10, pd.decodeChallengeList("cl"));
@@ -1009,7 +1010,7 @@ public class MysqlConnection extends Database {
             stmt.setString(3, Utils.arrayToString(pd.getBanList()));
             stmt.setString(4, pd.teamLeader);
             stmt.setString(5, pd.teamIslandLocation);
-            stmt.setBoolean(6, pd.inTeam);
+            stmt.setBoolean(6, pd.hasTeam());
             stmt.setInt(7, pd.getIslandLevel());
             stmt.setString(8, Utils.arrayToString(pd.members));
             stmt.setString(9, pd.decodeChallengeList("cl"));

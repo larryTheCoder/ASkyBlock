@@ -38,7 +38,9 @@ import com.larryTheCoder.utils.Utils;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Main database provider that saves
@@ -49,15 +51,11 @@ import java.util.List;
  */
 public final class SqlConnection extends Database {
 
-    private final AbstractConfig db;
     private final ASkyBlock plugin;
     private Connection con;
-    private boolean closed = true;
 
     public SqlConnection(ASkyBlock plugin, AbstractConfig database) throws SQLException, ClassNotFoundException {
-        // Performance upgrade: Cache
         this.plugin = plugin;
-        this.db = database;
         this.con = database.openConnection();
         this.verifyTable();
     }
@@ -75,6 +73,7 @@ public final class SqlConnection extends Database {
             }
         }
         if (create == 0) {
+            verifyColumns();
             return;
         }
         // A lot of updates will coming
@@ -105,6 +104,7 @@ public final class SqlConnection extends Database {
                     + "`teamleader` VARCHAR,"
                     + "`teamislandlocation` VARCHAR,"
                     + "`inteam` BOOLEAN,"
+                    + "`deaths` INTEGER DEFAULT 0,"
                     + "`islandlvl` INTEGER,"
                     + "`members` VARCHAR,"
                     + "`challengelist` VARCHAR,"
@@ -114,33 +114,89 @@ public final class SqlConnection extends Database {
             set.executeBatch();
             set.clearBatch();
         }
-        closed = false;
     }
 
-    private boolean isValid() {
-        try {
-            if (con.isClosed()) {
-                return false;
+    /**
+     * Verify each columns if it exists and creates a new
+     * column if not exists.
+     */
+    private void verifyColumns() throws SQLException {
+        Statement stmt = this.con.createStatement();
+        // First, store the database metadata with its column
+        // type name so its could be altered when update
+        Map<String, String> dbIsland = new HashMap<>();
+        Map<String, String> dbPlayer = new HashMap<>();
+
+        // Verified tables of `island`
+        dbIsland.put("id", "INTEGER");
+        dbIsland.put("islandId", "INTEGER NOT NULL");
+        dbIsland.put("x", "INTEGER NOT NULL");
+        dbIsland.put("y", "INTEGER NOT NULL");
+        dbIsland.put("z", "INTEGER NOT NULL");
+        dbIsland.put("spawnX", "INTEGER NOT NULL");
+        dbIsland.put("spawnY", "INTEGER NOT NULL");
+        dbIsland.put("spawnZ", "INTEGER NOT NULL");
+        dbIsland.put("isSpawn", "BOOLEAN NOT NULL");
+        dbIsland.put("psize", "INTEGER NOT NULL");
+        dbIsland.put("owner", "VARCHAR NOT NULL");
+        dbIsland.put("name", "VARCHAR NOT NULL");
+        dbIsland.put("world", "VARCHAR NOT NULL");
+        dbIsland.put("protection", "VARCHAR(780) NOT NULL");
+        dbIsland.put("biome", "VARCHAR NOT NULL");
+        dbIsland.put("locked", "INTEGER NOT NULL");
+
+        // Verified tables of `players`
+        dbPlayer.put("player", "VARCHAR NOT NULL");
+        dbPlayer.put("homes", "INTEGER NOT NULL");
+        dbPlayer.put("resetleft", "INTEGER NOT NULL");
+        dbPlayer.put("banlist", "VARCHAR");
+        dbPlayer.put("teamleader", "VARCHAR");
+        dbPlayer.put("teamislandlocation", "VARCHAR");
+        dbPlayer.put("inteam", "BOOLEAN");
+        dbPlayer.put("deaths", "INTEGER DEFAULT 0");
+        dbPlayer.put("islandlvl", "INTEGER");
+        dbPlayer.put("members", "VARCHAR");
+        dbPlayer.put("challengelist", "VARCHAR");
+        dbPlayer.put("challengelisttimes", "VARCHAR");
+        dbPlayer.put("name", "VARCHAR");
+        dbPlayer.put("locale", "VARCHAR NOT NULL");
+
+        String islandData = "SELECT * FROM `island`";
+        String playerData = "SELECT * FROM `players`";
+
+        // Now check if the columns existed
+        ResultSet rs = stmt.executeQuery(islandData);
+        ResultSetMetaData dbData = rs.getMetaData();
+
+        int cols = dbData.getColumnCount();
+        for (int i = 1; i <= cols; i++) {
+            dbIsland.remove(dbData.getColumnName(i));
+        }
+        rs.close();
+
+        rs = stmt.executeQuery(playerData);
+        dbData = rs.getMetaData();
+
+        cols = dbData.getColumnCount();
+        for (int i = 1; i <= cols; i++) {
+            dbPlayer.remove(dbData.getColumnName(i));
+        }
+        rs.close();
+
+        // Take an action on the unresolved columns
+        if (dbIsland.size() != 0) {
+            for (Map.Entry<String, String> map : dbIsland.entrySet()) {
+                stmt.executeUpdate("ALTER TABLE `island` ADD `" + map.getKey() + "` " + map.getValue());
             }
-        } catch (SQLException e) {
-            return false;
         }
-        try (PreparedStatement stmt = this.con.prepareStatement("SELECT 1")) {
-            stmt.executeQuery();
-            return true;
-        } catch (Throwable e) {
-            return false;
-        }
-    }
 
-    private void reconnect() {
-        try {
-            close();
-            closed = false;
-            con = db.forceConnection();
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+        if (dbPlayer.size() != 0) {
+            for (Map.Entry<String, String> map : dbPlayer.entrySet()) {
+                stmt.executeUpdate("ALTER TABLE `island` ADD `" + map.getKey() + "` " + map.getValue());
+            }
         }
+
+        stmt.close();
     }
 
     @Override
@@ -373,8 +429,7 @@ public final class SqlConnection extends Database {
     public void close() {
         Utils.send("&7Closing databases...");
         try {
-            this.closed = true;
-            this.con.close();
+            con.close();
             // Clear all variables
             islandCache.clear();
             islandSpawn = null;
@@ -516,6 +571,7 @@ public final class SqlConnection extends Database {
                     set.getString("challengelisttimes"),
                     set.getInt("islandlvl"),
                     set.getBoolean("inTeam"),
+                    set.getInt("deaths"),
                     set.getString("teamLeader"),
                     set.getString("teamIslandLocation"),
                     set.getInt("resetleft"),

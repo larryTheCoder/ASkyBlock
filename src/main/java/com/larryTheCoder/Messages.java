@@ -132,20 +132,17 @@ public class Messages {
     /**
      * Sends a message to every player in the team that is offline
      *
-     * @param team
+     * @param player
      * @param message
      */
-    public void tellOfflineTeam(String team, String message) {
-        // getLogger().info("DEBUG: tell offline team called");
-        if (!plugin.getTManager().inTeam(team)) {
-            //    // getLogger().info("DEBUG: player is not in a team");
+    public void tellOfflineTeam(String player, String message) {
+        if (!plugin.getTManager().inTeam(player)) {
             return;
         }
-        String teamLeader = plugin.getTManager().getLeader(team);
+        String teamLeader = plugin.getTManager().getLeader(player);
         List<String> teamMembers = plugin.getTManager().getPlayerMembers(teamLeader);
         for (String member : teamMembers) {
-            // getLogger().info("DEBUG: trying String " + member.toString());
-            if (plugin.getServer().getPlayer(team) == null) {
+            if (plugin.getServer().getPlayer(player) == null) {
                 // Offline player
                 setMessage(member, message);
             }

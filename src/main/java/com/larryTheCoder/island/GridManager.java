@@ -161,7 +161,7 @@ public class GridManager {
      * @param number Starting home location e.g., 1
      * @return Location of a safe teleport spot or null if one cannot be found
      */
-    Location getSafeHomeLocation(String p, int number) {
+    public Location getSafeHomeLocation(String p, int number) {
         IslandData pd = plugin.getDatabase().getIsland(p, number);
         if (pd == null) {
             // Get the default home, which may be null too, but that's okay

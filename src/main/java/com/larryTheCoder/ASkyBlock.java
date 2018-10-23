@@ -52,6 +52,7 @@ import com.larryTheCoder.island.IslandManager;
 import com.larryTheCoder.listener.ChatHandler;
 import com.larryTheCoder.listener.IslandListener;
 import com.larryTheCoder.listener.LavaCheck;
+import com.larryTheCoder.listener.PlayerEvent;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.panels.Panel;
@@ -255,6 +256,7 @@ public class ASkyBlock extends PluginBase {
         pm.registerEvents(chatHandler, this);
         pm.registerEvents(new IslandListener(this), this);
         pm.registerEvents(new LavaCheck(this), this);
+        pm.registerEvents(new PlayerEvent(this), this);
         ServerScheduler pd = getServer().getScheduler();
         pd.scheduleRepeatingTask(new PluginTask(this), 20); // tick every 1 sec
     }

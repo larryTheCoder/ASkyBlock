@@ -101,6 +101,7 @@ public final class ASlocales {
     public String errorChallengeDoesNotExist = "Challenge doesn't exist or is already completed";
     public String completeChallengeCompleted = "[challengename] has been completed for [name]";
     public String resetChallengeReset = "[challengename] has been reset for [name]";
+    public String deathsDied;
     private String errorCommandNotReady = "§cYou can't use that command right now.";
     public String errorCommandBlocked = "§cYou can't use that command here.";
     public String errorOfflinePlayer = "§cThat player is offline or doesn't exist.";

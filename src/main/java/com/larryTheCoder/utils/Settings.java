@@ -47,6 +47,8 @@ public class Settings {
     public static int islandHeight = 60;
     public static int islandMaxNameLong;
     public static int cleanRate;
+    public static boolean respawnOnIsland;
+    public static int deathPenalty;
     public static final ArrayList<String> bannedCommands = new ArrayList<>();
     public static int reset = 3;
     public static int gameMode;
