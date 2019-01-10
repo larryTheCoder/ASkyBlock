@@ -1,4 +1,4 @@
-![ASkyBlock](https://github.com/TheSolidCrafter/ASkyBlock-Nukkit/blob/master/.circleci/images/logo.png)
+![ASkyBlock](https://github.com/larryTheCoder/SkyBlock-legacy/blob/master/.circleci/images/logo.png)
 [![Circle-CI](https://circleci.com/gh/TheSolidCrafter/ASkyBlock-Nukkit.svg?style=shield)](https://circleci.com/gh/TheSolidCrafter/ASkyBlock-Nukkit)
 
 Introduction
