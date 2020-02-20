@@ -31,6 +31,7 @@ import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
+import com.larryTheCoder.player.TeamManager;
 
 /**
  * @author larryTheCoder
@@ -73,10 +74,11 @@ public class ChatSubCommand extends SubCommand {
             sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
         }
-        if (getPlugin().getTManager().hasTeam(p)) {
+        TeamManager manager = getPlugin().getTManager();
+        if (manager.hasTeam(p.getName())) {
             // Check if team members are online
             boolean online = false;
-            for (String teamMember : getPlugin().getPlayerInfo(p).members) {
+            for (String teamMember : manager.getPlayerCoop(p.getName()).getMembers()) {
                 if (!teamMember.equals(p.getName()) && getPlugin().getServer().getPlayer(teamMember) != null) {
                     online = true;
                 }

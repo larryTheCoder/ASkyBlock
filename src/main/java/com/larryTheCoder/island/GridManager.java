@@ -136,7 +136,7 @@ public class GridManager {
                 int protectionRange = plugin.getSettings(islandTestLocation.getLevel().getName()).getProtectionRange();
                 if (plugin.getIsland().checkIslandAt(islandTestLocation.getLevel())) {
                     // Get the protection range for this location if possible
-                    IslandData island = plugin.getIsland().GetIslandAt(islandTestLocation);
+                    IslandData island = plugin.getIsland().getIslandAt(islandTestLocation);
                     if (island != null) {
                         // We are in a protected island area.
                         protectionRange = island.getProtectionSize();

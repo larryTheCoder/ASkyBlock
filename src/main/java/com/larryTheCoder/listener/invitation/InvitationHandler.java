@@ -28,71 +28,97 @@ package com.larryTheCoder.listener.invitation;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.utils.Settings;
 
-import java.util.HashMap;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
 
 /**
- * This class handle all Invitations and addmember function It will tick every
- * seconds as in config.yml
+ * Handles all the invites for the server.
  *
  * @author larryTheCoder
  */
 public class InvitationHandler {
 
     private final ASkyBlock plugin;
-    private final HashMap<Player, Invitation> invitation = new HashMap<>();
+    private final List<Invitation> invitation = new ArrayList<>();
 
-    public InvitationHandler(ASkyBlock main) {
-        plugin = main;
-    }
+    public InvitationHandler(ASkyBlock plugin) {
+        this.plugin = plugin;
+        Server.getInstance().getScheduler().scheduleRepeatingTask(plugin, () -> {
+            if (invitation.isEmpty()) {
+                return;
+            }
+            Queue<Invitation> removeQuery = new ArrayDeque<>(invitation.size());
+            // We can't remove the invite while in forEach
+            // We store it in Queue and then stores them in it
+            // After we done dealing with it.
+            invitation.forEach(invite -> {
+                if (!invite.tick()) {
+                    removeQuery.add(invite);
+                }
+            });
 
-    public void removeInvitation(Invitation player) {
-        Player p = Server.getInstance().getPlayer(player.getReceiver().getName());
-        invitation.remove(player, p);
-    }
-
-    public ASkyBlock getPlugin() {
-        return plugin;
+            // Deal with these things.
+            while (!removeQuery.isEmpty()) {
+                removeInvitation(removeQuery.poll());
+            }
+        }, 20);
     }
 
     /**
-     * Return all invitations
+     * Removes an invite from a invite.
      *
-     * @return HashMap<>
+     * @param invite The invitation class.
      */
-    @SuppressWarnings("ReturnOfCollectionOrArrayField")
-    public HashMap<Player, Invitation> getInvitations() {
-        return invitation;
+    void removeInvitation(Invitation invite) {
+        invitation.remove(invite);
     }
 
+    /**
+     * Gets an invite by the receiver.
+     *
+     * @param player The receiver of the invite
+     * @return The invite class itself, otherwise null.
+     */
     public Invitation getInvitation(Player player) {
-        Invitation inv = null;
-        for (Invitation p : invitation.values()) {
-            if (p.getSender() == player) {
-                inv = p;
-            }
-        }
-        return inv;
+        return getInvitation(player, "");
+    }
+
+    /**
+     * Gets an invite by the receiver with the
+     * player who sent the invite
+     *
+     * @param player The receiver of the invite
+     * @return The invite class itself, otherwise null.
+     */
+    public Invitation getInvitation(Player player, String playerName) {
+        return invitation.stream()
+                .filter(invite -> invite.getReceiver().getName().equalsIgnoreCase(playerName))
+                .filter(invite -> invite.getSender().equals(player))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
      * Create a new invitation
      *
-     * @param sender
-     * @param receiver
+     * @param sender   The sender itself
+     * @param receiver The receiver of the invitation
      */
-    public void addInvitation(Player sender, Player receiver) {
-        sender.sendMessage(plugin.getPrefix() + plugin.getLocale(sender).generalSuccess);
+    public void addInvitation(CommandSender sender, Player receiver) {
+        sender.sendMessage(plugin.getPrefix() + plugin.getLocale(sender.isPlayer() ? (Player) sender : null).inviteSuccess);
         receiver.sendMessage(plugin.getPrefix() + plugin.getLocale(receiver).newInvitation.replace("[player]", sender.getName()));
-        invitation.put(sender, new Invitation(this, sender, receiver));
-    }
+        if (plugin.getIslandInfo(receiver) != null) {
+            // Yes? No? Well its based on ASkyBlock anyways
+            receiver.sendMessage(plugin.getPrefix() + "§cAll of your islands will be deleted after you accept this party.");
 
-    public void tick() {
-        if (Settings.memberTimeOut != -1) {
-            invitation.values().forEach(Invitation::tick);
         }
 
+        // Add into the list.
+        invitation.add(new Invitation(this, sender, receiver));
     }
 }

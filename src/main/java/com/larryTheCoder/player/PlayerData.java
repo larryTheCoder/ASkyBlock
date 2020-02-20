@@ -38,51 +38,30 @@ import java.util.*;
 public class PlayerData implements Cloneable {
 
     // Player critical information data.
-    private final int homes;
     private final String playerName;
     private final HashMap<String, Boolean> challengeList = new HashMap<>();
     private final HashMap<String, Integer> challengeListTimes = new HashMap<>();
-    // Coop team for the player user.
-    // #TBD
-    public String teamLeader;
-    String leader;
     private int resetleft;
     private int islandLevel;
-    private int deaths;
     private ArrayList<String> banList = new ArrayList<>();
     private String pubLocale;
-    public String teamIslandLocation;
-    public boolean inTeam;
-    public ArrayList<String> members = new ArrayList<>();
-    public String name;
 
     public PlayerData(String playerName, int homes, int resetleft) {
         this.playerName = playerName;
-        this.homes = homes;
         this.resetleft = resetleft;
         this.pubLocale = Settings.defaultLanguage;
         setupChallengeList();
     }
 
-    public PlayerData(String playerName, int homes, ArrayList<String> members, String challenges, String challengesTime, int islandlvl, boolean inTeam, int deaths, String teamleader, String teamIslandloc, int resetleft, ArrayList<String> banList, String locale, String teamName) {
-        this.homes = homes;
-        this.members = members;
-        this.inTeam = inTeam;
+    public PlayerData(String playerName, int homes, String challenges, String challengesTime, int islandlvl, int resetleft, ArrayList<String> banList, String locale) {
         this.islandLevel = islandlvl;
-        this.teamLeader = teamleader;
-        this.teamIslandLocation = teamIslandloc;
         this.resetleft = resetleft;
         this.playerName = playerName;
         this.banList = banList;
         this.pubLocale = locale;
-        this.name = teamName;
-        this.deaths = deaths;
         encodeChallengeList(challenges, challengesTime); // Safe
     }
 
-    public int getHomeNumber() {
-        return homes;
-    }
 
     /**
      * Gets the player name of this data.
@@ -119,6 +98,10 @@ public class PlayerData implements Cloneable {
      */
     public int getIslandLevel() {
         return islandLevel;
+    }
+
+    public void setIslandLevel(int level) {
+        this.islandLevel = level;
     }
 
     /**
@@ -222,6 +205,7 @@ public class PlayerData implements Cloneable {
 
     /**
      * Resets a specific challenge.
+     *
      * @param challenge the challenge name
      */
     public void resetChallenge(final String challenge) {
@@ -308,22 +292,5 @@ public class PlayerData implements Cloneable {
      */
     public void saveData() {
         ASkyBlock.get().getDatabase().savePlayerData(this);
-    }
-
-    /**
-     * Checks if the player is in a team
-     *
-     * @return true if the player does
-     */
-    public boolean hasTeam() {
-        return inTeam;
-    }
-
-    public int getDeaths() {
-        return deaths;
-    }
-
-    public void addDeath() {
-        this.deaths++;
     }
 }

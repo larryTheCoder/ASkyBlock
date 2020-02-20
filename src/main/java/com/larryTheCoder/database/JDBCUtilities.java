@@ -97,12 +97,12 @@ public class JDBCUtilities {
             if (e instanceof SQLException) {
                 if (!ignoreSQLException(((SQLException) e).getSQLState())) {
                     e.printStackTrace(System.err);
-                    ASkyBlock.get().getServer().getLogger().notice("SQLState: " + ((SQLException) e).getSQLState());
-                    ASkyBlock.get().getServer().getLogger().notice("Error Code: " + ((SQLException) e).getErrorCode());
-                    ASkyBlock.get().getServer().getLogger().notice("Message: " + e.getMessage());
+                    ASkyBlock.get().getServer().getLogger().debug("SQLState: " + ((SQLException) e).getSQLState());
+                    ASkyBlock.get().getServer().getLogger().debug("Error Code: " + ((SQLException) e).getErrorCode());
+                    ASkyBlock.get().getServer().getLogger().debug("Message: " + e.getMessage());
                     Throwable t = ex.getCause();
                     while (t != null) {
-                        ASkyBlock.get().getServer().getLogger().notice("Cause: " + t);
+                        ASkyBlock.get().getServer().getLogger().debug("Cause: " + t);
                         t = t.getCause();
                     }
                 }

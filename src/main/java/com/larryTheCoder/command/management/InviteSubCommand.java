@@ -31,6 +31,7 @@ import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
 import com.larryTheCoder.player.PlayerData;
+import com.larryTheCoder.player.TeamManager;
 
 /**
  * @author larryTheCoder
@@ -71,26 +72,30 @@ public class InviteSubCommand extends SubCommand {
         if (args.length != 2) {
             return false;
         }
+
+        // Player cannot invite other players when he have no island
         Player p = sender.getServer().getPlayer(sender.getName());
         if (!getPlugin().getIsland().checkIsland(p)) {
             sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
         }
+
+        // The invite player.
         Player invite = sender.getServer().getPlayer(args[1]);
         if (invite == null) {
             sender.sendMessage(getPrefix() + getLocale(p).errorOfflinePlayer);
             return true;
         }
-        PlayerData pdinv = ASkyBlock.get().getPlayerInfo(invite);
-        PlayerData pd = ASkyBlock.get().getPlayerInfo(p);
-        if (pdinv.hasTeam()) {
+
+        // This checks either the player already set into a team
+        // or not.
+        TeamManager manager = getPlugin().getTManager();
+        if (manager.hasTeam(invite.getName())) {
             sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
-            return false;
+            return true;
         }
-        if (pd.members.contains(invite.getName())) {
-            sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
-            return false;
-        }
+
+        // Add them.
         getPlugin().getInvitationHandler().addInvitation(p, invite);
         return true;
     }

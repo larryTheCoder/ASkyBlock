@@ -27,9 +27,13 @@
 package com.larryTheCoder.listener.invitation;
 
 import cn.nukkit.Player;
+import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
+
+import java.util.List;
 
 /**
  * @author larryTheCoder
@@ -37,33 +41,33 @@ import com.larryTheCoder.utils.Settings;
 public class Invitation {
 
     private final InvitationHandler handler;
-    private final Player sender;
+    private final CommandSender sender;
     private final Player receiver;
     private final ASkyBlock plugin;
 
-    private final int time;
+    private int time;
 
     /**
      * Invitation constructor.
      *
-     * @param member   InvitationHandler
-     * @param sender   Player
-     * @param receiver Player
+     * @param handler  The classloader for invite handler
+     * @param sender   The sender of this invite
+     * @param receiver The receiver of this invite
      */
-    public Invitation(InvitationHandler member, Player sender, Player receiver) {
-        this.handler = member;
+    Invitation(InvitationHandler handler, CommandSender sender, Player receiver) {
+        this.handler = handler;
         this.sender = sender;
         this.receiver = receiver;
         this.time = Settings.memberTimeOut;
-        this.plugin = handler.getPlugin();
+        this.plugin = ASkyBlock.get();
     }
 
     /**
      * Return invitation sender
      *
-     * @return Player
+     * @return CommandSender
      */
-    public Player getSender() {
+    public CommandSender getSender() {
         return sender;
     }
 
@@ -72,29 +76,54 @@ public class Invitation {
      *
      * @return Player
      */
-    public Player getReceiver() {
+    Player getReceiver() {
         return receiver;
     }
 
-    public void accept() {
-        sender.sendMessage(plugin.getPrefix() + plugin.getLocale(sender).acceptedTo.replace("[player]", receiver.getName()));
+    public void acceptInvitation() {
+        sender.sendMessage(plugin.getPrefix() + plugin.getLocale(sender.isPlayer() ? (Player) sender : null).acceptedTo.replace("[player]", receiver.getName()));
         receiver.sendMessage(plugin.getPrefix() + plugin.getLocale(receiver).acceptedFrom.replace("[player]", sender.getName()));
-        plugin.getTManager().addTeam(sender, receiver);
-    }
 
-    public void deny() {
-        sender.sendMessage(plugin.getPrefix() + TextFormat.YELLOW + receiver.getName() + " denied your invitation!");
-        receiver.sendMessage(plugin.getPrefix() + TextFormat.YELLOW + "You denied " + sender.getName() + "'s invitation!");
-    }
+        List<IslandData> dataList = plugin.getDatabase().getIslands(receiver.getName());
+        // Check if the player has an island
+        if (!dataList.isEmpty()) {
+            receiver.sendMessage(plugin.getPrefix() + "Deleting all of your islands");
+            dataList.forEach((island) -> plugin.getDatabase().deleteIsland(island));
+        }
 
-    private void expire() {
-        sender.sendMessage(plugin.getPrefix() + TextFormat.YELLOW + "The invitation to " + sender.getName() + " expired!");
+        // Set the team from the sender and the receiver.
+        plugin.getTManager().setTeam(sender.getName(), receiver.getName());
         handler.removeInvitation(this);
     }
 
-    public void tick() {
+    public void denyInvitation() {
+        sender.sendMessage(plugin.getPrefix() + TextFormat.RED + receiver.getName() + " denied your invitation!");
+        receiver.sendMessage(plugin.getPrefix() + TextFormat.RED + "You denied " + sender.getName() + "'s invitation!");
+
+        // Otherwise remove this.
+        handler.removeInvitation(this);
+    }
+
+    private void expire() {
+        receiver.sendMessage(plugin.getPrefix() + TextFormat.RED + "The invitation from " + sender.getName() + " expired!");
+        sender.sendMessage(plugin.getPrefix() + TextFormat.RED + "The invitation to " + receiver + " expired!");
+    }
+
+    boolean tick() {
+        // Fix infinite expire time
+        time--;
         if (time <= 0) {
             expire();
+            return false;
         }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int userData = sender.getName().hashCode();
+        int receiverData = sender.getName().hashCode();
+
+        return (userData / receiverData) + super.hashCode();
     }
 }

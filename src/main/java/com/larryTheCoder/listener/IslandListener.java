@@ -44,6 +44,7 @@ import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.IslandEnterEvent;
 import com.larryTheCoder.events.IslandExitEvent;
+import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.storage.SettingsFlag;
 import com.larryTheCoder.utils.Settings;
@@ -111,7 +112,8 @@ public class IslandListener implements Listener {
             return true;
         }
         IslandData island = plugin.getGrid().getProtectedIslandAt(location);
-        if (island != null && (island.getIgsSettings().getIgsFlag(flag) || island.getMembers().contains(player.getName()))) {
+        TeamManager pd = plugin.getTManager();
+        if (island != null && (island.getIgsSettings().getIgsFlag(flag) || (pd.getLeaderCoop(island.getOwner()) == null || pd.getLeaderCoop(island.getOwner()).isMember(player.getName())))) {
             //deb.debug("DEBUG: Action is allowed, flag=" + island.getIgsSettings().getIgsFlag(flag) + " member=" + island.getMembers().contains(player.getName()));
             return true;
         }

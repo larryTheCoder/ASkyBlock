@@ -146,3 +146,6 @@ permissions:
     is.admin.challanges:
      default: op
      description: "Check information on the given player."
+    is.topten:
+     default: true
+     description: "Be able to get into topten leaderboard."

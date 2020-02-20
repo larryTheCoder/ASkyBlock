@@ -24,641 +24,381 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.larryTheCoder.database.database;
 
-import cn.nukkit.level.Position;
+import cn.nukkit.math.Vector3;
+import cn.nukkit.scheduler.NukkitRunnable;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.database.Database;
-import com.larryTheCoder.database.JDBCUtilities;
 import com.larryTheCoder.database.config.AbstractConfig;
-import com.larryTheCoder.player.PlayerData;
-import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.utils.Settings;
+import com.larryTheCoder.database.config.SQLiteConfig;
+import com.larryTheCoder.storage.IslandSettings;
+import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Utils;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Main database provider that saves
- * Every saves all the data of the island.
- * This is the most stable type of database.
- *
- * @author larryTheCoder
+ * A new and faster way to operate sql commands
+ * and database through a relational database.
+ * <p>
+ * This makes sense when managing tables more easier
+ * when its comes to create a new data and tables.
+ * <p>
+ * Legacy one will be automatically converted into a
+ * new ones, depends, its could fails. Also more
+ * slower...
  */
-public final class SqlConnection extends Database {
+public class SqlConnection {
 
-    private final ASkyBlock plugin;
-    private Connection con;
+    private static final int TABLE_VERSION = 1;
 
-    public SqlConnection(ASkyBlock plugin, AbstractConfig database) throws SQLException, ClassNotFoundException {
-        this.plugin = plugin;
-        this.con = database.openConnection();
-        this.verifyTable();
+    private AbstractConfig database;
+    private Connection connection;
+
+    private long lastTick = 0;
+    private boolean messageDigest = false;
+
+    public SqlConnection(AbstractConfig database) throws SQLException, ClassNotFoundException {
+        this.database = database;
+        this.connection = database.openConnection();
+
+        this.startConnection();
     }
 
-    private void verifyTable() throws SQLException {
-        String[] tables = new String[]{"island", "worlds", "players"};
-        DatabaseMetaData meta = this.con.getMetaData();
-        int create = 0;
-        // Verify tables.
-        for (String s : tables) {
-            try (ResultSet set = meta.getTables(null, null, s, new String[]{"TABLE"})) {
-                if (!set.next()) {
-                    create++;
-                }
+    /**
+     * Starts a connection and creates a new table.
+     * This also checks the table version and decide to
+     * update it or not, like Windows Update Service.
+     */
+    private void startConnection() throws SQLException, ClassNotFoundException {
+        Statement stmt = connection.createStatement();
+
+        ResultSet tables = connection.getMetaData().getTables(null, null, "tableRevision", new String[]{"TABLE"});
+        ResultSet legacy = connection.getMetaData().getTables(null, null, "worlds", new String[]{"TABLE"});
+
+        if (tables.next()) {
+            // Table exists
+            ResultSet r = stmt.executeQuery("SELECT tableVersion from tableRevision");
+            int revVersion = r.getInt(1);
+            if (revVersion < TABLE_VERSION) {
+                Utils.send("&7Updating sql tables from version " + revVersion + " into version " + TABLE_VERSION);
+                Utils.send("&7Backing up your data before updating your tables.");
+
+                startUpdate(revVersion);
             }
-        }
-        if (create == 0) {
-            verifyColumns();
-            return;
-        }
-        // A lot of updates will coming
-        try (Statement set = this.con.createStatement()) {
-            //createdDate updatedDate votes
-            set.addBatch("CREATE TABLE IF NOT EXISTS `island` (`id` INTEGER,"
-                    + "`islandId` INTEGER NOT NULL,"
-                    + "`x` INTEGER NOT NULL,"
-                    + "`y` INTEGER NOT NULL,"
-                    + "`z` INTEGER NOT NULL,"
-                    + "`spawnX` INTEGER,"
-                    + "`spawnY` INTEGER,"
-                    + "`spawnZ` INTEGER,"
-                    + "`isSpawn` BOOLEAN NOT NULL,"
-                    + "`psize` INTEGER NOT NULL,"
-                    + "`owner` VARCHAR NOT NULL,"
-                    + "`name` VARCHAR NOT NULL,"
-                    + "`world` VARCHAR NOT NULL,"
-                    + "`protection` VARCHAR(780) NOT NULL,"
-                    + "`biome` VARCHAR NOT NULL,"
-                    + "`locked` INTEGER NOT NULL)");
-            //+ "`active` INTEGER NOT NULL)");
-            set.addBatch("CREATE TABLE IF NOT EXISTS `worlds` (`world` VARCHAR)");
-            set.addBatch("CREATE TABLE IF NOT EXISTS `players` (`player` VARCHAR NOT NULL,"
-                    + "`homes` INTEGER NOT NULL,"
-                    + "`resetleft` INTEGER NOT NULL,"
-                    + "`banlist` VARCHAR,"
-                    + "`teamleader` VARCHAR,"
-                    + "`teamislandlocation` VARCHAR,"
-                    + "`inteam` BOOLEAN,"
-                    + "`deaths` INTEGER DEFAULT 0,"
-                    + "`islandlvl` INTEGER,"
-                    + "`members` VARCHAR,"
-                    + "`challengelist` VARCHAR,"
-                    + "`challengelisttimes` VARCHAR,"
-                    + "`name` VARCHAR,"
-                    + "`locale` VARCHAR NOT NULL)");
-            set.executeBatch();
-            set.clearBatch();
+        } else if (legacy.next()) {
+            database.closeConnection();
+            Utils.send("&7Updating sql tables into version " + TABLE_VERSION);
+            Utils.send("&7Backing up your data before updating your tables.");
+
+            startUpdate(-1);
+        } else {
+            // Table revision and world name.
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS tableRevision(tableVersion INT)");
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS worldList (worldName TEXT PRIMARY KEY)");
+
+            /*
+             * Player data and challenges
+             */
+
+            // Player table
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS player (" +
+                    "playerName VARCHAR(100) PRIMARY KEY," +
+                    "locale TEXT NOT NULL," +
+                    "banList TEXT NOT NULL," +
+                    "resetAttempts INT NOT NULL)");
+
+            // Challenges data
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS challenges(" +
+                    "challengesList TEXT," +
+                    "challengesTimes TEXT," +
+                    "player VARCHAR(100)," +
+                    "FOREIGN KEY (player) REFERENCES player(playerName))");
+
+            /*
+             * Island Tables and data
+             */
+
+            // Island table
+            // Stores important data.
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS island (" +
+                    "islandId INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "islandUniqueId BIGINT," +
+                    "gridPosition TEXT NOT NULL," +
+                    "spawnPosition TEXT," +
+                    "gridSize INTEGER NOT NULL," +
+                    "player VARCHAR(100)," +
+                    "FOREIGN KEY (player) REFERENCES player(playerName))");
+
+            // Island data from table 'table island'
+            // Store only island side data. Not important. well at least?
+            // We can create new table if there is new data lol
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS islandData(" +
+                    "dataId INT," +
+                    "biome INT DEFAULT 0," +
+                    "locked INTEGER DEFAULT 0," +
+                    "protectionData TEXT DEFAULT ''," +
+                    "levelName TEXT," +
+                    "levelHandicap INT DEFAULT 0," +
+                    "FOREIGN KEY (dataId) REFERENCES island(islandId)," +
+                    "FOREIGN KEY (levelName) REFERENCES worldList(worldName))");
+
+            // This table stores the home count, no more pain
+            // This table will be updated every time player deletes their island.
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS islandId(" +
+                    "dataId INT," +
+                    "homeId INT," +
+                    "FOREIGN KEY (dataId) REFERENCES island(islandId))");
+
+            /*
+             * Parties data and members
+             */
+
+            // PartyData table
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS partyData (" +
+                    "teamId INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "defaultIsland INT NOT NULL," +
+                    "player VARCHAR(100)," +
+                    "FOREIGN KEY (defaultIsland) REFERENCES island(islandId)," +
+                    "FOREIGN KEY (player) REFERENCES player(playerName))");
+
+            // Members table
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS members(" +
+                    "memberId INT," +
+                    "teamMembers TEXT DEFAULT ''," +
+                    "FOREIGN KEY (memberId) REFERENCES partyData(teamId))");
+
+            stmt.addBatch("INSERT INTO tableRevision(tableVersion) VALUES(" + TABLE_VERSION + ")");
+            stmt.executeBatch();
+            stmt.clearBatch();
         }
     }
 
     /**
-     * Verify each columns if it exists and creates a new
-     * column if not exists.
+     * Update a sql table from revision A to
+     * revision B.
+     *
+     * @param from The table that need to be updated from.
      */
-    private void verifyColumns() throws SQLException {
-        Statement stmt = this.con.createStatement();
-        // First, store the database metadata with its column
-        // type name so its could be altered when update
-        Map<String, String> dbIsland = new HashMap<>();
-        Map<String, String> dbPlayer = new HashMap<>();
+    private void startUpdate(int from) throws SQLException, ClassNotFoundException {
+        // Windows Update much?
+        switch (from) {
+            // The table is from a very very legacy one
+            // Like uh? no performance at all.
+            case -1:
+                if (database instanceof SQLiteConfig) {
+                    UUID random = UUID.randomUUID(); // Random and unique, fix update loop
+                    String sqlPath = ((SQLiteConfig) database).getAbsolutePath();
+                    // Prepare to rename it and move it
+                    File file = new File(sqlPath);
+                    try {
+                        file.renameTo(new File(ASkyBlock.get().getDataFolder(), random.toString() + ".db"));
+                        file.createNewFile();
+                    } catch (IOException ignored) {
+                    }
+                    SQLiteConfig oldDb = new SQLiteConfig(new File(ASkyBlock.get().getDataFolder(), random.toString() + ".db"));
 
-        // Verified tables of `island`
-        dbIsland.put("id", "INTEGER");
-        dbIsland.put("islandId", "INTEGER NOT NULL");
-        dbIsland.put("x", "INTEGER NOT NULL");
-        dbIsland.put("y", "INTEGER NOT NULL");
-        dbIsland.put("z", "INTEGER NOT NULL");
-        dbIsland.put("spawnX", "INTEGER NOT NULL");
-        dbIsland.put("spawnY", "INTEGER NOT NULL");
-        dbIsland.put("spawnZ", "INTEGER NOT NULL");
-        dbIsland.put("isSpawn", "BOOLEAN NOT NULL");
-        dbIsland.put("psize", "INTEGER NOT NULL");
-        dbIsland.put("owner", "VARCHAR NOT NULL");
-        dbIsland.put("name", "VARCHAR NOT NULL");
-        dbIsland.put("world", "VARCHAR NOT NULL");
-        dbIsland.put("protection", "VARCHAR(780) NOT NULL");
-        dbIsland.put("biome", "VARCHAR NOT NULL");
-        dbIsland.put("locked", "INTEGER NOT NULL");
+                    this.database = new SQLiteConfig(file);
+                    this.connection = database.openConnection();
+                    Connection oldConn = oldDb.openConnection(); // Now move table A to B... uh more things to be done
 
-        // Verified tables of `players`
-        dbPlayer.put("player", "VARCHAR NOT NULL");
-        dbPlayer.put("homes", "INTEGER NOT NULL");
-        dbPlayer.put("resetleft", "INTEGER NOT NULL");
-        dbPlayer.put("banlist", "VARCHAR");
-        dbPlayer.put("teamleader", "VARCHAR");
-        dbPlayer.put("teamislandlocation", "VARCHAR");
-        dbPlayer.put("inteam", "BOOLEAN");
-        dbPlayer.put("deaths", "INTEGER DEFAULT 0");
-        dbPlayer.put("islandlvl", "INTEGER");
-        dbPlayer.put("members", "VARCHAR");
-        dbPlayer.put("challengelist", "VARCHAR");
-        dbPlayer.put("challengelisttimes", "VARCHAR");
-        dbPlayer.put("name", "VARCHAR");
-        dbPlayer.put("locale", "VARCHAR NOT NULL");
+                    Statement stmtOld = oldConn.createStatement();
 
-        String islandData = "SELECT * FROM `island`";
-        String playerData = "SELECT * FROM `players`";
+                    // Start a new connection.
+                    startConnection();
 
-        // Now check if the columns existed
-        ResultSet rs = stmt.executeQuery(islandData);
-        ResultSetMetaData dbData = rs.getMetaData();
+                    TaskManager.runTaskAsync(() -> {
+                        long currentTime = System.currentTimeMillis();
 
-        int cols = dbData.getColumnCount();
-        for (int i = 1; i <= cols; i++) {
-            dbIsland.remove(dbData.getColumnName(i));
-        }
-        rs.close();
+                        Exception errorCode = null;
+                        boolean failure = false;
 
-        rs = stmt.executeQuery(playerData);
-        dbData = rs.getMetaData();
+                        try {
+                            Statement stmt = connection.createStatement();
 
-        cols = dbData.getColumnCount();
-        for (int i = 1; i <= cols; i++) {
-            dbPlayer.remove(dbData.getColumnName(i));
-        }
-        rs.close();
+                            // The worlds table.
+                            ResultSet worldSet = stmtOld.executeQuery("SELECT * FROM `worlds`");
 
-        // Take an action on the unresolved columns
-        if (dbIsland.size() != 0) {
-            for (Map.Entry<String, String> map : dbIsland.entrySet()) {
-                stmt.executeUpdate("ALTER TABLE `island` ADD `" + map.getKey() + "` " + map.getValue());
-            }
-        }
+                            while (worldSet.next()) {
+                                stmt.addBatch("INSERT INTO worldList(worldName) VALUES ('" + worldSet.getString("world") + "')");
+                                stmt.executeBatch();
+                                stmt.clearBatch();
+                            }
+                            worldSet.close();
 
-        if (dbPlayer.size() != 0) {
-            for (Map.Entry<String, String> map : dbPlayer.entrySet()) {
-                stmt.executeUpdate("ALTER TABLE `island` ADD `" + map.getKey() + "` " + map.getValue());
-            }
-        }
+                            // The player data.
+                            ResultSet playerSet = stmtOld.executeQuery("SELECT * FROM `players`");
+                            while (playerSet.next()) {
+                                tickProcessor(currentTime);
 
-        stmt.close();
-    }
+                                String playerName = playerSet.getString("player");
+                                String localeName = playerSet.getString("locale");
+                                String banList = playerSet.getString("banList");
+                                int resetLeft = playerSet.getInt("resetleft");
 
-    @Override
-    public void setSpawnPosition(Position pos) {
-        int x = pos.getFloorX();
-        int y = pos.getFloorY();
-        int z = pos.getFloorZ();
-        try (PreparedStatement stmt = con.prepareStatement("UPDATE `island` SET `spawnX` = ?, `spawnY` = ?, `spawnZ` = ? WHERE `isSpawn` = '1'")) {
-            stmt.setInt(1, x);
-            stmt.setInt(2, y);
-            stmt.setInt(3, z);
-            stmt.addBatch();
-            stmt.executeBatch();
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-    }
+                                // This will fix the challenge issue on legacies databases
+                                String challengeList = Utils.checkChallenge(playerSet.getString("challengelist"), "cl");
+                                String challengeListTimes = Utils.checkChallenge(playerSet.getString("challengelisttimes"), "clt");
 
-    @Override
-    public IslandData getIslandLocation(String levelName, int X, int Z) {
-        int id = plugin.getIsland().generateIslandKey(X, Z, levelName);
-        IslandData database = new IslandData(levelName, X, Z, plugin.getSettings(levelName).getProtectionRange());
-        if (enableFastCache) {
-            // Get a list of island data on cache
-            for (IslandData pd : islandCache) {
-                if (pd.getIslandId() == id && pd.getLevelName().equalsIgnoreCase(levelName)) {
-                    return pd;
+                                try {
+                                    stmt.addBatch("INSERT INTO player(playerName, locale, banList, resetAttempts) VALUES (" +
+                                            "'" + playerName + "'," +
+                                            "'" + localeName + "'," +
+                                            "'" + banList + "'," +
+                                            "'" + resetLeft + "')");
+
+                                    stmt.executeBatch();
+                                    stmt.clearBatch();
+
+                                    stmt.addBatch("INSERT INTO challenges(challengesList, challengesTimes, player) VALUES (" +
+                                            "'" + challengeList + "'," +
+                                            "'" + challengeListTimes + "'," +
+                                            "'" + playerName + "')");
+
+                                    stmt.executeBatch();
+                                    stmt.clearBatch();
+                                } catch (SQLException e) {
+                                    Utils.send("&cFailed to insert player table: " + playerName);
+                                }
+                            }
+
+                            // The island table.
+                            ResultSet set = stmtOld.executeQuery("SELECT * FROM `island`");
+                            while (set.next()) {
+                                tickProcessor(currentTime);
+
+                                // Important set of data
+                                String gridPosition = Utils.getVectorPair(new Vector3(set.getInt("x"), set.getInt("y"), set.getInt("z")));
+                                String playerName = set.getString("owner"); // This is very very confusion on alpha databases
+                                int islandUniqueId = set.getInt("islandId");
+                                int gridSize = set.getInt("psize");
+
+                                // Just an 'eh' set of data
+                                int homeCount = set.getInt("id");
+                                String biome = set.getString("biome");
+                                String igsSettings = new IslandSettings(set.getString("protection")).getSettings();
+                                String levelName = set.getString("world");
+                                boolean isLocked = set.getBoolean("locked");
+
+                                try {
+                                    // Table 1: Important table
+                                    stmt.addBatch("INSERT INTO island(islandUniqueId, gridPosition, gridSize, player) VALUES (" +
+                                            "'" + islandUniqueId + "'," +
+                                            "'" + gridPosition + "'," +
+                                            "'" + gridSize + "'," +
+                                            "'" + playerName + "')");
+
+                                    stmt.executeBatch();
+                                    stmt.clearBatch();
+
+                                    int islandId;
+
+                                    ResultSet setNew = stmt.executeQuery("SELECT * FROM island WHERE islandUniqueId = " + islandUniqueId);
+
+                                    if (setNew.next()) {
+                                        islandId = setNew.getInt("islandId");
+                                    } else {
+                                        Utils.send("&cUnable to process the islandId for " + playerName);
+                                        return;
+                                    }
+                                    setNew.close();
+
+                                    // Table 2: Island Data
+                                    stmt.addBatch("INSERT INTO islandData(dataId, biome, locked, protectionData, levelName) VALUES (" +
+                                            "'" + islandId + "'," +
+                                            "'" + biome + "'," +
+                                            "'" + (isLocked ? 0 : 1) + "'," +
+                                            "'" + igsSettings + "'," +
+                                            "'" + levelName + "')");
+
+                                    stmt.executeBatch();
+                                    stmt.clearBatch();
+
+                                    // Table 3: Island homes
+                                    stmt.addBatch("INSERT INTO islandId(dataId, homeId) VALUES (" +
+                                            "'" + islandId + "', " +
+                                            "'" + homeCount + "')");
+
+                                    stmt.executeBatch();
+                                    stmt.clearBatch();
+                                } catch (SQLException e) {
+                                    Utils.send("&cFailed to insert island table of player: " + playerName + " of IslandUniqueId: " + islandUniqueId);
+                                }
+                            }
+                        } catch (SQLException | NullPointerException e) {
+                            try {
+                                database.closeConnection();
+                                oldDb.closeConnection();
+                            } catch (SQLException e1) {
+                                failure = true;
+                            }
+                            errorCode = e;
+                        }
+
+                        final Exception errorRecord = errorCode;
+                        final boolean crashedError = failure;
+
+                        // Return to main thread.
+                        new NukkitRunnable() {
+                            @Override
+                            public void run() {
+                                if (errorRecord != null) {
+                                    if (crashedError) {
+                                        Utils.send("&cCRASHED WHILE UPDATING DATABASE...");
+                                        Utils.send("&cCANNOT REVERT DATABASE TO ITS LAST STATE...");
+                                        Utils.send("&cYOUR DATABASE COULD BE EFFECTED WITH CORRUPTION...");
+                                        return;
+                                    }
+                                    Utils.send("&cAn unexpected error occured while updating database");
+                                    Utils.send("&cReverting changes...");
+                                    errorRecord.printStackTrace();
+                                    // TODO: Revert the database
+                                } else {
+                                    double timeline = (double) (System.currentTimeMillis() - currentTime) / 1000;
+                                    Utils.send("&aSuccessfully updated your database within (" + timeline + "s)!");
+                                    Utils.send("&7Please restart your server to fully complete this update...");
+                                }
+                            }
+                        }.runTask(ASkyBlock.get());
+                    });
                 }
-            }
-        }
-        try (Statement stmt = con.createStatement()) {
-            ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE(`world` = '" + levelName + "' AND `islandId` = '" + id + "')");
-            if (set.isClosed()) {
-                return database;
-            }
-
-            set.next();
-            database = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
-            if (enableFastCache) {
-                islandCache.add(database);
-            }
-
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-        return database;
-    }
-
-    @Override
-    public ArrayList<IslandData> getIslands(String owner) {
-        ArrayList<IslandData> pd = new ArrayList<>();
-        if (enableFastCache) {
-            // get the data from cache
-            islandCache.stream().filter(
-                    (pd3) -> (pd3.getOwner().equalsIgnoreCase(owner)))
-                    .forEachOrdered(pd::add);
-            // Not empty: Data in list contains player islands
-            if (!pd.isEmpty()) {
-                return pd; // Return
-            }
-        }
-        try (Statement stmt = con.createStatement()) {
-            ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE `owner` = '" + owner + "'");
-            if (set.isClosed()) {
-                return pd;
-            }
-            while (set.next()) {
-                pd.add(new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn")));
-            }
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-        if (enableFastCache) {
-            // Save the island into cache
-            islandCache.addAll(pd);
-        }
-        return pd;
-    }
-
-    @Override
-    public ArrayList<IslandData> getIslands(String owner, String levelName) {
-        ArrayList<IslandData> pd = new ArrayList<>();
-        if (enableFastCache) {
-            // get the data from cache
-            islandCache.stream().filter(
-                    (pd3) -> (pd3.getOwner().equalsIgnoreCase(owner) && pd3.getLevelName().equalsIgnoreCase(levelName)))
-                    .forEachOrdered(pd::add);
-            // Not empty: Data in list contains player islands
-            if (!pd.isEmpty()) {
-                return pd; // Return
-            }
-        }
-        try (Statement stmt = con.createStatement()) {
-            ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE `owner` = '" + owner + "' AND `world` = '" + levelName + "'");
-            if (set.isClosed()) {
-                return pd;
-            }
-            while (set.next()) {
-                pd.add(new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn")));
-            }
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-        if (enableFastCache) {
-            // Save the island into cache
-            islandCache.addAll(pd);
-        }
-        return pd;
-    }
-
-    @Override
-    public IslandData getIsland(String name, int homes) {
-        // safe block
-        IslandData pd = null;
-        if (enableFastCache) {
-            for (IslandData pda : islandCache) {
-                if (pda.getOwner().equals(name) && pda.getId() == homes) {
-                    return pda;
-                }
-            }
-        }
-        try (Statement stmt = con.createStatement()) {
-            ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE(`owner` = '" + name + "' AND `id` = '" + homes + "')");
-            if (set.isClosed()) {
-                return null;
-            }
-            pd = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-        if (enableFastCache) {
-            islandCache.add(pd);
-        }
-        return pd;
-    }
-
-    @Override
-    public IslandData getIsland(String name, String homeName) {
-        // safe block
-        IslandData pd = null;
-        if (enableFastCache) {
-            for (IslandData pda : islandCache) {
-                if (pda.getOwner().equals(name) && pda.getName().equalsIgnoreCase(homeName)) {
-                    return pda;
-                }
-            }
-        }
-        try (Statement stmt = con.createStatement()) {
-            ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE(`owner` = '" + name + "' AND `name` = '" + homeName + "')");
-            if (set.isClosed()) {
-                return null;
-            }
-            pd = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-        if (enableFastCache) {
-            islandCache.add(pd);
-        }
-        return pd;
-    }
-
-    @Override
-    public boolean deleteIsland(IslandData pd) {
-        if (enableFastCache) {
-            islandCache.remove(pd);
-        }
-        try (PreparedStatement set = con.prepareStatement("DELETE FROM `island` WHERE(`id` = ? AND `owner` = ?)")) {
-            set.setInt(1, pd.getId());
-            set.setString(2, pd.getOwner());
-
-            set.execute();
-            set.close();
-            return true;
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-        return false;
-    }
-
-    @Override
-    public IslandData getSpawn() {
-        // safe block
-        IslandData pd = null;
-        if (islandSpawn != null) {
-            return islandSpawn;
-        }
-        try (Statement stmt = con.createStatement()) {
-            ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE `isSpawn` = '1'");
-            if (set.isClosed()) {
-                return null;
-            }
-            set.next();
-            pd = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-        islandSpawn = pd;
-        return pd;
-    }
-
-    @Override
-    public IslandData getIslandById(int id) {
-        // safe block
-        IslandData pd = null;
-        if (enableFastCache) {
-            for (IslandData pde : islandCache) {
-                if (pde.getIslandId() == id) {
-                    return pde;
-                }
-            }
-        }
-        try (Statement stmt = con.createStatement()) {
-            ResultSet set = stmt.executeQuery("SELECT * FROM `island` WHERE `islandId` = '" + id + "'");
-            if (set.isClosed()) {
-                return null;
-            }
-            set.next();
-            pd = new IslandData(set.getString("world"), set.getInt("x"), set.getInt("y"), set.getInt("z"), set.getInt("spawnX"), set.getInt("spawnY"), set.getInt("spawnZ"), set.getInt("psize"), set.getString("name"), set.getString("owner"), set.getString("biome"), set.getInt("id"), set.getInt("islandId"), set.getBoolean("locked"), set.getString("protection"), set.getBoolean("isSpawn"));
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-        if (enableFastCache) {
-            islandCache.add(pd);
-        }
-        return pd;
-    }
-
-    @Override
-    public void close() {
-        Utils.send("&7Closing databases...");
-        try {
-            con.close();
-            // Clear all variables
-            islandCache.clear();
-            islandSpawn = null;
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
+                break;
+            case 1:
+            case 2:
+            case 3:
+                // All goes this kind of 'way'
+                // Do not break it.
+                // -1 -/-> 1 -> 2 -> 3 -> ...
+                break;
         }
     }
 
-    @Override
-    public boolean createIsland(IslandData pd) {
-        try (PreparedStatement set = con.prepareStatement("INSERT INTO `island` (`id`, `islandId`, `x`, `y`, `z`, `isSpawn`, `psize`, `owner`, `name`, `world`, `biome`, `locked`, `protection`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
-            set.setInt(1, pd.getId());
-            set.setInt(2, pd.getIslandId());
-            set.setInt(3, pd.getCenter().getFloorX());
-            set.setInt(4, pd.getCenter().getFloorY());
-            set.setInt(5, pd.getCenter().getFloorZ());
-            set.setBoolean(6, pd.isSpawn());
-            set.setInt(7, pd.getProtectionSize());
-            set.setString(8, pd.getOwner());
-            set.setString(9, pd.getName());
-            set.setString(10, pd.getLevelName());
-            set.setString(11, pd.getBiome());
-            set.setBoolean(12, pd.isLocked());
-            set.setString(13, pd.getIgsSettings().getSettings());
-            set.addBatch();
-            set.executeBatch();
-            set.close();
-            if (enableFastCache) {
-                islandCache.add(pd);
-            }
-            return true;
-        } catch (BatchUpdateException b) {
-            JDBCUtilities.printBatchUpdateException(b);
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
+    /**
+     * Ticks the processor from SkyBlock Update Service
+     * This is run trough async worker, please do not
+     * exploit...
+     *
+     * @param currentTime The time of the worker elapsed.
+     */
+    private void tickProcessor(long currentTime) {
+        if (lastTick == 0) {
+            lastTick = currentTime;
         }
-        return false;
-    }
+        long threadThreshold = System.currentTimeMillis() - lastTick;
 
-    @Override
-    public boolean saveIsland(IslandData pd) {
-        if (enableFastCache) {
-            for (IslandData pde : islandCache) {
-                if (pde.getIslandId() == pd.getIslandId() && pde.getOwner().equalsIgnoreCase(pd.getOwner())) {
-                    islandCache.remove(pde);
-                    break;
-                }
-            }
-        }
-        try (PreparedStatement stmt = con.prepareStatement("UPDATE `island` SET `name` = ?, `biome` = ?, `locked` = ?,`isSpawn` = ?, `protection` = ?, `spawnX` = ?, `spawnY` = ?, `spawnZ` = ? WHERE(`id` = '" + pd.getId() + "' AND `owner` = '" + pd.getOwner() + "')")) {
-            stmt.setString(1, pd.getName());
-            stmt.setString(2, pd.getBiome());
-            stmt.setBoolean(3, pd.isLocked());
-            stmt.setBoolean(4, pd.isSpawn());
-            stmt.setString(5, pd.getIgsSettings().getSettings());
-            stmt.setInt(6, pd.homeX);
-            stmt.setInt(7, pd.homeY);
-            stmt.setInt(8, pd.homeZ);
-            stmt.addBatch();
-            stmt.executeBatch();
-            stmt.close();
-            if (enableFastCache) {
-                islandCache.add(pd);
-            }
-            return true;
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-        return false;
-    }
-
-    @Override
-    public ArrayList<String> getWorlds() {
-        ArrayList<String> world = new ArrayList<>();
-        try (Statement kt = con.createStatement()) {
-            ResultSet set = kt.executeQuery("SELECT `world` FROM `worlds`");
-            if (set.isClosed()) {
-                return world;
-            }
-            while (set.next()) {
-                world.add(set.getString("world"));
-            }
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-        return world;
-    }
-
-    @Override
-    public boolean saveWorlds(ArrayList<String> pd) {
-        try (PreparedStatement set = con.prepareStatement("INSERT INTO `worlds` (`world`) VALUES (?);")) {
-            ArrayList<String> second = getWorlds();
-            for (String pd2 : pd) {
-                if (!second.contains(pd2)) {
-                    set.setString(1, pd2);
-                    set.addBatch();
-                    set.executeBatch();
-                }
-            }
-            set.close();
-            return true;
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-        return false;
-    }
-
-    @Override
-    public List<String> getPlayersData() {
-        List<String> playersData = new ArrayList<>();
-        try (Statement kt = con.createStatement()) {
-            ResultSet set = kt.executeQuery("SELECT * FROM `players` ");
-            if (set.isClosed()) {
-                return playersData;
-            }
-            while (set.next()) {
-                playersData.add(set.getString("player"));
-            }
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-        return playersData;
-    }
-
-    @Override
-    public PlayerData getPlayerData(String st) {
-        // TESTED SUCCESS
-        PlayerData pd = null;
-        try (Statement kt = con.createStatement()) {
-            ResultSet set = kt.executeQuery("SELECT * FROM `players` WHERE `player` = '" + st + "'");
-            if (set.isClosed()) {
-                return null;
-            }
-            pd = new PlayerData(
-                    set.getString("player"),
-                    set.getInt("homes"),
-                    Utils.stringToArray(set.getString("members"), ", "),
-                    set.getString("challengelist"),
-                    set.getString("challengelisttimes"),
-                    set.getInt("islandlvl"),
-                    set.getBoolean("inTeam"),
-                    set.getInt("deaths"),
-                    set.getString("teamLeader"),
-                    set.getString("teamIslandLocation"),
-                    set.getInt("resetleft"),
-                    Utils.stringToArray(set.getString("banList"), ", "),
-                    set.getString("locale"),
-                    set.getString("name"));
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-        return pd;
-    }
-
-    @Override
-    public void createPlayer(String p) {
-        // TODO: Fix the casting issue on this
-        try (PreparedStatement set = con.prepareStatement("INSERT INTO `players` ("
-                + "`player`, "
-                + "`homes`, "
-                + "`resetleft`, "
-                + "`banlist`, "
-                + "`teamleader`, "
-                + "`teamislandlocation`, "
-                + "`inteam` , "
-                + "`islandlvl`, "
-                + "`members`,"
-                + "`challengelist`, "
-                + "`challengelisttimes`, "
-                + "`name`, "
-                + "`locale`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
-            PlayerData pd = new PlayerData(p, 0, Settings.reset);
-            set.setString(1, pd.getPlayerName());
-            set.setInt(2, pd.getHomeNumber());
-            set.setInt(3, pd.getPlayerReset());
-            set.setString(4, Utils.arrayToString(pd.getBanList()));
-            set.setString(5, pd.teamLeader);
-            set.setString(6, pd.teamIslandLocation);
-            set.setBoolean(7, pd.inTeam);
-            set.setInt(8, pd.getIslandLevel());
-            set.setString(9, Utils.arrayToString(pd.members));
-            set.setString(10, pd.decodeChallengeList("cl"));
-            set.setString(11, pd.decodeChallengeList("clt"));
-            set.setString(12, pd.name);
-            set.setString(13, pd.getLocale());
-            set.addBatch();
-
-            set.executeBatch();
-        } catch (BatchUpdateException b) {
-            JDBCUtilities.printBatchUpdateException(b);
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
-        }
-    }
-
-    @Override
-    public void savePlayerData(PlayerData pd) {
-        // TESTED SUCCESS
-        try (PreparedStatement stmt = con.prepareStatement(
-                "UPDATE `players` SET "
-                        + "`homes` = ?, "
-                        + "`resetleft` = ?, "
-                        + "`banlist` = ?, "
-                        + "`teamleader` = ?, "
-                        + "`teamislandlocation` = ?, "
-                        + "`inteam` = ?, "
-                        + "`islandlvl` = ?, "
-                        + "`members` = ?, "
-                        + "`challengelist` = ?, "
-                        + "`challengelisttimes` = ?, "
-                        + "`name` = ?, "
-                        + "`locale` = ? "
-                        + "WHERE `player` = '" + pd.getPlayerName() + "'")) {
-            stmt.setInt(1, pd.getHomeNumber());
-            stmt.setInt(2, pd.getPlayerReset());
-            stmt.setString(3, Utils.arrayToString(pd.getBanList()));
-            stmt.setString(4, pd.teamLeader);
-            stmt.setString(5, pd.teamIslandLocation);
-            stmt.setBoolean(6, pd.inTeam);
-            stmt.setInt(7, pd.getIslandLevel());
-            stmt.setString(8, Utils.arrayToString(pd.members));
-            stmt.setString(9, pd.decodeChallengeList("cl"));
-            stmt.setString(10, pd.decodeChallengeList("clt"));
-            stmt.setString(11, pd.name);
-            stmt.setString(12, pd.getLocale());
-            stmt.addBatch();
-            stmt.executeBatch();
-        } catch (SQLException ex) {
-            JDBCUtilities.printSQLException(ex);
+        // 60 Seconds interval...
+        if (threadThreshold >= TimeUnit.SECONDS.toMillis(30) && !messageDigest) {
+            Utils.send("&eThis may take some time to update your database");
+            lastTick = currentTime;
+            messageDigest = true;
         }
     }
 }

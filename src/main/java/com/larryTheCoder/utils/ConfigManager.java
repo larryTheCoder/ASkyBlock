@@ -51,8 +51,6 @@ import java.util.TreeMap;
  */
 public class ConfigManager {
 
-    public static final String CONFIG_VERSION = "Integration Failed";
-
     /**
      * Loads the various settings from the config.yml file into the plugin
      */
@@ -105,7 +103,7 @@ public class ConfigManager {
                         tempChest[i] = new Item(mat.getId(), Integer.parseInt(amountData[2]), Integer.parseInt(amountData[1]));
                     }
 
-                } catch (java.lang.IllegalArgumentException ex) {
+                } catch (IllegalArgumentException ex) {
                     if (ASkyBlock.get().isDebug()) {
                         ex.printStackTrace();
                     }
@@ -198,6 +196,74 @@ public class ConfigManager {
             }
         }
 
+        // ****************** Levels blockvalues.yml ****************
+        // Get the blockvalues.yml file
+        Config levelCfg = new Config(new File(ASkyBlock.get().getDataFolder(), "blockvalues.yml"), Config.YAML);
+
+        // Get the under water multiplier
+        Settings.deathPenalty = levelCfg.getInt("deathpenalty", 0);
+        Settings.sumTeamDeaths = levelCfg.getBoolean("sumteamdeaths");
+        Settings.maxDeaths = levelCfg.getInt("maxdeaths", 10);
+        Settings.islandResetDeathReset = levelCfg.getBoolean("islandresetdeathreset", true);
+        Settings.teamJoinDeathReset = levelCfg.getBoolean("teamjoindeathreset", true);
+        Settings.levelCost = levelCfg.getInt("levelcost", 100);
+        if (Settings.levelCost < 1) {
+            Settings.levelCost = 1;
+            Utils.send("&clevelcost in blockvalues.yml cannot be less than 1. Setting to 1.");
+        }
+
+        ConfigSection section = levelCfg.getSection("limits");
+        if (!section.isEmpty()) {
+            for (String material : section.getKeys(false)) {
+                try {
+                    String[] split = material.split(":");
+                    int data = 0;
+                    if (split.length > 1) {
+                        data = Integer.valueOf(split[1]);
+                    }
+                    Block item;
+                    if (Utils.isNumeric(split[0])) {
+                        item = Block.get(Integer.parseInt(split[0]));
+                    } else {
+                        item = Item.fromString(split[0]).getBlock();
+                    }
+                    item.setDamage(data);
+                    Settings.blockLimits.put(item.getFullId(), levelCfg.getInt("limits." + material, 0));
+                } catch (Exception e) {
+                    Utils.sendDebug("&eUnknown material (" + material + ") in blockvalues.yml Limits section. Skipping...");
+                }
+            }
+        }
+
+        section = levelCfg.getSection("blocks");
+        if (!section.isEmpty()) {
+            for (String material : section.getKeys(false)) {
+                try {
+                    int value = levelCfg.getInt("blocks." + material, 0);
+
+                    String[] split = material.split(":");
+                    int data = 0;
+                    if (split.length > 1) {
+                        data = Integer.valueOf(split[1]);
+                    }
+
+                    Block block;
+                    if (Utils.isNumeric(split[0])) {
+                        block = Block.get(Integer.parseInt(split[0]));
+                    } else {
+                        block = Item.fromString(split[0]).getBlock();
+                    }
+                    block.setDamage(data);
+
+                    Settings.blockValues.put(block.getFullId(), value);
+                } catch (Exception e) {
+                    Utils.send("&cUnknown material (" + material + ") in blockvalues.yml blocks section. Skipping...");
+                }
+            }
+        } else {
+            Utils.send("&cNo block values in blockvalues.yml! All island levels will be zero!");
+        }
+
         // Load languages
         HashMap<String, ASlocales> availableLocales = new HashMap<>();
         FileLister fl = new FileLister(ASkyBlock.get());
@@ -216,7 +282,6 @@ public class ConfigManager {
             availableLocales.put(Settings.defaultLanguage, new ASlocales(ASkyBlock.get(), Settings.defaultLanguage, 0));
         }
         ASkyBlock.get().setAvailableLocales(availableLocales);
-        // GridProtection
         Utils.send(TextFormat.YELLOW + "Successfully checked config.yml");
     }
 

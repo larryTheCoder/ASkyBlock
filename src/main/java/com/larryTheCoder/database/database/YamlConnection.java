@@ -28,11 +28,13 @@ package com.larryTheCoder.database.database;
 
 import cn.nukkit.level.Position;
 import com.larryTheCoder.database.Database;
+import com.larryTheCoder.player.CoopData;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.storage.IslandData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class YamlConnection extends Database {
 
@@ -78,7 +80,7 @@ public class YamlConnection extends Database {
     }
 
     @Override
-    public IslandData getIslandById(int id) {
+    public IslandData getIslandById(int id, String levelName) {
         return null;
     }
 
@@ -108,7 +110,7 @@ public class YamlConnection extends Database {
     }
 
     @Override
-    public List<String> getPlayersData() {
+    public List<PlayerData> getPlayersData() {
         return null;
     }
 

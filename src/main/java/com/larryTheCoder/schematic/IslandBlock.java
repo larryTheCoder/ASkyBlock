@@ -28,16 +28,14 @@ package com.larryTheCoder.schematic;
 
 import cn.nukkit.Player;
 import cn.nukkit.block.Block;
-import cn.nukkit.blockentity.BlockEntity;
-import cn.nukkit.blockentity.BlockEntityChest;
-import cn.nukkit.blockentity.BlockEntityFlowerPot;
-import cn.nukkit.blockentity.BlockEntitySign;
+import cn.nukkit.blockentity.*;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
@@ -50,6 +48,7 @@ import org.json.simple.parser.ParseException;
 
 import java.util.*;
 
+import static com.larryTheCoder.utils.Utils.TASK_SCHEDULED;
 import static com.larryTheCoder.utils.Utils.loadChunkAt;
 
 /**
@@ -427,6 +426,7 @@ class IslandBlock extends BlockMinecraftId {
             blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, true);
             blockLoc.getLevel().setBiomeId(loc.getFloorX(), loc.getFloorZ(), (byte) biome.id);
 
+            BlockEntitySpawnable e = null;
             // Usually when the chunk is loaded it will be fully loaded, no need task anymore
             if (signText != null) {
                 // Various bug fixed (Nukkit bug)
@@ -442,13 +442,12 @@ class IslandBlock extends BlockMinecraftId {
                         .putString("Text3", signText.get(2).replace("[player]", p.getName()))
                         .putString("Text4", signText.get(3).replace("[player]", p.getName()));
 
-                BlockEntitySign e = (BlockEntitySign) BlockEntity.createBlockEntity(
+                e = (BlockEntitySign) BlockEntity.createBlockEntity(
                         BlockEntity.SIGN,
                         chunk,
                         nbt);
 
                 blockLoc.getLevel().addBlockEntity(e);
-                e.spawnToAll();
             } else if (potItem != null) {
                 BaseFullChunk chunk = blockLoc.getLevel().getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
                 cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
@@ -459,12 +458,12 @@ class IslandBlock extends BlockMinecraftId {
                         .putShort("item", potItem.getId())
                         .putInt("data", potItemData);
 
-                BlockEntityFlowerPot potBlock = (BlockEntityFlowerPot) BlockEntity.createBlockEntity(
+                e = (BlockEntityFlowerPot) BlockEntity.createBlockEntity(
                         BlockEntity.FLOWER_POT,
                         chunk,
                         nbt);
 
-                blockLoc.getLevel().addBlockEntity(potBlock);
+                blockLoc.getLevel().addBlockEntity(e);
             } else if (Block.get(typeId, data).getId() == Block.CHEST) {
                 BaseFullChunk chunk = blockLoc.getLevel().getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
                 cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
@@ -473,23 +472,39 @@ class IslandBlock extends BlockMinecraftId {
                         .putInt("x", (int) loc.x)
                         .putInt("y", (int) loc.y)
                         .putInt("z", (int) loc.z);
-                BlockEntityChest e = (BlockEntityChest) BlockEntity.createBlockEntity(
+
+                e = (BlockEntityChest) BlockEntity.createBlockEntity(
                         BlockEntity.CHEST,
                         chunk,
                         nbt);
+
                 if (ASkyBlock.get().getSchematics().isUsingDefaultChest(islandId) || chestContents.isEmpty()) {
                     int count = 0;
                     for (Item item : Settings.chestItems) {
-                        e.getInventory().setItem(count, item);
+                        ((BlockEntityChest) e).getInventory().setItem(count, item);
                         count++;
                     }
                 } else {
-                    e.getInventory().setContents(chestContents);
+                    ((BlockEntityChest) e).getInventory().setContents(chestContents);
                 }
 
                 blockLoc.getLevel().addBlockEntity(e);
-                e.spawnToAll();
             }
+
+            final BlockEntitySpawnable blockEntity = e;
+
+            // Run as runnable, spawn them in next move.
+            if (blockEntity != null) {
+                NukkitRunnable runnable = new NukkitRunnable() {
+                    @Override
+                    public void run() {
+                        blockEntity.spawnToAll();
+                    }
+                };
+
+                TASK_SCHEDULED.put(p.getName(), runnable);
+            }
+
         } catch (Exception ignored) {
             Utils.sendDebug("&7Warning: Block " + typeId + ":" + data + " not found. Ignoring...");
         }

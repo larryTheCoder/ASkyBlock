@@ -181,7 +181,7 @@ public class Admin extends Command {
                     for (Block mat : LavaCheck.getStats().get(level).elementSet()) {
                         result.add("   " + Utils.prettifyText(mat.toString()) + ": " + LavaCheck.getStats().get(level).count(mat) + "/" + LavaCheck.getStats().get(level).size() + " or "
                                 + ((int) ((double) LavaCheck.getStats().get(level).count(mat) / LavaCheck.getStats().get(level).size() * 100))
-                                + "% (config = " + String.valueOf(LavaCheck.getConfigChances(level, mat)) + "%)");
+                                + "% (config = " + LavaCheck.getConfigChances(level, mat) + "%)");
                     }
                     // Send to player
                     for (String r : result) {
@@ -262,17 +262,17 @@ public class Admin extends Command {
                     offlinePlayer = Server.getInstance().getOfflinePlayer(args[1]);
                     island = plugin.getDatabase().getIsland(offlinePlayer.getName(), id);
                     if (island == null) {
-                        sender.sendMessage(plugin.getLocale(null).errorUnknownPlayer);
+                        sender.sendMessage(plugin.getLocale("").errorUnknownPlayer);
                         break;
                     }
 
-                    sender.sendMessage(plugin.getLocale(null).deleteRemoving.replace("[name]", "null"));
+                    sender.sendMessage(plugin.getLocale("").deleteRemoving.replace("[name]", "null"));
                     deleteIslands(island, sender);
                     break;
                 }
 
                 // Get the island I am on
-                island = plugin.getIsland().GetIslandAt(p);
+                island = plugin.getIsland().getIslandAt(p);
 
                 if (island == null) {
                     sender.sendMessage(plugin.getLocale(p).adminDeleteIslandnoid);
@@ -319,12 +319,12 @@ public class Admin extends Command {
                     msg = new StringBuilder(msg.substring(0, msg.length() - 1));
                 }
 
-                List<String> players = plugin.getDatabase().getPlayersData();
+                List<PlayerData> players = plugin.getDatabase().getPlayersData();
 
-                for (String pl : players) {
-                    List<String> list = plugin.getMessages().getMessages(pl);
+                for (PlayerData pl : players) {
+                    List<String> list = plugin.getMessages().getMessages(pl.getPlayerName());
                     list.add(msg.toString());
-                    plugin.getMessages().put(pl, list);
+                    plugin.getMessages().put(pl.getPlayerName(), list);
                 }
             case "info":
             case "challenges":
@@ -351,7 +351,7 @@ public class Admin extends Command {
     private void setSpawn(CommandSender sender) {
         Player p = sender.isPlayer() ? plugin.getServer().getPlayer(sender.getName()) : null;
         if (p == null) {
-            sender.sendMessage(plugin.getLocale(null).errorUseInGame);
+            sender.sendMessage(plugin.getLocale("").errorUseInGame);
             return;
         }
         if (plugin.inIslandWorld(p) && plugin.getIslandInfo(p) != null) {
@@ -380,7 +380,7 @@ public class Admin extends Command {
         PlayerData pd = plugin.getDatabase().getPlayerData(player.getName());
         // No way
         if (pd == null) {
-            sender.sendMessage(TextFormat.RED + plugin.getLocale(null).errorUnknownPlayer);
+            sender.sendMessage(TextFormat.RED + plugin.getLocale("").errorUnknownPlayer);
             return;
         }
         sender.sendMessage("Name:" + TextFormat.GREEN + player.getName());

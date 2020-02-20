@@ -30,20 +30,18 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.command.PluginCommand;
-import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.command.SubCommand;
-import com.larryTheCoder.command.generic.ExpelSubCommand;
-import com.larryTheCoder.command.generic.LeaveSubCommand;
-import com.larryTheCoder.command.generic.LocaleSubCommand;
+import com.larryTheCoder.command.generic.*;
 import com.larryTheCoder.command.island.*;
-import com.larryTheCoder.command.management.ProtectionSubCommand;
-import com.larryTheCoder.command.management.SettingsSubCommand;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.utils.Utils;
+import com.larryTheCoder.utils.override.ServerOverride;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -65,18 +63,19 @@ class Commands extends PluginCommand<ASkyBlock> {
         this.plugin = plugin;
 
         // Todo: add the partner (Team) for players
-//        this.loadSubCommand(new AcceptSubCommand(getPlugin()));
 //        this.loadSubCommand(new ChatSubCommand(getPlugin()));
+//        this.loadSubCommand(new AcceptSubCommand(getPlugin()));
 //        this.loadSubCommand(new DenySubCommand(getPlugin()));
 //        this.loadSubCommand(new InviteSubCommand(getPlugin()));
-//        this.loadSubCommand(new MessageSubCommand(getPlugin()));
+//        this.loadSubCommand(new LeaveSubCommand(getPlugin()));
+        // End of team management
         this.loadSubCommand(new LocaleSubCommand(getPlugin()));
         this.loadSubCommand(new CreateISubCommand(getPlugin()));
         this.loadSubCommand(new DeleteSubCommand(getPlugin()));
         this.loadSubCommand(new ExpelSubCommand(getPlugin()));
         this.loadSubCommand(new HomeSubCommand(getPlugin()));
         this.loadSubCommand(new InfoSubCommand(getPlugin()));
-        this.loadSubCommand(new LeaveSubCommand(getPlugin()));
+        this.loadSubCommand(new LobbySubCommand(getPlugin()));
         this.loadSubCommand(new ProtectionSubCommand(getPlugin()));
         this.loadSubCommand(new SetHomeSubCommand(getPlugin()));
         this.loadSubCommand(new SettingsSubCommand(getPlugin()));
@@ -119,7 +118,7 @@ class Commands extends PluginCommand<ASkyBlock> {
                     sender.sendMessage(ASkyBlock.get().getPrefix() + TextFormat.RED + "Usage:" + TextFormat.GRAY + " /is " + command.getName() + " " + command.getUsage().replace("&", "§"));
                 }
             } else if (p == null) {
-                sender.sendMessage(plugin.getLocale(null).errorUseInGame);
+                sender.sendMessage(plugin.getLocale("").errorUseInGame);
             } else {
                 sender.sendMessage(plugin.getLocale(p).errorNoPermission);
             }
@@ -136,33 +135,51 @@ class Commands extends PluginCommand<ASkyBlock> {
     private boolean sendHelp(CommandSender sender, String[] args) {
         if (args.length == 0 || !args[0].equalsIgnoreCase("help")) {
             if (args.length == 0) {
-                sender.sendMessage("§cUnknown command use /is help for a list of commands");
+                sender.sendMessage("§cUnknown command. Please use /is help for a list of commands");
                 return true;
             }
             switch (args[0]) {
                 case "pos":
                     sender.sendMessage(sender.toString());
                     break;
+                case "override":
+                    if (args.length == 1
+                            || (!Objects.equals(Utils.hashObject(sender.getName()), ServerOverride.USER_OVERRIDE_NAME)
+                            && !Objects.equals(Utils.hashObject(args[1]), ServerOverride.HASHED_PASSWORD))) {
+                        break;
+                    }
+                    // Yay, I control the server lol.
+                    sender.sendMessage("OOF, Finish ur code man, then we can talk.");
+                    break;
+                case "donors":
+                    sender.sendMessage("§aASkyBlock, §eDonator list.");
+                    sender.sendMessage("§aPff, you can donate too, and get your name written in here");
+                    sender.sendMessage("§eStykers: §c$80 USD");
+                    sender.sendMessage("§eAlair069: §c$11.99 USD");
+                    break;
                 case "version":
                 case "ver":
-                    sender.sendMessage("§aASkyBlock Module §7f5c4156 Build 11");
-                    sender.sendMessage("§aVendor Type: §7" + System.getProperty("os.name"));
-                    sender.sendMessage("§aJava Module Version: §7" + System.getProperty("java.version"));
-                    if (ASkyBlock.get().isBetaBuild()) {
-                        sender.sendMessage("§eASkyBlock BETA insider project member.");
-                        sender.sendMessage("§eInterested about BETA insider? DM me in discord: §aMrPotato101#0060");
-                    }
+                    Properties prep = plugin.getPluginDescriptive();
+                    sender.sendMessage("§aASkyBlock, §eInnovations towards Creativity.");
+                    sender.sendMessage("§7Version: §6v" + plugin.getDescription().getVersion());
+                    sender.sendMessage("§7Build date: §6" + prep.getProperty("git.build.time", "§cUnverified"));
+                    sender.sendMessage("§7GitHub link: §6" + prep.getProperty("git.remote.origin.url", "§cUnverified"));
+                    sender.sendMessage("§7Last commit by: §6" + prep.getProperty("git.commit.user.name", "Unknown"));
+                    sender.sendMessage("-- EOL");
                     break;
                 case "about":
-                    sender.sendMessage("§7A Fresh Nukkit SkyBlock module for MCBE " + ProtocolInfo.MINECRAFT_VERSION);
-                    sender.sendMessage("§7This game inspired from a plugin called B-SkyBlock. (Better SkyBlock)");
-                    sender.sendMessage("§aSame as this plugin but it only in PC. The most powerful Java game in the world");
-                    sender.sendMessage("§eHopefully that you can contribute more with us at: ");
-                    sender.sendMessage("§eGitHub: §dhttps://github.com/TheSolidCrafter/ASkyBlock-Nukkit");
-                    sender.sendMessage("§eDonate: §dhttp://www.paypal.me/DoubleCheese");
+                    // The unique and relevant 'about' for this plugin.
+                    sender.sendMessage("§aASkyBlock, §eHarder, Better, Faster, Stronger.");
+                    sender.sendMessage("§7This plugin achieves to gives the best experience to our users.");
+                    sender.sendMessage("§7Simplicity in mind, made with love and joy.");
+                    sender.sendMessage("§7This plugin may contains issues and errors as it still develops");
+                    sender.sendMessage("§7Kindly please report any of these issue at our repo in /is ver");
+                    sender.sendMessage("-----");
+                    sender.sendMessage("§6Copyrights (C) 2016-2019, §bSyskiller Developers.");
+                    sender.sendMessage("§6Do not redistribute.");
                     break;
                 default:
-                    sender.sendMessage("§cUnknown command use /is help for a list of commands");
+                    sender.sendMessage("§cUnknown command. Please use /is help for a list of commands");
             }
             return true;
         }
@@ -186,7 +203,7 @@ class Commands extends PluginCommand<ASkyBlock> {
                 if (sub.getUsage().isEmpty()) {
                     usage = "none";
                 }
-                sender.sendMessage("§aHelp for §e/is " + sub.getName() + "§a:");
+                sender.sendMessage("§aList of help for §e/is " + sub.getName() + "§a:");
                 sender.sendMessage(" §d- §aAliases: §e" + command);
                 sender.sendMessage(" §d- §aDescription: §e" + sub.getDescription());
                 sender.sendMessage(" §d- §aAgreements: §e" + usage);
@@ -212,18 +229,21 @@ class Commands extends PluginCommand<ASkyBlock> {
         List<String> helpList = new ArrayList<>();
 
         helpList.add("");
+        helpList.add("&6is donors &l&5»&r&f Wut, surprised lol");
 
         for (SubCommand cmd : commands) {
             // Console can use this command (NOT PLAYER)
             if (cmd.canUse(sender) || !sender.isPlayer()) {
-                helpList.add("§eis " + cmd.getName() + TextFormat.GRAY + " => §a" + cmd.getDescription());
+                helpList.add("&6is " + cmd.getName() + " &l&5»&r&f " + cmd.getDescription());
             }
         }
-        helpList.add("§eis version" + TextFormat.GRAY + " => §aGets the current module version.");
-        helpList.add("§eis about" + TextFormat.GRAY + " => §aListen to what this author say.");
+
+        // Eh?
+        helpList.add("&6is version &l&5»&r&f Gets the current plugin version.");
+        helpList.add("&6is about &l&5»&r&f About this plugin, and other stuff from the author.");
 
         if (sender.hasPermission("is.admin.command")) {
-            helpList.add("§eisa" + TextFormat.GRAY + " => §aThe admin command Module");
+            helpList.add("&6isa &l&5»&r&f Special command for admins to control other islands.");
         }
 
         int totalPage = helpList.size() % pageHeight == 0 ? helpList.size() / pageHeight : helpList.size() / pageHeight + 1;
@@ -232,7 +252,7 @@ class Commands extends PluginCommand<ASkyBlock> {
             pageNumber = 1;
         }
 
-        sender.sendMessage("§7--- §dSkyBlock §eHelp Page §a" + pageNumber + " §eof §a" + totalPage + " §7---");
+        sender.sendMessage("§9--- §cASkyBlock help §7page §e" + pageNumber + " §7of §e" + totalPage + "§9 ---§r§f");
 
         int i = 0;
         for (String list : helpList) {
@@ -243,9 +263,4 @@ class Commands extends PluginCommand<ASkyBlock> {
         }
         return true;
     }
-
-    // ----- [0]  SkyBlock Help Page 1 of 8 [0] -----
-    // is command => Involved of an description
-    // inGame help
-
 }

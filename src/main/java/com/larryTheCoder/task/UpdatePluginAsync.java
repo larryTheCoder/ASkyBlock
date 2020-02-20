@@ -32,6 +32,6 @@ public class UpdatePluginAsync extends AsyncTask {
 
     @Override
     public void onRun() {
-
+        // TODO: Use jenkins repo?
     }
 }

@@ -38,6 +38,7 @@ import java.util.HashMap;
  * <p>
  * This class fix the truncated data on database,
  * which I cannot fix.
+ *
  * @author tastybento
  */
 public class IslandSettings {
@@ -56,9 +57,18 @@ public class IslandSettings {
         }
     }
 
-    public IslandSettings(IslandData pd) {
+    IslandSettings(IslandData pd) {
         this.pd = pd;
         this.setIgsDefaults();
+    }
+
+    public IslandSettings(String defVal) {
+        // Sometimes this shit could be empty
+        if (defVal.isEmpty()) {
+            this.setIgsDefaults();
+        } else {
+            this.serializeIds(defVal);
+        }
     }
 
     /**
@@ -134,7 +144,7 @@ public class IslandSettings {
     }
 
     private void serializeIds(String defaultValue) {
-        if (pd.isSpawn()) {
+        if (pd != null && pd.isSpawn()) {
             setSpawnDefaults();
         } else {
             setIgsDefaults();

@@ -40,6 +40,7 @@ public class WorldSettings {
     private final boolean stopTime;
     private final int seaLevel;
     private final int plotRange;
+    private final boolean useDefaultChest;
 
     public WorldSettings(Level level) {
         this.level = level;
@@ -50,9 +51,10 @@ public class WorldSettings {
         this.stopTime = false;
         this.seaLevel = 0;
         this.plotRange = 100;
+        this.useDefaultChest = false;
     }
 
-    public WorldSettings(String permission, Level level, int plotMax, int plotSize, int plotRange, boolean stopTime, int seaLevel) {
+    public WorldSettings(String permission, Level level, int plotMax, int plotSize, int plotRange, boolean stopTime, int seaLevel, boolean useDefaultChest) {
         this.permission = permission;
         this.level = level;
         this.plotMax = plotMax;
@@ -60,6 +62,7 @@ public class WorldSettings {
         this.stopTime = stopTime;
         this.plotRange = plotRange;
         this.seaLevel = seaLevel;
+        this.useDefaultChest = useDefaultChest;
     }
 
     public int getSeaLevel() {

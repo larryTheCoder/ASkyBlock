@@ -114,7 +114,6 @@ public final class ASlocales {
     public String errorWrongWorld = "§cYou cannot do that in this world.";
     private String errorUnknownWorld = "§cUnknown world. Possible worlds are:";
     public String errorMaxIsland = "§cSorry you cant create island at this world any more";
-    public String errorNotPending = "§cNo invitation pending! Try again later";
     public String errorInTeam = "§cThe player [player] are already in team!";
     public String errorBlockedByAPI = "§cA plugin using the API blocked this action.";
     public String errorKickOwner = "§cYou cant kick yourself out your own island!";
@@ -133,6 +132,7 @@ public final class ASlocales {
     public String setHomeSuccess = "§aSuccessfully changed island home location!";
     public String generalSuccess = "§aSuccess!";
     public String biomeChangeComplete = "§aChanged your island biome to: [biome]";
+    public String inviteSuccess = "§aInvited [player] to your island.";
     // Teleport messages
     public String teleportDelay = "§aYou will be teleported in {0} seconds.";
     public String teleportCancelled = "§cTeleport cancelled";
@@ -155,9 +155,6 @@ public final class ASlocales {
     public String newsHeadline = "§aWhile you were §eOffline§a:";
     public String newsEmpty = "§aThere no messages for you today. Check back later!";
     public String newNews = "§eWelcome back! There's [count] news today! Use /is messages to see all messages";
-    public String newInvitation = "§aNew invitation from [player]'s island";
-    public String acceptedFrom = "§eYou accepted [player]'s invitation.";
-    public String acceptedTo = "§e[player] has accepted your invitation!";
     public String panelCancelled = "§cYou cancelled your island panel!";
     // Titles
     public String islandSubTitle = "&eNice and cosy";
@@ -182,7 +179,13 @@ public final class ASlocales {
     public String deleteIslandCancelled = "§cYou just cancelled your delete island confirmation";
     // Public error
     public String errorResponseUnknown = "§eAn error just occured. Try again later";
-
+    // Invite things
+    public String newInvitation = "- §7You have an invite from [player]'s island";
+    public String insInvitation = "- §7Use /is <accept/deny> to either deny or accept their invite.";
+    public String acceptedFrom = "§eYou accepted [player]'s invitation.";
+    public String acceptedTo = "§e[player] has accepted your invitation!";
+    public String errorNotPending = "§cNo invitation pending! Try again later";
+    public String errorNotPending2 = "§cNo invite sent by [player]! Try again later";
     // Localization Strings
     private Config locale = null;
     private File localeFile = null;

@@ -30,11 +30,8 @@ import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
-import com.google.common.collect.Lists;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.player.PlayerData;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -64,6 +61,8 @@ public class IslandData implements Cloneable {
     private int protectionRange;
     // IslandSettings
     private IslandSettings settings;
+    private int levelHandicap;
+    private int deaths;
 
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public IslandData(String levelName, int X, int Z, int PSize) {
@@ -77,7 +76,7 @@ public class IslandData implements Cloneable {
     }
 
     @SuppressWarnings({"AssignmentToMethodParameter", "OverridableMethodCallInConstructor"})
-    public IslandData(String levelName, int X, int Y, int Z, int homeX, int homeY, int homeZ, int PSize, String name, String owner, String biome, int id, int islandId, boolean locked, String defaultvalue, boolean isSpawn) {
+    public IslandData(String levelName, int X, int Y, int Z, int homeX, int homeY, int homeZ, int PSize, String name, String owner, String biome, int id, int islandId, boolean locked, String defaultvalue, boolean isSpawn, int levelHandicap, int deaths) {
         if (biome.isEmpty()) {
             biome = "PLAINS";
         }
@@ -97,6 +96,8 @@ public class IslandData implements Cloneable {
         this.locked = locked;
         this.settings = new IslandSettings(this, defaultvalue);
         this.isSpawn = isSpawn;
+        this.levelHandicap = levelHandicap;
+        this.deaths = deaths;
     }
 
     public Vector3 getCenter() {
@@ -231,20 +232,6 @@ public class IslandData implements Cloneable {
     }
 
     /**
-     * Get the members for this island,
-     * cooping method
-     *
-     * @return ArrayList or empty array
-     */
-    public ArrayList<String> getMembers() {
-        PlayerData pd = ASkyBlock.get().getDatabase().getPlayerData(this.owner);
-        if (pd == null) {
-            return Lists.newArrayList();
-        }
-        return pd.members;
-    }
-
-    /**
      * Checks if a location is within this island's protected area
      *
      * @param target The location to be checked
@@ -342,7 +329,7 @@ public class IslandData implements Cloneable {
 
     @Override
     public String toString() {
-        return "IslandData(x=" + homeX + ", y=" + homeY + ", z=)";
+        return "IslandData(x=" + centerX + ", y=" + centerY + ", z= " + centerZ + ")";
     }
 
     @Override
@@ -362,4 +349,21 @@ public class IslandData implements Cloneable {
         hash = 61 * hash + Objects.hashCode(this.owner);
         return hash;
     }
+
+    public int getLevelHandicap() {
+        return levelHandicap;
+    }
+
+    public int getDeaths() {
+        return deaths;
+    }
+
+    public void addDeath() {
+        this.deaths++;
+    }
+
+    public void saveData() {
+        ASkyBlock.get().getDatabase().saveIsland(this);
+    }
+
 }

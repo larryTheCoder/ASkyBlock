@@ -35,7 +35,7 @@ import cn.nukkit.event.player.*;
 import cn.nukkit.level.Location;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.player.PlayerData;
+import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
@@ -93,8 +93,9 @@ public class PlayerEvent implements Listener {
             return;
         }
 
-        PlayerData pd = plugin.getPlayerInfo(p);
-        if (plugin.getIslandInfo(p.getName()) == null || !pd.hasTeam()) {
+        TeamManager manager = plugin.getTManager();
+        IslandData pd = plugin.getIslandInfo(p.getLocation());
+        if (plugin.getIslandInfo(p.getName()) == null || !manager.hasTeam(p.getName())) {
             return;
         }
 
@@ -106,13 +107,13 @@ public class PlayerEvent implements Listener {
         // Add death to death count
         pd.addDeath();
         if (Settings.deathPenalty != 0) {
-            if (pd.hasTeam()) {
+            if (manager.hasTeam(p.getName())) {
                 // Tell team
-                plugin.getMessages().tellOfflineTeam(p.getName(), TextFormat.GREEN + "(" + String.valueOf(pd.getDeaths()) + " died!)");
+                plugin.getMessages().tellOfflineTeam(p.getName(), TextFormat.GREEN + "(" + pd.getDeaths() + " died!)");
             }
         }
+        pd.saveData();
     }
-
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerLogin(PlayerPreLoginEvent ex) {

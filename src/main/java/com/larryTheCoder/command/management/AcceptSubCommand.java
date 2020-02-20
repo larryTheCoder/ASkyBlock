@@ -48,7 +48,7 @@ public class AcceptSubCommand extends SubCommand {
 
     @Override
     public String getUsage() {
-        return "";
+        return "<playerName>";
     }
 
     @Override
@@ -72,9 +72,18 @@ public class AcceptSubCommand extends SubCommand {
         InvitationHandler pd = getPlugin().getInvitationHandler();
         if (pd.getInvitation(p) == null) {
             sender.sendMessage(getPrefix() + getLocale(p).errorNotPending);
-            return false;
+            return true;
         }
-        pd.getInvitation(p).accept();
+        if(args.length == 2){
+            String playerName = args[1];
+            if (pd.getInvitation(p, playerName) == null) {
+                sender.sendMessage(getPrefix() + getLocale(p).errorNotPending2.replace("[player]", playerName));
+                return true;
+            }
+            pd.getInvitation(p, playerName).acceptInvitation();
+            return true;
+        }
+        pd.getInvitation(p).acceptInvitation();
         return true;
     }
 

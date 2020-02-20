@@ -49,6 +49,7 @@ public class Settings {
     public static int cleanRate;
     public static boolean respawnOnIsland;
     public static int deathPenalty;
+    public static boolean sumTeamDeaths;
     public static final ArrayList<String> bannedCommands = new ArrayList<>();
     public static int reset = 3;
     public static int gameMode;
@@ -59,6 +60,11 @@ public class Settings {
     public static boolean saveInventory;
     public static int resetTime;
     public static String defaultLanguage;
+
+    // Levels
+    // The format are as 'FullID => Level'
+    public final static Map<Integer, Integer> blockLimits = new HashMap<>();
+    public final static Map<Integer, Integer> blockValues = new HashMap<>();
 
     // default config
     public static Set<String> challengeList = new HashSet<>();
@@ -78,11 +84,6 @@ public class Settings {
      */
     public static final HashMap<SettingsFlag, Boolean> defaultSpawnSettings = new HashMap<>();
 
-    public static boolean allowTNTDamage;
-    public static boolean allowChestDamage;
-    public static boolean allowCreeperGriefing;
-    public static boolean allowCreeperDamage;
-
     public static boolean useEconomy = false;
     public static double islandCost = 10D;
     public static boolean firstIslandFree = true;
@@ -90,4 +91,10 @@ public class Settings {
     // Magic Cobble Generator
     public static boolean useMagicCobbleGen;
     public static TreeMap<Integer, TreeMap<Double, Block>> magicCobbleGenChances;
+
+    // Level configuration settings.
+    public static int levelCost;
+    public static int maxDeaths;
+    public static boolean islandResetDeathReset;
+    public static boolean teamJoinDeathReset;
 }

@@ -48,7 +48,7 @@ public class DenySubCommand extends SubCommand {
 
     @Override
     public String getUsage() {
-        return "";
+        return "<player>";
     }
 
     @Override
@@ -74,7 +74,16 @@ public class DenySubCommand extends SubCommand {
             sender.sendMessage(getPrefix() + getLocale(p).errorNotPending);
             return false;
         }
-        pd.getInvitation(p).deny();
+        if(args.length == 2){
+            String playerName = args[1];
+            if (pd.getInvitation(p, playerName) == null) {
+                sender.sendMessage(getPrefix() + getLocale(p).errorNotPending2.replace("[player]", playerName));
+                return true;
+            }
+            pd.getInvitation(p, playerName).denyInvitation();
+            return true;
+        }
+        pd.getInvitation(p).denyInvitation();
         return true;
     }
 

@@ -462,13 +462,11 @@ public final class SchematicHandler {
                                 case Item.FLOWER_POT:
                                     block.setFlowerPot(TileEntities.get(new Vector3(x, y, z)));
                                     break;
-                                case Item.SIGN_POST:
-                                    block.setSign(TileEntities.get(new Vector3(x, y, z)));
-                                    break;
                                 case Item.CHEST:
                                     block.setChest(TileEntities.get(new Vector3(x, y, z)));
                                     break;
                                 case Item.WALL_SIGN:
+                                case Item.SIGN_POST:
                                     block.setSign(TileEntities.get(new Vector3(x, y, z)));
                                     break;
                                 default:

@@ -36,6 +36,7 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.IslandCreateEvent;
+import com.larryTheCoder.player.CoopData;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.storage.WorldSettings;
@@ -75,6 +76,7 @@ public class IslandManager {
             p.sendMessage(plugin.getLocale(p).hangInThere);
             // teleport to grid
             plugin.getGrid().homeTeleport(p);
+            TopTen.topTenAddEntry(p.getName(), 0);
         } else {
             createIsland(p);
         }
@@ -88,7 +90,7 @@ public class IslandManager {
 
     public void kickPlayerByName(final Player pOwner, final String victimName) {
         final Location loc = pOwner.getLocation();
-        final IslandData pd = GetIslandAt(loc);
+        final IslandData pd = getIslandAt(loc);
         if (pd == null || pd.getOwner() == null || !pd.getOwner().equals(pOwner.getName())) {
             pOwner.sendMessage(plugin.getPrefix() + plugin.getLocale(pOwner).errorNotOnIsland);
             return;
@@ -187,7 +189,7 @@ public class IslandManager {
             int wy = Settings.islandHeight;
             wx = wx - wx % settings.getIslandDistance() + settings.getIslandDistance() / 2;
             wz = wz - wz % settings.getIslandDistance() + settings.getIslandDistance() / 2;
-            IslandData pd = plugin.getDatabase().getIslandById(generateIslandKey(wx, wz, levelName));
+            IslandData pd = plugin.getDatabase().getIslandById(generateIslandKey(wx, wz, levelName), levelName);
             if (pd == null) {
                 Location locIsland = new Location(wx, wy, wz, world);
                 pd = claim(p, locIsland, home, locked);
@@ -247,9 +249,19 @@ public class IslandManager {
         return generateIslandKey(x, z, loc.level.getName());
     }
 
+    /**
+     * Generates a new public key by checking the vector values
+     * with their island distances, this will make sure every key
+     * will not be duplicated and will make sure that each key is
+     * unique every X distance.
+     *
+     * @param x     The position of the x vector
+     * @param z     The position of the z vector
+     * @param level This level will be checked on their distances / level
+     * @return A unique island key
+     */
     public int generateIslandKey(int x, int z, String level) {
         WorldSettings settings = plugin.getSettings(level);
-        // NEW: Key upgrade need to delete island database
         return x / settings.getIslandDistance() + z / settings.getIslandDistance() * Integer.MAX_VALUE;
     }
 
@@ -277,12 +289,12 @@ public class IslandManager {
         return plugin.getLevels().contains(level.getName());
     }
 
-    public IslandData GetIslandAt(Location loc) {
+    public IslandData getIslandAt(Location loc) {
         if (!checkIslandAt(loc.getLevel())) {
             return null;
         }
         int iKey = generateIslandKey(loc);
-        IslandData res = plugin.getDatabase().getIslandById(iKey);
+        IslandData res = plugin.getDatabase().getIslandById(iKey, loc.getLevel().getName());
         if (res == null) {
             return null;
         }
@@ -297,19 +309,21 @@ public class IslandManager {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorWrongWorld);
             return;
         }
-        final IslandData pd = GetIslandAt(loc);
-        PlayerData pd2 = plugin.getPlayerInfo(p);
+        final CoopData coopData = plugin.getTManager().getLeaderCoop(p.getName());
+        final IslandData pd = getIslandAt(loc);
         if (pd == null) {
             p.sendMessage(TextFormat.LIGHT_PURPLE + plugin.getLocale(p).errorNotOnIsland);
             return;
         }
         p.sendMessage(TextFormat.LIGHT_PURPLE + "- Island Owner: " + TextFormat.YELLOW + pd.getOwner());
-        String strMembers = Utils.arrayToString(pd2.members);
-        if (pd2.members.size() <= 0) {
+        String strMembers;
+        if (coopData == null || coopData.getMembers().isEmpty()) {
             strMembers = "none";
+        } else {
+            strMembers = Utils.arrayToString(coopData.getMembers());
         }
-        p.sendMessage(TextFormat.LIGHT_PURPLE + "- Members: " + TextFormat.AQUA + strMembers);
 
+        p.sendMessage(TextFormat.LIGHT_PURPLE + "- Members: " + TextFormat.AQUA + strMembers);
         p.sendMessage(TextFormat.LIGHT_PURPLE + "- Flags: " + TextFormat.GOLD + "Allow Teleport: " + pd.isLocked());
     }
 
@@ -346,13 +360,16 @@ public class IslandManager {
         }
         Location local = new Location(loc.x, loc.y, loc.z, player.getLevel());
         // Get the player's island from the grid if it exists
-        IslandData island = GetIslandAt(local);
+        IslandData island = getIslandAt(local);
+        CoopData pd = plugin.getTManager().getLeaderCoop(island.getOwner());
         if (island != null) {
             // On an island in the grid
             // In a protected zone but is on the list of acceptable players
             // Otherwise return false
-            return island.onIsland(local) && (island.getMembers().contains(player.getName()) || island.getOwner().equalsIgnoreCase(player.getName()));
+            return island.onIsland(local) && ((pd == null || pd.getMembers().contains(player.getName())) || island.getOwner().equalsIgnoreCase(player.getName()));
         }
         return false;
     }
+
+
 }

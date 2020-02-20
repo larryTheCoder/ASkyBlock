@@ -30,9 +30,8 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.*;
 import cn.nukkit.item.*;
-import cn.nukkit.level.Level;
-import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
@@ -40,10 +39,9 @@ import com.larryTheCoder.storage.IslandSettings;
 import com.larryTheCoder.storage.SettingsFlag;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -56,6 +54,7 @@ public class Utils {
     public static final String SCHEMATIC_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "schematics";
     public static final String LOCALES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "locale";
     public static final String DIRECTORY = ASkyBlock.get().getDataFolder() + File.separator;
+    public static final Map<String, Runnable> TASK_SCHEDULED = new HashMap<>();
     private static final ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap<>();
     private static Long x = System.nanoTime();
 
@@ -92,11 +91,38 @@ public class Utils {
         return config;
     }
 
+    public static String hashObject(String hashedObject) {
+        // Hashing works well, SHA-256 Hashing instance
+        // PS: You are not encrypting, you are hashing.
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
+        md.update(hashedObject.getBytes());
+
+        byte[] byteData = md.digest();
+
+        // Convert the byte to hex format method 2
+        StringBuilder hexString = new StringBuilder();
+        for (int i = 0; i < byteData.length / 2; i++) {
+            String hex = Integer.toHexString(0xff & byteData[i]);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+
+        return hexString.toString();
+    }
+
     public static boolean canBypassTimer(Player p, String what, int seconds) {
         if (p.hasPermission("is.bypass.wait")) {
             return true;
         }
-        String key = String.valueOf(what) + "." + p.getName();
+        String key = what + "." + p.getName();
         Long msBefore = tooSoon.get(key);
         Long curMS = System.currentTimeMillis();
         if (msBefore != null) {
@@ -109,7 +135,7 @@ public class Utils {
     }
 
     public static String getPlayerRTime(Player p, String what, int seconds) {
-        String key = String.valueOf(what) + "." + p.getName();
+        String key = what + "." + p.getName();
         Long msBefore = tooSoon.get(key);
         Long curMS = System.currentTimeMillis();
         Long msDelta = curMS - msBefore;
@@ -123,61 +149,9 @@ public class Utils {
      * @param loc The location of chunks target
      */
     public static void loadChunkAt(Position loc) {
-        if (loc != null && !loc.getLevel().isChunkLoaded((int) loc.getX() >> 4, (int) loc.getZ() >> 4)) {
-            loc.getLevel().loadChunk((int) loc.getX() >> 4, (int) loc.getZ() >> 4);
+        if (loc != null && !loc.getLevel().isChunkLoaded(loc.getChunkX(), loc.getChunkZ())) {
+            loc.getLevel().loadChunk(loc.getChunkZ(), loc.getChunkZ());
         }
-    }
-
-    /**
-     * Converts a serialized location to a Location. Returns null if string is
-     * empty
-     *
-     * @param s - serialized location in format "world:x:y:z"
-     * @return Location
-     */
-    public static Location getLocationString(final String s) {
-        if (s == null || s.trim().isEmpty()) {
-            return null;
-        }
-        final String[] parts = s.split(":");
-        if (parts.length == 4) {
-            final Level w = Server.getInstance().getLevelByName(parts[0]);
-            if (w == null) {
-                return null;
-            }
-            final int x = Integer.parseInt(parts[1]);
-            final int y = Integer.parseInt(parts[2]);
-            final int z = Integer.parseInt(parts[3]);
-            return new Location(x, y, z, 0, 0, w);
-        } else if (parts.length == 6) {
-            final Level w = Server.getInstance().getLevelByName(parts[0]);
-            if (w == null) {
-                return null;
-            }
-            final int x = Integer.parseInt(parts[1]);
-            final int y = Integer.parseInt(parts[2]);
-            final int z = Integer.parseInt(parts[3]);
-            final float yaw = Float.intBitsToFloat(Integer.parseInt(parts[4]));
-            final float pitch = Float.intBitsToFloat(Integer.parseInt(parts[5]));
-            return new Location(x, y, z, yaw, pitch, w);
-        }
-        return null;
-    }
-
-    /**
-     * Converts a location to a simple string representation If location is
-     * null, returns empty string.
-     * <p>
-     * Format: x:y:z:yaw:pitch:level
-     *
-     * @param location
-     * @return String of location
-     */
-    static public String getStringLocation(final Location location) {
-        if (location == null || location.getLevel() == null) {
-            return "";
-        }
-        return location.getFloorX() + ":" + location.getFloorY() + ":" + location.getFloorZ() + ":" + Float.floatToRawIntBits((float) location.getYaw()) + ":" + Float.floatToIntBits((float) location.getPitch()) + ":" + location.getLevel().getName();
     }
 
     /**
@@ -194,29 +168,6 @@ public class Utils {
     }
 
     // MAPPING STRINGS ---- Start ----
-
-    /**
-     * This function changes string to map
-     * Warning: This function has been detected to be an error and false casting
-     * please do not use this
-     *
-     * @param append String to be serialized
-     * @return HashMap
-     */
-    @Deprecated
-    public static HashMap stringToMap(String append) {
-        if (append.isEmpty()) {
-            return new HashMap<>();
-        }
-        HashMap<Object, Object> errs = new HashMap<>();
-        String[] at = append.split(", ");
-        for (String string : at) {
-            String[] at2 = string.split(":");
-            ArrayList<String> atd = new ArrayList<>(Arrays.asList(at2));
-            errs.put(atd.get(0), atd.get(1));
-        }
-        return errs;
-    }
 
     /**
      * This method changes an array to be string
@@ -256,12 +207,13 @@ public class Utils {
 
     // MAPPING STRINGS ---- End ----
 
-    public static boolean isNumeric(final String str) {
-        if (str == null) {
-            return false;
+    public static boolean isNumeric(final Object str) {
+        if (!(str instanceof String)) {
+            return str instanceof Integer;
         }
-        for (int sz = str.length(), i = 0; i < sz; ++i) {
-            if (!Character.isDigit(str.charAt(i))) {
+        String intnum = (String) str;
+        for (int sz = intnum.length(), i = 0; i < sz; ++i) {
+            if (!Character.isDigit(intnum.charAt(i))) {
                 return false;
             }
         }
@@ -291,63 +243,13 @@ public class Utils {
 
     private static String convertTimer(long ms) {
         int secs = (int) (ms / 1000 % 60);
-        int mins = (int) (ms / 1000 / 60 % 60);
-        return String.format("%02dm %02ds", mins, secs);
+        int min = (int) (ms / 1000 / 60 % 60);
+        return String.format("%02dm %02ds", min, secs);
     }
 
     public static int secondsAsMillis(int sec) {
-        int ms = (sec * 60);
-        return ms;
+        return (sec * 60);
     }
-
-    /**
-     * Saves a YAML file
-     *
-     * @param yamlFile
-     * @param fileLocation
-     */
-    public static void saveYamlFile(Config yamlFile, String fileLocation) {
-        File file = new File(DIRECTORY + fileLocation);
-
-        try {
-            yamlFile.save(file);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public static List<String> chop(TextFormat color, String longLine, int length) {
-        List<String> result = new ArrayList<>();
-        int i = 0;
-        for (i = 0; i < longLine.length(); i += length) {
-
-            int endIndex = Math.min(i + length, longLine.length());
-            String line = longLine.substring(i, endIndex);
-            // Do the following only if i+length is not the end of the string
-            if (endIndex < longLine.length()) {
-                // Check if last character in this string is not a space
-                if (!line.substring(line.length() - 1).equals(" ")) {
-                    // If it is not a space, check to see if the next character
-                    // in long line is a space.
-                    if (!longLine.substring(endIndex, endIndex + 1).equals(" ")) {
-                        // If it is not, then we are cutting a word in two and
-                        // need to backtrack to the last space if possible
-                        int lastSpace = line.lastIndexOf(" ");
-                        // Only do this if there is a space in the line to
-                        // backtrack to...
-                        if (lastSpace != -1 && lastSpace < line.length()) {
-                            line = line.substring(0, lastSpace);
-                            i -= (length - lastSpace - 1);
-                        }
-                    }
-                }
-            }
-            result.add(color + line);
-        }
-        return result;
-    }
-
 
     /**
      * Check physical activity of the player
@@ -375,20 +277,35 @@ public class Utils {
     }
 
     /**
-     * @return random long number using XORShift random number generator
+     * Unpair a string into a valid vector3 coordinates.
+     *
+     * @param pos A compressed integer by {@link Utils#getVectorPair}
+     * @return a valid {@link Vector3} class
      */
-    public static long randomLong() {
-        x ^= (x << 21);
-        x ^= (x >>> 35);
-        x ^= (x << 4);
-        return Math.abs(x);
+    public static Vector3 unpairVector(String pos) {
+        String[] list = pos.split(":");
+        return new Vector3(Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]));
+    }
+
+    /**
+     * Compress a vector3 coordinates into one long
+     * integer.
+     *
+     * @param vec The coordinates of the position
+     * @return the compressed integer
+     */
+    public static String getVectorPair(Vector3 vec) {
+        return vec.getFloorX() + ":" + vec.getFloorY() + ":" + vec.getFloorZ();
     }
 
     /**
      * @return random double using XORShift random number generator
      */
     public static double randomDouble() {
-        return (double) randomLong() / Long.MAX_VALUE;
+        x ^= (x << 21);
+        x ^= (x >>> 35);
+        x ^= (x << 4);
+        return (double) Math.abs(x) / Long.MAX_VALUE;
     }
 
     /**
@@ -460,7 +377,7 @@ public class Utils {
         } else if (type instanceof BlockBrewingStand) {
             sendDebug("DEBUG: Type of check is brewing stand");
             return data.getIgsFlag(SettingsFlag.BREWING);
-        } else if (type instanceof BlockFurnace || type instanceof BlockFurnaceBurning) {
+        } else if (type instanceof BlockFurnace) {
             sendDebug("DEBUG: Type of check is furnace");
             return data.getIgsFlag(SettingsFlag.FURNACE);
         } else if (type instanceof BlockEnchantingTable) {
@@ -520,5 +437,87 @@ public class Utils {
             fin.append(Character.toUpperCase(ugly.charAt(0))).append(ugly.substring(1));
         }
         return fin.toString();
+    }
+
+    /**
+     * Sorts map in descending order
+     *
+     * @param map The map of the
+     * @return The serialized map in descending order
+     */
+    public static <Key, Value extends Comparable<? super Value>> LinkedHashMap<Key, Value> sortByValue(Map<Key, Value> map) {
+        List<Map.Entry<Key, Value>> list = new LinkedList<>(map.entrySet());
+        list.sort((o1, o2) -> {
+            // Switch these two if you want ascending
+            return (o2.getValue()).compareTo(o1.getValue());
+        });
+
+        LinkedHashMap<Key, Value> result = new LinkedHashMap<>();
+        for (Map.Entry<Key, Value> entry : list) {
+            result.put(entry.getKey(), entry.getValue());
+            if (result.size() > 20)
+                break;
+        }
+        return result;
+    }
+
+    public static String checkChallenge(String challengeType, String type) {
+        Map<String, Boolean> challengeList = new HashMap<>();
+        Map<String, Integer> challengeListTimes = new HashMap<>();
+
+        for (String challenges : Settings.challengeList) {
+            challengeList.put(challenges, false);
+            challengeListTimes.put(challenges, 0);
+        }
+
+        StringBuilder buf = new StringBuilder();
+        if (type.equals("cl")) {
+            // Challenges encode for PlayerData.challengeList
+            if (!challengeType.isEmpty()) {
+                String[] at = challengeType.split(", ");
+                for (String string : at) {
+                    try {
+                        String[] at2 = string.split(":");
+                        ArrayList<String> list = new ArrayList<>(Arrays.asList(at2));
+
+                        boolean value = list.get(1).equalsIgnoreCase("1");
+                        challengeList.put(list.get(0).toLowerCase(), value);
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+
+            challengeList.forEach((key, value) -> {
+                if (buf.length() > 0) {
+                    buf.append(", ");
+                }
+                buf.append(key).append(":").append(value ? "1" : "0");
+            });
+        } else if (type.equals("clt")) {
+            if (!challengeType.isEmpty()) {
+                // Challenges encode for PlayerData.challengeListTimes
+                String[] at = challengeType.split(", ");
+                for (String string : at) {
+                    try {
+                        String[] at2 = string.split(":");
+                        ArrayList<String> list = new ArrayList<>(Arrays.asList(at2));
+
+                        challengeListTimes.put(list.get(0).toLowerCase(), Integer.parseInt(list.get(1)));
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+
+            challengeListTimes.forEach((key, value) -> {
+                if (buf.length() > 0) {
+                    buf.append(", ");
+                }
+                buf.append(key).append(":").append(value);
+            });
+        } else {
+            Utils.send("&cUnknown challenge list: " + type + ", returning null...");
+            buf.append("null");
+        }
+        return buf.toString();
     }
 }

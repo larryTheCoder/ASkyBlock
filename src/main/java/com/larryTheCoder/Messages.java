@@ -28,6 +28,7 @@ package com.larryTheCoder;
 
 import cn.nukkit.Player;
 import cn.nukkit.utils.Config;
+import com.larryTheCoder.player.CoopData;
 import com.larryTheCoder.utils.Utils;
 
 import java.util.ArrayList;
@@ -42,6 +43,8 @@ import java.util.List;
  * @author: larryTheCoder
  */
 public class Messages {
+
+    // TODO: REFACTOR THESE CODES
 
     // Offline Messages
     private final HashMap<String, List<String>> messages = new HashMap<>();
@@ -86,7 +89,6 @@ public class Messages {
             messages.keySet().forEach((p) -> offlineMessages.put(p, messages.get(p)));
             // Convert to YAML
             messageStore.set("messages", offlineMessages);
-            Utils.saveYamlFile(messageStore, "messages.yml");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -136,11 +138,11 @@ public class Messages {
      * @param message
      */
     public void tellOfflineTeam(String player, String message) {
-        if (!plugin.getTManager().inTeam(player)) {
+        if (!plugin.getTManager().hasTeam(player)) {
             return;
         }
-        String teamLeader = plugin.getTManager().getLeader(player);
-        List<String> teamMembers = plugin.getTManager().getPlayerMembers(teamLeader);
+        CoopData pd = plugin.getTManager().getLeaderCoop(player);
+        List<String> teamMembers = pd.getMembers();
         for (String member : teamMembers) {
             if (plugin.getServer().getPlayer(player) == null) {
                 // Offline player
@@ -152,20 +154,20 @@ public class Messages {
     /**
      * Tells all online team members something happened
      *
-     * @param p
+     * @param player
      * @param message
      */
-    public void tellTeam(String p, String message) {
+    public void tellTeam(String player, String message) {
         // getLogger().info("DEBUG: tell offline team called");
-        if (!plugin.getTManager().inTeam(p)) {
+        if (!plugin.getTManager().hasTeam(player)) {
             // getLogger().info("DEBUG: player is not in a team");
             return;
         }
-        String teamLeader = plugin.getTManager().getLeader(p);
-        List<String> teamMembers = plugin.getTManager().getPlayerMembers(teamLeader);
+        CoopData pd = plugin.getTManager().getLeaderCoop(player);
+        List<String> teamMembers = pd.getMembers();
         for (String member : teamMembers) {
             // getLogger().info("DEBUG: trying String " + member.toString());
-            if (!member.equals(p) && plugin.getServer().getPlayer(member) != null) {
+            if (!member.equals(player) && plugin.getServer().getPlayer(member) != null) {
                 // Online player
                 plugin.getServer().getPlayer(member).sendMessage(message);
             }

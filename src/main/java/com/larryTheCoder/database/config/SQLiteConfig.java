@@ -37,11 +37,15 @@ import java.sql.*;
  */
 public class SQLiteConfig implements AbstractConfig {
 
-    private Connection connection;
     private final String dbLocation;
+    private Connection connection;
 
     public SQLiteConfig(File data) {
         this.dbLocation = data.getAbsolutePath();
+    }
+
+    public String getAbsolutePath() {
+        return dbLocation;
     }
 
     @Override

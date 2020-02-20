@@ -33,6 +33,9 @@ import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.utils.Utils;
+
+import java.util.Map;
 
 public class SimpleFancyTitle extends Task {
 
@@ -90,6 +93,14 @@ public class SimpleFancyTitle extends Task {
             //p.sendMessage(plugin.getLocale(p).islandDonate.replace("[player]", p.getName()));
             //p.sendMessage(plugin.getLocale(p).islandSupport);
             //p.sendMessage(plugin.getLocale(p).islandURL);
+        }
+
+        Map<String, Runnable> task = Utils.TASK_SCHEDULED;
+        if (task.containsKey(p.getName())) {
+            Utils.sendDebug("Running a runnable task");
+            Runnable tasking = task.get(p.getName());
+            tasking.run();
+            task.remove(p.getName());
         }
     }
 }

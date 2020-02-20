@@ -28,11 +28,13 @@ package com.larryTheCoder.database;
 
 import cn.nukkit.level.Position;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.player.CoopData;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.storage.IslandData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Abstract class to open a connection
@@ -88,7 +90,7 @@ public abstract class Database {
 
     public abstract IslandData getSpawn();
 
-    public abstract IslandData getIslandById(int id);
+    public abstract IslandData getIslandById(int id, String levelName);
 
     public abstract void close();
 
@@ -100,7 +102,7 @@ public abstract class Database {
 
     public abstract boolean saveWorlds(ArrayList<String> pd);
 
-    public abstract List<String> getPlayersData();
+    public abstract List<PlayerData> getPlayersData();
 
     public abstract PlayerData getPlayerData(String st);
 

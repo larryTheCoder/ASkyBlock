@@ -40,7 +40,6 @@ class PluginTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> {
     @Override
     public void onRun(int currentTick) {
         time++;
-        owner.getInvitationHandler().tick();
         // Release every 1 Hour
         if (time == 3600) {
             owner.getDatabase().free();

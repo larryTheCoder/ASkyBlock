@@ -8,7 +8,7 @@
 ---
 
 ## Do not change this
-version: "Integration Failed"
+version: 1
 
 ## Game Prefix.
 Prefix: "&d[&eASkyBlock&d] &e"
@@ -274,6 +274,7 @@ database:
   #  SQLITE - custom sqlite file
   #  MYSQL  - custom MySql configuration
   connection: sqlite
+  prefix: ""
   SQLite:
     # SQlite file name.
     # You can pick your name and
@@ -282,7 +283,6 @@ database:
   MySQL:
     # Fully implemented, syncs and low latency connection
     port: 3306
-    prefix: "Server_1"
     database: "ASkyBlock"
     username: "root"
     password: ""
