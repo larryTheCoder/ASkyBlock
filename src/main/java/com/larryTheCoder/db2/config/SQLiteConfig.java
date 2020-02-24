@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -24,13 +24,16 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.database.config;
+package com.larryTheCoder.db2.config;
 
+import cn.nukkit.utils.Config;
+import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Utils;
+import org.sql2o.Sql2o;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.SQLException;
 
 /**
  * @author larryTheCoder
@@ -38,10 +41,12 @@ import java.sql.*;
 public class SQLiteConfig implements AbstractConfig {
 
     private final String dbLocation;
-    private Connection connection;
+    private final File file;
+    private Sql2o connection;
 
-    public SQLiteConfig(File data) {
-        this.dbLocation = data.getAbsolutePath();
+    public SQLiteConfig(Config data) {
+        this.file = new File(ASkyBlock.get().getDataFolder(), data.getString("database.SQLite.file-name") + ".db");
+        this.dbLocation = file.getAbsolutePath();
     }
 
     public String getAbsolutePath() {
@@ -49,10 +54,15 @@ public class SQLiteConfig implements AbstractConfig {
     }
 
     @Override
-    public Connection openConnection() throws SQLException, ClassNotFoundException {
-        if (checkConnection()) {
-            return this.connection;
-        }
+    public Sql2o forceConnection() {
+        return new Sql2o("jdbc:sqlite:" + this.dbLocation, null, null);
+    }
+
+    @Override
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public Sql2o openConnection() throws SQLException {
+        if (checkConnection()) return this.connection;
+
         File file = new File(this.dbLocation);
         if (!file.exists()) {
             try {
@@ -61,22 +71,21 @@ public class SQLiteConfig implements AbstractConfig {
                 Utils.send("&cUnable to create database!");
             }
         }
-        try {
-            new java.util.Properties();
-            this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.dbLocation);
-        } catch (SQLException ex) {
-            forceConnection();
-        }
-        return this.connection;
+
+        return new Sql2o("jdbc:sqlite:" + this.dbLocation, null, null);
     }
 
     @Override
     public boolean checkConnection() throws SQLException {
-        return (this.connection != null) && !this.connection.isClosed();
+        if (connection == null) return false;
+
+        try (java.sql.Connection con = connection.getConnectionSource().getConnection()) {
+            return !con.isClosed();
+        }
     }
 
     @Override
-    public Connection getConnection() {
+    public Sql2o getConnection() {
         return this.connection;
     }
 
@@ -85,36 +94,13 @@ public class SQLiteConfig implements AbstractConfig {
         if (this.connection == null) {
             return false;
         }
-        this.connection.close();
+        this.connection.getConnectionSource().getConnection().close();
         this.connection = null;
         return true;
     }
 
     @Override
-    public ResultSet querySQL(String query) throws SQLException, ClassNotFoundException {
-        if (checkConnection()) {
-            openConnection();
-        }
-        try (Statement statement = this.connection.createStatement()) {
-            return statement.executeQuery(query);
-        }
+    public String toString() {
+        return "SQLite, " + file.getName();
     }
-
-    @Override
-    public int updateSQL(String query) throws SQLException, ClassNotFoundException {
-        if (checkConnection()) {
-            openConnection();
-        }
-        try (Statement statement = this.connection.createStatement()) {
-            return statement.executeUpdate(query);
-        }
-    }
-
-    @Override
-    public Connection forceConnection() throws SQLException, ClassNotFoundException {
-        Class.forName("org.sqlite.JDBC");
-        this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.dbLocation);
-        return this.connection;
-    }
-
 }

@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -109,7 +109,6 @@ public class JSONValue {
      * "this" as the first parameter, use JSONObject.writeJSONString(Map, Writer) or JSONArray.writeJSONString(List, Writer) instead.
      *
      * @param value
-     * @param writer
      * @see org.json.simple.JSONObject#writeJSONString(Map, Writer)
      * @see org.json.simple.JSONArray#writeJSONString(List, Writer)
      */

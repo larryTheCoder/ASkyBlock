@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -114,7 +114,7 @@ public class LevelCalcTask {
 
         for (StoreMetadata data : copy) {
             IslandData pd = data.getIslandData();
-            Player targetPlayer = Server.getInstance().getPlayer(pd.getOwner());
+            Player targetPlayer = Server.getInstance().getPlayer(pd.getPlotOwner());
             CommandSender sender = data.getSender();
 
             // Sometimes the island could be null
@@ -140,7 +140,7 @@ public class LevelCalcTask {
                             levelMultiplier = 1;
                         }
                     } else {
-                        Utils.send("&cPlayer " + pd.getOwner() + " has permission: " + type + " <-- the last part MUST be a number! Ignoring...");
+                        Utils.send("&cPlayer " + pd.getPlotOwner() + " has permission: " + type + " <-- the last part MUST be a number! Ignoring...");
                     }
                 }
             }
@@ -281,7 +281,7 @@ public class LevelCalcTask {
                     if (targetPlayer != null) {
                         reportLines.add("Asker is " + sender.getName());
                     } else {
-                        reportLines.add("Asker is " + pd.getOwner());
+                        reportLines.add("Asker is " + pd.getPlotOwner());
                     }
                     reportLines.add("Total block score count = " + String.format("%,d", blockScore));
                     reportLines.add("Level cost = " + Settings.levelCost);
@@ -354,7 +354,7 @@ public class LevelCalcTask {
 
                 // Return to main thread
                 plugin.getServer().getScheduler().scheduleTask(plugin, () -> {
-                    PlayerData playerInfo = plugin.getPlayerInfo(pd.getOwner());
+                    PlayerData playerInfo = plugin.getPlayerInfo(pd.getPlotOwner());
                     // Fire the pre-level event
                     IslandPreLevelEvent event = new IslandPreLevelEvent(targetPlayer, pd, score, pointsToNextLevel);
                     plugin.getServer().getPluginManager().callEvent(event);
@@ -384,7 +384,7 @@ public class LevelCalcTask {
                                 // Tell offline team members the island level changed
                                 if (playerInfo.getIslandLevel() != oldLevel) {
                                     //plugin.getLogger().info("DEBUG: telling offline players");
-                                    plugin.getMessages().tellOfflineTeam(pd.getOwner(), TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel());
+                                    plugin.getMessages().tellOfflineTeam(pd.getPlotOwner(), TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel());
                                 }
                                 if (sender instanceof Player && ((Player) sender).isOnline()) {
                                     String message = TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel();

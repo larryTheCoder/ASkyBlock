@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -113,17 +113,17 @@ public class IslandListener implements Listener {
         }
         IslandData island = plugin.getGrid().getProtectedIslandAt(location);
         TeamManager pd = plugin.getTManager();
-        if (island != null && (island.getIgsSettings().getIgsFlag(flag) || (pd.getLeaderCoop(island.getOwner()) == null || pd.getLeaderCoop(island.getOwner()).isMember(player.getName())))) {
+        if (island != null && (island.getIgsSettings().getIgsFlag(flag) || (pd.getLeaderCoop(island.getPlotOwner()) == null || pd.getLeaderCoop(island.getPlotOwner()).isMember(player.getName())))) {
             //deb.debug("DEBUG: Action is allowed, flag=" + island.getIgsSettings().getIgsFlag(flag) + " member=" + island.getMembers().contains(player.getName()));
             return true;
         }
 
-        if (island == null || island.getOwner() == null) {
+        if (island == null || island.getPlotOwner() == null) {
             //deb.debug("DEBUG: Action not allowed: actionAllowed() check");
             return false;
         }
 
-        if (island.getOwner().equalsIgnoreCase(player.getName())) {
+        if (island.getPlotOwner().equalsIgnoreCase(player.getName())) {
             //deb.debug("DEBUG: Action is allowed: actionAllowed() check");
             return true;
         }
@@ -170,7 +170,7 @@ public class IslandListener implements Listener {
          * islandTo == islandFrom
          */
 
-        if (islandTo != null && islandFrom == null && (islandTo.getOwner() != null || islandTo.isSpawn())) {
+        if (islandTo != null && islandFrom == null && (islandTo.getPlotOwner() != null || islandTo.isSpawnIsland())) {
             // Entering
             if (islandTo.isLocked()) {
                 p.sendMessage(plugin.getPrefix() + TextFormat.RED + "This island is locked");
@@ -179,16 +179,16 @@ public class IslandListener implements Listener {
             }
 
             if (islandTo.getIgsSettings().getIgsFlag(SettingsFlag.ENTER_EXIT_MESSAGES)) {
-                p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering " + islandTo.getName() + "'s island");
+                p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Entering " + islandTo.getIslandName() + "'s island");
             }
 
             // Fire entry event
             final IslandEnterEvent event = new IslandEnterEvent(p, islandTo, e.getTo());
             plugin.getServer().getPluginManager().callEvent(event);
-        } else if (islandTo == null && islandFrom != null && (islandFrom.getOwner() != null || islandFrom.isSpawn())) {
+        } else if (islandTo == null && islandFrom != null && (islandFrom.getPlotOwner() != null || islandFrom.isSpawnIsland())) {
             // Leaving
             if (islandFrom.getIgsSettings().getIgsFlag(SettingsFlag.ENTER_EXIT_MESSAGES)) {
-                p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving " + islandFrom.getName() + "'s island");
+                p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving " + islandFrom.getIslandName() + "'s island");
             }
 
             // Fire exit event
@@ -201,7 +201,7 @@ public class IslandListener implements Listener {
             // Fire entry event
             final IslandEnterEvent event2 = new IslandEnterEvent(p, islandTo, e.getTo());
             plugin.getServer().getPluginManager().callEvent(event2);
-        } else if (islandTo != null && (islandTo.getOwner() != null || islandTo.isSpawn())) {
+        } else if (islandTo != null && (islandTo.getPlotOwner() != null || islandTo.isSpawnIsland())) {
             // Lock check
             if (islandTo.isLocked()) {
                 if (!p.isOp() && !p.hasPermission("is.mod.bypassprotect") && !p.hasPermission("is.mod.bypasslock")) {

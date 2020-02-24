@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -148,8 +148,8 @@ public class LavaCheck implements Listener {
 
             int level = Integer.MIN_VALUE;
             IslandData pd = plugin.getIslandInfo(e.getBlock());
-            if (pd != null && pd.getOwner() != null) {
-                PlayerData pd2 = plugin.getDatabase().getPlayerData(pd.getOwner());
+            if (pd != null && pd.getPlotOwner() != null) {
+                PlayerData pd2 = plugin.getDatabase().getPlayerData(pd.getPlotOwner());
                 if (pd2 != null) {
                     level = pd2.getIslandLevel();
                 }

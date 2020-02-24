@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -29,116 +29,159 @@ package com.larryTheCoder.storage;
 import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
+import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
+import com.google.common.base.Preconditions;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.db2.DatabaseManager;
+import com.larryTheCoder.db2.TableSet;
+import com.larryTheCoder.utils.Utils;
+import lombok.Builder;
+import org.sql2o.Connection;
+import org.sql2o.data.Row;
+import org.sql2o.data.Table;
 
 import java.util.Objects;
 
 /**
  * @author larryTheCoder
  */
+@Builder
 public class IslandData implements Cloneable {
 
+    private int islandUniquePlotId = 0;
+    private int homeCountId = 0;
+
     // Coordinates of the home spawn location
-    public int homeX = 0;
-    public int homeY = 0;
-    public int homeZ = 0;
-    private int islandId = 0;
-    private int id = 0;
-    private String levelName;
-    private String owner;
-    private String biome;
-    private boolean locked;
+    private Vector3 homeCoordinates;
+    private Vector2 gridCoordinates;
+
+    // Plot metadata
+    private boolean isLocked = false;
+    private boolean isSpawnIsland = false;
+
     // Island information
-    private String name;
-    // Coordinates of the island area
-    private int centerX;
-    private int centerY;
-    private int centerZ;
-    // Set if this island is a spawn island
-    private boolean isSpawn = false;
+    private String levelName;
+    private String plotOwner;
+    private String plotBiome;
+    private String islandName;
+
     // Protection size
     private int protectionRange;
-    // IslandSettings
-    private IslandSettings settings;
     private int levelHandicap;
     private int deaths;
 
+    // IslandSettings
+    private IslandSettings settings;
+
+    // IslandData private variables
+    private boolean isDataFetched = false;
+
     @SuppressWarnings("OverridableMethodCallInConstructor")
-    public IslandData(String levelName, int X, int Z, int PSize) {
-        this.centerX = X;
-        this.centerY = 0;
-        this.centerZ = Z;
+    public IslandData(String levelName, int xCoord, int zCoord, int plotSize) {
+        this.gridCoordinates = new Vector2(xCoord, zCoord);
         this.levelName = levelName;
-        this.protectionRange = PSize;
-        // Island Guard Settings
+        this.protectionRange = plotSize;
+
         this.settings = new IslandSettings(this);
+        this.isDataFetched = true;
     }
 
-    @SuppressWarnings({"AssignmentToMethodParameter", "OverridableMethodCallInConstructor"})
-    public IslandData(String levelName, int X, int Y, int Z, int homeX, int homeY, int homeZ, int PSize, String name, String owner, String biome, int id, int islandId, boolean locked, String defaultvalue, boolean isSpawn, int levelHandicap, int deaths) {
-        if (biome.isEmpty()) {
-            biome = "PLAINS";
-        }
+    private IslandData(String levelName, String plotOwner, Vector2 gridPos, Vector3 spawnPos, int plotSize, int homeId, int islandUniquePlotId) {
         this.levelName = levelName;
-        this.centerX = X;
-        this.centerY = Y;
-        this.centerZ = Z;
-        this.homeX = homeX;
-        this.homeY = homeY;
-        this.homeZ = homeZ;
-        this.protectionRange = PSize;
-        this.name = name;
-        this.owner = owner;
-        this.biome = biome;
-        this.id = id;
-        this.islandId = islandId;
-        this.locked = locked;
-        this.settings = new IslandSettings(this, defaultvalue);
-        this.isSpawn = isSpawn;
-        this.levelHandicap = levelHandicap;
-        this.deaths = deaths;
+        this.plotOwner = plotOwner;
+        this.homeCoordinates = spawnPos;
+        this.gridCoordinates = gridPos;
+        this.protectionRange = plotSize;
+
+        // The most crucial part of this plot
+        this.homeCountId = homeId;
+        this.islandUniquePlotId = islandUniquePlotId;
     }
 
-    public Vector3 getCenter() {
-        return new Vector3(centerX, centerY, centerZ);
+    public static IslandData fromRows(Row row) {
+        return new IslandData(
+                row.getString("levelName"),
+                row.getString("player"),
+                Utils.unpairVector2(row.getString("gridPosition")),
+                Utils.unpairVector3(row.getString("spawnPosition")),
+                row.getInteger("gridSize"),
+                row.getInteger("islandId"),
+                row.getInteger("islandUniqueId"));
     }
 
-    public void setCenter(int centerX, int centerY, int centerZ) {
-        this.centerX = centerX;
-        this.centerY = centerY;
-        this.centerZ = centerZ;
+    private void fetchData() {
+        Connection conn = ASkyBlock.get().getDatabase().getConnection();
+
+        Table table = conn.createQuery(TableSet.FETCH_ISLAND_DATA.getQuery())
+                .addParameter("islandUniquePlotId", islandUniquePlotId)
+                .executeAndFetchTable();
+
+        if (table.rows().isEmpty()) {
+            this.plotBiome = "";
+            this.isLocked = false;
+            this.levelHandicap = 0;
+            this.settings = new IslandSettings(this);
+        } else {
+            Row row = table.rows().get(0);
+
+            this.plotBiome = row.getString("biome");
+            this.isLocked = row.getBoolean("locked");
+            this.levelHandicap = row.getInteger("levelHandicap");
+            this.settings = new IslandSettings(row.getString("protectionData"));
+        }
+
+        isDataFetched = true;
+    }
+
+    /**
+     * Get a valid home coordinates for this island.
+     * This will return a safe-point for players to teleport into.
+     *
+     * @return {@link Location location} of the safe-point position.
+     */
+    public Location getHome() {
+        return Location.fromObject(homeCoordinates, Server.getInstance().getLevelByName(levelName));
+    }
+
+    /**
+     * This will return a valid coordinates for the center of the island.
+     * This were used to plot a grid to islands so the code can make sense of the range
+     * used by other islands.
+     *
+     * @return {@link Vector2 Vector} of 2-point grid coordinates
+     */
+    public Vector2 getCenter() {
+        return gridCoordinates;
+    }
+
+    public void setCenter(Vector2 gridCoordinates) {
+        Preconditions.checkState(gridCoordinates != null, "Grid coordinates cannot be null!");
+
+        this.gridCoordinates = gridCoordinates;
     }
 
     public void setHomeLocation(Vector3 vector) {
-        this.homeX = vector.getFloorX();
-        this.homeY = vector.getFloorY();
-        this.homeZ = vector.getFloorZ();
-    }
-
-    public Location getHome() {
-        return new Location(homeX, homeY, homeZ, Server.getInstance().getLevelByName(levelName));
+        this.homeCoordinates = vector.clone();
     }
 
     /**
-     * Get generic ID for this island
-     * every islands generate own unique
-     * ID
+     * Get a number of plots created by this player for this plot.
+     * This is the plot number created by the player.
      *
-     * @return integer, double
+     * @return {@code int} value, the house value.
      */
-    public int getId() {
-        return id;
+    public int getHomeCountId() {
+        return homeCountId;
     }
 
     /**
-     * Do not use this in server production
-     * Unless you want to mess up the plugin
+     * This is for internal usage.
      *
-     * @param id int
+     * @param homeCountId int
      */
-    public void setId(int id) {
-        this.id = id;
+    public void setHomeCountId(int homeCountId) {
+        this.homeCountId = homeCountId;
     }
 
     /**
@@ -147,8 +190,8 @@ public class IslandData implements Cloneable {
      *
      * @return int
      */
-    public int getIslandId() {
-        return islandId;
+    public int getIslandUniquePlotId() {
+        return islandUniquePlotId;
     }
 
     /**
@@ -156,10 +199,10 @@ public class IslandData implements Cloneable {
      * Please do not use this in any production
      * server, this method is mean to be final only
      *
-     * @param islandId int
+     * @param islandUniquePlotId int
      */
-    public void setIslandId(int islandId) {
-        this.islandId = islandId;
+    public void setIslandUniquePlotId(int islandUniquePlotId) {
+        this.islandUniquePlotId = islandUniquePlotId;
     }
 
     /**
@@ -168,6 +211,10 @@ public class IslandData implements Cloneable {
      * @return IslandSettings
      */
     public IslandSettings getIgsSettings() {
+        if (!isDataFetched) {
+            fetchData();
+        }
+
         return settings;
     }
 
@@ -176,8 +223,8 @@ public class IslandData implements Cloneable {
      *
      * @return bool
      */
-    public boolean isSpawn() {
-        return isSpawn;
+    public boolean isSpawnIsland() {
+        return isSpawnIsland;
     }
 
     /**
@@ -187,8 +234,8 @@ public class IslandData implements Cloneable {
      *
      * @param vec boolean
      */
-    public void setSpawn(boolean vec) {
-        isSpawn = vec;
+    public void setSpawnIsland(boolean vec) {
+        isSpawnIsland = vec;
     }
 
     /* (non-Javadoc)
@@ -210,7 +257,7 @@ public class IslandData implements Cloneable {
      * @return int
      */
     public int getMinProtectedZ() {
-        return (centerZ - protectionRange / 2);
+        return (gridCoordinates.getFloorY() - protectionRange / 2);
     }
 
     /**
@@ -219,7 +266,7 @@ public class IslandData implements Cloneable {
      * @return int
      */
     public int getMinProtectedX() {
-        return (centerX - protectionRange / 2);
+        return (gridCoordinates.getFloorX() - protectionRange / 2);
     }
 
     /**
@@ -239,20 +286,13 @@ public class IslandData implements Cloneable {
      */
     public boolean onIsland(Location target) {
         Level level = Server.getInstance().getLevelByName(levelName);
-        if (level != null && levelName != null) {
-            // If the new nether is being used, islands exist in the nether too
-            //plugin.getLogger().info("DEBUG: target x = " + target.getBlockX() + " target z = " + target.getBlockZ());
-            //plugin.getLogger().info("DEBUG: min prot x = " + getMinProtectedX() + " min z = " + minProtectedZ);
-            //plugin.getLogger().info("DEBUG: max x = " + (getMinProtectedX() + protectionRange) + " max z = " + (minProtectedZ + protectionRange));
+        if (level == null || levelName == null) return false;
 
-            if (target.getLevel().getName().equalsIgnoreCase(levelName)) {
-                return target.getFloorX() >= getMinProtectedX()
-                        && target.getFloorX() <= (getMinProtectedX() + protectionRange)
-                        && target.getFloorZ() >= getMinProtectedZ()
-                        && target.getFloorZ() <= (getMinProtectedZ() + protectionRange);
-            }
-        }
-        return false;
+        return target.getLevel().getName().equalsIgnoreCase(levelName)
+                && target.getFloorX() >= getMinProtectedX()
+                && target.getFloorX() <= (getMinProtectedX() + protectionRange)
+                && target.getFloorZ() >= getMinProtectedZ()
+                && target.getFloorZ() <= (getMinProtectedZ() + protectionRange);
     }
 
     /**
@@ -266,8 +306,8 @@ public class IslandData implements Cloneable {
     public boolean inIslandSpace(int x, int z) {
         return x >= getCenter().getFloorX() - protectionRange / 2
                 && x < getCenter().getFloorX() + protectionRange / 2
-                && z >= getCenter().getFloorZ() - protectionRange / 2
-                && z < getCenter().getFloorZ() + protectionRange / 2;
+                && z >= getCenter().getFloorY() - protectionRange / 2
+                && z < getCenter().getFloorY() + protectionRange / 2;
     }
 
     /**
@@ -275,18 +315,18 @@ public class IslandData implements Cloneable {
      *
      * @return string
      */
-    public String getName() {
-        return name;
+    public String getIslandName() {
+        return islandName;
     }
 
     /**
      * Set own name for this island
      * Player choice, do not duplicate
      *
-     * @param name string
+     * @param islandName string
      */
-    public void setName(String name) {
-        this.name = name;
+    public void setIslandName(String islandName) {
+        this.islandName = islandName;
     }
 
     /**
@@ -295,28 +335,28 @@ public class IslandData implements Cloneable {
      *
      * @return String
      */
-    public String getBiome() {
-        return biome;
+    public String getPlotBiome() {
+        return plotBiome;
     }
 
-    public void setBiome(String biome) {
-        this.biome = biome;
+    public void setPlotBiome(String plotBiome) {
+        this.plotBiome = plotBiome;
     }
 
     public boolean isLocked() {
-        return locked;
+        return isLocked;
     }
 
     public void setLocked(boolean locked) {
-        this.locked = locked;
+        this.isLocked = locked;
     }
 
-    public String getOwner() {
-        return owner;
+    public String getPlotOwner() {
+        return plotOwner;
     }
 
-    public final void setOwner(String owner) {
-        this.owner = owner;
+    public final void setPlotOwner(String plotOwner) {
+        this.plotOwner = plotOwner;
     }
 
     public String getLevelName() {
@@ -329,7 +369,7 @@ public class IslandData implements Cloneable {
 
     @Override
     public String toString() {
-        return "IslandData(x=" + centerX + ", y=" + centerY + ", z= " + centerZ + ")";
+        return "IslandData(x=" + gridCoordinates.getFloorX() + ", z= " + gridCoordinates.getFloorY() + ")";
     }
 
     @Override
@@ -343,10 +383,10 @@ public class IslandData implements Cloneable {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 61 * hash + this.islandId;
-        hash = 61 * hash + this.id;
+        hash = 61 * hash + this.islandUniquePlotId;
+        hash = 61 * hash + this.homeCountId;
         hash = 61 * hash + Objects.hashCode(this.levelName);
-        hash = 61 * hash + Objects.hashCode(this.owner);
+        hash = 61 * hash + Objects.hashCode(this.plotOwner);
         return hash;
     }
 
@@ -362,8 +402,36 @@ public class IslandData implements Cloneable {
         this.deaths++;
     }
 
-    public void saveData() {
-        ASkyBlock.get().getDatabase().saveIsland(this);
+    /**
+     * Save island data asynchronously
+     */
+    public void saveIslandData() {
+        ASkyBlock.get().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
+            @Override
+            public void executeQuery(Connection connection) {
+                connection.createQuery(TableSet.ISLAND_INSERT_MAIN.getQuery())
+                        .addParameter("islandId", homeCountId)
+                        .addParameter("islandUniqueId", islandUniquePlotId)
+                        .addParameter("gridPos", Utils.getVector2Pair(gridCoordinates))
+                        .addParameter("spawnPos", Utils.getVector3Pair(homeCoordinates))
+                        .addParameter("gridSize", protectionRange)
+                        .addParameter("levelName", levelName)
+                        .addParameter("player", plotOwner)
+                        .executeUpdate();
+
+                if (!isDataFetched) {
+                    return;
+                }
+
+                connection.createQuery(TableSet.ISLAND_INSERT_DATA.getQuery())
+                        .addParameter("islandUniqueId", islandUniquePlotId)
+                        .addParameter("plotBiome", plotBiome)
+                        .addParameter("isLocked", isLocked)
+                        .addParameter("protectionData", settings.getSettings())
+                        .addParameter("levelHandicap", levelHandicap)
+                        .executeUpdate();
+            }
+        });
     }
 
 }

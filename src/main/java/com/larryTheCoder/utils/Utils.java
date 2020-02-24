@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -31,10 +31,12 @@ import cn.nukkit.Server;
 import cn.nukkit.block.*;
 import cn.nukkit.item.*;
 import cn.nukkit.level.Position;
+import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.SkyBlockGenerator;
 import com.larryTheCoder.storage.IslandSettings;
 import com.larryTheCoder.storage.SettingsFlag;
 
@@ -279,12 +281,23 @@ public class Utils {
     /**
      * Unpair a string into a valid vector3 coordinates.
      *
-     * @param pos A compressed integer by {@link Utils#getVectorPair}
+     * @param pos A compressed integer by {@link Utils#getVector3Pair}
      * @return a valid {@link Vector3} class
      */
-    public static Vector3 unpairVector(String pos) {
+    public static Vector3 unpairVector3(String pos) {
         String[] list = pos.split(":");
         return new Vector3(Integer.parseInt(list[0]), Integer.parseInt(list[1]), Integer.parseInt(list[2]));
+    }
+
+    /**
+     * Unpair a string into a valid vector2 coordinates.
+     *
+     * @param pos A compressed integer by {@link Utils#getVector3Pair}
+     * @return a valid {@link Vector3} class
+     */
+    public static Vector2 unpairVector2(String pos){
+        String[] list = pos.split(":");
+        return new Vector2(Integer.parseInt(list[0]), Integer.parseInt(list[1]));
     }
 
     /**
@@ -294,8 +307,19 @@ public class Utils {
      * @param vec The coordinates of the position
      * @return the compressed integer
      */
-    public static String getVectorPair(Vector3 vec) {
+    public static String getVector3Pair(Vector3 vec) {
         return vec.getFloorX() + ":" + vec.getFloorY() + ":" + vec.getFloorZ();
+    }
+
+    /**
+     * Compress a vector2 coordinates into one long
+     * integer.
+     *
+     * @param vec The coordinates of the position
+     * @return the compressed integer
+     */
+    public static String getVector2Pair(Vector2 vec) {
+        return vec.getFloorX() + ":" + vec.getFloorY();
     }
 
     /**
@@ -519,5 +543,14 @@ public class Utils {
             buf.append("null");
         }
         return buf.toString();
+    }
+
+    public static void loadLevelSeed(String levelName) {
+        if (!Server.getInstance().isLevelGenerated(levelName)) {
+            Server.getInstance().generateLevel(levelName, 0, SkyBlockGenerator.class);
+        }
+        if (!Server.getInstance().isLevelLoaded(levelName)) {
+            Server.getInstance().loadLevel(levelName);
+        }
     }
 }

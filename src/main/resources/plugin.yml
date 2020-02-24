@@ -106,10 +106,6 @@ permissions:
     is.bypass.wait:
      default: op
      description: "Bypass the reset timer"
-    # Admin delete command
-    is.admin.delete:
-     default: op
-     description: "Admin delete island command"
     # Admin on /isa command
     is.admin.command:
      default: op

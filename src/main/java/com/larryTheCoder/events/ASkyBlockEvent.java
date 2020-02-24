@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -111,7 +111,7 @@ class ASkyBlockEvent extends Event {
      * @return the teamLeader
      */
     public Player getTeamLeader() {
-        return Server.getInstance().getPlayer(island.getOwner());
+        return Server.getInstance().getPlayer(island.getPlotOwner());
     }
 
     /**
@@ -120,7 +120,7 @@ class ASkyBlockEvent extends Event {
      * @return UUID of owner
      */
     public Player getIslandOwner() {
-        return Server.getInstance().getPlayer(island.getOwner());
+        return Server.getInstance().getPlayer(island.getPlotOwner());
     }
 
     /**

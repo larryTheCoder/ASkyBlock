@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -30,6 +30,7 @@ import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
+import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
@@ -123,11 +124,15 @@ public class GridManager {
         Set<Location> islandTestLocations = new HashSet<>();
         if (plugin.getIsland().checkIsland(player)) {
             IslandData pd = plugin.getIslandInfo(player);
-            islandTestLocations.add(new Location(0, 0, 0, 0, 0, plugin.getServer().getLevelByName(pd.getLevelName())).add(pd.getCenter()));
+            Vector2 cartesianPlane = pd.getCenter();
+
+            islandTestLocations.add(new Location(cartesianPlane.getX(), 0, cartesianPlane.getY(), plugin.getServer().getLevelByName(pd.getLevelName())));
         }
+
         if (islandTestLocations.isEmpty()) {
             return false;
         }
+
         // Run through all the locations
         for (Location islandTestLocation : islandTestLocations) {
             // Must be in the same world as the locations being checked
@@ -142,10 +147,10 @@ public class GridManager {
                         protectionRange = island.getProtectionSize();
                     }
                 }
-                if (loc.getX() > islandTestLocation.getX() - protectionRange / 2
-                        && loc.getX() < islandTestLocation.getX() + protectionRange / 2
-                        && loc.getZ() > islandTestLocation.getZ() - protectionRange / 2
-                        && loc.getZ() < islandTestLocation.getZ() + protectionRange / 2) {
+                if (loc.getFloorX() > islandTestLocation.getFloorX() - protectionRange / 2
+                        && loc.getFloorX() < islandTestLocation.getFloorX() + protectionRange / 2
+                        && loc.getFloorZ() > islandTestLocation.getFloorZ() - protectionRange / 2
+                        && loc.getFloorZ() < islandTestLocation.getFloorZ() + protectionRange / 2) {
                     return true;
                 }
             }
@@ -162,23 +167,22 @@ public class GridManager {
      * @return Location of a safe teleport spot or null if one cannot be found
      */
     public Location getSafeHomeLocation(String p, int number) {
-        IslandData pd = plugin.getDatabase().getIsland(p, number);
+        IslandData pd = plugin.getIslandInfo(p, number);
         if (pd == null) {
             // Get the default home, which may be null too, but that's okay
-            number = 1;
-            pd = plugin.getDatabase().getIsland(p, number);
+            pd = plugin.getIslandInfo(p, 1);
         }
 
         if (pd != null) {
-            if (pd.isSpawn()) {
+            if (pd.isSpawnIsland()) {
                 return pd.getHome();
             }
 
-            Location locationSafe;
-            if (pd.homeX != 0 || pd.homeY != 0 || pd.homeZ != 0) {
-                locationSafe = pd.getHome();
-            } else {
-                locationSafe = new Location(0, 0, 0, 0, 0, plugin.getServer().getLevelByName(pd.getLevelName())).add(pd.getCenter());
+            Location locationSafe = pd.getHome();
+            if (locationSafe.getFloorX() == 0 || locationSafe.getFloorY() == 0 || locationSafe.getFloorY() == 0) {
+                Vector2 cartesianPlane = pd.getCenter();
+
+                locationSafe = new Location(cartesianPlane.getX(), 0, cartesianPlane.getY(), plugin.getServer().getLevelByName(pd.getLevelName()));
             }
 
             // Load the chunks (Pretend that the island chunks has not loaded)
@@ -213,10 +217,10 @@ public class GridManager {
             }
 
             Utils.sendDebug("Trying to check another way");
-            Vector3 center = pd.getCenter();
+            Vector2 center = pd.getCenter();
             for (int dy = 0; dy <= 128; dy++) {
                 for (int dx = center.getFloorX() - 25; dx <= center.getFloorX() + 25; dx++) {
-                    for (int dz = center.getFloorZ() - 25; dz <= center.getFloorZ() + 25; dz++) {
+                    for (int dz = center.getFloorY() - 25; dz <= center.getFloorY() + 25; dz++) {
                         Position pos = locPlusOne.setComponents(dx, dy, dz);
                         if (isSafeLocation(pos) && checkSurrounding(pos)) {
                             pd.setHomeLocation(pos);
@@ -268,11 +272,6 @@ public class GridManager {
             return island;
         }
         return null;
-    }
-
-    public boolean isAtSpawn(Location location) {
-        IslandData spawn = plugin.getDatabase().getSpawn();
-        return spawn != null && spawn.onIsland(location);
     }
 
 }

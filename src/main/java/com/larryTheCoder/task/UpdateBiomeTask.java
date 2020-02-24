@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -102,7 +102,7 @@ class UpdateBiomeTask extends Task {
                         for (int y = settings.getSeaLevel(); y < 255 - settings.getSeaLevel(); y++) {
                             for (int x = 0; x < 16; x++) {
                                 for (int z = 0; z < 16; z++) {
-                                    chunk.setBiomeId(x, z, getBiome(pd.getBiome()).getId());
+                                    chunk.setBiomeId(x, z, getBiome(pd.getPlotBiome()).getId());
                                 }
                             }
                         }
@@ -110,7 +110,7 @@ class UpdateBiomeTask extends Task {
                         iChunk.remove();
                     }
                     if (biomeToChanged.isEmpty()) {
-                        player.sendMessage(plugin.getPrefix() + plugin.getLocale(p).biomeChangeComplete.replace("[biome]", pd.getBiome()));
+                        player.sendMessage(plugin.getPrefix() + plugin.getLocale(p).biomeChangeComplete.replace("[biome]", pd.getPlotBiome()));
                         this.cancel();
                     }
                 }

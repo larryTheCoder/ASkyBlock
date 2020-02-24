@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -144,7 +144,7 @@ public class IslandSettings {
     }
 
     private void serializeIds(String defaultValue) {
-        if (pd != null && pd.isSpawn()) {
+        if (pd != null && pd.isSpawnIsland()) {
             setSpawnDefaults();
         } else {
             setIgsDefaults();

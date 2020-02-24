@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -24,9 +24,11 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.database.config;
+package com.larryTheCoder.db2.config;
 
-import java.sql.Connection;
+import org.sql2o.Sql2o;
+import org.sql2o.data.Table;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -35,7 +37,7 @@ import java.sql.SQLException;
  */
 public interface AbstractConfig {
 
-    Connection forceConnection() throws SQLException, ClassNotFoundException;
+    Sql2o forceConnection();
 
     /**
      * Opens a connection with the database.
@@ -44,7 +46,7 @@ public interface AbstractConfig {
      * @throws SQLException           if the connection can not be opened
      * @throws ClassNotFoundException if the driver cannot be found
      */
-    Connection openConnection() throws SQLException, ClassNotFoundException;
+    Sql2o openConnection() throws SQLException, ClassNotFoundException;
 
     /**
      * Checks if a connection is open with the database.
@@ -59,7 +61,7 @@ public interface AbstractConfig {
      *
      * @return Connection with the database, null if none
      */
-    Connection getConnection();
+    Sql2o getConnection();
 
     /**
      * Closes the connection with the database.
@@ -68,28 +70,4 @@ public interface AbstractConfig {
      * @throws SQLException if the connection cannot be closed
      */
     boolean closeConnection() throws SQLException;
-
-    /**
-     * Executes a SQL Query.
-     * If the connection is closed, it will be opened.
-     *
-     * @param query Query to be run
-     * @return the results of the query
-     * @throws SQLException           If the query cannot be executed
-     * @throws ClassNotFoundException If the driver cannot be found; see {@link #openConnection()}
-     */
-    ResultSet querySQL(String query) throws SQLException, ClassNotFoundException;
-
-    /**
-     * Executes an Update SQL Query.
-     * See {@link java.sql.Statement#execute(String)}.
-     * If the connection is closed, it will be opened.
-     *
-     * @param query Query to be run
-     * @return Result Code, see {@link java.sql.Statement#execute(String)}
-     * @throws SQLException           If the query cannot be executed
-     * @throws ClassNotFoundException If the driver cannot be found; see {@link #openConnection()}
-     */
-    int updateSQL(String query) throws SQLException, ClassNotFoundException;
-
 }

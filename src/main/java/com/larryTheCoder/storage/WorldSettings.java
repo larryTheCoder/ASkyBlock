@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -27,23 +27,28 @@
 package com.larryTheCoder.storage;
 
 import cn.nukkit.level.Level;
+import cn.nukkit.utils.Config;
+import com.larryTheCoder.utils.Utils;
+import lombok.Builder;
 
 /**
  * @author larryTheCoder
  */
+@Builder
 public class WorldSettings {
 
-    private final Level level;
-    private final String permission;
-    private final int plotMax;
-    private final int plotSize;
-    private final boolean stopTime;
-    private final int seaLevel;
-    private final int plotRange;
-    private final boolean useDefaultChest;
+    private Level level;
+    private String permission;
+    private int plotMax;
+    private int plotSize;
+    private boolean stopTime;
+    private int seaLevel;
+    private int plotRange;
+    private boolean useDefaultChest;
 
     public WorldSettings(Level level) {
         this.level = level;
+
         // By using default parameters
         this.permission = "is.create";
         this.plotMax = 5;
@@ -54,15 +59,25 @@ public class WorldSettings {
         this.useDefaultChest = false;
     }
 
-    public WorldSettings(String permission, Level level, int plotMax, int plotSize, int plotRange, boolean stopTime, int seaLevel, boolean useDefaultChest) {
-        this.permission = permission;
-        this.level = level;
-        this.plotMax = plotMax;
-        this.plotSize = plotSize;
-        this.stopTime = stopTime;
-        this.plotRange = plotRange;
-        this.seaLevel = seaLevel;
-        this.useDefaultChest = useDefaultChest;
+    public void verifyWorldSettings() {
+        if (isStopTime()) {
+            level.setTime(1600);
+            level.stopTime();
+        }
+
+        if (plotRange % 2 != 0) {
+            plotRange--;
+            Utils.send("&cThe protection range must be even, using " + plotRange);
+        }
+
+        if (plotRange > plotSize) {
+            Utils.send("&cThe protection range cannot be bigger then the island distance. Setting them to be half equal.");
+            plotRange = plotSize / 2; // Avoiding players from CANNOT break their island
+        }
+
+        if (plotRange < 0) {
+            plotRange = 0;
+        }
     }
 
     public int getSeaLevel() {
@@ -91,5 +106,18 @@ public class WorldSettings {
 
     public int getMaximumIsland() {
         return plotMax;
+    }
+
+    public void saveConfig(Config cfg) {
+        String levelName = level.getName();
+
+        cfg.set(levelName + ".permission", permission);
+        cfg.set(levelName + ".maxHome", 5);
+        cfg.set(levelName + ".plotSize", plotSize);
+        cfg.set(levelName + ".protectionRange", plotRange);
+        cfg.set(levelName + ".stopTime", false);
+        cfg.set(levelName + ".seaLevel", seaLevel);
+        cfg.set(levelName + ".useDefaultChest", true);
+        cfg.save();
     }
 }

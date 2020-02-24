@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -83,10 +83,10 @@ public class SimpleFancyTitle extends Task {
 
         IslandData ownership = plugin.getIslandInfo(p.getLocation());
         if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
-            p.setSubtitle(TextFormat.GOLD + plugin.getLocale(p).islandSubTitle.replace("[player]", ownership.getOwner()));
+            p.setSubtitle(TextFormat.GOLD + plugin.getLocale(p).islandSubTitle.replace("[player]", ownership.getPlotOwner()));
         }
         if (!plugin.getLocale(p).islandTitle.isEmpty()) {
-            p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", ownership.getOwner()));
+            p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", ownership.getPlotOwner()));
         }
         if (!plugin.getLocale(p).islandDonate.isEmpty() && !plugin.getLocale(p).islandURL.isEmpty()) {
             // These are useful for me not for you xD

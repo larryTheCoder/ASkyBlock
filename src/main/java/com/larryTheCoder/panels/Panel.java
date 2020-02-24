@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -199,7 +199,7 @@ public class Panel implements Listener {
                 responsesSimple = windowSimple.getResponse();
 
                 int islandIde = responsesSimple.getClickedButtonId();
-                addProtectionOverlay(p, plugin.getDatabase().getIsland(p.getName(), islandIde + 1));
+                addProtectionOverlay(p, plugin.getIslandInfo(p.getName(), islandIde + 1));
                 break;
             case FIRST_TIME_SETTING:
                 // Check if the player closed this form
@@ -213,7 +213,7 @@ public class Panel implements Listener {
                 responsesSimple = windowSimple.getResponse();
 
                 int islandId = responsesSimple.getClickedButtonId();
-                addSettingFormOverlay(p, plugin.getDatabase().getIsland(p.getName(), islandId + 1));
+                addSettingFormOverlay(p, plugin.getIslandInfo(p.getName(), islandId + 1));
                 break;
             case SECOND_TIME_SETTING:
                 // Check if the player closed this form
@@ -226,7 +226,7 @@ public class Panel implements Listener {
                 response = windowCustom.getResponse();
 
                 int idea = 1;
-                IslandData pd = plugin.getDatabase().getIsland(p.getName(), mapIslandId.get(p));
+                IslandData pd = plugin.getIslandInfo(p.getName(), mapIslandId.get(p));
                 if (pd == null) {
                     p.sendMessage(plugin.getLocale(p).errorResponseUnknown);
                     break;
@@ -236,10 +236,11 @@ public class Panel implements Listener {
                 if (pd.isLocked() != lock) {
                     pd.setLocked(lock);
                 }
-                if (!pd.getName().equalsIgnoreCase(nameIsland)) {
-                    pd.setName(nameIsland);
+                if (!pd.getIslandName().equalsIgnoreCase(nameIsland)) {
+                    pd.setIslandName(nameIsland);
                 }
-                plugin.getDatabase().saveIsland(pd);
+
+                pd.saveIslandData();
                 break;
             case FIRST_TIME_DELETE:
                 // Check if the player closed this form
@@ -253,7 +254,7 @@ public class Panel implements Listener {
                 FormResponseSimple delete = windowSimple.getResponse();
 
                 String islandUID = delete.getClickedButton().getText();
-                addDeleteFormOverlay(p, plugin.getDatabase().getIsland(p.getName(), islandUID));
+                addDeleteFormOverlay(p, plugin.getIslandInfo(p.getName(), islandUID));
                 break;
             case SECOND_TIME_DELETE:
                 // Check if the player closed this form
@@ -268,7 +269,7 @@ public class Panel implements Listener {
 
                 int buttonId = modalForm.getResponse().getClickedButtonId();
                 if (buttonId == 0) {
-                    plugin.getIsland().deleteIsland(p, plugin.getDatabase().getIsland(p.getName(), idButton));
+                    plugin.getIsland().deleteIsland(p, plugin.getIslandInfo(p.getName(), idButton));
                 } else {
                     p.sendMessage(plugin.getLocale(p).deleteIslandCancelled);
                 }
@@ -279,7 +280,7 @@ public class Panel implements Listener {
                     break;
                 }
 
-                IslandData pd3 = plugin.getDatabase().getIsland(p.getName(), mapIslandId.get(p));
+                IslandData pd3 = plugin.getIslandInfo(p.getName(), mapIslandId.get(p));
                 if (pd3 == null) {
                     return;
                 }
@@ -390,7 +391,7 @@ public class Panel implements Listener {
 
         FormWindowSimple islandHome = new FormWindowSimple("Home list", getLocale(p).panelHomeHeader.replace("[function]", "§aTeleport to them"));
         for (IslandData pd : listHome) {
-            islandHome.addButton(new ElementButton(pd.getName()));
+            islandHome.addButton(new ElementButton(pd.getIslandName()));
         }
         int id = p.showFormWindow(islandHome);
         panelDataId.put(id, PanelType.TYPE_HOMES);
@@ -411,14 +412,14 @@ public class Panel implements Listener {
 
             FormWindowSimple islandHome = new FormWindowSimple("Choose your home", getLocale(p).panelHomeHeader.replace("[function]", "§aDelete your island."));
             for (IslandData pda : listHome) {
-                islandHome.addButton(new ElementButton(pda.getName()));
+                islandHome.addButton(new ElementButton(pda.getIslandName()));
             }
 
             int id = p.showFormWindow(islandHome);
             panelDataId.put(id, PanelType.FIRST_TIME_DELETE);
             return;
         }
-        mapIslandId.put(p, pd.getId());
+        mapIslandId.put(p, pd.getHomeCountId());
 
         FormWindowModal confirm = new FormWindowModal("Delete", getLocale(p).deleteIslandSure, "§cDelete my island", "Cancel");
 
@@ -442,7 +443,7 @@ public class Panel implements Listener {
 
             FormWindowSimple islandHome = new FormWindowSimple("Choose your home", getLocale(p).panelHomeHeader.replace("[function]", "§aSet your island settings."));
             for (IslandData pda : listHome) {
-                islandHome.addButton(new ElementButton(pda.getName()));
+                islandHome.addButton(new ElementButton(pda.getIslandName()));
             }
 
             int id = p.showFormWindow(islandHome);
@@ -450,7 +451,7 @@ public class Panel implements Listener {
             return;
         }
 
-        FormWindowCustom settingForm = new FormWindowCustom("" + pd.getName() + "'s Settings");
+        FormWindowCustom settingForm = new FormWindowCustom("" + pd.getIslandName() + "'s Settings");
 
         settingForm.addElement(new ElementLabel(getLocale(p).panelProtectionHeader));
 
@@ -462,7 +463,7 @@ public class Panel implements Listener {
             settingForm.addElement(new ElementToggle(flag.getName(), value));
         }
 
-        mapIslandId.put(p, pd.getId());
+        mapIslandId.put(p, pd.getHomeCountId());
         int id = p.showFormWindow(settingForm);
         panelDataId.put(id, PanelType.SECOND_TIME_PROTECTION);
     }
@@ -483,7 +484,7 @@ public class Panel implements Listener {
 
             FormWindowSimple islandHome = new FormWindowSimple("Choose your home", getLocale(p).panelHomeHeader.replace("[function]", "§aSet your island settings."));
             for (IslandData pda : listHome) {
-                islandHome.addButton(new ElementButton(pda.getName()));
+                islandHome.addButton(new ElementButton(pda.getIslandName()));
             }
 
             int id = p.showFormWindow(islandHome);
@@ -491,12 +492,12 @@ public class Panel implements Listener {
             return;
         }
 
-        FormWindowCustom settingForm = new FormWindowCustom("" + pd.getName() + "'s Settings");
+        FormWindowCustom settingForm = new FormWindowCustom("" + pd.getIslandName() + "'s Settings");
 
         settingForm.addElement(new ElementLabel(getLocale(p).panelSettingHeader));
         settingForm.addElement(new ElementToggle("Locked", pd.isLocked()));
-        settingForm.addElement(new ElementInput("Island Name", "", pd.getName())); // islandMaxNameLong
-        mapIslandId.put(p, pd.getId());
+        settingForm.addElement(new ElementInput("Island Name", "", pd.getIslandName())); // islandMaxNameLong
+        mapIslandId.put(p, pd.getHomeCountId());
 
         int id = p.showFormWindow(settingForm);
         panelDataId.put(id, PanelType.SECOND_TIME_SETTING);

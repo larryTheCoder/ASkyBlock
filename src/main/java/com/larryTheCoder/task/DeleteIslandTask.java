@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -76,7 +76,7 @@ public class DeleteIslandTask implements Runnable {
         WorldSettings settings = plugin.getSettings(level.getName());
         if (level == null) {
             Utils.send("ERROR: Cannot find the level " + pd.getLevelName());
-            Utils.send("The sender who execute this: " + pd.getOwner());
+            Utils.send("The sender who execute this: " + pd.getPlotOwner());
             return;
         }
 

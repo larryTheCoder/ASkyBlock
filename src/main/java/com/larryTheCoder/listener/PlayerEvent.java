@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -35,18 +35,23 @@ import cn.nukkit.event.player.*;
 import cn.nukkit.level.Location;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.db2.DatabaseManager;
 import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+import org.sql2o.Connection;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.larryTheCoder.db2.TableSet.PLAYER_INSERT_MAIN;
 
 /**
  * Events that associate to player
  * behaviors and etc
  */
+@SuppressWarnings("unused")
 public class PlayerEvent implements Listener {
 
     private final ASkyBlock plugin;
@@ -100,7 +105,7 @@ public class PlayerEvent implements Listener {
         }
 
         if (Settings.respawnOnIsland) {
-            // Add them to the list to be respawned on their island
+            // Add them to the list to be re-spawned on their island
             respawn.add(p.getName());
         }
 
@@ -112,7 +117,8 @@ public class PlayerEvent implements Listener {
                 plugin.getMessages().tellOfflineTeam(p.getName(), TextFormat.GREEN + "(" + pd.getDeaths() + " died!)");
             }
         }
-        pd.saveData();
+
+        pd.saveIslandData();
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -129,7 +135,34 @@ public class PlayerEvent implements Listener {
         // Load player data
         if (plugin.getPlayerInfo(p) == null) {
             Utils.send(p.getName() + "&a data doesn't exists. Creating new ones");
-            plugin.getDatabase().createPlayer(p.getName());
+
+            plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
+                @Override
+                public void executeQuery(Connection connection) {
+                    connection.createQuery(PLAYER_INSERT_MAIN.getQuery())
+                            .addParameter("playerName", p.getName())
+                            .addParameter("playerUUID", p.getLoginChainData().getXUID())
+                            .addParameter("locale", "")
+                            .addParameter("banList", "")
+                            .addParameter("resetLeft", Settings.reset)
+                            .executeUpdate();
+                }
+
+                @Override
+                public void onCompletion(Exception ex) {
+                    if (ex != null) {
+                        ex.printStackTrace();
+                        return;
+                    }
+
+                    List<String> news = plugin.getMessages().getMessages(p.getName());
+
+                    if (news != null && news.isEmpty()) {
+                        p.sendMessage(plugin.getLocale(p).newNews.replace("[count]", Integer.toString(news.size())));
+                    }
+                }
+            });
+            return;
         }
 
         // Load messages
@@ -137,16 +170,6 @@ public class PlayerEvent implements Listener {
 
         if (news != null && news.isEmpty()) {
             p.sendMessage(plugin.getLocale(p).newNews.replace("[count]", Integer.toString(news.size())));
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onPlayerLeave(PlayerQuitEvent ex) {
-        Player p = ex.getPlayer();
-        IslandData pd = plugin.getIslandInfo(p);
-        if (pd != null) {
-            // Remove the island data from cache provides the memory to server
-            plugin.getDatabase().removeIslandFromCache(pd);
         }
     }
 

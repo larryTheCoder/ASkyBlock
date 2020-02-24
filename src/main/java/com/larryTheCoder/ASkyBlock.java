@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -31,10 +31,7 @@ import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.generator.Generator;
-import cn.nukkit.math.Vector3;
-import cn.nukkit.plugin.Plugin;
 import cn.nukkit.plugin.PluginBase;
-import cn.nukkit.plugin.PluginDescription;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.utils.Config;
@@ -42,11 +39,10 @@ import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.command.Admin;
 import com.larryTheCoder.command.Quests;
-import com.larryTheCoder.database.Database;
-import com.larryTheCoder.database.config.MySQLConfig;
-import com.larryTheCoder.database.config.SQLiteConfig;
-import com.larryTheCoder.database.database.LegacySqlConnection;
-import com.larryTheCoder.database.database.SqlConnection;
+import com.larryTheCoder.db2.DatabaseManager;
+import com.larryTheCoder.db2.config.AbstractConfig;
+import com.larryTheCoder.db2.config.MySQLConfig;
+import com.larryTheCoder.db2.config.SQLiteConfig;
 import com.larryTheCoder.integration.economy.Economy;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
@@ -58,7 +54,6 @@ import com.larryTheCoder.listener.PlayerEvent;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.panels.Panel;
-import com.larryTheCoder.player.CoopData;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.player.TeleportLogic;
@@ -66,18 +61,22 @@ import com.larryTheCoder.schematic.SchematicHandler;
 import com.larryTheCoder.storage.InventorySave;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.storage.WorldSettings;
-import com.larryTheCoder.task.LevelCalcTask;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.ConfigManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import com.larryTheCoder.utils.updater.Updater;
-import ru.nukkit.dblib.nukkit.DbLibPlugin;
+import org.sql2o.Connection;
+import org.sql2o.Query;
+import org.sql2o.data.Table;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import static com.larryTheCoder.db2.TableSet.*;
 
 /**
  * High quality SkyBlock mainframe
@@ -94,10 +93,6 @@ public class ASkyBlock extends PluginBase {
     // Arrays
     public ArrayList<WorldSettings> level = new ArrayList<>();
 
-    // This function is to keep track beta build
-    // So I could barely see which is the thingy is used
-    private boolean betaBuild = false;
-    private String buildNumber = "0";
     private SchematicHandler schematics;
 
     // Configs
@@ -105,7 +100,7 @@ public class ASkyBlock extends PluginBase {
     private Config worldConfig;
 
     // Managers
-    private Database db = null;
+    private DatabaseManager db = null;
     private ChatHandler chatHandler;
     private InvitationHandler invitationHandler;
     private IslandManager manager;
@@ -120,8 +115,6 @@ public class ASkyBlock extends PluginBase {
     private boolean disabled = false;
     // Localization Strings
     private HashMap<String, ASlocales> availableLocales = new HashMap<>();
-    private LevelCalcTask levelCalculate;
-    private Properties pluginGit;
 
     /**
      * Return of ASkyBlock plugin instance
@@ -137,6 +130,7 @@ public class ASkyBlock extends PluginBase {
         if (object == null) {
             object = this;
         }
+
         // Init this config
         initConfig();
         // Register generator
@@ -147,8 +141,6 @@ public class ASkyBlock extends PluginBase {
 
     @Override
     public void onEnable() {
-        // A simple problem while new plugin is placed on server
-        initDependency();
         // A Simple issue could cause a huge problem
         if (disabled || !initDatabase()) {
             return;
@@ -163,91 +155,6 @@ public class ASkyBlock extends PluginBase {
         registerObject();
 
         getServer().getLogger().info(getPrefix() + "§aASkyBlock has been successfully enabled!");
-
-        // Beta build, we test things here, be safe
-        if (isBetaBuild()) {
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException ignored) {
-                // Silence
-            }
-            testContainer();
-        }
-    }
-
-    private void testContainer() {
-        TeamManager teamLogic = getTManager();
-
-        Utils.sendDebug("Test 1: Create team test");
-
-        // Run create team first
-        if (teamLogic.createTeam("MrPotato101")) {
-            Utils.sendDebug("Creation check success");
-        }
-
-        if (!teamLogic.createTeam("MrPotato101")) {
-            Utils.sendDebug("Duplicate check success");
-        }
-
-        Utils.sendDebug("Test 2: Add team");
-
-        // Set the team
-        teamLogic.setTeam("MrPotato101", "larryZ00p");
-
-        // Get coop data by name
-        CoopData pd = getTManager().getPlayerCoop("larryZ00p");
-
-        if (pd != null) {
-            Utils.sendDebug("Player add team success, testing stage-2");
-            if (pd.getLeaderName().equalsIgnoreCase("MrPotato101")) {
-                Utils.sendDebug("Success");
-            } else {
-                Utils.sendDebug("Failing");
-            }
-        } else {
-            Utils.sendDebug("Failed to get player data after being stored");
-        }
-
-        pd = teamLogic.getLeaderCoop("larryZ00p");
-        if (pd == null) {
-            Utils.sendDebug("Leader coop check succeeded");
-        } else {
-            Utils.sendDebug("Leader coop check failed");
-        }
-
-        pd = teamLogic.getLeaderCoop("MrPotato101");
-        if (pd != null) {
-            Utils.sendDebug("Leader coop check succeeded");
-        } else {
-            Utils.sendDebug("Leader coop check failed");
-        }
-
-        // Test if the duplicates player removed from the team
-        Utils.sendDebug("Test 3: Excessive Test");
-
-        // Run create team first
-        if (!teamLogic.createTeam("larryZ00p")) {
-            Utils.sendDebug("Duplicate check success");
-        }
-
-        teamLogic.createTeam("DummyOnes");
-
-        teamLogic.setTeam("DummyOnes", "larryZ00p");
-
-        String hexValue = Utils.hashObject("1234IsABadPassword");
-        String hexDecrypt = Utils.hashObject("ThisIsNotMyPasswordSilly");
-
-        assert hexDecrypt != null;
-        if (!hexDecrypt.equals(hexValue)) {
-            Utils.sendDebug("Hashing succeeded");
-        } else {
-            Utils.sendDebug("Hashing failed");
-        }
-
-        Utils.sendDebug("Testing compressed Vector3");
-
-        Random rand = new Random(185630);
-        Vector3 randVec = new Vector3(rand.nextInt(3000), rand.nextInt(128), rand.nextInt(3000));
     }
 
     @Override
@@ -255,43 +162,13 @@ public class ASkyBlock extends PluginBase {
         Utils.send("&7Saving all island framework...");
 
         saveLevel(true);
-        getDatabase().close();
+        getDatabase().shutdownDB();
         getMessages().saveMessages();
         LavaCheck.clearStats();
         TopTen.topTenSave();
         getTManager().saveData();
 
         Utils.send("&cASkyBlock has been successfully disabled. Goodbye!");
-
-        updateForceCheck();
-    }
-
-    private void updateForceCheck() {
-        // TODO: creates an async task to delete this old plugin and copy new ones after the plugin fully downloaded
-        //       Plugin is disabled first then the task, if we could manage to force run an async thread or
-        //       Just possibly blocks the main thread and move it to another one, we could manage to
-        //       copy the plugin without java VM being shutdown first from the server thread
-
-        File updatePath = new File(Utils.DIRECTORY + "updates");
-        //updatePath.deleteOnExit(); Uh not debug...
-        if (!updatePath.isDirectory()) {
-            Utils.sendDebug("Path is not a directory.");
-            return;
-        }
-
-        // Checks all the folders in it.
-        List<File> files = Arrays.asList(updatePath.listFiles());
-        Queue<File> fileToCheck = new ArrayDeque<>();
-        files.forEach((dir) -> {
-            if (dir.isFile() && dir.getName().endsWith(".jar") && dir.getName().startsWith("SkyBlock-")) {
-                // TODO: Verify SHA integrity
-                //       Add more level of security
-                fileToCheck.add(dir);
-                Utils.sendDebug("Processing update for " + dir.getName());
-            } else {
-                Utils.sendDebug("Unable to process update " + dir.getName() + ", skipping...");
-            }
-        });
     }
 
     @Override
@@ -299,74 +176,27 @@ public class ASkyBlock extends PluginBase {
         return cfg;
     }
 
-    private void initDependency() {
-        try {
-            Plugin plugin = getServer().getPluginManager().getPlugin("DbLib");
-            if (plugin instanceof DbLibPlugin) {
-                DbLibPlugin dblib = (DbLibPlugin) plugin;
-                PluginDescription description = dblib.getDescription();
-                // TODO: compare them
-            }
-        } catch (ClassCastException ex) {
-            Utils.send("&cThe DbLib plugin was not found. Please install it and reload/restart your server!");
-            getServer().getPluginManager().disablePlugin(this);
-            disabled = true;
-        }
-    }
-
     private boolean initDatabase() {
-        if (false) {
-            SQLiteConfig config = new SQLiteConfig(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db"));
-            try {
-                new SqlConnection(config);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            return false;
-        }
         if (disabled) {
             return false;
         }
-        // To be done: DbLib defined database, JSON, YML
-        // Warning: MySQL Database may result an error while attempting to create a connection
-        //          With the server because there is no error in it
-        boolean fireSql = false;
-        if (cfg.getString("database.connection").equalsIgnoreCase("mysql")) {
-            try {
-                MySQLConfig config = new MySQLConfig(cfg.getString("database.MySQL.host"), cfg.getInt("database.MySQL.port"), cfg.getString("database.MySQL.database"), cfg.getString("database.MySQL.username"), cfg.getString("database.MySQL.password"));
-                db = new LegacySqlConnection(this, config, cfg.getString("prefix", ""));
-                return true;
-            } catch (SQLException | ClassNotFoundException ex) {
-                Utils.send("§cUnable to create a connection with MySQL Server... Please make sure that your server is up and running or check your config again.");
-                fireSql = true;
-            }
+        String connectionType = cfg.getString("database.connection");
+        AbstractConfig dbConfig;
+
+        if (connectionType.equalsIgnoreCase("mysql")) {
+            dbConfig = new MySQLConfig(cfg);
         } else {
-            try {
-                SQLiteConfig config = new SQLiteConfig(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db"));
-                db = new LegacySqlConnection(this, config, cfg.getString("prefix", ""));
-                return true;
-            } catch (SQLException | ClassNotFoundException ex) {
-                Utils.send("§cUnable to create a connection with the SQLite database, please check your config!");
-                Utils.send("§cEMERGENCY! NO DATABASE PROVIDER WAS FOUND! ASKYBLOCK IS NOW SHUTTING DOWN!");
-                getServer().getPluginManager().disablePlugin(this);
-            }
+            dbConfig = new SQLiteConfig(cfg);
         }
 
-        if (fireSql) {
-            try {
-                SQLiteConfig config = new SQLiteConfig(new File(getDataFolder(), cfg.getString("database.SQLite.file-name") + ".db"));
-                db = new LegacySqlConnection(this, config, cfg.getString("prefix", ""));
-                return true;
-            } catch (SQLException | ClassNotFoundException ex) {
-                Utils.send("§cUnable to create a connection with the SQLite database, please check your config!");
-                Utils.send("§cERROR: NO DATABASE PROVIDER WERE FOUND, PLEASE FIX THIS ISSUE, PLUGIN WILL DISABLE NOW.");
-                getServer().getPluginManager().disablePlugin(this);
-            }
-        }
+        try {
+            db = new DatabaseManager(dbConfig);
 
-        return false;
+            return true;
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -386,7 +216,7 @@ public class ASkyBlock extends PluginBase {
         // This should be loaded first
         messageModule = new Messages(this);
         messageModule.loadMessages();
-        levelCalculate = new LevelCalcTask(this);
+        // new LevelCalcTask(this);
         //TopTen.topTenLoad();
 
         pm.registerEvents(chatHandler, this);
@@ -410,7 +240,7 @@ public class ASkyBlock extends PluginBase {
     }
 
     private void initConfig() {
-        initGitCheckup();
+        //initGitCheckup();
         Utils.EnsureDirectory(Utils.DIRECTORY);
         Utils.EnsureDirectory(Utils.LOCALES_DIRECTORY);
         Utils.EnsureDirectory(Utils.SCHEMATIC_DIRECTORY);
@@ -432,27 +262,7 @@ public class ASkyBlock extends PluginBase {
         ConfigManager.load();
     }
 
-    private void initGitCheckup() {
-        Properties properties = new Properties();
-        try {
-            properties.load(getResource("git-sb.properties"));
-        } catch (IOException e) {
-            getServer().getLogger().info("§cERROR! We cannot load the git loader for this ASkyBlock build!");
-            // Wtf? Maybe this user is trying to using unofficial build of ASkyBlock?
-            // Or they just wanna to create a PR to do a fix?
-            // Hmm we will never know lol
-            return;
-        }
-        // To developers: Don't remove this please.
-        betaBuild = properties.getProperty("git.dirty").equalsIgnoreCase("true");
-        buildNumber = properties.getProperty("git.commit.id.describe", "");
-        Utils.sendDebug("§7ASkyBlock Git Information:");
-        Utils.sendDebug("§7Build number: " + getBuildNumber());
-        Utils.sendDebug("§7Commit number: " + properties.getProperty("git.commit.id"));
-
-        pluginGit = properties;
-    }
-
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void recheck() {
         File file = new File(ASkyBlock.get().getDataFolder(), "config.yml");
         Config config = new Config(file, Config.YAML);
@@ -472,70 +282,48 @@ public class ASkyBlock extends PluginBase {
         if (!Server.getInstance().isLevelLoaded("SkyBlock")) {
             Server.getInstance().loadLevel("SkyBlock");
         }
-        List<String> levels = db.getWorlds();
-        if (!levels.contains("SkyBlock")) {
-            levels.add("SkyBlock");
-        }
 
-        ArrayList<WorldSettings> settings = new ArrayList<>();
-        for (String levelName : levels) {
-            if (!Server.getInstance().isLevelGenerated(levelName)) {
-                Server.getInstance().generateLevel(levelName, 0, SkyBlockGenerator.class);
-            }
-            if (!Server.getInstance().isLevelLoaded(levelName)) {
-                Server.getInstance().loadLevel(levelName);
+        db.pushQuery((connection) -> {
+            List<String> levels = new ArrayList<>();
+            try (Query query = connection.createQuery(FETCH_WORLDS.getQuery())) {
+                Table table = query.executeAndFetchTable();
+
+                table.rows().forEach(i -> levels.add(i.getString("worldName")));
             }
 
-            Level level = getServer().getLevelByName(levelName);
-            WorldSettings worldSettings;
-            Config cfg = worldConfig;
-            if (cfg.isSection(levelName)) {
-                ConfigSection section = cfg.getSection(levelName);
-                String permission = section.getString("permission");
-                int maxPlot = section.getInt("maxHome");
-                int plotSize = section.getInt("plotSize");
-                int plotRange = section.getInt("protectionRange");
-                boolean stopTime = section.getBoolean("stopTime");
-                boolean useDefaultChest = section.getBoolean("useDefaultChest");
-                int seaLevel = section.getInt("seaLevel");
-                if (stopTime) {
-                    Level world = getServer().getLevelByName(levelName);
-                    world.setTime(1600);
-                    world.stopTime();
-                }
-                if (plotRange % 2 != 0) {
-                    plotRange--;
-                    Utils.send("The protection range must be even, using " + plotRange);
-                }
-                if (plotRange > plotSize) {
-                    Utils.send("The protection range cannot be bigger then the island distance. Setting them to be half equal.");
-                    plotRange = plotSize / 2; // Avoiding players from CANNOT break their island
-                }
-                if (plotRange < 0) {
-                    plotRange = 0;
-                }
-                worldSettings = new WorldSettings(permission, level, maxPlot, plotSize, plotRange, stopTime, seaLevel, useDefaultChest);
-            } else {
-                // Default arguments
-                String permission = "";
-                int plotSize = 100;
-                int plotRange = 200;
-                int seaLevel = 3;
-                worldSettings = new WorldSettings(permission, level, 5, plotSize, plotRange, false, seaLevel, true);
-                cfg.set(levelName + ".permission", permission);
-                cfg.set(levelName + ".maxHome", 5);
-                cfg.set(levelName + ".plotSize", plotSize);
-                cfg.set(levelName + ".protectionRange", plotRange);
-                cfg.set(levelName + ".stopTime", false);
-                cfg.set(levelName + ".seaLevel", seaLevel);
-                cfg.set(levelName + ".useDefaultChest", true);
-                cfg.save();
-            }
+            if (!levels.contains("SkyBlock")) levels.add("SkyBlock");
 
-            settings.add(worldSettings);
-            loadedLevel.add(levelName);
-        }
-        this.level = settings;
+            ArrayList<WorldSettings> settings = new ArrayList<>();
+            for (String levelName : levels) {
+                Utils.loadLevelSeed(levelName);
+
+                Level level = getServer().getLevelByName(levelName);
+                WorldSettings worldSettings;
+                if (worldConfig.isSection(levelName)) {
+                    ConfigSection section = worldConfig.getSection(levelName);
+                    worldSettings = WorldSettings.builder()
+                            .permission(section.getString("permission"))
+                            .plotMax(section.getInt("maxHome"))
+                            .plotSize(section.getInt("plotSize"))
+                            .plotRange(section.getInt("protectionRange"))
+                            .stopTime(section.getBoolean("stopTime"))
+                            .useDefaultChest(section.getBoolean("useDefaultChest"))
+                            .seaLevel(section.getInt("seaLevel"))
+                            .level(level)
+                            .build();
+
+                    worldSettings.verifyWorldSettings();
+                } else {
+                    worldSettings = new WorldSettings(level);
+
+                    worldSettings.saveConfig(cfg);
+                }
+
+                settings.add(worldSettings);
+                loadedLevel.add(levelName);
+            }
+            this.level = settings;
+        });
     }
 
     /**
@@ -594,20 +382,14 @@ public class ASkyBlock extends PluginBase {
      * Get the preferred locale for a player
      * If the player is null, default will be used
      *
-     * @param p Player
+     * @param p Player|null
      * @return ASlocales class
      */
     public ASlocales getLocale(Player p) {
         if (p == null) {
-            return getAvailableLocales().get(Settings.defaultLanguage);
+            return getLocale("");
         }
-        PlayerData pd = this.getPlayerInfo(p);
-        if (!this.getAvailableLocales().containsKey(pd.getLocale())) {
-            Utils.send("&cUnknown locale: &e" + pd.getLocale());
-            Utils.send("&cSwitching to default: &een_US");
-            return getAvailableLocales().get(Settings.defaultLanguage);
-        }
-        return getAvailableLocales().get(pd.getLocale());
+        return getLocale(p.getName());
     }
 
     /**
@@ -636,38 +418,20 @@ public class ASkyBlock extends PluginBase {
      * @param showEnd Check if there should be a stop message
      */
     public void saveLevel(boolean showEnd) {
-        if (showEnd) {
-            Utils.send("&eSaving worlds...");
-        }
-        ArrayList<String> level = new ArrayList<>();
-        for (WorldSettings settings : this.level) {
-            level.add(settings.getLevel().getName());
-        }
-        boolean result = this.db.saveWorlds(level);
-        if (!result) {
-            Utils.send("&cUnable to save the world.");
-        }
-    }
+        if (showEnd) Utils.send("&eSaving worlds...");
 
-    /**
-     * Get the status of this plugin
-     * Check if its a beta build or not
-     *
-     * @return bool
-     */
-    public boolean isBetaBuild() {
-        return betaBuild;
-    }
+        db.pushQuery((connection) -> {
+            try (Query queue = connection.createQuery(WORLDS_INSERT.getQuery())) {
+                for (WorldSettings settings : this.level) {
+                    queue.addParameter("levelName", settings.getLevel().getName());
+                    queue.executeUpdate();
+                }
+            } catch (Exception err) {
+                err.printStackTrace();
 
-    /**
-     * Check the build number for this plugin.
-     * Every build number is different based on the
-     * git commit file
-     *
-     * @return string
-     */
-    public String getBuildNumber() {
-        return buildNumber;
+                Utils.send("&cUnable to save the world.");
+            }
+        });
     }
 
     /**
@@ -714,7 +478,7 @@ public class ASkyBlock extends PluginBase {
      *
      * @return Database that associated with them
      */
-    public Database getDatabase() {
+    public DatabaseManager getDatabase() {
         return db;
     }
 
@@ -810,7 +574,27 @@ public class ASkyBlock extends PluginBase {
      * @return Island data of the location
      */
     public IslandData getIslandInfo(Position pos) {
-        return getDatabase().getIslandLocation(pos.getLevel().getName(), pos.getFloorX(), pos.getFloorZ());
+        int x = pos.getFloorX();
+        int z = pos.getFloorZ();
+        String levelName = pos.getLevel().getName();
+
+        int id = getIsland().generateIslandKey(x, z, levelName);
+        Connection conn = getDatabase().getConnection();
+
+        Table levelPlot = conn.createQuery(FETCH_LEVEL_PLOT.getQuery())
+                .addParameter("levelName", levelName)
+                .addParameter("islandId", id)
+                .executeAndFetchTable();
+
+        if (levelPlot.rows().isEmpty()) {
+            return new IslandData(levelName, x, z, getSettings(levelName).getProtectionRange());
+        }
+
+        return IslandData.fromRows(levelPlot.rows().get(0));
+    }
+
+    public IslandData getIslandInfo(String player) {
+        return getIslandInfo(player, 1);
     }
 
     /**
@@ -820,8 +604,19 @@ public class ASkyBlock extends PluginBase {
      * @param player The player name
      * @return IslandData if the data is available otherwise null
      */
-    public IslandData getIslandInfo(String player) {
-        return getDatabase().getIsland(player, 1);
+    public IslandData getIslandInfo(String player, int homeCount) {
+        Connection conn = getDatabase().getConnection();
+
+        Table levelPlot = conn.createQuery(FETCH_ISLAND_PLOT.getQuery())
+                .addParameter("pName", player)
+                .addParameter("islandId", homeCount)
+                .executeAndFetchTable();
+
+        if (levelPlot.rows().isEmpty()) {
+            return null;
+        }
+
+        return IslandData.fromRows(levelPlot.rows().get(0));
     }
 
     /**
@@ -866,7 +661,17 @@ public class ASkyBlock extends PluginBase {
      * @return PlayerData class
      */
     public PlayerData getPlayerInfo(String player) {
-        return getDatabase().getPlayerData(player);
+        Connection conn = getDatabase().getConnection();
+
+        Table data = conn.createQuery(FETCH_PLAYER_MAIN.getQuery())
+                .addParameter("plotOwner", player)
+                .executeAndFetchTable();
+
+        if (data.rows().isEmpty()) {
+            return null;
+        }
+
+        return PlayerData.fromRows(data.rows().get(0));
     }
 
     /**
@@ -899,13 +704,5 @@ public class ASkyBlock extends PluginBase {
      */
     public String getDefaultWorld() {
         return "SkyBlock";
-    }
-
-    public LevelCalcTask getLevelCalculate() {
-        return levelCalculate;
-    }
-
-    Properties getPluginDescriptive() {
-        return pluginGit;
     }
 }

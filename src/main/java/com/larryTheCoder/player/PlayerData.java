@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -27,10 +27,18 @@
 package com.larryTheCoder.player;
 
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.db2.DatabaseManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+import lombok.Getter;
+import lombok.Setter;
+import org.sql2o.Connection;
+import org.sql2o.data.Row;
+import org.sql2o.data.Table;
 
 import java.util.*;
+
+import static com.larryTheCoder.db2.TableSet.*;
 
 /**
  * @author larryTheCoder
@@ -38,91 +46,44 @@ import java.util.*;
 public class PlayerData implements Cloneable {
 
     // Player critical information data.
+    @Getter
     private final String playerName;
+    @Getter
+    private final String playerXUID;
+
+    @Setter @Getter
+    private int resetLeft;
+
+    @Setter @Getter
+    private int islandLevel;
+
+    private boolean challengeFetched = false;
     private final HashMap<String, Boolean> challengeList = new HashMap<>();
     private final HashMap<String, Integer> challengeListTimes = new HashMap<>();
-    private int resetleft;
-    private int islandLevel;
-    private ArrayList<String> banList = new ArrayList<>();
-    private String pubLocale;
 
-    public PlayerData(String playerName, int homes, int resetleft) {
-        this.playerName = playerName;
-        this.resetleft = resetleft;
-        this.pubLocale = Settings.defaultLanguage;
-        setupChallengeList();
-    }
+    @Getter @Setter
+    private String locale;
+    @Getter
+    private List<String> banList;
 
-    public PlayerData(String playerName, int homes, String challenges, String challengesTime, int islandlvl, int resetleft, ArrayList<String> banList, String locale) {
-        this.islandLevel = islandlvl;
-        this.resetleft = resetleft;
+    private PlayerData(String playerName, String playerXUID, String pubLocale, List<String> banList, int resetAttempts, int islandLevels) {
         this.playerName = playerName;
+        this.playerXUID = playerXUID;
+
+        this.locale = pubLocale;
         this.banList = banList;
-        this.pubLocale = locale;
-        encodeChallengeList(challenges, challengesTime); // Safe
+        this.resetLeft = resetAttempts;
+        this.islandLevel = islandLevels;
     }
 
-
-    /**
-     * Gets the player name of this data.
-     *
-     * @return A player name
-     */
-    public String getPlayerName() {
-        return playerName;
-    }
-
-    /**
-     * Get the player reset
-     *
-     * @return the value of the player reset
-     */
-    public int getPlayerReset() {
-        return resetleft;
-    }
-
-    /**
-     * Gets the reset left for this user
-     *
-     * @param resetleft The value to be set
-     */
-    public void setPlayerReset(int resetleft) {
-        this.resetleft = resetleft;
-    }
-
-    /**
-     * Get the user's island level. Its basically
-     * An XP Stats for SkyBlock
-     *
-     * @return The island level value
-     */
-    public int getIslandLevel() {
-        return islandLevel;
-    }
-
-    public void setIslandLevel(int level) {
-        this.islandLevel = level;
-    }
-
-    /**
-     * Get the user banned list for the SkyBlock users
-     * This is more likely that this user hates that person.
-     *
-     * @return A list of string of player names
-     */
-    public ArrayList<String> getBanList() {
-        return banList;
-    }
-
-    public String getLocale() {
-        return pubLocale;
-    }
-
-    /**
-     * @param locale the locale to set
-     */
-    public void setLocale(String locale) {
-        this.pubLocale = locale;
+    public static PlayerData fromRows(Row dataRow) {
+        return new PlayerData(
+                dataRow.getString("playerName"),
+                dataRow.getString("playerUUID"),
+                dataRow.getString("locale"),
+                Utils.stringToArray(dataRow.getString("banList"), ":"),
+                dataRow.getInteger("resetAttempts"),
+                dataRow.getInteger("islandLevels"));
     }
 
     /**
@@ -145,8 +106,6 @@ public class PlayerData implements Cloneable {
      */
     public boolean checkChallenge(final String challenge) {
         if (challengeList.containsKey(challenge.toLowerCase())) {
-            // plugin.getLogger().info("DEBUG: " + challenge + ":" +
-            // challengeList.get(challenge.toLowerCase()).booleanValue() );
             return challengeList.get(challenge.toLowerCase());
         }
         return false;
@@ -174,11 +133,45 @@ public class PlayerData implements Cloneable {
      * @return The list of all the challenges times
      */
     public Map<String, Integer> getChallengeTimes() {
+        if (!challengeFetched) {
+            fetchChallengeBody();
+        }
+
         return Collections.unmodifiableMap(challengeListTimes);
     }
 
     public Map<String, Boolean> getChallengeStatus() {
+        if (!challengeFetched) {
+            fetchChallengeBody();
+        }
+
         return Collections.unmodifiableMap(challengeList);
+    }
+
+    /**
+     * Fetch challenges body of this player.
+     * <p>
+     * This body is not fetched by default, therefore you may have to execute
+     * this first before fetching any challenges.
+     */
+    public void fetchChallengeBody() {
+        if (challengeFetched) {
+            return;
+        }
+
+        Connection connection = ASkyBlock.get().getDatabase().getConnection();
+
+        Table data = connection.createQuery(FETCH_PLAYER_DATA.getQuery())
+                .addParameter("playerName", playerName)
+                .executeAndFetchTable();
+
+        if (!data.rows().isEmpty()) {
+            Row row = data.rows().get(0);
+
+            encodeChallengeList(row.getString("challengesList"), row.getString("challengesTimes"));
+        }
+
+        challengeFetched = true;
     }
 
     /**
@@ -269,8 +262,6 @@ public class PlayerData implements Cloneable {
                 challengeListTimes.put(list.get(0).toLowerCase(), Integer.parseInt(list.get(1)));
             }
         } catch (Exception ignored) {
-            //Utils.sendDebug"Player data is outdated, resetting its data");
-            ASkyBlock.get().getDatabase().savePlayerData(this);
         }
     }
 
@@ -286,11 +277,31 @@ public class PlayerData implements Cloneable {
     }
 
     /**
-     * Saves all of the data in this plugin
-     * into database without trying to use
-     * the hard way.
+     * Save player data asynchronously.
      */
     public void saveData() {
-        ASkyBlock.get().getDatabase().savePlayerData(this);
+        ASkyBlock.get().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
+            @Override
+            public void executeQuery(Connection connection) {
+                connection.createQuery(PLAYER_INSERT_MAIN.getQuery())
+                        .addParameter("playerName", playerName)
+                        .addParameter("playerUUID", playerXUID)
+                        .addParameter("locale", locale)
+                        .addParameter("banList", Utils.arrayToString(banList))
+                        .addParameter("resetLeft", resetLeft)
+                        .addParameter("islandLevels", islandLevel)
+                        .executeUpdate();
+
+                if (!challengeFetched) {
+                    return;
+                }
+
+                connection.createQuery(PLAYER_INSERT_DATA.getQuery())
+                        .addParameter("playerName", playerName)
+                        .addParameter("challengesList", decodeChallengeList("cl"))
+                        .addParameter("challengesTimes", decodeChallengeList("clt"))
+                        .executeUpdate();
+            }
+        });
     }
 }

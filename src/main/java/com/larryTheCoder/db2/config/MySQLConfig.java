@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -24,24 +24,25 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.database.config;
+package com.larryTheCoder.db2.config;
 
+import cn.nukkit.utils.Config;
 import com.larryTheCoder.utils.Utils;
+import org.sql2o.Sql2o;
 
-import java.sql.*;
+import java.sql.SQLException;
 
 /**
  * @author larryTheCoder
  */
 public class MySQLConfig implements AbstractConfig {
 
-
     private final String user;
     private final String database;
     private final String password;
     private final int port;
     private final String hostname;
-    private Connection connection;
+    private Sql2o connection;
 
     /**
      * Creates a new MySQL instance.
@@ -61,31 +62,41 @@ public class MySQLConfig implements AbstractConfig {
         this.connection = null;
     }
 
-    @Override
-    public Connection forceConnection() throws SQLException, ClassNotFoundException {
-        Class.forName("com.mysql.jdbc.Driver");
-        this.connection = DriverManager.getConnection("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
-        return this.connection;
+    public MySQLConfig(Config config){
+        this.hostname = config.getString("database.MySQL.host");
+        this.port =  config.getInt("database.MySQL.port");
+        this.database = config.getString("database.MySQL.database");
+        this.user = config.getString("database.MySQL.username");
+        this.password = config.getString("database.MySQL.password");
+        this.connection = null;
     }
 
     @Override
-    public Connection openConnection() throws SQLException, ClassNotFoundException {
+    public Sql2o forceConnection() {
+        return new Sql2o("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
+    }
+
+    @Override
+    public Sql2o openConnection() throws SQLException {
         if (checkConnection()) {
             return this.connection;
         }
-        Class.forName("com.mysql.jdbc.Driver");
+
         Utils.send("&aConnecting to: jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database);
-        this.connection = DriverManager.getConnection("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
-        return this.connection;
+        return new Sql2o("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
     }
 
     @Override
     public boolean checkConnection() throws SQLException {
-        return (this.connection != null) && !this.connection.isClosed();
+        if (connection == null) return false;
+
+        try (java.sql.Connection con = connection.getConnectionSource().getConnection()) {
+            return !con.isClosed();
+        }
     }
 
     @Override
-    public Connection getConnection() {
+    public Sql2o getConnection() {
         return this.connection;
     }
 
@@ -94,28 +105,13 @@ public class MySQLConfig implements AbstractConfig {
         if (this.connection == null) {
             return false;
         }
-        this.connection.close();
+        this.connection.getConnectionSource().getConnection().close();
         this.connection = null;
         return true;
     }
 
     @Override
-    public ResultSet querySQL(String query) throws SQLException, ClassNotFoundException {
-        if (checkConnection()) {
-            openConnection();
-        }
-        try (Statement statement = this.connection.createStatement()) {
-            return statement.executeQuery(query);
-        }
-    }
-
-    @Override
-    public int updateSQL(String query) throws SQLException, ClassNotFoundException {
-        if (checkConnection()) {
-            openConnection();
-        }
-        try (Statement statement = this.connection.createStatement()) {
-            return statement.executeUpdate(query);
-        }
+    public String toString() {
+        return "jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database;
     }
 }

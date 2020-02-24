@@ -1,7 +1,7 @@
 /*
  * Adapted from the Wizardry License
  *
- * Copyright (c) 2016-2018 larryTheCoder and contributors
+ * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
  * using this software to copy, modify, merge, publish, and distribute it.
@@ -80,7 +80,7 @@ public class SetHomeSubCommand extends SubCommand {
             return true;
         }
         // Check if the player on their own island or not
-        if (pd != null && pd.getOwner().equalsIgnoreCase(sender.getName())) {
+        if (pd != null && pd.getPlotOwner().equalsIgnoreCase(sender.getName())) {
             pd.setHomeLocation(p.getLocation());
             p.sendMessage(getLocale(p).setHomeSuccess);
         } else {
