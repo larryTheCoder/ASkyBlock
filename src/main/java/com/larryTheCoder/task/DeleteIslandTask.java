@@ -94,9 +94,9 @@ public class DeleteIslandTask implements Runnable {
 
         int islandSpacing = plugin.getSettings(level.getName()).getIslandDistance() - pd.getProtectionSize();
         int minxX = (pd.getCenter().getFloorX() - range - islandSpacing);
-        int minzZ = (pd.getCenter().getFloorZ() - range - islandSpacing);
+        int minzZ = (pd.getCenter().getFloorY() - range - islandSpacing);
         int maxxX = (pd.getCenter().getFloorX() + range + islandSpacing);
-        int maxzZ = (pd.getCenter().getFloorZ() + range + islandSpacing);
+        int maxzZ = (pd.getCenter().getFloorY() + range + islandSpacing);
 
         // get the chunks for these locations
         final BaseFullChunk minChunk = level.getChunk(minX >> 4, minZ >> 4, true);
@@ -220,10 +220,10 @@ public class DeleteIslandTask implements Runnable {
         }
 
         // Remove from database
-        boolean result = ASkyBlock.get().getDatabase().deleteIsland(pd);
-        if (!result) {
-            //Utils.sendDebug"Unable to delete player island data from database");
-        }
+        //boolean result = ASkyBlock.get().getDatabase().deleteIsland(pd);
+//        if (!result) {
+//            //Utils.sendDebug"Unable to delete player island data from database");
+//        }
     }
 
 }

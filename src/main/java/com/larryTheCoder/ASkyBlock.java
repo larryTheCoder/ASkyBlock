@@ -31,7 +31,6 @@ import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.generator.Generator;
-import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.utils.Config;
@@ -85,7 +84,7 @@ import static com.larryTheCoder.db2.TableSet.*;
  *
  * @author larryTheCoder
  */
-public class ASkyBlock extends PluginBase {
+public class ASkyBlock extends ASkyBlockAPI {
 
     public static Economy econ;
     private static ASkyBlock object;
@@ -93,24 +92,9 @@ public class ASkyBlock extends PluginBase {
     // Arrays
     public ArrayList<WorldSettings> level = new ArrayList<>();
 
-    private SchematicHandler schematics;
-
     // Configs
     private Config cfg;
     private Config worldConfig;
-
-    // Managers
-    private DatabaseManager db = null;
-    private ChatHandler chatHandler;
-    private InvitationHandler invitationHandler;
-    private IslandManager manager;
-    private GridManager grid;
-    private InventorySave inventory;
-    private TeamManager managers;
-    private TeleportLogic teleportLogic;
-    private Quests challengesCommand;
-    private Messages messageModule;
-    private Panel panel;
 
     private boolean disabled = false;
     // Localization Strings
@@ -148,7 +132,7 @@ public class ASkyBlock extends PluginBase {
 
         // Wohooo! Fast! Unique and Colorful!
         generateLevel(); // Regenerate The world
-        getServer().getLogger().info(getPrefix() + "§7Loading ASkyBlock - Founders Edition (API 25)");
+        getServer().getLogger().info(getPrefix() + "§7Loading ASkyBlock - Bedrock Edition (API 30)");
 
         // Only defaults
         initIslands();
@@ -190,7 +174,7 @@ public class ASkyBlock extends PluginBase {
         }
 
         try {
-            db = new DatabaseManager(dbConfig);
+            database = new DatabaseManager(dbConfig);
 
             return true;
         } catch (SQLException | ClassNotFoundException e) {
@@ -204,7 +188,7 @@ public class ASkyBlock extends PluginBase {
      */
     private void initIslands() {
         getServer().getCommandMap().register("ASkyBlock", new Commands(this));
-        getServer().getCommandMap().register("ASkyBlock", this.challengesCommand = new Quests(this));
+        getServer().getCommandMap().register("ASkyBlock", this.challenges = new Quests(this));
         getServer().getCommandMap().register("ASkyBlock", new Admin(this));
 
         PluginManager pm = getServer().getPluginManager();
@@ -214,8 +198,8 @@ public class ASkyBlock extends PluginBase {
         panel = new Panel(this);
 
         // This should be loaded first
-        messageModule = new Messages(this);
-        messageModule.loadMessages();
+        messages = new Messages(this);
+        messages.loadMessages();
         // new LevelCalcTask(this);
         //TopTen.topTenLoad();
 
@@ -233,9 +217,10 @@ public class ASkyBlock extends PluginBase {
         if (Settings.checkUpdate) {
             Updater.getUpdate();
         }
-        manager = new IslandManager(this);
+
+        islandManager = new IslandManager(this);
         grid = new GridManager(this);
-        managers = new TeamManager(this);
+        tManager = new TeamManager(this);
         inventory = new InventorySave();
     }
 
@@ -283,7 +268,7 @@ public class ASkyBlock extends PluginBase {
             Server.getInstance().loadLevel("SkyBlock");
         }
 
-        db.pushQuery((connection) -> {
+        database.pushQuery((connection) -> {
             List<String> levels = new ArrayList<>();
             try (Query query = connection.createQuery(FETCH_WORLDS.getQuery())) {
                 Table table = query.executeAndFetchTable();
@@ -302,14 +287,14 @@ public class ASkyBlock extends PluginBase {
                 if (worldConfig.isSection(levelName)) {
                     ConfigSection section = worldConfig.getSection(levelName);
                     worldSettings = WorldSettings.builder()
-                            .permission(section.getString("permission"))
-                            .plotMax(section.getInt("maxHome"))
-                            .plotSize(section.getInt("plotSize"))
-                            .plotRange(section.getInt("protectionRange"))
-                            .stopTime(section.getBoolean("stopTime"))
+                            .setPermission(section.getString("permission"))
+                            .setPlotMax(section.getInt("maxHome"))
+                            .setPlotSize(section.getInt("plotSize"))
+                            .setPlotRange(section.getInt("protectionRange"))
+                            .isStopTime(section.getBoolean("stopTime"))
                             .useDefaultChest(section.getBoolean("useDefaultChest"))
-                            .seaLevel(section.getInt("seaLevel"))
-                            .level(level)
+                            .setSeaLevel(section.getInt("seaLevel"))
+                            .setLevel(level)
                             .build();
 
                     worldSettings.verifyWorldSettings();
@@ -337,35 +322,17 @@ public class ASkyBlock extends PluginBase {
     }
 
     /**
-     * Get the list of levels that used
-     * for SkyBlock worlds
+     * Get the settings of a level provided. The rightful owner of this
+     * server will set the level settings.
      *
-     * @return A list of string
-     */
-    public ArrayList<String> getLevels() {
-        ArrayList<String> level = new ArrayList<>();
-        for (WorldSettings settings : this.level) {
-            level.add(settings.getLevel().getName());
-        }
-        return level;
-    }
-
-    /**
-     * Get the level settings for the
-     * SkyBlock world. Null if the world
-     * isn't a skyblock world or the world
-     * doesn't have a settings
-     *
-     * @param level String
+     * @param levelName String
      * @return WorldSettings
      */
-    public WorldSettings getSettings(String level) {
-        for (WorldSettings settings : this.level) {
-            if (settings.getLevel().getName().equalsIgnoreCase(level)) {
-                return settings;
-            }
-        }
-        return null;
+    public WorldSettings getSettings(String levelName) {
+        return level.stream()
+                .filter(i -> i.getLevel().getName().equalsIgnoreCase(levelName))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -386,10 +353,7 @@ public class ASkyBlock extends PluginBase {
      * @return ASlocales class
      */
     public ASlocales getLocale(Player p) {
-        if (p == null) {
-            return getLocale("");
-        }
-        return getLocale(p.getName());
+        return p == null ? getLocale("") : getLocale(p.getName());
     }
 
     /**
@@ -420,7 +384,7 @@ public class ASkyBlock extends PluginBase {
     public void saveLevel(boolean showEnd) {
         if (showEnd) Utils.send("&eSaving worlds...");
 
-        db.pushQuery((connection) -> {
+        database.pushQuery((connection) -> {
             try (Query queue = connection.createQuery(WORLDS_INSERT.getQuery())) {
                 for (WorldSettings settings : this.level) {
                     queue.addParameter("levelName", settings.getLevel().getName());
@@ -432,15 +396,6 @@ public class ASkyBlock extends PluginBase {
                 Utils.send("&cUnable to save the world.");
             }
         });
-    }
-
-    /**
-     * Return the messages module
-     *
-     * @return Messages class
-     */
-    public Messages getMessages() {
-        return messageModule;
     }
 
     /**
@@ -464,121 +419,72 @@ public class ASkyBlock extends PluginBase {
         this.availableLocales = availableLocales;
     }
 
-    /**
-     * Returns the version 2 schematics handler
-     *
-     * @return SchematicHandler
-     */
-    public SchematicHandler getSchematics() {
-        return schematics;
+    // DEPRECATED DUE TO OUR ASYNC TARGET VIOLATION.
+
+    // ISLAND DATA STARTING LINE ---
+
+    @Deprecated
+    public List<IslandData> getIslandsInfo(String playerName) {
+        Connection conn = getDatabase().getConnection();
+
+        Table levelPlot = conn.createQuery(FETCH_ISLAND_PLOT.getQuery())
+                .addParameter("pName", playerName)
+                .executeAndFetchTable();
+
+        List<IslandData> islandList = new ArrayList<>();
+        levelPlot.rows().forEach(o -> islandList.add(IslandData.fromRows(o)));
+
+        return islandList;
     }
 
     /**
-     * Get the database handler for this plugin
-     *
-     * @return Database that associated with them
-     */
-    public DatabaseManager getDatabase() {
-        return db;
-    }
-
-    /**
-     * Get the chat handler for coop islands
-     *
-     * @return ChatHandler class
-     */
-    public ChatHandler getChatHandlers() {
-        return chatHandler;
-    }
-
-    /**
-     * Get the invitation handler for coop islands
-     * This handles the timing for each users
-     *
-     * @return InvitationHandler class
-     */
-    public InvitationHandler getInvitationHandler() {
-        return invitationHandler;
-    }
-
-    /**
-     * Get the island manager that controls all
-     * aspect of the island
-     *
-     * @return IslandManager class
-     */
-    public IslandManager getIsland() {
-        return manager;
-    }
-
-    /**
-     * Get the grid manager, this is used to
-     * check if the island is orderly in grid or not.
-     *
-     * @return GridManager class
-     */
-    public GridManager getGrid() {
-        return grid;
-    }
-
-    /**
-     * Get the inventory save class which handles
-     * all the transaction when player teleports to
-     * their islands
-     *
-     * @return InventorySave
-     */
-    public InventorySave getInventory() {
-        return inventory;
-    }
-
-    /**
-     * Coop class for team management
-     * I still writing script for this class and
-     * it not mean to used in public server so do
-     * not use it.
-     *
-     * @return TeamManager class
-     */
-    public TeamManager getTManager() {
-        return managers;
-    }
-
-    /**
-     * Get the panel class, this class
-     * control the FormPanel for the plugin
-     * and manage island by easy interface
-     *
-     * @return Panel
-     */
-    public Panel getPanel() {
-        return panel;
-    }
-
-    /**
-     * Get the island info by the player class
-     * You can use this or use string instead.
+     * Get an island information from a player class.
      *
      * @param player The player class
      * @return IslandData class
      */
+    @Deprecated
     public IslandData getIslandInfo(Player player) {
         return getIslandInfo(player.getName());
     }
 
     /**
-     * Get the island info by the position
-     * that available
+     * Get an island information from a player's name
+     *
+     * @param player The player name itself.
+     * @return The IslandData class
+     */
+    @Deprecated
+    public IslandData getIslandInfo(String player) {
+        return getIslandInfo(player, 1);
+    }
+
+    /**
+     * Get a list of SkyBlock worlds/levels that are used for islands.
+     *
+     * @return A list of string
+     */
+    public ArrayList<String> getLevels() {
+        ArrayList<String> level = new ArrayList<>();
+        for (WorldSettings settings : this.level) {
+            level.add(settings.getLevel().getName());
+        }
+        return level;
+    }
+
+    /**
+     * Get an island information from a position given.
      *
      * @param pos the position to be checked
      * @return Island data of the location
      */
+    @Deprecated
     public IslandData getIslandInfo(Position pos) {
         int x = pos.getFloorX();
         int z = pos.getFloorZ();
         String levelName = pos.getLevel().getName();
 
-        int id = getIsland().generateIslandKey(x, z, levelName);
+        int id = getIslandManager().generateIslandKey(x, z, levelName);
         Connection conn = getDatabase().getConnection();
 
         Table levelPlot = conn.createQuery(FETCH_LEVEL_PLOT.getQuery())
@@ -593,17 +499,13 @@ public class ASkyBlock extends PluginBase {
         return IslandData.fromRows(levelPlot.rows().get(0));
     }
 
-    public IslandData getIslandInfo(String player) {
-        return getIslandInfo(player, 1);
-    }
-
     /**
-     * Get the data for the player by
-     * string
+     * Get an island information from a player name.
      *
      * @param player The player name
      * @return IslandData if the data is available otherwise null
      */
+    @Deprecated
     public IslandData getIslandInfo(String player, int homeCount) {
         Connection conn = getDatabase().getConnection();
 
@@ -619,69 +521,20 @@ public class ASkyBlock extends PluginBase {
         return IslandData.fromRows(levelPlot.rows().get(0));
     }
 
-    /**
-     * Get the challenges module for this
-     * plugin. This class is still confirming its
-     * credibility and being checked for any bugs
-     * and error
-     *
-     * @return Quests class
-     */
-    public Quests getChallenges() {
-        return challengesCommand;
-    }
-
-    /**
-     * Check if the player is inside the skyblock
-     * world.
-     *
-     * @param p The player class, not string
-     * @return true if the player is inside the world
-     */
-    public boolean inIslandWorld(Player p) {
-        return getIsland().checkIslandAt(p.getLevel());
-    }
-
-    /**
-     * Get the data for the player
-     * Each data is being stored centrally
-     *
-     * @param player The player class
-     * @return PlayerData class
-     */
-    public PlayerData getPlayerInfo(Player player) {
-        return getPlayerInfo(player.getName());
-    }
-
-    /**
-     * Get the data for the player
-     * Each data is being stored centrally
-     *
-     * @param player The player name
-     * @return PlayerData class
-     */
-    public PlayerData getPlayerInfo(String player) {
+    @Deprecated
+    public IslandData getIslandInfo(String player, String homeName) {
         Connection conn = getDatabase().getConnection();
 
-        Table data = conn.createQuery(FETCH_PLAYER_MAIN.getQuery())
-                .addParameter("plotOwner", player)
+        Table levelPlot = conn.createQuery(FETCH_ISLAND_PLOT.getQuery())
+                .addParameter("pName", player)
+                .addParameter("islandName", homeName)
                 .executeAndFetchTable();
 
-        if (data.rows().isEmpty()) {
+        if (levelPlot.rows().isEmpty()) {
             return null;
         }
 
-        return PlayerData.fromRows(data.rows().get(0));
-    }
-
-    /**
-     * The teleport logic for the teleportation between worlds
-     * This ensure that player isn't fall into the doom.
-     *
-     * @return TeleportLogic class
-     */
-    public TeleportLogic getTeleportLogic() {
-        return teleportLogic;
+        return IslandData.fromRows(levelPlot.rows().get(0));
     }
 
     /**
@@ -704,5 +557,52 @@ public class ASkyBlock extends PluginBase {
      */
     public String getDefaultWorld() {
         return "SkyBlock";
+    }
+
+    // PLAYER DATA STARTING LINE ---
+
+    /**
+     * Check if the player is inside the skyblock
+     * world.
+     *
+     * @param p The player class, not string
+     * @return true if the player is inside the world
+     */
+    public boolean inIslandWorld(Player p) {
+        return getIslandManager().checkIslandAt(p.getLevel());
+    }
+
+    /**
+     * Get the data for the player
+     * Each data is being stored centrally
+     *
+     * @param player The player class
+     * @return PlayerData class
+     */
+    @Deprecated
+    public PlayerData getPlayerInfo(Player player) {
+        return getPlayerInfo(player.getName());
+    }
+
+    /**
+     * Get the data for the player
+     * Each data is being stored centrally
+     *
+     * @param player The player name
+     * @return PlayerData class
+     */
+    @Deprecated
+    public PlayerData getPlayerInfo(String player) {
+        Connection conn = getDatabase().getConnection();
+
+        Table data = conn.createQuery(FETCH_PLAYER_MAIN.getQuery())
+                .addParameter("plotOwner", player)
+                .executeAndFetchTable();
+
+        if (data.rows().isEmpty()) {
+            return null;
+        }
+
+        return PlayerData.fromRows(data.rows().get(0));
     }
 }

@@ -42,7 +42,6 @@ class PluginTask extends cn.nukkit.scheduler.PluginTask<ASkyBlock> {
         time++;
         // Release every 1 Hour
         if (time == 3600) {
-            owner.getDatabase().free();
             time = 0;
         }
     }

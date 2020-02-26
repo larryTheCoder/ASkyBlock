@@ -273,7 +273,7 @@ public class IslandListener implements Listener {
             return;
         }
         // Too bad that the item is not a vector3
-        if (plugin.getIsland().locationIsOnIsland(p, e.getPlayer())) {
+        if (plugin.getIslandManager().locationIsOnIsland(p, e.getPlayer())) {
             //deb.debug("Action is allowed: Player on island");
             // You can do anything on your island
             return;
@@ -299,7 +299,7 @@ public class IslandListener implements Listener {
         if (p.isOp() || p.hasPermission("is.mod.bypassprotect")) {
             return;
         }
-        if (plugin.getIsland().locationIsOnIsland(p, e.getBlock()) || plugin.getIsland().locationIsOnIsland(p, p.getLocation())) {
+        if (plugin.getIslandManager().locationIsOnIsland(p, e.getBlock()) || plugin.getIslandManager().locationIsOnIsland(p, p.getLocation())) {
             //deb.debug("Action is allowed: Player on island");
             // You can do anything on your island
             return;

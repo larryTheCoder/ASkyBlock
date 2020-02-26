@@ -24,58 +24,11 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.command.island;
 
-import cn.nukkit.Player;
-import cn.nukkit.command.CommandSender;
-import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.command.SubCommand;
+package com.larryTheCoder.storage;
 
 /**
- * @author larryTheCoder
+ * Caches information for an object.
  */
-public class HomeSubCommand extends SubCommand {
-
-    public HomeSubCommand(ASkyBlock plugin) {
-        super(plugin);
-    }
-
-    @Override
-    public boolean canUse(CommandSender sender) {
-        return sender.isPlayer() && sender.hasPermission("is.command.home");
-    }
-
-    @Override
-    public String getUsage() {
-        return "";
-    }
-
-    @Override
-    public String getName() {
-        return "home";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Teleport to your island";
-    }
-
-    @Override
-    public String[] getAliases() {
-        return new String[]{"h"};
-    }
-
-    @Override
-    public boolean execute(CommandSender sender, String[] args) {
-        Player p = sender.getServer().getPlayer(sender.getName());
-        // Only one home? Don't worry. we wont open the form overlay
-        if (getPlugin().getIslandsInfo(sender.getName()).size() == 1) {
-            getPlugin().getGrid().homeTeleport(p);
-            return true;
-        }
-
-        getPlugin().getPanel().addHomeFormOverlay(p);
-        return true;
-    }
-
+public class FastCache {
 }

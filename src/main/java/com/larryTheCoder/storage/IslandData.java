@@ -37,6 +37,7 @@ import com.larryTheCoder.db2.DatabaseManager;
 import com.larryTheCoder.db2.TableSet;
 import com.larryTheCoder.utils.Utils;
 import lombok.Builder;
+import lombok.Setter;
 import org.sql2o.Connection;
 import org.sql2o.data.Row;
 import org.sql2o.data.Table;
@@ -46,10 +47,11 @@ import java.util.Objects;
 /**
  * @author larryTheCoder
  */
-@Builder
 public class IslandData implements Cloneable {
 
+    @Setter
     private int islandUniquePlotId = 0;
+    @Setter
     private int homeCountId = 0;
 
     // Coordinates of the home spawn location
@@ -76,6 +78,9 @@ public class IslandData implements Cloneable {
 
     // IslandData private variables
     private boolean isDataFetched = false;
+
+    IslandData() {
+    }
 
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public IslandData(String levelName, int xCoord, int zCoord, int plotSize) {
@@ -176,15 +181,6 @@ public class IslandData implements Cloneable {
     }
 
     /**
-     * This is for internal usage.
-     *
-     * @param homeCountId int
-     */
-    public void setHomeCountId(int homeCountId) {
-        this.homeCountId = homeCountId;
-    }
-
-    /**
      * The ID count of the island for player
      * this counts how much island player had
      *
@@ -192,17 +188,6 @@ public class IslandData implements Cloneable {
      */
     public int getIslandUniquePlotId() {
         return islandUniquePlotId;
-    }
-
-    /**
-     * Set the player island ID
-     * Please do not use this in any production
-     * server, this method is mean to be final only
-     *
-     * @param islandUniquePlotId int
-     */
-    public void setIslandUniquePlotId(int islandUniquePlotId) {
-        this.islandUniquePlotId = islandUniquePlotId;
     }
 
     /**

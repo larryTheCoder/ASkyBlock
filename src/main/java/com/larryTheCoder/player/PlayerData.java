@@ -47,24 +47,24 @@ public class PlayerData implements Cloneable {
 
     // Player critical information data.
     @Getter
-    private final String playerName;
+    public final String playerName;
     @Getter
-    private final String playerXUID;
+    public final String playerXUID;
 
     @Setter @Getter
-    private int resetLeft;
+    public int resetLeft;
 
     @Setter @Getter
-    private int islandLevel;
+    public int islandLevel;
 
     private boolean challengeFetched = false;
     private final HashMap<String, Boolean> challengeList = new HashMap<>();
     private final HashMap<String, Integer> challengeListTimes = new HashMap<>();
 
     @Getter @Setter
-    private String locale;
+    public String locale;
     @Getter
-    private List<String> banList;
+    public List<String> banList;
 
     private PlayerData(String playerName, String playerXUID, String pubLocale, List<String> banList, int resetAttempts, int islandLevels) {
         this.playerName = playerName;

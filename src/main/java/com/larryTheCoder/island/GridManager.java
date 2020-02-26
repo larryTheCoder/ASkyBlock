@@ -122,7 +122,7 @@ public class GridManager {
     private boolean locationIsAtHome(final Player player, Location loc) {
         // Make a list of test locations and test them
         Set<Location> islandTestLocations = new HashSet<>();
-        if (plugin.getIsland().checkIsland(player)) {
+        if (plugin.getIslandManager().checkIsland(player)) {
             IslandData pd = plugin.getIslandInfo(player);
             Vector2 cartesianPlane = pd.getCenter();
 
@@ -139,9 +139,9 @@ public class GridManager {
             // Note that getWorld can return null if a world has been deleted on the server
             if (islandTestLocation != null && islandTestLocation.getLevel() != null && islandTestLocation.getLevel().equals(loc.getLevel())) {
                 int protectionRange = plugin.getSettings(islandTestLocation.getLevel().getName()).getProtectionRange();
-                if (plugin.getIsland().checkIslandAt(islandTestLocation.getLevel())) {
+                if (plugin.getIslandManager().checkIslandAt(islandTestLocation.getLevel())) {
                     // Get the protection range for this location if possible
-                    IslandData island = plugin.getIsland().getIslandAt(islandTestLocation);
+                    IslandData island = plugin.getIslandManager().getIslandAt(islandTestLocation);
                     if (island != null) {
                         // We are in a protected island area.
                         protectionRange = island.getProtectionSize();
@@ -260,7 +260,7 @@ public class GridManager {
             return;
         }
         plugin.getTeleportLogic().safeTeleport(player, home, false, number);
-        plugin.getIsland().showFancyTitle(player);
+        plugin.getIslandManager().showFancyTitle(player);
     }
 
     public IslandData getProtectedIslandAt(Location location) {

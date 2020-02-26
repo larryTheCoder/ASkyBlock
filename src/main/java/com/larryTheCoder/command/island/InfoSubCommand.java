@@ -74,7 +74,7 @@ public class InfoSubCommand extends SubCommand {
                 return true;
             }
         }
-        getPlugin().getIsland().islandInfo(p, p.getLocation());
+        getPlugin().getIslandManager().islandInfo(p, p.getLocation());
         return true;
     }
 

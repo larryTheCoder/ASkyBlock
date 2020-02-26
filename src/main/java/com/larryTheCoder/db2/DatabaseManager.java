@@ -62,9 +62,13 @@ public class DatabaseManager {
     private AtomicBoolean isClosed = new AtomicBoolean(false);
     private ConcurrentLinkedQueue<DatabaseImpl> requestQueue = new ConcurrentLinkedQueue<>();
 
+    public static boolean isMysql = false;
+
     public DatabaseManager(AbstractConfig database) throws SQLException, ClassNotFoundException {
         this.database = database;
         this.connection = database.openConnection().open();
+
+        isMysql = database instanceof MySQLConfig;
 
         this.startConnection();
     }
@@ -94,9 +98,8 @@ public class DatabaseManager {
     }
 
     private void startConnection() {
-        boolean isMysql = database instanceof MySQLConfig;
-
         TableSet[] tableSets = {
+                WORLD_TABLE,
                 ISLAND_DATA,
                 PLAYER_TABLE,
                 PLAYER_CHALLENGES,
@@ -105,32 +108,28 @@ public class DatabaseManager {
                 ISLAND_RELATIONS
         };
 
-        // Add all tables into our database.
-        for (TableSet set : tableSets) {
-            if (isMysql) {
-                // InnoDB Special case
-                connection.createQuery(set.getQuery() + FOR_INNODB_OPTIMIZE.getQuery()).executeUpdate();
-            } else {
-                connection.createQuery(set.getQuery()).executeUpdate();
-            }
+        if (isMysql) {
+            connection.createQuery(FOR_TABLE_OPTIMIZE_A.getQuery()).executeUpdate();
+            connection.createQuery(FOR_TABLE_OPTIMIZE_B.getQuery()).executeUpdate();
+        } else {
+            connection.createQuery(SQLITE_PRAGMA_ON.getQuery()).executeUpdate();
         }
 
+        // Add all tables into our database.
+        for (TableSet set : tableSets) {
+            connection.createQuery(set.getQuery()).executeUpdate();
+        }
 
         // If the database is a mysql database, we can
         // apply as many connections we want since this database
         // structure provides pooling and etc.
-        if (database instanceof MySQLConfig) {
-            connection.createQuery(FOR_TABLE_OPTIMIZE_A.getQuery()).executeUpdate();
-            connection.createQuery(FOR_TABLE_OPTIMIZE_B.getQuery()).executeUpdate();
-
+        if (isMysql) {
             startAsyncPool(3);
         } else {
-            connection.createQuery(SQLITE_PRAGMA_ON.getQuery()).executeUpdate();
-
             startAsyncPool(1);
         }
 
-        Utils.send(String.format("&6Connected to %s database.&e %s",
+        Utils.send(String.format("&6Connected to %s database.&e %sms",
                 database instanceof MySQLConfig ? "mysql" : "sqlite",
                 pingDatabase()));
     }

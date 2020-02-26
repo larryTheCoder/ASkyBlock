@@ -29,22 +29,20 @@ package com.larryTheCoder.storage;
 import cn.nukkit.level.Level;
 import cn.nukkit.utils.Config;
 import com.larryTheCoder.utils.Utils;
-import lombok.Builder;
 
 /**
  * @author larryTheCoder
  */
-@Builder
 public class WorldSettings {
 
-    private Level level;
-    private String permission;
-    private int plotMax;
-    private int plotSize;
-    private boolean stopTime;
-    private int seaLevel;
-    private int plotRange;
-    private boolean useDefaultChest;
+    Level level;
+    String permission;
+    int plotMax;
+    int plotSize;
+    boolean stopTime;
+    int seaLevel;
+    int plotRange;
+    boolean useDefaultChest;
 
     public WorldSettings(Level level) {
         this.level = level;
@@ -119,5 +117,9 @@ public class WorldSettings {
         cfg.set(levelName + ".seaLevel", seaLevel);
         cfg.set(levelName + ".useDefaultChest", true);
         cfg.save();
+    }
+
+    public static WorldSettingsBuilder builder() {
+        return new WorldSettingsBuilder();
     }
 }

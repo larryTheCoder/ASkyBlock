@@ -70,7 +70,7 @@ public class ChatSubCommand extends SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         Player p = Server.getInstance().getPlayer(sender.getName());
-        if (getPlugin().getIsland().checkIsland(p)) {
+        if (getPlugin().getIslandManager().checkIsland(p)) {
             sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
         }
@@ -86,16 +86,16 @@ public class ChatSubCommand extends SubCommand {
             if (!online) {
                 p.sendMessage(getPrefix() + getLocale(p).teamChatNoTeamAround);
                 p.sendMessage(getPrefix() + getLocale(p).teamChatStatusOff);
-                getPlugin().getChatHandlers().unSetPlayer(p);
+                getPlugin().getChatHandler().unSetPlayer(p);
                 return true;
             }
-            if (getPlugin().getChatHandlers().isTeamChat(p)) {
+            if (getPlugin().getChatHandler().isTeamChat(p)) {
                 // Toggle
                 p.sendMessage(getPrefix() + getLocale(p).teamChatStatusOff);
-                getPlugin().getChatHandlers().unSetPlayer(p);
+                getPlugin().getChatHandler().unSetPlayer(p);
             } else {
                 p.sendMessage(getPrefix() + getLocale(p).teamChatStatusOn);
-                getPlugin().getChatHandlers().setPlayer(p);
+                getPlugin().getChatHandler().setPlayer(p);
             }
         }
         return false;

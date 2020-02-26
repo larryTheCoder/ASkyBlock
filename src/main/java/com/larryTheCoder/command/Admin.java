@@ -130,7 +130,7 @@ public class Admin extends Command {
                     sender.sendMessage(plugin.getLocale(pl).errorNoPermission);
                     break;
                 }
-                plugin.getIsland().kickPlayerByAdmin(sender, args[1]);
+                plugin.getIslandManager().kickPlayerByAdmin(sender, args[1]);
                 break;
             case "rename":
                 if (!sender.hasPermission("is.admin.rename")) {
@@ -265,7 +265,7 @@ public class Admin extends Command {
                 }
 
                 // Get the island I am on
-                island = plugin.getIsland().getIslandAt(pl);
+                island = plugin.getIslandManager().getIslandAt(pl);
 
                 if (island == null) {
                     sender.sendMessage(plugin.getLocale(pl).adminDeleteIslandnoid);

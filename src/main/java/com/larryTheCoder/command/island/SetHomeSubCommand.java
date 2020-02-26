@@ -82,11 +82,13 @@ public class SetHomeSubCommand extends SubCommand {
         // Check if the player on their own island or not
         if (pd != null && pd.getPlotOwner().equalsIgnoreCase(sender.getName())) {
             pd.setHomeLocation(p.getLocation());
+            pd.saveIslandData();
+
             p.sendMessage(getLocale(p).setHomeSuccess);
         } else {
             p.sendMessage(getLocale(p).errorNotOnIsland);
         }
-        ASkyBlock.get().getDatabase().saveIsland(pd); // Very big mistake
+
         return true;
     }
 

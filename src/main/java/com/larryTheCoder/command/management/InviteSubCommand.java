@@ -30,7 +30,6 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.SubCommand;
-import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.player.TeamManager;
 
 /**
@@ -75,7 +74,7 @@ public class InviteSubCommand extends SubCommand {
 
         // Player cannot invite other players when he have no island
         Player p = sender.getServer().getPlayer(sender.getName());
-        if (!getPlugin().getIsland().checkIsland(p)) {
+        if (!getPlugin().getIslandManager().checkIsland(p)) {
             sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
             return true;
         }

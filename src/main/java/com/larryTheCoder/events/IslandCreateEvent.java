@@ -32,6 +32,7 @@ import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.HandlerList;
 import cn.nukkit.level.Location;
+import cn.nukkit.math.Vector2;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.storage.IslandData;
 
@@ -79,7 +80,9 @@ public class IslandCreateEvent extends Event implements Cancellable {
      * @return the island
      */
     public Location getIslandLocation() {
-        return new Location(0, 0, 0, 0, 0, Server.getInstance().getLevelByName(island.getLevelName())).add(island.getCenter());
+        Vector2 center = island.getCenter();
+
+        return new Location(center.getFloorX(), 0, center.getFloorY(), Server.getInstance().getLevelByName(island.getLevelName()));
     }
 
     /**

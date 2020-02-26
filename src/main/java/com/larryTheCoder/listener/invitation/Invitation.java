@@ -84,11 +84,11 @@ public class Invitation {
         sender.sendMessage(plugin.getPrefix() + plugin.getLocale(sender.isPlayer() ? (Player) sender : null).acceptedTo.replace("[player]", receiver.getName()));
         receiver.sendMessage(plugin.getPrefix() + plugin.getLocale(receiver).acceptedFrom.replace("[player]", sender.getName()));
 
-        List<IslandData> dataList = plugin.getDatabase().getIslands(receiver.getName());
+        List<IslandData> dataList = plugin.getIslandsInfo(receiver.getName());
         // Check if the player has an island
         if (!dataList.isEmpty()) {
             receiver.sendMessage(plugin.getPrefix() + "Deleting all of your islands");
-            dataList.forEach((island) -> plugin.getDatabase().deleteIsland(island));
+            //dataList.forEach((island) -> plugin.getDatabase().deleteIsland(island));
         }
 
         // Set the team from the sender and the receiver.

@@ -149,7 +149,7 @@ public class LavaCheck implements Listener {
             int level = Integer.MIN_VALUE;
             IslandData pd = plugin.getIslandInfo(e.getBlock());
             if (pd != null && pd.getPlotOwner() != null) {
-                PlayerData pd2 = plugin.getDatabase().getPlayerData(pd.getPlotOwner());
+                PlayerData pd2 = plugin.getPlayerInfo(pd.getPlotOwner());
                 if (pd2 != null) {
                     level = pd2.getIslandLevel();
                 }

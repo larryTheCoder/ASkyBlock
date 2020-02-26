@@ -135,7 +135,7 @@ public class Panel implements Listener {
 
                 boolean teleport = response.getToggleResponse(responseId);
 
-                plugin.getIsland().createIsland(p, id, worldName, islandName, locked, EnumBiome.PLAINS, teleport);
+                plugin.getIslandManager().createIsland(p, id, worldName, islandName, locked, EnumBiome.PLAINS, teleport);
                 break;
             // Challenges data
             case TYPE_CHALLENGES:
@@ -269,7 +269,7 @@ public class Panel implements Listener {
 
                 int buttonId = modalForm.getResponse().getClickedButtonId();
                 if (buttonId == 0) {
-                    plugin.getIsland().deleteIsland(p, plugin.getIslandInfo(p.getName(), idButton));
+                    plugin.getIslandManager().deleteIsland(p, plugin.getIslandInfo(p.getName(), idButton));
                 } else {
                     p.sendMessage(plugin.getLocale(p).deleteIslandCancelled);
                 }
@@ -304,7 +304,7 @@ public class Panel implements Listener {
                     }
                 }
 
-                plugin.getDatabase().saveIsland(pd3);
+                pd3.saveIslandData();
                 break;
         }
     }
@@ -362,7 +362,7 @@ public class Panel implements Listener {
         ArrayList<String> worldName = plugin.getLevels();
         // TODO: Check max homes
 
-        int homes = plugin.getDatabase().getIslands(player.getName()).size();
+        int homes = plugin.getIslandsInfo(player.getName()).size();
         FormWindowCustom panelIsland = new FormWindowCustom("Island Menu");
 
         panelIsland.addElement(new ElementLabel(getLocale(player).panelIslandHeader));
@@ -387,7 +387,7 @@ public class Panel implements Listener {
     }
 
     public void addHomeFormOverlay(Player p) {
-        ArrayList<IslandData> listHome = plugin.getDatabase().getIslands(p.getName());
+        List<IslandData> listHome = plugin.getIslandsInfo(p.getName());
 
         FormWindowSimple islandHome = new FormWindowSimple("Home list", getLocale(p).panelHomeHeader.replace("[function]", "§aTeleport to them"));
         for (IslandData pd : listHome) {
@@ -403,7 +403,7 @@ public class Panel implements Listener {
 
     private void addDeleteFormOverlay(Player p, IslandData pd) {
         if (pd == null) {
-            ArrayList<IslandData> listHome = plugin.getDatabase().getIslands(p.getName());
+            List<IslandData> listHome = plugin.getIslandsInfo(p.getName());
             // Automatically show default island setting
             if (listHome.size() == 1) {
                 addDeleteFormOverlay(p, listHome.get(0));
@@ -434,10 +434,10 @@ public class Panel implements Listener {
     private void addProtectionOverlay(Player p, IslandData pd) {
         // This is the island Form
         if (pd == null) {
-            ArrayList<IslandData> listHome = plugin.getDatabase().getIslands(p.getName());
+            List<IslandData> listHome = plugin.getIslandsInfo(p.getName());
             // Automatically show default island setting
             if (listHome.size() == 1) {
-                addProtectionOverlay(p, plugin.getDatabase().getIsland(p.getName(), 1));
+                addProtectionOverlay(p, plugin.getIslandInfo(p.getName()));
                 return;
             }
 
@@ -475,10 +475,10 @@ public class Panel implements Listener {
     private void addSettingFormOverlay(Player p, IslandData pd) {
         // This is the island Form
         if (pd == null) {
-            ArrayList<IslandData> listHome = plugin.getDatabase().getIslands(p.getName());
+            List<IslandData> listHome = plugin.getIslandsInfo(p.getName());
             // Automatically show default island setting
             if (listHome.size() == 1) {
-                addSettingFormOverlay(p, plugin.getDatabase().getIsland(p.getName(), 1));
+                addSettingFormOverlay(p, plugin.getIslandInfo(p.getName()));
                 return;
             }
 

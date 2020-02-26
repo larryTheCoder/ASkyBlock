@@ -27,7 +27,7 @@
 
 package com.larryTheCoder.db2;
 
-import lombok.Getter;
+import com.larryTheCoder.ASkyBlock;
 
 /**
  * A set of queries.
@@ -36,21 +36,20 @@ public enum TableSet {
 
     // Default tables
     WORLD_TABLE("CREATE TABLE IF NOT EXISTS worldList(" +
-            "worldName TEXT PRIMARY KEY) "),
+            "worldName TEXT PRIMARY KEY) %OPTIMIZE"),
     PLAYER_TABLE("CREATE TABLE IF NOT EXISTS player(" +
-            "playerId INTEGER AUTOINCREMENT," +
             "playerName VARCHAR(100)," +
             "playerUUID VARCHAR(36) NOT NULL," +
             "locale TEXT NOT NULL," +
             "banList TEXT NOT NULL," +
             "resetAttempts INTEGER NOT NULL," +
-            "islandLevels INTEGER DEFAULT 0" +
-            "PRIMARY KEY (playerId, playerName, playerUUID)) "),
+            "islandLevels INTEGER DEFAULT 0," +
+            "PRIMARY KEY (playerName, playerUUID)) %OPTIMIZE"),
     PLAYER_CHALLENGES("CREATE TABLE IF NOT EXISTS challenges(" +
             "player VARCHAR(100) PRIMARY KEY NOT NULL," +
             "challengesList TEXT," +
             "challengesTimes TEXT," +
-            "FOREIGN KEY (player) REFERENCES player(playerName) ON UPDATE CASCADE) "),
+            "FOREIGN KEY (player) REFERENCES player(playerName) ON UPDATE CASCADE) %OPTIMIZE"),
     ISLAND_TABLE("CREATE TABLE IF NOT EXISTS island(" +
             "islandId INTEGER," +
             "islandUniqueId INTEGER," +
@@ -58,28 +57,27 @@ public enum TableSet {
             "spawnPosition TEXT NOT NULL," +
             "gridSize INTEGER NOT NULL," +
             "levelName TEXT," +
+            "islandName TEXT," +
             "player VARCHAR(100)," +
             "FOREIGN KEY (player) REFERENCES player(playerName) ON UPDATE CASCADE," +
             "FOREIGN KEY (levelName) REFERENCES worldList(worldName) ON UPDATE CASCADE," +
-            "PRIMARY KEY (islandUniqueId, player)) "),
+            "PRIMARY KEY (islandUniqueId, player)) %OPTIMIZE"),
     ISLAND_DATA("CREATE TABLE IF NOT EXISTS islandData(" +
             "dataId INT PRIMARY KEY," +
             "biome INTEGER DEFAULT 0," +
             "locked INTEGER DEFAULT 0," +
             "protectionData TEXT DEFAULT ''," +
             "levelHandicap INTEGER DEFAULT 0," +
-            "FOREIGN KEY (dataId) REFERENCES island(islandUniqueId) ON UPDATE CASCADE) "),
+            "FOREIGN KEY (dataId) REFERENCES island(islandUniqueId) ON UPDATE CASCADE) %OPTIMIZE"),
     ISLAND_RELATIONS("CREATE TABLE IF NOT EXISTS islandRelations(" +
-            "teamId INTEGER AUTOINCREMENT," +
             "defaultIsland INT NOT NULL," +
             "islandLeader VARCHAR(100)," +
             "islandMembers TEXT DEFAULT ''," +
             "FOREIGN KEY (defaultIsland) REFERENCES island(islandUniqueId) ON UPDATE CASCADE," +
             "FOREIGN KEY (islandLeader) REFERENCES player(playerName) ON UPDATE CASCADE," +
-            "PRIMARY KEY (teamId, islandLeader)) "),
+            "PRIMARY KEY (defaultIsland, islandLeader)) %OPTIMIZE"),
 
     SQLITE_PRAGMA_ON("PRAGMA foreign_keys = ON"),
-    FOR_INNODB_OPTIMIZE("ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPRESSED"),
     FOR_TABLE_OPTIMIZE_A("SET GLOBAL innodb_file_per_table=1"),
     FOR_TABLE_OPTIMIZE_B("SET GLOBAL innodb_file_format=Barracuda"),
 
@@ -88,21 +86,38 @@ public enum TableSet {
     FETCH_PLAYER_DATA("SELECT * FROM challenges WHERE player = :playerName"),
     FETCH_ISLAND_UNIQUE("SELECT * FROM island WHERE islandUniqueId = :islandUniqueId AND levelName = :levelName"),
     FETCH_LEVEL_PLOT("SELECT * FROM island WHERE levelName = :levelName AND islandUniqueId = :islandId"),
-    FETCH_ISLAND_PLOT("SELECT * FROM island WHERE player = :pName"),
+    FETCH_ISLAND_PLOT("SELECT * FROM island WHERE player = :pName AND islandId = :islandId"),
+    FETCH_ISLAND_NAME("SELECT * FROM island WHERE player = :pName AND islandName = :islandName"),
     FETCH_ISLAND_DATA("SELECT * FROM islandData WHERE dataId = :islandUniquePlotId"),
+    FETCH_ISLANDS_PLOT("SELECT * FROM island WHERE player = :pName"),
     FETCH_ALL_ISLAND_UNIQUE("SELECT islandUniqueId FROM island"),
 
-    ISLAND_INSERT_MAIN("INSERT INTO island(islandId, islandUniqueId, gridPosition, spawnPosition, gridSize, levelName, player) VALUES (:islandId, :islandUniqueId, :gridPos, :spawnPos, :gridSize, :levelName, :player) ON DUPLICATE KEY UPDATE islandId = :islandId, gridPosition = :gridPos, spawnPosition` = :spawnPos,`gridSize` = :gridSize, `levelName` = :levelName, `player` = :plotOwner WHERE islandUniqueId = :islandUniqueId"),
+    ISLAND_INSERT_MAIN("INSERT INTO island(islandId, islandUniqueId, gridPosition, spawnPosition, gridSize, levelName, player, islandName) VALUES (:islandId, :islandUniqueId, :gridPos, :spawnPos, :gridSize, :levelName, :player, :islandName) ON DUPLICATE KEY UPDATE islandId = :islandId, gridPosition = :gridPos, spawnPosition` = :spawnPos,`gridSize` = :gridSize, `levelName` = :levelName, `player` = :plotOwner, islandName = :islandName"),
     ISLAND_INSERT_DATA("INSERT INTO islandData(dataId, biome, locked, protectionData, levelHandicap) VALUES (:islandUniqueId, :plotBiome, :isLocked, :protectionData, :levelHandicap) ON DUPLICATE KEY UPDATE biome = :plotBiome, locked = :isLocked, protectionData = :protectionData, levelHandicap = :levelHandicap"),
     PLAYER_INSERT_MAIN("INSERT INTO player(playerName, playerUUID, locale, banList, resetAttempts, islandLevels) VALUES (:playerName, :playerUUID, :locale, :banList, :resetLeft, :islandLevels) ON DUPLICATE KEY UPDATE playerName = :playerName, playerUUID = :playerUUID, locale = :locale, banList = :banList, resetAttempts = :resetLeft, islandLevels = :islandLevels"),
     PLAYER_INSERT_DATA("INSERT INTO challenges(player, challengesList, challengesTimes) VALUES (:playerName, :challengesList, :challengesTimes ON DUPLICATE KEY UPDATE challengesList = :challengesList, challengesTimes = :challengesTimes)"),
 
-    WORLDS_INSERT("INSERT IGNORE INTO worlds (worldName) VALUES (:levelName)");
+    WORLDS_INSERT("INSERT %IGNORE INTO worldList (worldName) VALUES (:levelName)");
 
-    @Getter
     private final String query;
 
     TableSet(String query) {
         this.query = query;
+    }
+
+    public String getQuery() {
+        String resultPoint = query;
+
+        boolean isMysql = DatabaseManager.isMysql;
+
+        if (isMysql) {
+            resultPoint = resultPoint.replace("%IGNORE", "IGNORE");
+            resultPoint = resultPoint.replace("%OPTIMIZE", "ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPRESSED");
+        } else {
+            resultPoint = resultPoint.replace("%IGNORE", "OR IGNORE");
+            resultPoint = resultPoint.replace("%OPTIMIZE", "");
+        }
+
+        return resultPoint;
     }
 }

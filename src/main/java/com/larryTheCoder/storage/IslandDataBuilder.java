@@ -24,58 +24,56 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.command.island;
 
-import cn.nukkit.Player;
-import cn.nukkit.command.CommandSender;
-import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.command.SubCommand;
+package com.larryTheCoder.storage;
 
-/**
- * @author larryTheCoder
- */
-public class HomeSubCommand extends SubCommand {
+import cn.nukkit.math.Vector2;
 
-    public HomeSubCommand(ASkyBlock plugin) {
-        super(plugin);
+public class IslandDataBuilder {
+
+    private IslandData data = new IslandData();
+
+    public IslandDataBuilder setGridCoordinates(Vector2 vec) {
+        data.setCenter(vec);
+
+        return this;
     }
 
-    @Override
-    public boolean canUse(CommandSender sender) {
-        return sender.isPlayer() && sender.hasPermission("is.command.home");
+    public IslandDataBuilder setIslandUniquePlotId(int generatedData) {
+        data.setIslandUniquePlotId(generatedData);
+
+        return this;
     }
 
-    @Override
-    public String getUsage() {
-        return "";
+    public IslandDataBuilder setPlotOwner(String plotOwner) {
+        data.setPlotOwner(plotOwner);
+
+        return this;
     }
 
-    @Override
-    public String getName() {
-        return "home";
+    public IslandDataBuilder setLevelName(String levelName) {
+        data.setLevelName(levelName);
+
+        return this;
     }
 
-    @Override
-    public String getDescription() {
-        return "Teleport to your island";
+    public IslandDataBuilder setLocked(boolean isLocked) {
+        data.setLocked(isLocked);
+        return this;
     }
 
-    @Override
-    public String[] getAliases() {
-        return new String[]{"h"};
+    public IslandDataBuilder setPlotBiome(String biomeName) {
+        data.setPlotBiome(biomeName);
+        return this;
     }
 
-    @Override
-    public boolean execute(CommandSender sender, String[] args) {
-        Player p = sender.getServer().getPlayer(sender.getName());
-        // Only one home? Don't worry. we wont open the form overlay
-        if (getPlugin().getIslandsInfo(sender.getName()).size() == 1) {
-            getPlugin().getGrid().homeTeleport(p);
-            return true;
-        }
+    public IslandDataBuilder setIslandName(String islandName) {
+        data.setIslandName(islandName);
+        return this;
+    }
 
-        getPlugin().getPanel().addHomeFormOverlay(p);
-        return true;
+    public IslandData build() {
+        return data;
     }
 
 }

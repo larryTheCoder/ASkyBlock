@@ -42,6 +42,7 @@ import com.larryTheCoder.events.IslandCreateEvent;
 import com.larryTheCoder.player.CoopData;
 import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.storage.IslandDataBuilder;
 import com.larryTheCoder.storage.WorldSettings;
 import com.larryTheCoder.task.DeleteIslandTask;
 import com.larryTheCoder.task.SimpleFancyTitle;
@@ -52,7 +53,10 @@ import org.sql2o.Connection;
 import org.sql2o.data.Row;
 import org.sql2o.data.Table;
 
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static com.larryTheCoder.db2.TableSet.FETCH_ISLAND_UNIQUE;
 
 /**
  * Core management for SkyBlock world and
@@ -213,14 +217,14 @@ public class IslandManager {
                             return;
                         }
 
-                        resultData = IslandData.builder()
-                                .gridCoordinates(new Vector2(x, z))
-                                .islandUniquePlotId(generatedData)
-                                .plotOwner(pl.getName())
-                                .levelName(levelName)
-                                .isLocked(locked)
-                                .plotBiome("Plains")
-                                .islandName(home).build();
+                        resultData = new IslandDataBuilder()
+                                .setGridCoordinates(new Vector2(x, z))
+                                .setIslandUniquePlotId(generatedData)
+                                .setPlotOwner(pl.getName())
+                                .setLevelName(levelName)
+                                .setLocked(locked)
+                                .setPlotBiome("Plains")
+                                .setIslandName(home).build();
                     }
                 }
             }
@@ -315,8 +319,8 @@ public class IslandManager {
         TaskManager.runTask(new DeleteIslandTask(plugin, pd, p));
 
         PlayerData pda = plugin.getPlayerInfo(p);
-        pda.setPlayerReset(pda.getPlayerReset() + 1);
-        plugin.getDatabase().savePlayerData(pda);
+        pda.setResetLeft(pda.getResetLeft() + 1);
+        pda.saveData();
 
         p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).resetSuccess.replace("[mili]", "" + Settings.resetTime));
     }
@@ -330,10 +334,19 @@ public class IslandManager {
             return null;
         }
         int iKey = generateIslandKey(loc);
-        IslandData res = plugin.getDatabase().getIslandById(iKey, loc.getLevel().getName());
-        if (res == null) {
+
+        Connection connection = plugin.getDatabase().getConnection();
+
+        List<Row> rows = connection.createQuery(FETCH_ISLAND_UNIQUE.getQuery())
+                .addParameter("islandUniqueId", iKey)
+                .addParameter("levelName", loc.getLevel().getName())
+                .executeAndFetchTable().rows();
+
+        if (rows.isEmpty()) {
             return null;
         }
+
+        IslandData res = IslandData.fromRows(rows.get(0));
         if (res.getPlotOwner() == null) {
             return null;
         }
@@ -364,7 +377,7 @@ public class IslandManager {
     }
 
     public void teleportPlayer(Player p, String arg) {
-        IslandData pd = plugin.getDatabase().getIsland(arg, 1);
+        IslandData pd = plugin.getIslandInfo(arg);
         if (pd == null) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNoIslandOther);
             return;

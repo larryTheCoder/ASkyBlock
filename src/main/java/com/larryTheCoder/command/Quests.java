@@ -189,7 +189,7 @@ public class Quests extends Command {
                     //Utils.send("DEBUG: " + oldLevel + " " + newLevel);
                     if (oldLevel < newLevel) {
                         // Update chat
-                        plugin.getChatHandlers().setPlayerChallengeLevel(p);
+                        plugin.getChatHandler().setPlayerChallengeLevel(p);
                         // Run commands and give rewards but only if they haven't done it below
                         //Utils.send("DEBUG: old level = " + oldLevel + " new level = " + newLevel);
                         String level = Settings.challengeLevels.get(newLevel);

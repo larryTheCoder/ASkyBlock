@@ -24,58 +24,61 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.command.island;
 
-import cn.nukkit.Player;
-import cn.nukkit.command.CommandSender;
-import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.command.SubCommand;
+package com.larryTheCoder.storage;
 
-/**
- * @author larryTheCoder
- */
-public class HomeSubCommand extends SubCommand {
 
-    public HomeSubCommand(ASkyBlock plugin) {
-        super(plugin);
+import cn.nukkit.level.Level;
+import com.google.common.base.Preconditions;
+
+public class WorldSettingsBuilder {
+
+    private WorldSettings realSettings = new WorldSettings(null);
+
+    public WorldSettingsBuilder setPermission(String permission) {
+        realSettings.permission = permission;
+        return this;
     }
 
-    @Override
-    public boolean canUse(CommandSender sender) {
-        return sender.isPlayer() && sender.hasPermission("is.command.home");
+    public WorldSettingsBuilder setPlotMax(int plotMax) {
+        realSettings.plotMax = plotMax;
+        return this;
     }
 
-    @Override
-    public String getUsage() {
-        return "";
+    public WorldSettingsBuilder setPlotSize(int plotSize) {
+        realSettings.plotSize = plotSize;
+        return this;
     }
 
-    @Override
-    public String getName() {
-        return "home";
+    public WorldSettingsBuilder setPlotRange(int plotRange) {
+        realSettings.plotRange = plotRange;
+        return this;
     }
 
-    @Override
-    public String getDescription() {
-        return "Teleport to your island";
+    public WorldSettingsBuilder isStopTime(boolean isStopTime) {
+        realSettings.stopTime = isStopTime;
+        return this;
     }
 
-    @Override
-    public String[] getAliases() {
-        return new String[]{"h"};
+    public WorldSettingsBuilder useDefaultChest(boolean defaultChest) {
+        realSettings.useDefaultChest = defaultChest;
+        return this;
     }
 
-    @Override
-    public boolean execute(CommandSender sender, String[] args) {
-        Player p = sender.getServer().getPlayer(sender.getName());
-        // Only one home? Don't worry. we wont open the form overlay
-        if (getPlugin().getIslandsInfo(sender.getName()).size() == 1) {
-            getPlugin().getGrid().homeTeleport(p);
-            return true;
-        }
-
-        getPlugin().getPanel().addHomeFormOverlay(p);
-        return true;
+    public WorldSettingsBuilder setSeaLevel(int seaLevel) {
+        realSettings.seaLevel = seaLevel;
+        return this;
     }
 
+    public WorldSettingsBuilder setLevel(Level level) {
+        realSettings.level = level;
+        return this;
+    }
+
+
+    public WorldSettings build() {
+        Preconditions.checkState(realSettings.level != null, "World level cannot be null!");
+
+        return realSettings;
+    }
 }

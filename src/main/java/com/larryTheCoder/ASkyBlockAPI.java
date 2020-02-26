@@ -24,58 +24,47 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.command.island;
 
-import cn.nukkit.Player;
-import cn.nukkit.command.CommandSender;
-import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.command.SubCommand;
+package com.larryTheCoder;
 
-/**
- * @author larryTheCoder
- */
-public class HomeSubCommand extends SubCommand {
+import cn.nukkit.plugin.PluginBase;
+import com.larryTheCoder.command.Quests;
+import com.larryTheCoder.db2.DatabaseManager;
+import com.larryTheCoder.island.GridManager;
+import com.larryTheCoder.island.IslandManager;
+import com.larryTheCoder.listener.ChatHandler;
+import com.larryTheCoder.listener.invitation.InvitationHandler;
+import com.larryTheCoder.panels.Panel;
+import com.larryTheCoder.player.TeamManager;
+import com.larryTheCoder.player.TeleportLogic;
+import com.larryTheCoder.schematic.SchematicHandler;
+import com.larryTheCoder.storage.InventorySave;
+import lombok.Getter;
 
-    public HomeSubCommand(ASkyBlock plugin) {
-        super(plugin);
-    }
+public class ASkyBlockAPI extends PluginBase {
 
-    @Override
-    public boolean canUse(CommandSender sender) {
-        return sender.isPlayer() && sender.hasPermission("is.command.home");
-    }
-
-    @Override
-    public String getUsage() {
-        return "";
-    }
-
-    @Override
-    public String getName() {
-        return "home";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Teleport to your island";
-    }
-
-    @Override
-    public String[] getAliases() {
-        return new String[]{"h"};
-    }
-
-    @Override
-    public boolean execute(CommandSender sender, String[] args) {
-        Player p = sender.getServer().getPlayer(sender.getName());
-        // Only one home? Don't worry. we wont open the form overlay
-        if (getPlugin().getIslandsInfo(sender.getName()).size() == 1) {
-            getPlugin().getGrid().homeTeleport(p);
-            return true;
-        }
-
-        getPlugin().getPanel().addHomeFormOverlay(p);
-        return true;
-    }
-
+    @Getter
+    protected DatabaseManager database = null;
+    @Getter
+    protected ChatHandler chatHandler;
+    @Getter
+    protected InvitationHandler invitationHandler;
+    @Getter
+    protected IslandManager islandManager;
+    @Getter
+    protected GridManager grid;
+    @Getter
+    protected InventorySave inventory;
+    @Getter
+    protected TeamManager tManager;
+    @Getter
+    protected TeleportLogic teleportLogic;
+    @Getter
+    protected Quests challenges;
+    @Getter
+    protected Messages messages;
+    @Getter
+    protected Panel panel;
+    @Getter
+    protected SchematicHandler schematics;
 }

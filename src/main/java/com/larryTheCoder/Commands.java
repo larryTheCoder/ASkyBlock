@@ -100,7 +100,7 @@ class Commands extends PluginCommand<ASkyBlock> {
         }
         if (args.length == 0) {
             if (p != null && sender.hasPermission("is.create")) {
-                plugin.getIsland().handleIslandCommand(p, false);
+                plugin.getIslandManager().handleIslandCommand(p, false);
             } else if (!(sender instanceof Player)) {
                 return this.sendHelp(sender, args);
             } else {
@@ -151,21 +151,15 @@ class Commands extends PluginCommand<ASkyBlock> {
                     // Yay, I control the server lol.
                     sender.sendMessage("OOF, Finish ur code man, then we can talk.");
                     break;
-                case "donors":
-                    sender.sendMessage("§aASkyBlock, §eDonator list.");
-                    sender.sendMessage("§aPff, you can donate too, and get your name written in here");
-                    sender.sendMessage("§eStykers: §c$80 USD");
-                    sender.sendMessage("§eAlair069: §c$11.99 USD");
-                    break;
                 case "version":
                 case "ver":
-                    Properties prep = plugin.getPluginDescriptive();
-                    sender.sendMessage("§aASkyBlock, §eInnovations towards Creativity.");
+                    //Properties prep = plugin.getPluginDescriptive();
+                    sender.sendMessage("§aASkyBlock, §eUnparalleled Innocent, Quality > Quantity.");
                     sender.sendMessage("§7Version: §6v" + plugin.getDescription().getVersion());
-                    sender.sendMessage("§7Build date: §6" + prep.getProperty("git.build.time", "§cUnverified"));
-                    sender.sendMessage("§7GitHub link: §6" + prep.getProperty("git.remote.origin.url", "§cUnverified"));
-                    sender.sendMessage("§7Last commit by: §6" + prep.getProperty("git.commit.user.name", "Unknown"));
-                    sender.sendMessage("-- EOL");
+//                    sender.sendMessage("§7Build date: §6" + prep.getProperty("git.build.time", "§cUnverified"));
+//                    sender.sendMessage("§7GitHub link: §6" + prep.getProperty("git.remote.origin.url", "§cUnverified"));
+//                    sender.sendMessage("§7Last commit by: §6" + prep.getProperty("git.commit.user.name", "Unknown"));
+//                    sender.sendMessage("-- EOL");
                     break;
                 case "about":
                     // The unique and relevant 'about' for this plugin.
