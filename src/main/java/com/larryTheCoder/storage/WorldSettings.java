@@ -94,8 +94,8 @@ public class WorldSettings {
         return permission;
     }
 
-    public Level getLevel() {
-        return level;
+    public String getLevelName() {
+        return level.getName();
     }
 
     public int getProtectionRange() {

@@ -143,7 +143,7 @@ class AcidEffect implements Listener {
     @EventHandler(priority = EventPriority.NORMAL)
     public void onWeatherChange(final WeatherChangeEvent e) {
         // Check that they are in the ASkyBlock world
-        if (!plugin.level.contains(e.getLevel().getName())) {
+        if (!plugin.getLevel().contains(e.getLevel().getName())) {
             return;
         }
         boolean isRaining = e.toWeatherState();

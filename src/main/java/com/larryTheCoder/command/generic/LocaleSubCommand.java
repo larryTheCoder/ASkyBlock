@@ -113,15 +113,7 @@ public class LocaleSubCommand extends SubCommand {
     }
 
     private void displayLocales(Player player) {
-        TreeMap<Integer, String> langs = new TreeMap<>();
-        for (ASlocales locale : getPlugin().getAvailableLocales().values()) {
-            if (!locale.getLocaleName().equalsIgnoreCase("locale")) {
-                langs.put(locale.getIndex(), locale.getLanguageName() + " (" + locale.getCountryName() + ")");
-            }
-        }
-        for (Map.Entry<Integer, String> entry : langs.entrySet()) {
-            player.sendMessage(entry.getKey() + ": " + entry.getValue());
-        }
+
     }
 
 }

@@ -105,7 +105,7 @@ public class Admin extends Command {
                     cfg.set(args[1] + ".seaLevel", world.getSeaLevel());
                     cfg.save();
                     plugin.saveLevel(false);
-                    plugin.level.add(world);
+                    plugin.getLevel().add(world);
                     sender.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).generalSuccess);
                     break;
                 }

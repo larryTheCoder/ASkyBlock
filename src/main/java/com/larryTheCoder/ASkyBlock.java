@@ -65,6 +65,7 @@ import com.larryTheCoder.utils.ConfigManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import com.larryTheCoder.utils.updater.Updater;
+import lombok.Getter;
 import org.sql2o.Connection;
 import org.sql2o.Query;
 import org.sql2o.data.Table;
@@ -90,7 +91,8 @@ public class ASkyBlock extends ASkyBlockAPI {
     private static ASkyBlock object;
     public final ArrayList<String> loadedLevel = new ArrayList<>();
     // Arrays
-    public ArrayList<WorldSettings> level = new ArrayList<>();
+    @Getter
+    private ArrayList<WorldSettings> level = new ArrayList<>();
 
     // Configs
     private Config cfg;
@@ -330,7 +332,7 @@ public class ASkyBlock extends ASkyBlockAPI {
      */
     public WorldSettings getSettings(String levelName) {
         return level.stream()
-                .filter(i -> i.getLevel().getName().equalsIgnoreCase(levelName))
+                .filter(i -> i.getLevelName().equalsIgnoreCase(levelName))
                 .findFirst()
                 .orElse(null);
     }
@@ -387,7 +389,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         database.pushQuery((connection) -> {
             try (Query queue = connection.createQuery(WORLDS_INSERT.getQuery())) {
                 for (WorldSettings settings : this.level) {
-                    queue.addParameter("levelName", settings.getLevel().getName());
+                    queue.addParameter("levelName", settings.getLevelName());
                     queue.executeUpdate();
                 }
             } catch (Exception err) {
@@ -467,7 +469,7 @@ public class ASkyBlock extends ASkyBlockAPI {
     public ArrayList<String> getLevels() {
         ArrayList<String> level = new ArrayList<>();
         for (WorldSettings settings : this.level) {
-            level.add(settings.getLevel().getName());
+            level.add(settings.getLevelName());
         }
         return level;
     }
