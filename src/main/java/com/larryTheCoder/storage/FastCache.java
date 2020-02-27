@@ -27,6 +27,11 @@
 
 package com.larryTheCoder.storage;
 
+import com.larryTheCoder.player.PlayerData;
+import lombok.Getter;
+
+import java.util.List;
+
 /**
  * Caches information for an object.
  */
@@ -45,7 +50,7 @@ public class FastCache {
     //    4 - Not active       [Average of 96-144h]       70% chances for the data to destruct itself
     //    5 - Rarely active    [More than 144h]          95% overall chances of data to destruct itself
 
-    //    DATA LOSS RATE: 1/10000s
+    //    DATA LOSS RATE: 1/10000s * [DATA LOSS RATE PERCENTAGE]
 
     //    So in order to achieve this, a HashMap consisting of Level Name, Player name, and home UNIQUE were placed.
     //    The HashMap however, consisting of 6 HashMap functions, where those functions are aligned according to the
@@ -57,5 +62,24 @@ public class FastCache {
 
     //    Diagram of how this code executed:
 
-    //    [From] --> {Asks for IslandData [Player, Home]} -->
+    //    [From] --> {Asks for IslandData [Player, Home]}
+    //                         (lambda) --> [FastCacheData] --> (Consumer)
+    //                               (Verifies data and its variables)
+    //                                       (Not in cache) --> [Mysql Fetch] --> Consumer
+
+    public static class FastCacheData {
+
+        @Getter
+        private List<IslandData> islandData;
+        @Getter
+        private PlayerData playerData;
+
+        public boolean anyMatch(String pl) {
+            return playerData.getPlayerName().equalsIgnoreCase(pl);
+        }
+
+        public boolean anyIslandMatch(int islandId) {
+            return islandData.stream().anyMatch(o -> o.getHomeCountId() == islandId);
+        }
+    }
 }

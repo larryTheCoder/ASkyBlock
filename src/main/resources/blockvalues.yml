@@ -1,0 +1,252 @@
+# This file lists the values for various blocks that are used to calculate the
+# island level. Level: total of all blocks in island boundary / 100.
+# Players with the permission 'is.multiplier.#' will have their blocks
+# multiplied in value by that amount.
+
+# Value of one island level. Default 100. Minimum value is 1.
+levelcost: 100
+
+# --> Death penalty
+# How many block values a player will lose per death.
+# Default value of 100 means that for every death, the player will lose 1 level (if levelcost is 100)
+# Set to zero to not use this feature
+deathpenalty: 100
+# --> Team deaths
+# Sum team deaths - if true, all the teams deaths are summed
+# If false, only the leader's deaths counts
+sumteamdeaths: false
+# --> Max deaths
+# If player dies more than this, it doesn't count anymore
+# Stops players from getting into an impossible situation
+maxdeaths: 10
+# Reset deaths on island reset
+islandresetdeathreset: true
+# Reset deaths on team join
+teamjoindeathreset: true
+
+# This section lists the limits for any particular block. Blocks over this amount
+# are not counted.
+# Format:
+# MATERIAL: limit or MATERIAL:DATA: limit.
+# If DATA is used, there MUST be a corresponding block:data value in the blocks list.
+# For example, if you limit Jungle Logs LOG:3, then there must be a value for LOG:3
+# in the blocks section. If there is not, then LOG:3 would have no value.
+limits:
+  COBBLESTONE: 10000
+  NETHERRACK: 1000
+  #LOG:3: 10
+
+# This section lists the value of a block. Value must be an integer.
+# Any blocks not listed will have a value of zero.
+# Format is MATERIAL: value or MATERIAL:DATA: value.
+blocks:
+  STONE: 1
+  GRASS: 5
+  DIRT: 2
+  COBBLESTONE: 2
+  WOODEN_PLANKS: 1
+  SAPLING: 1
+  SAND: 1
+  GRAVEL: 1
+  LOG: 1
+  LEAVES: 1
+  SPONGE: 10
+  GLASS: 2
+  LAPIS_BLOCK: 10
+  DISPENSER: 5
+  SANDSTONE: 1
+  NOTEBLOCK: 1
+  BED_BLOCK: 1
+  POWERED_RAIL: 10
+  DETECTOR_RAIL: 10
+  STICKY_PISTON: 4
+  COBWEB: 2
+  TALL_GRASS: 1
+  BUSH: 1
+  PISTON: 2
+  PISTON_HEAD: 2
+  WOOL: 1
+  DANDELION: 2
+  POPPY: 2
+  BROWN_MUSHROOM: 1
+  RED_MUSHROOM: 1
+  GOLD_BLOCK: 150
+  IRON_BLOCK: 10
+  DOUBLE_SLAB: 1
+  SLAB: 1
+  BRICKS: 2
+  TNT: 5
+  BOOKSHELF: 5
+  MOSS_STONE: 2
+  MOSSY_STONE: 2
+  OBSIDIAN: 10
+  TORCH: 5
+  WOOD_STAIRS: 1
+  CHEST: 2
+  REDSTONE_WIRE: 1
+  DIAMOND_BLOCK: 300
+  WHEAT_BLOCK: 1
+  FARMLAND: 1
+  FURNACE: 10
+  BURNING_FURNACE: 10
+  SIGN_POST: 1
+  DOOR_BLOCK: 5
+  LADDER: 1
+  RAIL: 1
+  COBBLE_STAIRS: 1
+  WALL_SIGN: 1
+  LEVER: 1
+  STONE_PRESSURE_PLATE: 1
+  IRON_DOOR_BLOCK: 5
+  WOODEN_PRESSURE_PLATE: 2
+  UNLIT_REDSTONE_TORCH: 5
+  REDSTONE_TORCH: 5
+  STONE_BUTTON: 1
+  SNOW: 1
+  ICE: 5
+  SNOW_BLOCK: 1
+  CACTUS: 1
+  CLAY_BLOCK: 2
+  REEDS: 3
+  JUKEBOX: 10
+  FENCE: 1
+  PUMPKIN: 1
+  NETHERRACK: 1
+  SOUL_SAND: 2
+  GLOWSTONE: 1
+  JACK_O_LANTERN: 1
+  CAKE_BLOCK: 1
+  UNPOWERED_REPEATER: 1
+  POWERED_REPEATER: 1
+  TRAPDOOR: 1
+  STONE_BRICKS: 1
+  BROWN_MUSHROOM_BLOCK: 1
+  RED_MUSHROOM_BLOCK: 1
+  IRON_BAR: 5
+  GLASS_PANE: 1
+  MELON_BLOCK: 1
+  PUMPKIN_STEM: 1
+  MELON_STEM: 1
+  VINES: 1
+  FENCE_GATE: 1
+  BRICK_STAIRS: 5
+  STONE_BRICK_STAIRS: 1
+  MYCELIUM: 1
+  WATER_LILY: 5
+  NETHER_BRICK_BLOCK: 1
+  NETHER_BRICK_FENCE: 1
+  NETHER_BRICKS_STAIRS: 1
+  NETHER_WART_BLOCK: 2
+  ENCHANTING_TABLE: 1
+  BREWING_STAND_BLOCK: 1
+  CAULDRON_BLOCK: 1
+  END_PORTAL: 2
+  END_PORTAL_FRAME: 2
+  END_STONE: 1
+  DRAGON_EGG: 150
+  REDSTONE_LAMP: 10
+  LIT_REDSTONE_LAMP: 10
+  DROPPER: 5
+  ACTIVATOR_RAIL: 10
+  COCOA_BLOCK: 1
+  SANDSTONE_STAIRS: 1
+  ENDER_CHEST: 150
+  TRIPWIRE_HOOK: 2
+  TRIPWIRE: 2
+  EMERALD_BLOCK: 150
+  SPRUCE_WOOD_STAIRS: 1
+  BIRCH_WOOD_STAIRS: 1
+  JUNGLE_WOOD_STAIRS: 1
+  BEACON: 100
+  COBBLE_WALL: 1
+  FLOWER_POT_BLOCK: 5
+  CARROT_BLOCK: 1
+  POTATO_BLOCK: 1
+  WOODEN_BUTTON: 1
+  SKULL_BLOCK: 10
+  ANVIL: 10
+  TRAPPED_CHEST: 10
+  LIGHT_WEIGHTED_PRESSURE_PLATE: 5
+  HEAVY_WEIGHTED_PRESSURE_PLATE: 5
+  UNPOWERED_COMPARATOR: 1
+  POWERED_COMPARATOR: 1
+  DAYLIGHT_DETECTOR: 10
+  REDSTONE_BLOCK: 10
+  HOPPER_BLOCK: 10
+  QUARTZ_BLOCK: 1
+  QUARTZ_STAIRS: 1
+  DOUBLE_WOOD_SLAB: 1
+  WOOD_SLAB: 1
+  STAINED_TERRACOTTA: 4
+  STAINED_GLASS_PANE: 1
+  LEAVES2: 1
+  WOOD2: 1
+  ACACIA_WOOD_STAIRS: 1
+  DARK_OAK_WOOD_STAIRS: 1
+  SLIME_BLOCK: 10
+  IRON_TRAPDOOR: 1
+  PRISMARINE: 10
+  SEA_LANTERN: 1
+  HAY_BALE: 2
+  CARPET: 1
+  TERRACOTTA: 2
+  COAL_BLOCK: 9
+  PACKED_ICE: 5
+  DOUBLE_PLANT: 2
+  DAYLIGHT_DETECTOR_INVERTED: 10
+  RED_SANDSTONE: 1
+  RED_SANDSTONE_STAIRS: 1
+  DOUBLE_RED_SANDSTONE_SLAB: 1
+  RED_SANDSTONE_SLAB: 1
+  FENCE_GATE_SPRUCE: 1
+  FENCE_GATE_BIRCH: 1
+  FENCE_GATE_JUNGLE: 1
+  FENCE_GATE_DARK_OAK: 1
+  FENCE_GATE_ACACIA: 1
+  SPRUCE_DOOR_BLOCK: 1
+  BIRCH_DOOR_BLOCK: 1
+  JUNGLE_DOOR_BLOCK: 1
+  ACACIA_DOOR_BLOCK: 1
+  DARK_OAK_DOOR_BLOCK: 1
+  GRASS_PATH: 5
+  ITEM_FRAME_BLOCK: 2
+  CHORUS_FLOWER: 1
+  PURPUR_BLOCK: 1
+  PURPUR_STAIRS: 1
+  UNDYED_SHULKER_BOX: 1
+  END_BRICKS: 2
+  ICE_FROSTED: 1
+  END_ROD: 4
+  END_GATEWAY: 4
+  MAGMA: 8
+  BLOCK_NETHER_WART_BLOCK: 2
+  RED_NETHER_BRICK: 2
+  BONE_BLOCK: 1
+  SHULKER_BOX: 1
+  PURPLE_GLAZED_TERRACOTTA: 2
+  WHITE_GLAZED_TERRACOTTA: 2
+  ORANGE_GLAZED_TERRACOTTA: 2
+  MAGENTA_GLAZED_TERRACOTTA: 2
+  LIGHT_BLUE_GLAZED_TERRACOTTA: 2
+  YELLOW_GLAZED_TERRACOTTA: 2
+  LIME_GLAZED_TERRACOTTA: 2
+  PINK_GLAZED_TERRACOTTA: 2
+  GRAY_GLAZED_TERRACOTTA: 2
+  SILVER_GLAZED_TERRACOTTA: 2
+  CYAN_GLAZED_TERRACOTTA: 2
+  BLUE_GLAZED_TERRACOTTA: 2
+  BROWN_GLAZED_TERRACOTTA: 2
+  GREEN_GLAZED_TERRACOTTA: 2
+  RED_GLAZED_TERRACOTTA: 2
+  BLACK_GLAZED_TERRACOTTA: 2
+  CONCRETE: 2
+  CONCRETE_POWDER: 2
+  CHORUS_PLANT: 1
+  STAINED_GLASS: 2
+  PODZOL: 1
+  BEETROOT_BLOCK: 1
+  STONECUTTER: 1
+  GLOWING_OBSIDIAN: 10
+  NETHER_REACTOR: 20
+  PISTON_EXTENSION: 10
+  OBSERVER: 1
