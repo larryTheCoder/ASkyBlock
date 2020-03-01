@@ -1,5 +1,5 @@
 ![ASkyBlock](https://github.com/larryTheCoder/SkyBlock-legacy/blob/master/.circleci/images/logo.png)
-[![Circle-CI](https://circleci.com/gh/TheSolidCrafter/ASkyBlock-Nukkit.svg?style=shield)](https://circleci.com/gh/TheSolidCrafter/ASkyBlock-Nukkit)
+[![Circle-CI](https://circleci.com/gh/TheSolidCrafter/ASkyBlock-Nukkit.svg?style=shield)](https://jenkins.potatohome.xyz/job/ASkyBlock)
 
 Introduction
 -------------
