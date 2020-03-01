@@ -27,5 +27,151 @@
 
 package com.larryTheCoder.cmd2;
 
-public class Commands {
+import cn.nukkit.Player;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.ConsoleCommandSender;
+import cn.nukkit.command.PluginCommand;
+import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.cmd2.category.*;
+import com.larryTheCoder.locales.ASlocales;
+import com.larryTheCoder.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * A better version of Command
+ *
+ * @author larryTheCoder
+ */
+public class Commands extends PluginCommand<ASkyBlock> {
+
+    private final List<SubCategory> commandCategory = new ArrayList<>();
+    private final List<String> baseCommand = new ArrayList<>();
+
+    public Commands(ASkyBlock plugin) {
+        super("is", plugin);
+
+        this.registerCategories();
+    }
+
+    private void registerCategories() {
+        commandCategory.add(new GenericCategory(getPlugin()));
+        commandCategory.add(new IslandCategory(getPlugin()));
+        commandCategory.add(new ChatCategory(getPlugin()));
+        commandCategory.add(new AdminCategory(getPlugin()));
+        commandCategory.add(new OperatorCategory(getPlugin()));
+
+        // Then we add them into the array.
+        commandCategory.forEach(i -> i.baseCommands().stream().filter(o -> !baseCommand.contains(o)).forEach(baseCommand::add));
+
+        setAliases(baseCommand.toArray(new String[0]));
+    }
+
+    @Override
+    public boolean execute(CommandSender sender, String label, String[] args) {
+        Player p = sender.isPlayer() ? getPlugin().getServer().getPlayer(sender.getName()) : null;
+        if (!sender.hasPermission("is.command")) {
+            sender.sendMessage(getLocale(p).errorNoPermission);
+            return true;
+        }
+
+        if (args.length == 0) {
+            sender.sendMessage("§cUnknown command. Please use /is help for a list of commands");
+
+            return true;
+        }
+
+        // An array always consisting of (n + 1) where n is the value of data in an array.
+        if (args[0].equalsIgnoreCase("help")) {
+            int pageNumber = 1;
+            if (args.length >= 2 && Utils.isNumeric(args[1])) {
+                pageNumber = Integer.parseInt(args[1]);
+            }
+
+            switch (label.toLowerCase()) {
+                case "is":
+                case "island":
+                    sendHelp(sender, 0, pageNumber);
+                    break;
+                case "isa":
+                case "isadmin":
+                    sendHelp(sender, 1, pageNumber);
+                    break;
+            }
+
+            return true;
+        }
+
+        SubCategory cmdCategory = commandCategory.stream().filter(i -> i.getCommands().contains(args[0].toLowerCase())).findFirst().orElse(null);
+        if (cmdCategory == null || !cmdCategory.canUse(sender, args[0])) {
+            sender.sendMessage("§cUnknown command. Please use /is help for a list of commands");
+
+            return true;
+        }
+
+        cmdCategory.execute(sender, label, args);
+
+        return true;
+    }
+
+    public void sendHelp(CommandSender sender, int helpId, int pageNumber) {
+        int pageHeight;
+        if (sender instanceof ConsoleCommandSender) {
+            pageHeight = Integer.MAX_VALUE;
+        } else {
+            pageHeight = 9;
+        }
+
+        List<String> helpList = new ArrayList<>();
+
+        switch (helpId) {
+            case 0:
+                commandCategory.forEach(i -> i.getCommands().stream().filter(h -> i.canUse(sender, h)).forEach(a -> {
+                    helpList.add(String.format("&6%s %s &l&5»&r&f %s", Utils.compactSmall(i.baseCommands().toArray(new String[0])), a, i.getDescription(a)));
+                }));
+
+                int totalPage = helpList.size() % pageHeight == 0 ? helpList.size() / pageHeight : helpList.size() / pageHeight + 1;
+                pageNumber = Math.min(pageNumber, totalPage);
+                if (pageNumber < 1) {
+                    pageNumber = 1;
+                }
+
+                sender.sendMessage("§9--- §cASkyBlock help §7page §e" + pageNumber + " §7of §e" + totalPage + "§9 ---§r§f");
+                break;
+            case 1:
+                helpList.add("&7isa rename &l&5»&r&f &a" + getPlugin().getLocale(sender).adminHelpRename);
+                helpList.add("&7isa kick &l&5»&r&f &a" + getPlugin().getLocale(sender).adminHelpKick);
+                helpList.add("&7isa generate &l&5»&r&f &a" + getPlugin().getLocale(sender).adminHelpGenerate);
+                helpList.add("&7isa delete &l&5»&r&f &a" + getPlugin().getLocale(sender).adminHelpDelete);
+                helpList.add("&7isa addmessage &l&5»&r&f &a" + getPlugin().getLocale(sender).adminHelpMessage);
+                helpList.add("&7isa clear &l&5»&r&f &a" + getPlugin().getLocale(sender).adminHelpClear);
+                helpList.add("&7isa cobblestats &l&5»&r&f &a" + getPlugin().getLocale(sender).adminHelpDelete);
+                helpList.add("&7isa completechallenge &l&5»&r&f &a" + getPlugin().getLocale(sender).adminHelpMessage);
+                helpList.add("&7isa resetchallenge &l&5»&r&f &a" + getPlugin().getLocale(sender).adminHelpClear);
+                helpList.add("&7isa challenges &l&5»&r&f &a" + getPlugin().getLocale(sender).adminHelpInfo);
+
+                totalPage = helpList.size() % pageHeight == 0 ? helpList.size() / pageHeight : helpList.size() / pageHeight + 1;
+                pageNumber = Math.min(pageNumber, totalPage);
+                if (pageNumber < 1) {
+                    pageNumber = 1;
+                }
+
+                sender.sendMessage("§e--- §eAdmin SkyBlock Help Page §a" + pageNumber + " §eof §a" + totalPage + " §e---");
+                break;
+        }
+
+        int i = 0;
+        for (String list : helpList) {
+            i++; // Very smart
+
+            if (i >= (pageNumber - 1) * pageHeight + 1 && i <= Math.min(helpList.size(), pageNumber * pageHeight)) {
+                sender.sendMessage(list.replace("&", "§"));
+            }
+        }
+    }
+
+    private ASlocales getLocale(Player key) {
+        return getPlugin().getLocale(key);
+    }
 }

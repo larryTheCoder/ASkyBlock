@@ -1,6 +1,4 @@
 /*
- * Adapted from the Wizardry License
- *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -24,58 +22,42 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.command.island;
 
-import cn.nukkit.Player;
+package com.larryTheCoder.cmd2.category;
+
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.command.SubCommand;
+
+import java.util.List;
 
 /**
- * @author larryTheCoder
+ * A Quest, or called as challenges, commands. This category is
+ * being revised as some of the commands are considered useless or obsolete to our
+ * SkyBlock gameplay.
  */
-public class DeleteSubCommand extends SubCommand {
+public class QuestCategory extends SubCategory {
 
-    public DeleteSubCommand(ASkyBlock plugin) {
+    protected QuestCategory(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
-    public boolean canUse(CommandSender sender) {
-        return sender.hasPermission("is.command.reset") && sender.isPlayer();
+    public List<String> getCommands() {
+        return null;
     }
 
     @Override
-    public String getUsage() {
-        return "";
+    public void execute(CommandSender sender, String commandLabel, String[] args) {
+
     }
 
     @Override
-    public String getName() {
-        return "delete";
+    public boolean canUse(CommandSender sender, String command) {
+        return false;
     }
 
     @Override
-    public String getDescription() {
-        return "Delete your where you standing at";
+    public String getDescription(String commandName) {
+        return null;
     }
-
-    @Override
-    public String[] getAliases() {
-        return new String[]{"reset", "del"};
-    }
-
-    @Override
-    public boolean execute(CommandSender sender, String[] args) {
-        Player p = getPlugin().getServer().getPlayer(sender.getName());
-//        TODO: MULTIPLE WORLD SUPPORT?
-//        PlayerData pda = getPlugin().getPlayerInfo(p);
-//        if (pda.resetleft > Settings.reset) {
-//            p.sendMessage(getPrefix() + getPlugin().getLocale(p).errorMaxReset);
-//            return true;
-//        }
-        getPlugin().getPanel().addDeleteFormOverlay(p);
-        return true;
-    }
-
 }

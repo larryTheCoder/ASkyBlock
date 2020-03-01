@@ -28,6 +28,7 @@ package com.larryTheCoder;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.generator.Generator;
@@ -36,8 +37,7 @@ import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
-import com.larryTheCoder.command.Admin;
-import com.larryTheCoder.command.Quests;
+import com.larryTheCoder.cmd2.Commands;
 import com.larryTheCoder.db2.DatabaseManager;
 import com.larryTheCoder.db2.config.AbstractConfig;
 import com.larryTheCoder.db2.config.MySQLConfig;
@@ -71,10 +71,12 @@ import org.sql2o.Query;
 import org.sql2o.data.Table;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
 import static com.larryTheCoder.db2.TableSet.*;
 
@@ -101,6 +103,7 @@ public class ASkyBlock extends ASkyBlockAPI {
     private boolean disabled = false;
     // Localization Strings
     private HashMap<String, ASlocales> availableLocales = new HashMap<>();
+    private Properties pluginGit;
 
     /**
      * Return of ASkyBlock plugin instance
@@ -190,8 +193,6 @@ public class ASkyBlock extends ASkyBlockAPI {
      */
     private void initIslands() {
         getServer().getCommandMap().register("ASkyBlock", new Commands(this));
-        getServer().getCommandMap().register("ASkyBlock", this.challenges = new Quests(this));
-        getServer().getCommandMap().register("ASkyBlock", new Admin(this));
 
         PluginManager pm = getServer().getPluginManager();
         chatHandler = new ChatHandler(this);
@@ -213,6 +214,32 @@ public class ASkyBlock extends ASkyBlockAPI {
         pd.scheduleRepeatingTask(new PluginTask(this), 20); // tick every 1 sec
     }
 
+    /**
+     * Gathers an information about this plugin.
+     */
+    private void initGitCheckup() {
+        Properties properties = new Properties();
+        try {
+            properties.load(getResource("git-sb.properties"));
+        } catch (IOException e) {
+            getServer().getLogger().info("§cERROR! We cannot load the git loader for this ASkyBlock build!");
+            // Wtf? Maybe this user is trying to using unofficial build of ASkyBlock?
+            // Or they just wanna to create a PR to do a fix?
+            // Hmm we will never know lol
+            return;
+        }
+        // To developers: Don't remove this please.\
+        Utils.sendDebug("§7ASkyBlock Git Information:");
+        Utils.sendDebug("§7Build number: " + properties.getProperty("git.commit.id.describe", ""));
+        Utils.sendDebug("§7Commit number: " + properties.getProperty("git.commit.id"));
+
+        pluginGit = properties;
+    }
+
+    public Properties getGitInfo() {
+        return pluginGit;
+    }
+
     private void registerObject() {
         Utils.send(TextFormat.GRAY + "Loading all island framework. Please wait...");
         schematics = new SchematicHandler(this, new File(getDataFolder(), "schematics"));
@@ -227,7 +254,7 @@ public class ASkyBlock extends ASkyBlockAPI {
     }
 
     private void initConfig() {
-        //initGitCheckup();
+        initGitCheckup();
         Utils.EnsureDirectory(Utils.DIRECTORY);
         Utils.EnsureDirectory(Utils.LOCALES_DIRECTORY);
         Utils.EnsureDirectory(Utils.SCHEMATIC_DIRECTORY);
@@ -345,6 +372,10 @@ public class ASkyBlock extends ASkyBlockAPI {
      */
     public String getPrefix() {
         return cfg.getString("Prefix").replace("&", "§");
+    }
+
+    public ASlocales getLocale(CommandSender sender) {
+        return sender.isPlayer() ? getLocale((Player) sender) : getLocale("");
     }
 
     /**

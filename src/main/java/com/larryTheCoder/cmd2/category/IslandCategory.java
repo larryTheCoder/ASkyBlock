@@ -38,7 +38,7 @@ import java.util.List;
 
 public class IslandCategory extends SubCategory {
 
-    protected IslandCategory(ASkyBlock plugin) {
+    public IslandCategory(ASkyBlock plugin) {
         super(plugin);
     }
 
@@ -63,6 +63,24 @@ public class IslandCategory extends SubCategory {
 
         return false;
     }
+
+    @Override
+    public String getDescription(String commandName) {
+        switch (commandName.toLowerCase()) {
+            case "create":
+                return "Start to create a new island.";
+            case "reset":
+                return "Reset your original island.";
+            case "home":
+            case "sethome":
+                return "Set your island main spawn position.";
+            case "teleport":
+                return "Teleport to your island spawn position.";
+            default:
+                return "NaN";
+        }
+    }
+
 
     @Override
     public void execute(CommandSender sender, String commandLabel, String[] args) {

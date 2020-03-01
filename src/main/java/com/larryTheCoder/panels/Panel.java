@@ -166,11 +166,11 @@ public class Panel implements Listener {
                 responsesSimple = windowSimple.getResponse();
 
                 String role = TextFormat.clean(responsesSimple.getClickedButton().getText());
-                if (plugin.getChallenges().isLevelAvailable(p, role)) {
-                    showChallengeType(p, role);
-                } else {
+//                if (plugin.getChallenges().isLevelAvailable(p, role)) {
+//                    showChallengeType(p, role);
+//                } else {
                     sendChallengeError(p);
-                }
+//                }
                 break;
             case TYPE_HOMES:
                 // Check if the player closed this form
@@ -320,11 +320,11 @@ public class Panel implements Listener {
         FormWindowSimple panelIsland = new FormWindowSimple("Quest Entries", "§aChoose your desired levels. Each levels contains a quests. Make sure you past all the quest in the level to go on into the next one!");
 
         for (String levels : Settings.challengeLevels) {
-            if (plugin.getChallenges().isLevelAvailable(player, levels)) {
-                panelIsland.addButton(new ElementButton(levels));
-            } else {
+//            if (plugin.getChallenges().isLevelAvailable(player, levels)) {
+//                panelIsland.addButton(new ElementButton(levels));
+//            } else {
                 panelIsland.addButton(new ElementButton(TextFormat.RED + levels));
-            }
+//            }
         }
 
         int id = player.showFormWindow(panelIsland);
@@ -335,22 +335,22 @@ public class Panel implements Listener {
         FormWindowSimple panelIsland = new FormWindowSimple("Quest Menu for " + type, getLocale(player).panelChallengesHeader);
 
         HashMap<String, String> orders = new HashMap<>();
-        for (Map.Entry<String, List<String>> list : plugin.getChallenges().getChallengeList().entrySet()) {
-            if (!list.getKey().equalsIgnoreCase(type)) {
-                continue;
-            }
-
-            Config cfg = plugin.getChallenges().getChallengeConfig();
-            for (String challenge : list.getValue()) {
-                String friendlyName = cfg.getString("challengeList." + challenge + ".friendlyname");
-                String level = cfg.getString("challengeList." + challenge + ".type");
-                if (!plugin.getChallenges().hasRequired(player, challenge, level, true)) {
-                    friendlyName = TextFormat.RED + friendlyName;
-                }
-                panelIsland.addButton(new ElementButton(friendlyName));
-                orders.put(friendlyName, challenge); // Sometimes this could fudge up
-            }
-        }
+//        for (Map.Entry<String, List<String>> list : plugin.getChallenges().getChallengeList().entrySet()) {
+//            if (!list.getKey().equalsIgnoreCase(type)) {
+//                continue;
+//            }
+//
+//            Config cfg = plugin.getChallenges().getChallengeConfig();
+//            for (String challenge : list.getValue()) {
+//                String friendlyName = cfg.getString("challengeList." + challenge + ".friendlyname");
+//                String level = cfg.getString("challengeList." + challenge + ".type");
+//                if (!plugin.getChallenges().hasRequired(player, challenge, level, true)) {
+//                    friendlyName = TextFormat.RED + friendlyName;
+//                }
+//                panelIsland.addButton(new ElementButton(friendlyName));
+//                orders.put(friendlyName, challenge); // Sometimes this could fudge up
+//            }
+//        }
 
         int id = player.showFormWindow(panelIsland);
         panelDataId.put(id, PanelType.TYPE_CHALLENGES);

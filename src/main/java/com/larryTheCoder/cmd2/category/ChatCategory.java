@@ -70,6 +70,18 @@ public class ChatCategory extends SubCategory {
     }
 
     @Override
+    public String getDescription(String commandName) {
+        switch (commandName.toLowerCase()) {
+            case "chat":
+                return "Chat with your island members.";
+            case "messages":
+                return "Read a new messages from island leader.";
+            default:
+                return "NaN";
+        }
+    }
+
+    @Override
     public void execute(CommandSender sender, String commandLabel, String[] args) {
         Player p = Server.getInstance().getPlayer(sender.getName());
 

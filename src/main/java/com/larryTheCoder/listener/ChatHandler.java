@@ -59,7 +59,11 @@ public class ChatHandler implements Listener {
         this.teamChatUsers = new ConcurrentHashMap<>();
         this.playerChallengeLevels = new ConcurrentHashMap<>();
         // Add all online player Levels
-        plugin.getServer().getOnlinePlayers().values().stream().peek((player) -> playerLevels.put(player, String.valueOf(plugin.getIslandLevel(player)))).forEachOrdered((player) -> playerChallengeLevels.put(player.getUniqueId(), plugin.getChallenges().getChallengeLevel(player)));
+        plugin.getServer().getOnlinePlayers().values()
+                .stream()
+                .peek((player) -> playerLevels.put(player, String.valueOf(plugin.getIslandLevel(player))))
+                .forEachOrdered((player) -> playerChallengeLevels.put(player.getUniqueId(), ""));
+
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -138,16 +142,6 @@ public class ChatHandler implements Listener {
      */
     public boolean isTeamChat(Player p) {
         return this.teamChatUsers.containsKey(p);
-    }
-
-    /**
-     * Store the player's challenge level for use in their chat tag
-     *
-     * @param player
-     */
-    public void setPlayerChallengeLevel(Player player) {
-        //plugin.getLogger().info("DEBUG: setting player's challenge level to " + plugin.getChallenges().getChallengeLevel(player));
-        playerChallengeLevels.put(player.getUniqueId(), plugin.getChallenges().getChallengeLevel(player));
     }
 
     /**

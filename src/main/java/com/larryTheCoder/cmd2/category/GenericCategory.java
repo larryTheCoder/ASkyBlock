@@ -42,10 +42,7 @@ import com.larryTheCoder.utils.Utils;
 import org.sql2o.Connection;
 import org.sql2o.data.Table;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import static com.larryTheCoder.db2.TableSet.FETCH_PLAYER_MAIN;
 
@@ -81,6 +78,30 @@ public class GenericCategory extends SubCategory {
                 return true;
             default:
                 return false;
+        }
+    }
+
+    @Override
+    public String getDescription(String commandName) {
+        switch (commandName.toLowerCase()) {
+            case "expel":
+            case "kick":
+                return "Kick out a member from your island.";
+            case "lobby":
+            case "spawn":
+                return "Leave your island and teleport to server lobby.";
+            case "locale":
+                return "Change your preferred locale.";
+            case "protection":
+                return "Change your island protection settings.";
+            case "settings":
+                return "Change your island preferred settings.";
+            case "top":
+                return "Shows top ten islands with highest points.";
+            case "about":
+                return "About this plugin and its version.";
+            default:
+                return "NaN";
         }
     }
 
@@ -173,13 +194,13 @@ public class GenericCategory extends SubCategory {
                 TopTen.topTenShow(sender);
                 break;
             case "about":
-                //Properties prep = plugin.getPluginDescriptive();
-                sender.sendMessage("§aASkyBlock, §eUnparalleled Innocent, Quality > Quantity.");
+                Properties prep = getPlugin().getGitInfo();
+                sender.sendMessage("§aASkyBlock, §eUnparalleled Innocent, §7Quality > Quantity.");
                 sender.sendMessage("§7Version: §6v" + getPlugin().getDescription().getVersion());
-//                    sender.sendMessage("§7Build date: §6" + prep.getProperty("git.build.time", "§cUnverified"));
-//                    sender.sendMessage("§7GitHub link: §6" + prep.getProperty("git.remote.origin.url", "§cUnverified"));
-//                    sender.sendMessage("§7Last commit by: §6" + prep.getProperty("git.commit.user.name", "Unknown"));
-//                    sender.sendMessage("-- EOL");
+                sender.sendMessage("§7Build date: §6" + prep.getProperty("git.build.time", "§cUnverified"));
+                sender.sendMessage("§7GitHub link: §6" + prep.getProperty("git.remote.origin.url", "§cUnverified"));
+                sender.sendMessage("§7Last commit by: §6" + prep.getProperty("git.commit.user.name", "Unknown"));
+                sender.sendMessage("-- EOL");
         }
     }
 

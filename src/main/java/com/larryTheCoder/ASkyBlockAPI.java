@@ -28,7 +28,6 @@
 package com.larryTheCoder;
 
 import cn.nukkit.plugin.PluginBase;
-import com.larryTheCoder.command.Quests;
 import com.larryTheCoder.db2.DatabaseManager;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
@@ -59,8 +58,6 @@ public class ASkyBlockAPI extends PluginBase {
     protected TeamManager tManager;
     @Getter
     protected TeleportLogic teleportLogic;
-    @Getter
-    protected Quests challenges;
     @Getter
     protected Messages messages;
     @Getter

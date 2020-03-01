@@ -34,6 +34,7 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.locales.ASlocales;
 import lombok.Getter;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -65,6 +66,10 @@ public abstract class SubCategory {
         return plugin.getPrefix();
     }
 
+    public List<String> baseCommands() {
+        return Arrays.asList("is", "island");
+    }
+
     /**
      * Return a list of command provided by this category.
      *
@@ -89,4 +94,12 @@ public abstract class SubCategory {
      */
     public abstract boolean canUse(CommandSender sender, String command);
 
+    /**
+     * Get a description of a command. This is useful when it comes to know
+     * what command does this do.
+     *
+     * @param commandName The command name
+     * @return The description of the command.
+     */
+    public abstract String getDescription(String commandName);
 }

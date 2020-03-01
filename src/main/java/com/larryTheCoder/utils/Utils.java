@@ -35,6 +35,7 @@ import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
+import com.google.common.base.Preconditions;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.SkyBlockGenerator;
 import com.larryTheCoder.storage.IslandSettings;
@@ -295,7 +296,7 @@ public class Utils {
      * @param pos A compressed integer by {@link Utils#getVector3Pair}
      * @return a valid {@link Vector3} class
      */
-    public static Vector2 unpairVector2(String pos){
+    public static Vector2 unpairVector2(String pos) {
         String[] list = pos.split(":");
         return new Vector2(Integer.parseInt(list[0]), Integer.parseInt(list[1]));
     }
@@ -552,5 +553,14 @@ public class Utils {
         if (!Server.getInstance().isLevelLoaded(levelName)) {
             Server.getInstance().loadLevel(levelName);
         }
+    }
+
+    public static String compactSmall(String[] list) {
+        Preconditions.checkArgument(list.length != 0, "The list cannot be empty or null.");
+
+        String currentString = list[0];
+        for (String str : list) if (currentString.length() > str.length()) currentString = str;
+
+        return currentString;
     }
 }
