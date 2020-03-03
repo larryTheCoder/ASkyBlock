@@ -123,7 +123,7 @@ public class GridManager {
         // Make a list of test locations and test them
         Set<Location> islandTestLocations = new HashSet<>();
         if (plugin.getIslandManager().checkIsland(player)) {
-            IslandData pd = plugin.getIslandInfo(player);
+            IslandData pd = plugin.getFastCache().getIslandData(player);
             Vector2 cartesianPlane = pd.getCenter();
 
             islandTestLocations.add(new Location(cartesianPlane.getX(), 0, cartesianPlane.getY(), plugin.getServer().getLevelByName(pd.getLevelName())));
@@ -264,7 +264,7 @@ public class GridManager {
     }
 
     public IslandData getProtectedIslandAt(Location location) {
-        IslandData island = plugin.getIslandInfo(location);
+        IslandData island = plugin.getFastCache().getIslandData(location);
         if (island == null) {
             return null;
         }

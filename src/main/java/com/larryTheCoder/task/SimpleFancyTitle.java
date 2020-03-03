@@ -32,10 +32,7 @@ import cn.nukkit.scheduler.Task;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.TeleportLogic;
-import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Utils;
-
-import java.util.Map;
 
 public class SimpleFancyTitle extends Task {
 
@@ -81,26 +78,17 @@ public class SimpleFancyTitle extends Task {
             return;
         }
 
-        IslandData ownership = plugin.getIslandInfo(p.getLocation());
-        if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
-            p.setSubtitle(TextFormat.GOLD + plugin.getLocale(p).islandSubTitle.replace("[player]", ownership.getPlotOwner()));
-        }
-        if (!plugin.getLocale(p).islandTitle.isEmpty()) {
-            p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", ownership.getPlotOwner()));
-        }
-        if (!plugin.getLocale(p).islandDonate.isEmpty() && !plugin.getLocale(p).islandURL.isEmpty()) {
-            // These are useful for me not for you xD
-            //p.sendMessage(plugin.getLocale(p).islandDonate.replace("[player]", p.getName()));
-            //p.sendMessage(plugin.getLocale(p).islandSupport);
-            //p.sendMessage(plugin.getLocale(p).islandURL);
-        }
+        plugin.getFastCache().getIslandData(p.getLocation(), ownership -> {
+            if (!plugin.getLocale(p).islandSubTitle.isEmpty()) {
+                p.setSubtitle(TextFormat.GOLD + plugin.getLocale(p).islandSubTitle.replace("[player]", ownership.getPlotOwner()));
+            }
+            if (!plugin.getLocale(p).islandTitle.isEmpty()) {
+                p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", ownership.getPlotOwner()));
+            }
+        });
 
-        Map<String, Runnable> task = Utils.TASK_SCHEDULED;
-        if (task.containsKey(p.getName())) {
-            Utils.sendDebug("Running a runnable task");
-            Runnable tasking = task.get(p.getName());
-            tasking.run();
-            task.remove(p.getName());
+        if (Utils.TASK_SCHEDULED.containsKey(p.getName())) {
+            TaskManager.runTaskLater(Utils.TASK_SCHEDULED.remove(p.getName()), 5);
         }
     }
 }

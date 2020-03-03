@@ -437,7 +437,7 @@ public class Panel implements Listener {
             List<IslandData> listHome = plugin.getIslandsInfo(p.getName());
             // Automatically show default island setting
             if (listHome.size() == 1) {
-                addProtectionOverlay(p, plugin.getIslandInfo(p.getName()));
+                addProtectionOverlay(p, listHome.get(0));
                 return;
             }
 
@@ -478,7 +478,7 @@ public class Panel implements Listener {
             List<IslandData> listHome = plugin.getIslandsInfo(p.getName());
             // Automatically show default island setting
             if (listHome.size() == 1) {
-                addSettingFormOverlay(p, plugin.getIslandInfo(p.getName()));
+                addSettingFormOverlay(p, listHome.get(0));
                 return;
             }
 

@@ -57,6 +57,7 @@ import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.schematic.SchematicHandler;
+import com.larryTheCoder.storage.FastCache;
 import com.larryTheCoder.storage.InventorySave;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.storage.WorldSettings;
@@ -199,6 +200,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         teleportLogic = new TeleportLogic(this);
         invitationHandler = new InvitationHandler(this);
         panel = new Panel(this);
+        fastCache = new FastCache(this);
 
         // This should be loaded first
         messages = new Messages(this);
@@ -471,17 +473,6 @@ public class ASkyBlock extends ASkyBlockAPI {
     }
 
     /**
-     * Get an island information from a player class.
-     *
-     * @param player The player class
-     * @return IslandData class
-     */
-    @Deprecated
-    public IslandData getIslandInfo(Player player) {
-        return getIslandInfo(player.getName());
-    }
-
-    /**
      * Get an island information from a player's name
      *
      * @param player The player name itself.
@@ -503,33 +494,6 @@ public class ASkyBlock extends ASkyBlockAPI {
             level.add(settings.getLevelName());
         }
         return level;
-    }
-
-    /**
-     * Get an island information from a position given.
-     *
-     * @param pos the position to be checked
-     * @return Island data of the location
-     */
-    @Deprecated
-    public IslandData getIslandInfo(Position pos) {
-        int x = pos.getFloorX();
-        int z = pos.getFloorZ();
-        String levelName = pos.getLevel().getName();
-
-        int id = getIslandManager().generateIslandKey(x, z, levelName);
-        Connection conn = getDatabase().getConnection();
-
-        Table levelPlot = conn.createQuery(FETCH_LEVEL_PLOT.getQuery())
-                .addParameter("levelName", levelName)
-                .addParameter("islandId", id)
-                .executeAndFetchTable();
-
-        if (levelPlot.rows().isEmpty()) {
-            return new IslandData(levelName, x, z, getSettings(levelName).getProtectionRange());
-        }
-
-        return IslandData.fromRows(levelPlot.rows().get(0));
     }
 
     /**

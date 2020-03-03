@@ -103,21 +103,22 @@ public class IslandCategory extends SubCategory {
                 getPlugin().getPanel().addHomeFormOverlay(p);
                 break;
             case "sethome":
-                IslandData pd = getPlugin().getIslandInfo(p.getLocation());
-                // Check if the ground is an air
-                if (!BlockUtil.isBreathable(p.clone().add(p.down()).getLevelBlock())) {
-                    p.sendMessage(getLocale(p).groundNoAir);
-                    break;
-                }
-                // Check if the player on their own island or not
-                if (pd != null && pd.getPlotOwner().equalsIgnoreCase(sender.getName())) {
-                    pd.setHomeLocation(p.getLocation());
-                    pd.saveIslandData();
+                getPlugin().getFastCache().getIslandData(p.getLocation(), pd ->{
+                    // Check if the ground is an air
+                    if (!BlockUtil.isBreathable(p.clone().add(p.down()).getLevelBlock())) {
+                        p.sendMessage(getLocale(p).groundNoAir);
+                        return;
+                    }
+                    // Check if the player on their own island or not
+                    if (pd != null && pd.getPlotOwner().equalsIgnoreCase(sender.getName())) {
+                        pd.setHomeLocation(p.getLocation());
+                        pd.saveIslandData();
 
-                    p.sendMessage(getLocale(p).setHomeSuccess);
-                } else {
-                    p.sendMessage(getLocale(p).errorNotOnIsland);
-                }
+                        p.sendMessage(getLocale(p).setHomeSuccess);
+                    } else {
+                        p.sendMessage(getLocale(p).errorNotOnIsland);
+                    }
+                });
                 break;
             case "teleport":
                 if (args.length != 2) {

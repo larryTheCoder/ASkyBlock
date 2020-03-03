@@ -37,6 +37,7 @@ import com.larryTheCoder.panels.Panel;
 import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.schematic.SchematicHandler;
+import com.larryTheCoder.storage.FastCache;
 import com.larryTheCoder.storage.InventorySave;
 import lombok.Getter;
 
@@ -62,6 +63,8 @@ public class ASkyBlockAPI extends PluginBase {
     protected Messages messages;
     @Getter
     protected Panel panel;
+    @Getter
+    protected FastCache fastCache;
     @Getter
     protected SchematicHandler schematics;
 }

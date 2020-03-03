@@ -38,6 +38,7 @@ import cn.nukkit.utils.TextFormat;
 import com.google.common.base.Preconditions;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.SkyBlockGenerator;
+import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.storage.IslandSettings;
 import com.larryTheCoder.storage.SettingsFlag;
 
@@ -263,12 +264,8 @@ public class Utils {
      */
     public static boolean actionPhysical(Player p, Block type) {
         // Settings priority
-        IslandSettings data;
-        if (ASkyBlock.get().getIslandInfo(p.getLocation()) != null) {
-            data = ASkyBlock.get().getIslandInfo(p.getLocation()).getIgsSettings();
-        } else {
-            data = new IslandSettings(null);
-        }
+        IslandData pd = ASkyBlock.get().getFastCache().getIslandData(p.getLocation());
+        IslandSettings data = pd == null ? new IslandSettings(null) : pd.getIgsSettings();
 
         // Checked nukkit source code, the only things that triggers PHYSICAL
         // Is these dudes.
@@ -349,12 +346,8 @@ public class Utils {
         }
 
         // Check if the island have the settings
-        IslandSettings data;
-        if (ASkyBlock.get().getIslandInfo(p.getLocation()) != null) {
-            data = ASkyBlock.get().getIslandInfo(p.getLocation()).getIgsSettings();
-        } else {
-            data = new IslandSettings(null);
-        }
+        IslandData pd = ASkyBlock.get().getFastCache().getIslandData(p.getLocation());
+        IslandSettings data = pd == null ? new IslandSettings(null) : pd.getIgsSettings();
 
         if (type instanceof ItemEgg) {
             //Utils.sendDebug"User is interacting with chicken egg");
@@ -381,14 +374,8 @@ public class Utils {
         }
 
         // Check if the island have the settings
-        IslandSettings data;
-        if (ASkyBlock.get().getIslandInfo(p.getLocation()) != null) {
-            sendDebug("DEBUG: Settings available");
-            data = ASkyBlock.get().getIslandInfo(p.getLocation()).getIgsSettings();
-        } else {
-            sendDebug("DEBUG: Settings unavailable");
-            data = new IslandSettings(null);
-        }
+        IslandData pd = ASkyBlock.get().getFastCache().getIslandData(p.getLocation());
+        IslandSettings data = pd == null ? new IslandSettings(null) : pd.getIgsSettings();
 
         if (type instanceof BlockAnvil) {
             sendDebug("DEBUG: Type of check is anvil");

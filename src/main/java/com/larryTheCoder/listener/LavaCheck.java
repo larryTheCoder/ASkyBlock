@@ -27,7 +27,6 @@
 package com.larryTheCoder.listener;
 
 import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockLiquid;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
@@ -36,17 +35,18 @@ import cn.nukkit.level.Location;
 import cn.nukkit.level.Sound;
 import cn.nukkit.level.particle.SmokeParticle;
 import cn.nukkit.math.BlockFace;
-import cn.nukkit.math.Vector3;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.player.PlayerData;
 import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Stream;
 
 import static cn.nukkit.block.BlockID.*;
 
@@ -59,10 +59,10 @@ public class LavaCheck implements Listener {
     private static Map<Integer, Multiset<Block>> stats = new HashMap<>();
     private static Map<Integer, Map<Block, Double>> configChances = new HashMap<>();
     private final ASkyBlock plugin;
-    private List<Vector3> isOnTick = new ArrayList<>();
 
-    public LavaCheck(ASkyBlock aSkyBlock) {
-        plugin = aSkyBlock;
+    public LavaCheck(ASkyBlock plugin) {
+        this.plugin = plugin;
+
         stats.clear();
     }
 
@@ -105,11 +105,8 @@ public class LavaCheck implements Listener {
      * @return chance, or 0 if the level or material don't exist
      */
     public static double getConfigChances(Integer level, Block material) {
-        double result = 0;
-        if (configChances.containsKey(level) && configChances.get(level).containsKey(material)) {
-            result = configChances.get(level).get(material);
-        }
-        return result;
+        return configChances.containsKey(level) && configChances.get(level).containsKey(material) ?
+                configChances.get(level).get(material) : 0;
     }
 
     /**
@@ -120,7 +117,7 @@ public class LavaCheck implements Listener {
      * @return true if in the island world
      */
     private boolean notInWorld(Location loc) {
-        return !ASkyBlock.get().getLevels().contains(loc.getLevel().getName());
+        return !plugin.getLevels().contains(loc.getLevel().getName());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -136,48 +133,48 @@ public class LavaCheck implements Listener {
 
         Block block = e.getTo();
         if (block.getId() == WATER || block.getId() == STILL_WATER || block.getId() == LAVA || block.getId() == STILL_LAVA) {
-            BlockLiquid blockLiq = (BlockLiquid) block;
-
-            // This is a very weird thing to be reproduce.
-            // #BlameNukkit :/
             Block flowedFrom = e.getBlock();
 
             if (!generatesCobble(block, flowedFrom)) {
                 return;
             }
 
-            int level = Integer.MIN_VALUE;
-            IslandData pd = plugin.getIslandInfo(e.getBlock());
+            IslandData pd = plugin.getFastCache().getIslandData(e.getBlock());
             if (pd != null && pd.getPlotOwner() != null) {
-                PlayerData pd2 = plugin.getPlayerInfo(pd.getPlotOwner());
-                if (pd2 != null) {
-                    level = pd2.getIslandLevel();
-                }
+                plugin.getFastCache().getPlayerData(pd.getPlotOwner(), pd2 -> invokeGenerate(e, pd2.getIslandLevel()));
+
+                return;
             }
 
-            if (!Settings.magicCobbleGenChances.isEmpty()) {
-                Map.Entry<Integer, TreeMap<Double, Block>> entry = Settings.magicCobbleGenChances.floorEntry(level);
-                double maxValue = entry.getValue().lastKey();
-                double rnd = Utils.randomDouble() * maxValue;
-                Map.Entry<Double, Block> en = entry.getValue().ceilingEntry(rnd);
+            invokeGenerate(e, Integer.MIN_VALUE);
+        }
+    }
 
-                if (en != null) {
-                    e.setCancelled();
-                    flowedFrom.getLevel().setBlock(flowedFrom, en.getValue());
-                    flowedFrom.getLevel().addSound(flowedFrom.add(0.5, 0.5, 0.5), Sound.RANDOM_FIZZ, 1, 2.6F + (ThreadLocalRandom.current().nextFloat() - ThreadLocalRandom.current().nextFloat()) * 0.8F);
+    public void invokeGenerate(BlockFromToEvent e, int islandLevel) {
+        Block flowedFrom = e.getBlock();
 
-                    for (int i = 0; i < 8; ++i) {
-                        flowedFrom.getLevel().addParticle(new SmokeParticle(flowedFrom.add(Math.random(), 1.2, Math.random())));
-                    }
+        if (!Settings.magicCobbleGenChances.isEmpty()) {
+            Map.Entry<Integer, TreeMap<Double, Block>> entry = Settings.magicCobbleGenChances.floorEntry(islandLevel);
+            double maxValue = entry.getValue().lastKey();
+            double rnd = Utils.randomDouble() * maxValue;
+            Map.Entry<Double, Block> en = entry.getValue().ceilingEntry(rnd);
 
-                    // Record stats, per level
-                    if (stats.containsKey(entry.getKey())) {
-                        stats.get(entry.getKey()).add(en.getValue());
-                    } else {
-                        Multiset<Block> set = HashMultiset.create();
-                        set.add(en.getValue());
-                        stats.put(entry.getKey(), set);
-                    }
+            if (en != null) {
+                e.setCancelled();
+                flowedFrom.getLevel().setBlock(flowedFrom, en.getValue());
+                flowedFrom.getLevel().addSound(flowedFrom.add(0.5, 0.5, 0.5), Sound.RANDOM_FIZZ, 1, 2.6F + (ThreadLocalRandom.current().nextFloat() - ThreadLocalRandom.current().nextFloat()) * 0.8F);
+
+                for (int i = 0; i < 8; ++i) {
+                    flowedFrom.getLevel().addParticle(new SmokeParticle(flowedFrom.add(Math.random(), 1.2, Math.random())));
+                }
+
+                // Record stats, per level
+                if (stats.containsKey(entry.getKey())) {
+                    stats.get(entry.getKey()).add(en.getValue());
+                } else {
+                    Multiset<Block> set = HashMultiset.create();
+                    set.add(en.getValue());
+                    stats.put(entry.getKey(), set);
                 }
             }
         }
@@ -186,13 +183,9 @@ public class LavaCheck implements Listener {
     public boolean generatesCobble(Block block, Block toBlock) {
         int mirrorID1 = block.getId() == WATER || block.getId() == STILL_WATER ? LAVA : WATER;
         int mirrorID2 = block.getId() == WATER || block.getId() == STILL_WATER ? STILL_LAVA : STILL_WATER;
-        for (BlockFace face : BlockFace.values()) {
-            Block r = toBlock.getSide(face);
-            if (r.getId() == mirrorID1 || r.getId() == mirrorID2) {
-                return true;
-            }
-        }
-        return false;
+        return Stream.of(BlockFace.values())
+                .anyMatch(face -> toBlock.getSide(face).getId() == mirrorID1
+                        || toBlock.getSide(face).getId() == mirrorID2);
     }
 
 }

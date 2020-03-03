@@ -30,7 +30,6 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
@@ -146,15 +145,16 @@ public class OperatorCategory extends SubCategory {
                     break;
                 }
 
-                IslandData pd = getPlugin().getIslandInfo(args[1]);
-                if (pd == null) {
-                    sender.sendMessage(getPlugin().getPrefix() + getPlugin().getLocale(pl).errorNoIslandOther);
-                    break;
-                }
-                pd.setIslandName(args[2]);
-                pd.saveIslandData();
+                getPlugin().getFastCache().getIslandData(args[1], pd -> {
+                    if (pd == null) {
+                        sender.sendMessage(getPlugin().getPrefix() + getPlugin().getLocale(pl).errorNoIslandOther);
+                        return;
+                    }
+                    pd.setIslandName(args[2]);
+                    pd.saveIslandData();
 
-                sender.sendMessage(getPlugin().getPrefix() + getPlugin().getLocale(pl).renameSuccess);
+                    sender.sendMessage(getPlugin().getPrefix() + getPlugin().getLocale(pl).renameSuccess);
+                });
                 break;
             case "cobblestats":
                 if (!sender.hasPermission("is.admin.cobblestats")) {

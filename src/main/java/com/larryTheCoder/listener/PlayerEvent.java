@@ -31,13 +31,13 @@ import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
-import cn.nukkit.event.player.*;
+import cn.nukkit.event.player.PlayerCommandPreprocessEvent;
+import cn.nukkit.event.player.PlayerDeathEvent;
+import cn.nukkit.event.player.PlayerJoinEvent;
+import cn.nukkit.event.player.PlayerRespawnEvent;
 import cn.nukkit.level.Location;
-import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.db2.DatabaseManager;
-import com.larryTheCoder.player.TeamManager;
-import com.larryTheCoder.storage.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import org.sql2o.Connection;
@@ -98,33 +98,16 @@ public class PlayerEvent implements Listener {
             return;
         }
 
-        TeamManager manager = plugin.getTManager();
-        IslandData pd = plugin.getIslandInfo(p.getLocation());
-        if (plugin.getIslandInfo(p.getName()) == null || !manager.hasTeam(p.getName())) {
-            return;
-        }
-
-        if (Settings.respawnOnIsland) {
-            // Add them to the list to be re-spawned on their island
-            respawn.add(p.getName());
-        }
-
-        // Add death to death count
-        pd.addDeath();
-        if (Settings.deathPenalty != 0) {
-            if (manager.hasTeam(p.getName())) {
-                // Tell team
-                plugin.getMessages().tellOfflineTeam(p.getName(), TextFormat.GREEN + "(" + pd.getDeaths() + " died!)");
+        plugin.getFastCache().getIslandData(p.getLocation(), pd -> {
+            if (pd == null) {
+                return;
             }
-        }
 
-        pd.saveIslandData();
-    }
-
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onPlayerLogin(PlayerPreLoginEvent ex) {
-        Player p = ex.getPlayer();
-        plugin.getIslandInfo(p);
+            if (Settings.respawnOnIsland) {
+                // Add them to the list to be re-spawned on their island
+                respawn.add(p.getName());
+            }
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -132,8 +115,12 @@ public class PlayerEvent implements Listener {
         // load player inventory if exists
         Player p = ex.getPlayer();
         plugin.getInventory().loadPlayerInventory(p);
-        // Load player data
-        if (plugin.getPlayerInfo(p) == null) {
+
+        plugin.getFastCache().getPlayerData(p, pd -> {
+            if (pd != null) {
+                return;
+            }
+
             Utils.send(p.getName() + "&a data doesn't exists. Creating new ones");
 
             plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
@@ -162,8 +149,8 @@ public class PlayerEvent implements Listener {
                     }
                 }
             });
-            return;
-        }
+        });
+
 
         // Load messages
         List<String> news = plugin.getMessages().getMessages(p.getName());

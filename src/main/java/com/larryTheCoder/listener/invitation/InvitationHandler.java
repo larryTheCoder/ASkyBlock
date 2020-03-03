@@ -112,11 +112,6 @@ public class InvitationHandler {
     public void addInvitation(CommandSender sender, Player receiver) {
         sender.sendMessage(plugin.getPrefix() + plugin.getLocale(sender.isPlayer() ? (Player) sender : null).inviteSuccess);
         receiver.sendMessage(plugin.getPrefix() + plugin.getLocale(receiver).newInvitation.replace("[player]", sender.getName()));
-        if (plugin.getIslandInfo(receiver) != null) {
-            // Yes? No? Well its based on ASkyBlock anyways
-            receiver.sendMessage(plugin.getPrefix() + "§cAll of your islands will be deleted after you accept this party.");
-
-        }
 
         // Add into the list.
         invitation.add(new Invitation(this, sender, receiver));

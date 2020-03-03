@@ -64,7 +64,7 @@ public class IslandSettings {
 
     public IslandSettings(String defVal) {
         // Sometimes this shit could be empty
-        if (defVal.isEmpty()) {
+        if (defVal == null || defVal.isEmpty()) {
             this.setIgsDefaults();
         } else {
             this.serializeIds(defVal);
