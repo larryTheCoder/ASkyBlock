@@ -1,6 +1,4 @@
 /*
- * Adapted from the Wizardry License
- *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -24,10 +22,10 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.player;
+package com.larryTheCoder.cache;
 
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.db2.DatabaseManager;
+import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import lombok.Getter;
@@ -38,7 +36,7 @@ import org.sql2o.data.Table;
 
 import java.util.*;
 
-import static com.larryTheCoder.db2.TableSet.*;
+import static com.larryTheCoder.database.TableSet.*;
 
 /**
  * @author larryTheCoder
@@ -283,7 +281,7 @@ public class PlayerData implements Cloneable {
         ASkyBlock.get().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
             @Override
             public void executeQuery(Connection connection) {
-                connection.createQuery(PLAYER_INSERT_MAIN.getQuery())
+                connection.createQuery(PLAYER_UPDATE_MAIN.getQuery())
                         .addParameter("playerName", playerName)
                         .addParameter("playerUUID", playerXUID)
                         .addParameter("locale", locale)
@@ -296,7 +294,7 @@ public class PlayerData implements Cloneable {
                     return;
                 }
 
-                connection.createQuery(PLAYER_INSERT_DATA.getQuery())
+                connection.createQuery(PLAYER_UPDATE_DATA.getQuery())
                         .addParameter("playerName", playerName)
                         .addParameter("challengesList", decodeChallengeList("cl"))
                         .addParameter("challengesTimes", decodeChallengeList("clt"))

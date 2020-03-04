@@ -1,6 +1,4 @@
 /*
- * Adapted from the Wizardry License
- *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -25,15 +23,15 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.larryTheCoder.storage;
+package com.larryTheCoder.cache;
 
 import cn.nukkit.Player;
 import cn.nukkit.level.Position;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.db2.DatabaseManager;
-import com.larryTheCoder.player.PlayerData;
+import com.larryTheCoder.database.DatabaseManager;
 import lombok.Getter;
 import org.sql2o.Connection;
+import org.sql2o.data.Row;
 import org.sql2o.data.Table;
 
 import java.sql.Timestamp;
@@ -41,7 +39,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static com.larryTheCoder.db2.TableSet.*;
+import static com.larryTheCoder.database.TableSet.*;
 
 /**
  * Caches information for an object.
@@ -109,12 +107,10 @@ public class FastCache {
         if (result == null) {
             Connection connection = plugin.getDatabase().getConnection();
 
-            List<IslandData> islandList = new ArrayList<>();
-            connection.createQuery(FETCH_LEVEL_PLOT.getQuery())
+            List<IslandData> islandList = parseData(connection.createQuery(FETCH_LEVEL_PLOT.getQuery())
                     .addParameter("pName", id)
                     .addParameter("levelName", pos.getLevel().getName())
-                    .executeAndFetchTable().rows()
-                    .forEach(o -> islandList.add(IslandData.fromRows(o)));
+                    .executeAndFetchTable().rows(), connection);
 
             putIslandUnspecified(islandList);
 
@@ -140,13 +136,10 @@ public class FastCache {
             plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
                 @Override
                 public void executeQuery(Connection connection) {
-                    Table levelPlot = connection.createQuery(FETCH_LEVEL_PLOT.getQuery())
+                    List<IslandData> islandList = parseData(connection.createQuery(FETCH_LEVEL_PLOT.getQuery())
                             .addParameter("pName", id)
                             .addParameter("levelName", pos.getLevel().getName())
-                            .executeAndFetchTable();
-
-                    List<IslandData> islandList = new ArrayList<>();
-                    levelPlot.rows().forEach(o -> islandList.add(IslandData.fromRows(o)));
+                            .executeAndFetchTable().rows(), connection);
 
                     putIslandUnspecified(islandList);
                 }
@@ -175,12 +168,9 @@ public class FastCache {
         if (result == null) {
             Connection connection = plugin.getDatabase().getConnection();
 
-            Table levelPlot = connection.createQuery(FETCH_ISLAND_PLOT.getQuery())
+            List<IslandData> islandList = parseData(connection.createQuery(FETCH_ISLAND_PLOT.getQuery())
                     .addParameter("pName", playerName)
-                    .executeAndFetchTable();
-
-            List<IslandData> islandList = new ArrayList<>();
-            levelPlot.rows().forEach(o -> islandList.add(IslandData.fromRows(o)));
+                    .executeAndFetchTable().rows(), connection);
 
             createIntoDb(playerName, islandList);
 
@@ -200,12 +190,9 @@ public class FastCache {
             plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
                 @Override
                 public void executeQuery(Connection connection) {
-                    Table levelPlot = connection.createQuery(FETCH_ISLAND_PLOT.getQuery())
+                    List<IslandData> islandList = parseData(connection.createQuery(FETCH_ISLAND_PLOT.getQuery())
                             .addParameter("pName", playerName)
-                            .executeAndFetchTable();
-
-                    List<IslandData> islandList = new ArrayList<>();
-                    levelPlot.rows().forEach(o -> islandList.add(IslandData.fromRows(o)));
+                            .executeAndFetchTable().rows(), connection);
 
                     createIntoDb(playerName, islandList);
                 }
@@ -355,6 +342,25 @@ public class FastCache {
         // Since ArrayList is modifiable, there is no need to replace the cache again into the list.
         object.setPlayerData(data);
         object.updateTime();
+    }
+
+    private List<IslandData> parseData(List<Row> data, Connection connection) {
+        List<IslandData> islandList = new ArrayList<>();
+
+        for (Row o : data) {
+            List<Row> row = connection.createQuery(FETCH_ISLAND_DATA.getQuery())
+                    .addParameter("islandUniquePlotId", o.getInteger("islandUniqueId"))
+                    .executeAndFetchTable().rows();
+
+            if (row.isEmpty()) {
+                islandList.add(IslandData.fromRows(o));
+                continue;
+            }
+
+            islandList.add(IslandData.fromRows(o, row.get(0)));
+        }
+
+        return islandList;
     }
 
     public static class FastCacheData {

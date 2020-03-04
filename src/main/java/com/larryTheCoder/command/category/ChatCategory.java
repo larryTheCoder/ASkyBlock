@@ -25,7 +25,7 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.larryTheCoder.cmd2.category;
+package com.larryTheCoder.command.category;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;

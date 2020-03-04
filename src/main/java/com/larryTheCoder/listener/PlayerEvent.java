@@ -37,7 +37,7 @@ import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.event.player.PlayerRespawnEvent;
 import cn.nukkit.level.Location;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.db2.DatabaseManager;
+import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import org.sql2o.Connection;
@@ -45,7 +45,7 @@ import org.sql2o.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.larryTheCoder.db2.TableSet.PLAYER_INSERT_MAIN;
+import static com.larryTheCoder.database.TableSet.PLAYER_INSERT_MAIN;
 
 /**
  * Events that associate to player

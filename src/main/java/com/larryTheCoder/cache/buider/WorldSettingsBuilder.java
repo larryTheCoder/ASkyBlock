@@ -1,6 +1,4 @@
 /*
- * Adapted from the Wizardry License
- *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -25,11 +23,12 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.larryTheCoder.storage;
+package com.larryTheCoder.cache.buider;
 
 
 import cn.nukkit.level.Level;
 import com.google.common.base.Preconditions;
+import com.larryTheCoder.cache.settings.WorldSettings;
 
 public class WorldSettingsBuilder {
 

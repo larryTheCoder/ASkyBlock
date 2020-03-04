@@ -25,14 +25,14 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.larryTheCoder.cmd2;
+package com.larryTheCoder.command;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.command.PluginCommand;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.cmd2.category.*;
+import com.larryTheCoder.command.category.*;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.utils.Utils;
 

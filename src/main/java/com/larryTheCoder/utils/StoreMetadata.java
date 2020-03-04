@@ -28,7 +28,7 @@
 package com.larryTheCoder.utils;
 
 import cn.nukkit.command.CommandSender;
-import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.cache.IslandData;
 
 /**
  * Stores a data regarding the user and its

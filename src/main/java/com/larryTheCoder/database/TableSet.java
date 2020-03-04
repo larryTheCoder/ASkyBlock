@@ -25,9 +25,7 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.larryTheCoder.db2;
-
-import com.larryTheCoder.ASkyBlock;
+package com.larryTheCoder.database;
 
 /**
  * A set of queries.
@@ -92,10 +90,17 @@ public enum TableSet {
     FETCH_ISLANDS_PLOT("SELECT * FROM island WHERE player = :pName"),
     FETCH_ALL_ISLAND_UNIQUE("SELECT islandUniqueId FROM island"),
 
-    ISLAND_INSERT_MAIN("INSERT INTO island(islandId, islandUniqueId, gridPosition, spawnPosition, gridSize, levelName, player, islandName) VALUES (:islandId, :islandUniqueId, :gridPos, :spawnPos, :gridSize, :levelName, :player, :islandName) ON DUPLICATE KEY UPDATE islandId = :islandId, gridPosition = :gridPos, spawnPosition` = :spawnPos,`gridSize` = :gridSize, `levelName` = :levelName, `player` = :plotOwner, islandName = :islandName"),
-    ISLAND_INSERT_DATA("INSERT INTO islandData(dataId, biome, locked, protectionData, levelHandicap) VALUES (:islandUniqueId, :plotBiome, :isLocked, :protectionData, :levelHandicap) ON DUPLICATE KEY UPDATE biome = :plotBiome, locked = :isLocked, protectionData = :protectionData, levelHandicap = :levelHandicap"),
-    PLAYER_INSERT_MAIN("INSERT INTO player(playerName, playerUUID, locale, banList, resetAttempts, islandLevels) VALUES (:playerName, :playerUUID, :locale, :banList, :resetLeft, :islandLevels) ON DUPLICATE KEY UPDATE playerName = :playerName, playerUUID = :playerUUID, locale = :locale, banList = :banList, resetAttempts = :resetLeft, islandLevels = :islandLevels"),
-    PLAYER_INSERT_DATA("INSERT INTO challenges(player, challengesList, challengesTimes) VALUES (:playerName, :challengesList, :challengesTimes ON DUPLICATE KEY UPDATE challengesList = :challengesList, challengesTimes = :challengesTimes)"),
+    // Mysql and SQLite database syntax are very different.
+    // Therefore we must INSERT data precisely.
+    ISLAND_INSERT_MAIN("INSERT %IGNORE INTO island(islandId, islandUniqueId, gridPosition, spawnPosition, gridSize, levelName, player, islandName) VALUES (:islandId, :islandUniqueId, :gridPos, :spawnPos, :gridSize, :levelName, :player, :islandName) %DUPLICATE_A islandId = :islandId, gridPosition = :gridPos, spawnPosition` = :spawnPos,`gridSize` = :gridSize, `levelName` = :levelName, `player` = :plotOwner, islandName = :islandName"),
+    ISLAND_INSERT_DATA("INSERT %IGNORE INTO islandData(dataId, biome, locked, protectionData, levelHandicap) VALUES (:islandUniqueId, :plotBiome, :isLocked, :protectionData, :levelHandicap) %DUPLICATE_B biome = :plotBiome, locked = :isLocked, protectionData = :protectionData, levelHandicap = :levelHandicap"),
+    PLAYER_INSERT_MAIN("INSERT %IGNORE INTO player(playerName, playerUUID, locale, banList, resetAttempts, islandLevels) VALUES (:playerName, :playerUUID, :locale, :banList, :resetLeft, :islandLevels)"),
+    PLAYER_INSERT_DATA("INSERT %IGNORE INTO challenges(player, challengesList, challengesTimes) VALUES (:playerName, :challengesList, :challengesTimes %DUPLICATE_D challengesList = :challengesList, challengesTimes = :challengesTimes)"),
+
+    ISLAND_UPDATE_MAIN("UPDATE island SET islandId = :islandId, gridPosition = :gridPos, spawnPosition = :spawnPos, gridSize = :gridSize, levelName = :levelName, player = :plotOwner, islandName = :islandName WHERE islandUniqueId = :islandUniqueId"),
+    ISLAND_UPDATE_DATA("UPDATE islandData SET biome = :plotBiome, locked = :isLocked, protectionData = :protectionData, levelHandicap = :levelHandicap WHERE dataId = :islandUniqueId"),
+    PLAYER_UPDATE_MAIN("UPDATE player SET locale = :locale, banList = :banList, resetAttempts = :resetLeft, islandLevels = :islandLevels WHERE playerName = :playerName, playerUUID = :playerUUID"),
+    PLAYER_UPDATE_DATA("UPDATE challenges SET challengesList = :challengesList, challengesTimes = :challengesTimes WHERE player = :playerName"),
 
     WORLDS_INSERT("INSERT %IGNORE INTO worldList (worldName) VALUES (:levelName)");
 

@@ -45,8 +45,8 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.IslandEnterEvent;
 import com.larryTheCoder.events.IslandExitEvent;
 import com.larryTheCoder.player.TeamManager;
-import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.storage.SettingsFlag;
+import com.larryTheCoder.cache.IslandData;
+import com.larryTheCoder.utils.SettingsFlag;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
@@ -170,7 +170,7 @@ public class IslandListener implements Listener {
          * islandTo == islandFrom
          */
 
-        if (islandTo != null && islandFrom == null && (islandTo.getPlotOwner() != null || islandTo.isSpawnIsland())) {
+        if (islandTo != null && islandFrom == null && (islandTo.getPlotOwner() != null)) {
             // Entering
             if (islandTo.isLocked()) {
                 p.sendMessage(plugin.getPrefix() + TextFormat.RED + "This island is locked");
@@ -185,7 +185,7 @@ public class IslandListener implements Listener {
             // Fire entry event
             final IslandEnterEvent event = new IslandEnterEvent(p, islandTo, e.getTo());
             plugin.getServer().getPluginManager().callEvent(event);
-        } else if (islandTo == null && islandFrom != null && (islandFrom.getPlotOwner() != null || islandFrom.isSpawnIsland())) {
+        } else if (islandTo == null && islandFrom != null && (islandFrom.getPlotOwner() != null)) {
             // Leaving
             if (islandFrom.getIgsSettings().getIgsFlag(SettingsFlag.ENTER_EXIT_MESSAGES)) {
                 p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Leaving " + islandFrom.getIslandName() + "'s island");
@@ -201,7 +201,7 @@ public class IslandListener implements Listener {
             // Fire entry event
             final IslandEnterEvent event2 = new IslandEnterEvent(p, islandTo, e.getTo());
             plugin.getServer().getPluginManager().callEvent(event2);
-        } else if (islandTo != null && (islandTo.getPlotOwner() != null || islandTo.isSpawnIsland())) {
+        } else if (islandTo != null && (islandTo.getPlotOwner() != null)) {
             // Lock check
             if (islandTo.isLocked()) {
                 if (!p.isOp() && !p.hasPermission("is.mod.bypassprotect") && !p.hasPermission("is.mod.bypasslock")) {

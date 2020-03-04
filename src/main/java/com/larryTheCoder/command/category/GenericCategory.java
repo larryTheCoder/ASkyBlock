@@ -25,7 +25,7 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.larryTheCoder.cmd2.category;
+package com.larryTheCoder.command.category;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
@@ -33,10 +33,10 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Location;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.db2.DatabaseManager;
+import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.island.TopTen;
 import com.larryTheCoder.locales.ASlocales;
-import com.larryTheCoder.player.PlayerData;
+import com.larryTheCoder.cache.PlayerData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import org.sql2o.Connection;
@@ -44,7 +44,7 @@ import org.sql2o.data.Table;
 
 import java.util.*;
 
-import static com.larryTheCoder.db2.TableSet.FETCH_PLAYER_MAIN;
+import static com.larryTheCoder.database.TableSet.FETCH_PLAYER_MAIN;
 
 public class GenericCategory extends SubCategory {
 

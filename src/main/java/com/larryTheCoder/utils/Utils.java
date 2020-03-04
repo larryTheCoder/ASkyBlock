@@ -38,9 +38,8 @@ import cn.nukkit.utils.TextFormat;
 import com.google.common.base.Preconditions;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.SkyBlockGenerator;
-import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.storage.IslandSettings;
-import com.larryTheCoder.storage.SettingsFlag;
+import com.larryTheCoder.cache.IslandData;
+import com.larryTheCoder.cache.settings.IslandSettings;
 
 import java.io.File;
 import java.security.MessageDigest;
@@ -265,7 +264,7 @@ public class Utils {
     public static boolean actionPhysical(Player p, Block type) {
         // Settings priority
         IslandData pd = ASkyBlock.get().getFastCache().getIslandData(p.getLocation());
-        IslandSettings data = pd == null ? new IslandSettings(null) : pd.getIgsSettings();
+        IslandSettings data = pd == null ? new IslandSettings("") : pd.getIgsSettings();
 
         // Checked nukkit source code, the only things that triggers PHYSICAL
         // Is these dudes.
@@ -347,7 +346,7 @@ public class Utils {
 
         // Check if the island have the settings
         IslandData pd = ASkyBlock.get().getFastCache().getIslandData(p.getLocation());
-        IslandSettings data = pd == null ? new IslandSettings(null) : pd.getIgsSettings();
+        IslandSettings data = pd == null ? new IslandSettings("") : pd.getIgsSettings();
 
         if (type instanceof ItemEgg) {
             //Utils.sendDebug"User is interacting with chicken egg");
@@ -375,7 +374,7 @@ public class Utils {
 
         // Check if the island have the settings
         IslandData pd = ASkyBlock.get().getFastCache().getIslandData(p.getLocation());
-        IslandSettings data = pd == null ? new IslandSettings(null) : pd.getIgsSettings();
+        IslandSettings data = pd == null ? new IslandSettings("") : pd.getIgsSettings();
 
         if (type instanceof BlockAnvil) {
             sendDebug("DEBUG: Type of check is anvil");

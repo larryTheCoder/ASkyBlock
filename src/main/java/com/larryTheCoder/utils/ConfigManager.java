@@ -38,7 +38,6 @@ import com.larryTheCoder.integration.economy.EconomyAPI;
 import com.larryTheCoder.listener.LavaCheck;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.locales.FileLister;
-import com.larryTheCoder.storage.SettingsFlag;
 
 import java.io.File;
 import java.io.IOException;

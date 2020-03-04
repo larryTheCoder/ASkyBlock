@@ -34,15 +34,12 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.player.PlayerData;
-import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Utils;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 public class TopTen implements Listener {

@@ -23,7 +23,7 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.larryTheCoder.cmd2.category;
+package com.larryTheCoder.command.category;
 
 import cn.nukkit.IPlayer;
 import cn.nukkit.Player;
@@ -35,9 +35,9 @@ import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.SkyBlockGenerator;
 import com.larryTheCoder.listener.LavaCheck;
-import com.larryTheCoder.player.PlayerData;
-import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.storage.WorldSettings;
+import com.larryTheCoder.cache.PlayerData;
+import com.larryTheCoder.cache.IslandData;
+import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.task.DeleteIslandTask;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Utils;

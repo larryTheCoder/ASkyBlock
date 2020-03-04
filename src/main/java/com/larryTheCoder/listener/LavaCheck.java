@@ -38,7 +38,7 @@ import cn.nukkit.math.BlockFace;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 

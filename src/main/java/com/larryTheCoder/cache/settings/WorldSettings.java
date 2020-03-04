@@ -1,6 +1,4 @@
 /*
- * Adapted from the Wizardry License
- *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -24,10 +22,11 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.storage;
+package com.larryTheCoder.cache.settings;
 
 import cn.nukkit.level.Level;
 import cn.nukkit.utils.Config;
+import com.larryTheCoder.cache.buider.WorldSettingsBuilder;
 import com.larryTheCoder.utils.Utils;
 
 /**
@@ -35,14 +34,14 @@ import com.larryTheCoder.utils.Utils;
  */
 public class WorldSettings {
 
-    Level level;
-    String permission;
-    int plotMax;
-    int plotSize;
-    boolean stopTime;
-    int seaLevel;
-    int plotRange;
-    boolean useDefaultChest;
+    public Level level;
+    public String permission;
+    public int plotMax;
+    public int plotSize;
+    public boolean stopTime;
+    public int seaLevel;
+    public int plotRange;
+    public boolean useDefaultChest;
 
     public WorldSettings(Level level) {
         this.level = level;

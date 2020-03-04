@@ -24,55 +24,66 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.db2.config;
+package com.larryTheCoder.database.config;
 
 import cn.nukkit.utils.Config;
-import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Utils;
 import org.sql2o.Sql2o;
 
-import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
 
 /**
  * @author larryTheCoder
  */
-public class SQLiteConfig implements AbstractConfig {
+public class MySQLConfig implements AbstractConfig {
 
-    private final String dbLocation;
-    private final File file;
+    private final String user;
+    private final String database;
+    private final String password;
+    private final int port;
+    private final String hostname;
     private Sql2o connection;
 
-    public SQLiteConfig(Config data) {
-        this.file = new File(ASkyBlock.get().getDataFolder(), data.getString("database.SQLite.file-name") + ".db");
-        this.dbLocation = file.getAbsolutePath();
+    /**
+     * Creates a new MySQL instance.
+     *
+     * @param hostname Name of the host
+     * @param port     Port number
+     * @param database Database name
+     * @param username Username
+     * @param password Password
+     */
+    public MySQLConfig(String hostname, int port, String database, String username, String password) {
+        this.hostname = hostname;
+        this.port = port;
+        this.database = database;
+        this.user = username;
+        this.password = password;
+        this.connection = null;
     }
 
-    public String getAbsolutePath() {
-        return dbLocation;
+    public MySQLConfig(Config config){
+        this.hostname = config.getString("database.MySQL.host");
+        this.port =  config.getInt("database.MySQL.port");
+        this.database = config.getString("database.MySQL.database");
+        this.user = config.getString("database.MySQL.username");
+        this.password = config.getString("database.MySQL.password");
+        this.connection = null;
     }
 
     @Override
     public Sql2o forceConnection() {
-        return new Sql2o("jdbc:sqlite:" + this.dbLocation, null, null);
+        return new Sql2o("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
     }
 
     @Override
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public Sql2o openConnection() throws SQLException {
-        if (checkConnection()) return this.connection;
-
-        File file = new File(this.dbLocation);
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException ignored) {
-                Utils.send("&cUnable to create database!");
-            }
+        if (checkConnection()) {
+            return this.connection;
         }
 
-        return new Sql2o("jdbc:sqlite:" + this.dbLocation, null, null);
+        Utils.send("&aConnecting to: jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database);
+        return new Sql2o("jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database, this.user, this.password);
     }
 
     @Override
@@ -101,6 +112,6 @@ public class SQLiteConfig implements AbstractConfig {
 
     @Override
     public String toString() {
-        return "SQLite, " + file.getName();
+        return "jdbc:mysql://" + this.hostname + ':' + this.port + '/' + this.database;
     }
 }

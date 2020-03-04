@@ -34,7 +34,7 @@ import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
-import com.larryTheCoder.storage.WorldSettings;
+import com.larryTheCoder.cache.settings.WorldSettings;
 
 import java.util.Map;
 

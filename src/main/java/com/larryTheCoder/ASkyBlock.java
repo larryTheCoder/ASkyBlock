@@ -30,18 +30,17 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.Position;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
-import com.larryTheCoder.cmd2.Commands;
-import com.larryTheCoder.db2.DatabaseManager;
-import com.larryTheCoder.db2.config.AbstractConfig;
-import com.larryTheCoder.db2.config.MySQLConfig;
-import com.larryTheCoder.db2.config.SQLiteConfig;
+import com.larryTheCoder.command.Commands;
+import com.larryTheCoder.database.DatabaseManager;
+import com.larryTheCoder.database.config.AbstractConfig;
+import com.larryTheCoder.database.config.MySQLConfig;
+import com.larryTheCoder.database.config.SQLiteConfig;
 import com.larryTheCoder.integration.economy.Economy;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
@@ -52,15 +51,14 @@ import com.larryTheCoder.listener.LavaCheck;
 import com.larryTheCoder.listener.PlayerEvent;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.locales.ASlocales;
-import com.larryTheCoder.panels.Panel;
-import com.larryTheCoder.player.PlayerData;
+import com.larryTheCoder.cache.PlayerData;
 import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.schematic.SchematicHandler;
-import com.larryTheCoder.storage.FastCache;
-import com.larryTheCoder.storage.InventorySave;
-import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.storage.WorldSettings;
+import com.larryTheCoder.cache.FastCache;
+import com.larryTheCoder.cache.inventory.InventorySave;
+import com.larryTheCoder.cache.IslandData;
+import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.ConfigManager;
 import com.larryTheCoder.utils.Settings;
@@ -79,7 +77,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
-import static com.larryTheCoder.db2.TableSet.*;
+import static com.larryTheCoder.database.TableSet.*;
 
 /**
  * High quality SkyBlock mainframe
@@ -199,7 +197,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         chatHandler = new ChatHandler(this);
         teleportLogic = new TeleportLogic(this);
         invitationHandler = new InvitationHandler(this);
-        panel = new Panel(this);
+        panel = new ServerPanel(this);
         fastCache = new FastCache(this);
 
         // This should be loaded first

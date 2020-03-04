@@ -1,6 +1,4 @@
 /*
- * Adapted from the Wizardry License
- *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -24,9 +22,11 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.storage;
+package com.larryTheCoder.cache.settings;
 
+import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.utils.Settings;
+import com.larryTheCoder.utils.SettingsFlag;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +46,7 @@ public class IslandSettings {
     private final HashMap<SettingsFlag, Boolean> igs = new HashMap<>();
     private IslandData pd;
 
-    IslandSettings(IslandData pd, String defVal) {
+    public IslandSettings(IslandData pd, String defVal) {
         this.pd = pd;
 
         // Sometimes this shit could be empty
@@ -57,7 +57,7 @@ public class IslandSettings {
         }
     }
 
-    IslandSettings(IslandData pd) {
+    public IslandSettings(IslandData pd) {
         this.pd = pd;
         this.setIgsDefaults();
     }
@@ -144,11 +144,8 @@ public class IslandSettings {
     }
 
     private void serializeIds(String defaultValue) {
-        if (pd != null && pd.isSpawnIsland()) {
-            setSpawnDefaults();
-        } else {
-            setIgsDefaults();
-        }
+        setIgsDefaults();
+
         try {
             String[] at = defaultValue.split(", ");
             for (String string : at) {

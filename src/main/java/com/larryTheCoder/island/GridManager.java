@@ -34,7 +34,7 @@ import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.utils.BlockUtil;
 import com.larryTheCoder.utils.Utils;
 
@@ -174,10 +174,6 @@ public class GridManager {
         }
 
         if (pd != null) {
-            if (pd.isSpawnIsland()) {
-                return pd.getHome();
-            }
-
             Location locationSafe = pd.getHome();
             if (locationSafe.getFloorX() == 0 || locationSafe.getFloorY() == 0 || locationSafe.getFloorY() == 0) {
                 Vector2 cartesianPlane = pd.getCenter();

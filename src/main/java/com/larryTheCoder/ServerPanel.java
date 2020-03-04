@@ -1,6 +1,4 @@
 /*
- * Adapted from the Wizardry License
- *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -24,7 +22,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.panels;
+package com.larryTheCoder;
 
 import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;
@@ -39,15 +37,13 @@ import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.form.window.FormWindowModal;
 import cn.nukkit.form.window.FormWindowSimple;
 import cn.nukkit.level.biome.EnumBiome;
-import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
-import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.cache.IslandData;
+import com.larryTheCoder.cache.settings.IslandSettings;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.schematic.SchematicHandler;
-import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.storage.IslandSettings;
-import com.larryTheCoder.storage.SettingsFlag;
 import com.larryTheCoder.utils.Settings;
+import com.larryTheCoder.utils.SettingsFlag;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,7 +59,7 @@ import java.util.Map;
  *
  * @author larryTheCoder
  */
-public class Panel implements Listener {
+public class ServerPanel implements Listener {
 
     private final ASkyBlock plugin;
 
@@ -73,7 +69,7 @@ public class Panel implements Listener {
     private final Map<Player, Map<String, String>> challengeReorder = new HashMap<>();
     private final Map<Player, String> defaultLevel = new HashMap<>();
 
-    public Panel(ASkyBlock plugin) {
+    public ServerPanel(ASkyBlock plugin) {
         this.plugin = plugin;
 
         plugin.getServer().getPluginManager().registerEvents(this, plugin);

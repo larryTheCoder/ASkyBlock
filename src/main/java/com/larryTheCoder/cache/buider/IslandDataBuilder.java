@@ -1,6 +1,4 @@
 /*
- * Adapted from the Wizardry License
- *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -24,34 +22,57 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.storage;
 
-import cn.nukkit.item.Item;
+package com.larryTheCoder.cache.buider;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
+import cn.nukkit.math.Vector2;
+import com.larryTheCoder.cache.IslandData;
 
-/**
- * @author larryTheCoder
- * @author tastybento
- */
-class InventoryStore {
-    private final ArrayList<Item[]> armor = new ArrayList<>();
-    private Map<Integer, Item> inventory;
+public class IslandDataBuilder {
 
-    InventoryStore(Map<Integer, Item> contents, Item[] armorContents) {
-        this.inventory = contents;
-        this.armor.add(armorContents);
+    private IslandData data = new IslandData();
+
+    public IslandDataBuilder setGridCoordinates(Vector2 vec) {
+        data.setCenter(vec);
+
+        return this;
     }
 
-    public Map<Integer, Item> getInventory() {
-        return Collections.unmodifiableMap(inventory);
+    public IslandDataBuilder setIslandUniquePlotId(int generatedData) {
+        data.setIslandUniquePlotId(generatedData);
+
+        return this;
     }
 
-    @SuppressWarnings("ReturnOfCollectionOrArrayField")
-    ArrayList<Item[]> getArmor() {
-        return armor;
+    public IslandDataBuilder setPlotOwner(String plotOwner) {
+        data.setPlotOwner(plotOwner);
+
+        return this;
+    }
+
+    public IslandDataBuilder setLevelName(String levelName) {
+        data.setLevelName(levelName);
+
+        return this;
+    }
+
+    public IslandDataBuilder setLocked(boolean isLocked) {
+        data.setLocked(isLocked);
+        return this;
+    }
+
+    public IslandDataBuilder setPlotBiome(String biomeName) {
+        data.setPlotBiome(biomeName);
+        return this;
+    }
+
+    public IslandDataBuilder setIslandName(String islandName) {
+        data.setIslandName(islandName);
+        return this;
+    }
+
+    public IslandData build() {
+        return data;
     }
 
 }

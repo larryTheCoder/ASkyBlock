@@ -36,13 +36,13 @@ import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.db2.DatabaseManager;
-import com.larryTheCoder.db2.TableSet;
+import com.larryTheCoder.database.DatabaseManager;
+import com.larryTheCoder.database.TableSet;
 import com.larryTheCoder.events.IslandCreateEvent;
 import com.larryTheCoder.player.CoopData;
-import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.storage.IslandDataBuilder;
-import com.larryTheCoder.storage.WorldSettings;
+import com.larryTheCoder.cache.IslandData;
+import com.larryTheCoder.cache.buider.IslandDataBuilder;
+import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.task.DeleteIslandTask;
 import com.larryTheCoder.task.SimpleFancyTitle;
 import com.larryTheCoder.task.TaskManager;
@@ -55,7 +55,7 @@ import org.sql2o.data.Table;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static com.larryTheCoder.db2.TableSet.FETCH_ISLAND_UNIQUE;
+import static com.larryTheCoder.database.TableSet.FETCH_ISLAND_UNIQUE;
 
 /**
  * Core management for SkyBlock world and
@@ -241,6 +241,14 @@ public class IslandManager {
                                         .addParameter("gridSize", resultData.getProtectionSize())
                                         .addParameter("levelName", resultData.getLevelName())
                                         .addParameter("player", resultData.getPlotOwner())
+                                        .executeUpdate();
+
+                                connection.createQuery(TableSet.ISLAND_INSERT_DATA.getQuery())
+                                        .addParameter("islandUniqueId", resultData.getIslandUniquePlotId())
+                                        .addParameter("plotBiome", resultData.getPlotBiome())
+                                        .addParameter("isLocked", resultData.isLocked())
+                                        .addParameter("protectionData", resultData.getIgsSettings().getSettings())
+                                        .addParameter("levelHandicap", resultData.getLevelHandicap())
                                         .executeUpdate();
                             }
 

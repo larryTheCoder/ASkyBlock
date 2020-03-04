@@ -30,7 +30,7 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.utils.Settings;
 
 import java.util.List;

@@ -1,6 +1,4 @@
 /*
- * Adapted from the Wizardry License
- *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -24,7 +22,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.storage;
+package com.larryTheCoder.cache;
 
 import cn.nukkit.Server;
 import cn.nukkit.level.Level;
@@ -33,14 +31,13 @@ import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import com.google.common.base.Preconditions;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.db2.DatabaseManager;
-import com.larryTheCoder.db2.TableSet;
+import com.larryTheCoder.cache.settings.IslandSettings;
+import com.larryTheCoder.database.DatabaseManager;
+import com.larryTheCoder.database.TableSet;
 import com.larryTheCoder.utils.Utils;
-import lombok.Builder;
 import lombok.Setter;
 import org.sql2o.Connection;
 import org.sql2o.data.Row;
-import org.sql2o.data.Table;
 
 import java.util.Objects;
 
@@ -60,26 +57,21 @@ public class IslandData implements Cloneable {
 
     // Plot metadata
     private boolean isLocked = false;
-    private boolean isSpawnIsland = false;
 
     // Island information
-    private String levelName;
-    private String plotOwner;
-    private String plotBiome;
-    private String islandName;
+    private String levelName = "";
+    private String plotOwner = "";
+    private String plotBiome  = "";
+    private String islandName = "";
 
     // Protection size
-    private int protectionRange;
-    private int levelHandicap;
-    private int deaths;
+    private int protectionRange = 0;
+    private int levelHandicap = 0;
 
     // IslandSettings
-    private IslandSettings settings;
+    private IslandSettings settings = new IslandSettings(this);
 
-    // IslandData private variables
-    private boolean isDataFetched = false;
-
-    IslandData() {
+    public IslandData() {
     }
 
     @SuppressWarnings("OverridableMethodCallInConstructor")
@@ -89,7 +81,6 @@ public class IslandData implements Cloneable {
         this.protectionRange = plotSize;
 
         this.settings = new IslandSettings(this);
-        this.isDataFetched = true;
     }
 
     private IslandData(String levelName, String plotOwner, Vector2 gridPos, Vector3 spawnPos, int plotSize, int homeId, int islandUniquePlotId) {
@@ -104,6 +95,23 @@ public class IslandData implements Cloneable {
         this.islandUniquePlotId = islandUniquePlotId;
     }
 
+    private IslandData(Row islandObj, Row dataObj) {
+        this.levelName = islandObj.getString("levelName");
+        this.plotOwner = islandObj.getString("player");
+        this.gridCoordinates = Utils.unpairVector2(islandObj.getString("gridPosition"));
+        this.homeCoordinates = Utils.unpairVector3(islandObj.getString("spawnPosition"));
+        this.protectionRange = islandObj.getInteger("gridSize");
+
+        // The most crucial part of this plot
+        this.homeCountId = islandObj.getInteger("islandId");
+        this.islandUniquePlotId = islandObj.getInteger("islandUniqueId");
+
+        this.plotBiome = dataObj.getString("biome");
+        this.isLocked = dataObj.getBoolean("locked");
+        this.levelHandicap = dataObj.getInteger("levelHandicap");
+        this.settings = new IslandSettings(dataObj.getString("protectionData"));
+    }
+
     public static IslandData fromRows(Row row) {
         return new IslandData(
                 row.getString("levelName"),
@@ -115,28 +123,8 @@ public class IslandData implements Cloneable {
                 row.getInteger("islandUniqueId"));
     }
 
-    private void fetchData() {
-        Connection conn = ASkyBlock.get().getDatabase().getConnection();
-
-        Table table = conn.createQuery(TableSet.FETCH_ISLAND_DATA.getQuery())
-                .addParameter("islandUniquePlotId", islandUniquePlotId)
-                .executeAndFetchTable();
-
-        if (table.rows().isEmpty()) {
-            this.plotBiome = "";
-            this.isLocked = false;
-            this.levelHandicap = 0;
-            this.settings = new IslandSettings(this);
-        } else {
-            Row row = table.rows().get(0);
-
-            this.plotBiome = row.getString("biome");
-            this.isLocked = row.getBoolean("locked");
-            this.levelHandicap = row.getInteger("levelHandicap");
-            this.settings = new IslandSettings(row.getString("protectionData"));
-        }
-
-        isDataFetched = true;
+    public static IslandData fromRows(Row islandObject, Row dataObject) {
+        return new IslandData(islandObject, dataObject);
     }
 
     /**
@@ -196,31 +184,7 @@ public class IslandData implements Cloneable {
      * @return IslandSettings
      */
     public IslandSettings getIgsSettings() {
-        if (!isDataFetched) {
-            fetchData();
-        }
-
         return settings;
-    }
-
-    /**
-     * Return if the island is the spawn
-     *
-     * @return bool
-     */
-    public boolean isSpawnIsland() {
-        return isSpawnIsland;
-    }
-
-    /**
-     * Set the safe spawn for this island
-     * Note: This is not mean setting the island binding
-     * location
-     *
-     * @param vec boolean
-     */
-    public void setSpawnIsland(boolean vec) {
-        isSpawnIsland = vec;
     }
 
     /* (non-Javadoc)
@@ -379,14 +343,6 @@ public class IslandData implements Cloneable {
         return levelHandicap;
     }
 
-    public int getDeaths() {
-        return deaths;
-    }
-
-    public void addDeath() {
-        this.deaths++;
-    }
-
     /**
      * Save island data asynchronously
      */
@@ -394,7 +350,7 @@ public class IslandData implements Cloneable {
         ASkyBlock.get().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
             @Override
             public void executeQuery(Connection connection) {
-                connection.createQuery(TableSet.ISLAND_INSERT_MAIN.getQuery())
+                connection.createQuery(TableSet.ISLAND_UPDATE_MAIN.getQuery())
                         .addParameter("islandId", homeCountId)
                         .addParameter("islandUniqueId", islandUniquePlotId)
                         .addParameter("gridPos", Utils.getVector2Pair(gridCoordinates))
@@ -404,11 +360,7 @@ public class IslandData implements Cloneable {
                         .addParameter("player", plotOwner)
                         .executeUpdate();
 
-                if (!isDataFetched) {
-                    return;
-                }
-
-                connection.createQuery(TableSet.ISLAND_INSERT_DATA.getQuery())
+                connection.createQuery(TableSet.ISLAND_UPDATE_DATA.getQuery())
                         .addParameter("islandUniqueId", islandUniquePlotId)
                         .addParameter("plotBiome", plotBiome)
                         .addParameter("isLocked", isLocked)

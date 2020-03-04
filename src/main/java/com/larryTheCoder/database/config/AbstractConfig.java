@@ -24,56 +24,48 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.larryTheCoder.database.config;
 
-package com.larryTheCoder.storage;
+import org.sql2o.Sql2o;
 
-import cn.nukkit.math.Vector2;
+import java.sql.SQLException;
 
-public class IslandDataBuilder {
+/**
+ * @author larryTheCoder
+ */
+public interface AbstractConfig {
 
-    private IslandData data = new IslandData();
+    Sql2o forceConnection();
 
-    public IslandDataBuilder setGridCoordinates(Vector2 vec) {
-        data.setCenter(vec);
+    /**
+     * Opens a connection with the database.
+     *
+     * @return Opened connection
+     * @throws SQLException           if the connection can not be opened
+     * @throws ClassNotFoundException if the driver cannot be found
+     */
+    Sql2o openConnection() throws SQLException, ClassNotFoundException;
 
-        return this;
-    }
+    /**
+     * Checks if a connection is open with the database.
+     *
+     * @return true if the connection is open
+     * @throws SQLException if the connection cannot be checked
+     */
+    boolean checkConnection() throws SQLException;
 
-    public IslandDataBuilder setIslandUniquePlotId(int generatedData) {
-        data.setIslandUniquePlotId(generatedData);
+    /**
+     * Gets the connection with the database.
+     *
+     * @return Connection with the database, null if none
+     */
+    Sql2o getConnection();
 
-        return this;
-    }
-
-    public IslandDataBuilder setPlotOwner(String plotOwner) {
-        data.setPlotOwner(plotOwner);
-
-        return this;
-    }
-
-    public IslandDataBuilder setLevelName(String levelName) {
-        data.setLevelName(levelName);
-
-        return this;
-    }
-
-    public IslandDataBuilder setLocked(boolean isLocked) {
-        data.setLocked(isLocked);
-        return this;
-    }
-
-    public IslandDataBuilder setPlotBiome(String biomeName) {
-        data.setPlotBiome(biomeName);
-        return this;
-    }
-
-    public IslandDataBuilder setIslandName(String islandName) {
-        data.setIslandName(islandName);
-        return this;
-    }
-
-    public IslandData build() {
-        return data;
-    }
-
+    /**
+     * Closes the connection with the database.
+     *
+     * @return true if successful
+     * @throws SQLException if the connection cannot be closed
+     */
+    boolean closeConnection() throws SQLException;
 }

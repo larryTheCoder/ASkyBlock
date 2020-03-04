@@ -33,7 +33,7 @@ import cn.nukkit.event.HandlerList;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector2;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.cache.IslandData;
 
 /**
  * @author larryTheCoder

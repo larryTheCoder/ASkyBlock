@@ -41,9 +41,9 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.events.IslandPostLevelEvent;
 import com.larryTheCoder.events.IslandPreLevelEvent;
 import com.larryTheCoder.island.TopTen;
-import com.larryTheCoder.player.PlayerData;
-import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.storage.WorldSettings;
+import com.larryTheCoder.cache.PlayerData;
+import com.larryTheCoder.cache.IslandData;
+import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.StoreMetadata;
 import com.larryTheCoder.utils.Utils;
@@ -148,7 +148,7 @@ public class LevelCalcTask {
             // Get the handicap
             final int levelHandicap = pd.getLevelHandicap();
             // Get the death handicap
-            int deathHandicap = pd.getDeaths();
+            int deathHandicap = 0;
             // TODO: Get the team deaths.
 
             Level level = Server.getInstance().getLevelByName(pd.getLevelName());

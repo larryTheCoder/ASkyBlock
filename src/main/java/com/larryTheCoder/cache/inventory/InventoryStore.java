@@ -1,6 +1,4 @@
 /*
- * Adapted from the Wizardry License
- *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -24,50 +22,34 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.db2.config;
+package com.larryTheCoder.cache.inventory;
 
-import org.sql2o.Sql2o;
-import org.sql2o.data.Table;
+import cn.nukkit.item.Item;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * @author larryTheCoder
+ * @author tastybento
  */
-public interface AbstractConfig {
+class InventoryStore {
+    private final ArrayList<Item[]> armor = new ArrayList<>();
+    private Map<Integer, Item> inventory;
 
-    Sql2o forceConnection();
+    InventoryStore(Map<Integer, Item> contents, Item[] armorContents) {
+        this.inventory = contents;
+        this.armor.add(armorContents);
+    }
 
-    /**
-     * Opens a connection with the database.
-     *
-     * @return Opened connection
-     * @throws SQLException           if the connection can not be opened
-     * @throws ClassNotFoundException if the driver cannot be found
-     */
-    Sql2o openConnection() throws SQLException, ClassNotFoundException;
+    public Map<Integer, Item> getInventory() {
+        return Collections.unmodifiableMap(inventory);
+    }
 
-    /**
-     * Checks if a connection is open with the database.
-     *
-     * @return true if the connection is open
-     * @throws SQLException if the connection cannot be checked
-     */
-    boolean checkConnection() throws SQLException;
+    @SuppressWarnings("ReturnOfCollectionOrArrayField")
+    ArrayList<Item[]> getArmor() {
+        return armor;
+    }
 
-    /**
-     * Gets the connection with the database.
-     *
-     * @return Connection with the database, null if none
-     */
-    Sql2o getConnection();
-
-    /**
-     * Closes the connection with the database.
-     *
-     * @return true if successful
-     * @throws SQLException if the connection cannot be closed
-     */
-    boolean closeConnection() throws SQLException;
 }

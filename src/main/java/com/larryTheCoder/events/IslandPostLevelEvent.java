@@ -29,7 +29,7 @@ package com.larryTheCoder.events;
 
 import cn.nukkit.Player;
 import cn.nukkit.event.Cancellable;
-import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.cache.IslandData;
 
 /**
  * This event is fired after ASkyBlock calculates an island level and when it sends notification to the player.

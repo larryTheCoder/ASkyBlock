@@ -28,7 +28,7 @@ package com.larryTheCoder.events;
 
 import cn.nukkit.Player;
 import cn.nukkit.level.Location;
-import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.cache.IslandData;
 
 /**
  * Fired when a player exits an island's protected area

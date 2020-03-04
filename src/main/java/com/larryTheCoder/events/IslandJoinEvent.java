@@ -27,7 +27,7 @@
 package com.larryTheCoder.events;
 
 import cn.nukkit.Player;
-import com.larryTheCoder.storage.IslandData;
+import com.larryTheCoder.cache.IslandData;
 
 /**
  * @author larryTheCoder

@@ -36,8 +36,8 @@ import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.scheduler.Task;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.storage.IslandData;
-import com.larryTheCoder.storage.WorldSettings;
+import com.larryTheCoder.cache.IslandData;
+import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 

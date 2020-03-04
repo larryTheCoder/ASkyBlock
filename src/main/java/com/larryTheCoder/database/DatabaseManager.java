@@ -25,11 +25,11 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.larryTheCoder.db2;
+package com.larryTheCoder.database;
 
 import cn.nukkit.api.API;
-import com.larryTheCoder.db2.config.AbstractConfig;
-import com.larryTheCoder.db2.config.MySQLConfig;
+import com.larryTheCoder.database.config.AbstractConfig;
+import com.larryTheCoder.database.config.MySQLConfig;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Utils;
 import org.sql2o.Connection;
@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import static com.larryTheCoder.db2.TableSet.*;
+import static com.larryTheCoder.database.TableSet.*;
 
 /**
  * Improved version of Database class.
@@ -129,7 +129,7 @@ public class DatabaseManager {
             startAsyncPool(1);
         }
 
-        Utils.send(String.format("&6Connected to %s database.&e %sms",
+        Utils.send(String.format("&6Connected to %s database,&e %sms",
                 database instanceof MySQLConfig ? "mysql" : "sqlite",
                 pingDatabase()));
     }
