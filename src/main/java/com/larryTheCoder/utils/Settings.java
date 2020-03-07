@@ -36,8 +36,6 @@ import java.util.*;
  */
 public class Settings {
 
-    public static GameType GAMETYPE = GameType.SKYBLOCK;
-
     // system config
     public static List<String> challengeLevels = new ArrayList<>();
 

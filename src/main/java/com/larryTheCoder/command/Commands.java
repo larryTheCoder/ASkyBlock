@@ -77,7 +77,11 @@ public class Commands extends PluginCommand<ASkyBlock> {
         }
 
         if (args.length == 0) {
-            sender.sendMessage("§cUnknown command. Please use /is help for a list of commands");
+            if (p == null) {
+                sender.sendMessage("§cUnknown command. Please use /is help for a list of commands");
+            } else {
+                getPlugin().getIslandManager().handleIslandCommand(p, false);
+            }
 
             return true;
         }

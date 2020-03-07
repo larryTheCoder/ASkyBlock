@@ -176,7 +176,10 @@ public class DatabaseManager {
                     final Exception resultFinal = result;
                     final DatabaseImpl dbImpl = consumer;
 
-                    TaskManager.runTask(() -> dbImpl.onCompletion(resultFinal));
+                    TaskManager.runTask(() -> {
+                        
+                        dbImpl.onCompletion(resultFinal);
+                    });
                 }
 
                 try {

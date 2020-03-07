@@ -49,17 +49,20 @@ public class PlayerData implements Cloneable {
     @Getter
     public final String playerXUID;
 
-    @Setter @Getter
+    @Setter
+    @Getter
     public int resetLeft;
 
-    @Setter @Getter
+    @Setter
+    @Getter
     public int islandLevel;
 
     private boolean challengeFetched = false;
     private final HashMap<String, Boolean> challengeList = new HashMap<>();
     private final HashMap<String, Integer> challengeListTimes = new HashMap<>();
 
-    @Getter @Setter
+    @Getter
+    @Setter
     public String locale;
     @Getter
     public List<String> banList;
@@ -272,6 +275,12 @@ public class PlayerData implements Cloneable {
             challengeList.put(challenges, false);
             challengeListTimes.put(challenges, 0);
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("PlayerData(playerName=%s, playerXUID=%s, resetLeft=%s, islandLevel=%s, locale=%s)",
+                playerName, playerXUID, resetLeft, islandLevel, locale);
     }
 
     /**

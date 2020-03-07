@@ -201,6 +201,9 @@ public class GenericCategory extends SubCategory {
                 sender.sendMessage("§7GitHub link: §6" + prep.getProperty("git.remote.origin.url", "§cUnverified"));
                 sender.sendMessage("§7Last commit by: §6" + prep.getProperty("git.commit.user.name", "Unknown"));
                 sender.sendMessage("-- EOL");
+                break;
+            case "status":
+                // TODO: SkyBlock status and stats.
         }
     }
 

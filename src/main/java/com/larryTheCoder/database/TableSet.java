@@ -80,7 +80,7 @@ public enum TableSet {
     FOR_TABLE_OPTIMIZE_B("SET GLOBAL innodb_file_format=Barracuda"),
 
     FETCH_WORLDS("SELECT worldName FROM worldList"),
-    FETCH_PLAYER_MAIN("SELECT * FROM player WHERE player = :plotOwner"),
+    FETCH_PLAYER_MAIN("SELECT * FROM player WHERE playerName = :plotOwner"),
     FETCH_PLAYER_DATA("SELECT * FROM challenges WHERE player = :playerName"),
     FETCH_ISLAND_UNIQUE("SELECT * FROM island WHERE islandUniqueId = :islandUniqueId AND levelName = :levelName"),
     FETCH_LEVEL_PLOT("SELECT * FROM island WHERE levelName = :levelName AND islandUniqueId = :islandId"),
@@ -94,7 +94,7 @@ public enum TableSet {
     // Therefore we must INSERT data precisely.
     ISLAND_INSERT_MAIN("INSERT %IGNORE INTO island(islandId, islandUniqueId, gridPosition, spawnPosition, gridSize, levelName, player, islandName) VALUES (:islandId, :islandUniqueId, :gridPos, :spawnPos, :gridSize, :levelName, :player, :islandName) %DUPLICATE_A islandId = :islandId, gridPosition = :gridPos, spawnPosition` = :spawnPos,`gridSize` = :gridSize, `levelName` = :levelName, `player` = :plotOwner, islandName = :islandName"),
     ISLAND_INSERT_DATA("INSERT %IGNORE INTO islandData(dataId, biome, locked, protectionData, levelHandicap) VALUES (:islandUniqueId, :plotBiome, :isLocked, :protectionData, :levelHandicap) %DUPLICATE_B biome = :plotBiome, locked = :isLocked, protectionData = :protectionData, levelHandicap = :levelHandicap"),
-    PLAYER_INSERT_MAIN("INSERT %IGNORE INTO player(playerName, playerUUID, locale, banList, resetAttempts, islandLevels) VALUES (:playerName, :playerUUID, :locale, :banList, :resetLeft, :islandLevels)"),
+    PLAYER_INSERT_MAIN("INSERT %IGNORE INTO player(playerName, playerUUID, locale, banList, resetAttempts) VALUES (:playerName, :playerUUID, :locale, :banList, :resetLeft)"),
     PLAYER_INSERT_DATA("INSERT %IGNORE INTO challenges(player, challengesList, challengesTimes) VALUES (:playerName, :challengesList, :challengesTimes %DUPLICATE_D challengesList = :challengesList, challengesTimes = :challengesTimes)"),
 
     ISLAND_UPDATE_MAIN("UPDATE island SET islandId = :islandId, gridPosition = :gridPos, spawnPosition = :spawnPos, gridSize = :gridSize, levelName = :levelName, player = :plotOwner, islandName = :islandName WHERE islandUniqueId = :islandUniqueId"),
