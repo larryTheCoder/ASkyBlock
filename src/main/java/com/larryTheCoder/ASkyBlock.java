@@ -44,7 +44,6 @@ import com.larryTheCoder.database.config.SQLiteConfig;
 import com.larryTheCoder.integration.economy.Economy;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
-import com.larryTheCoder.island.TopTen;
 import com.larryTheCoder.listener.ChatHandler;
 import com.larryTheCoder.listener.IslandListener;
 import com.larryTheCoder.listener.LavaCheck;
@@ -63,7 +62,7 @@ import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.ConfigManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
-import com.larryTheCoder.utils.updater.Updater;
+import com.larryTheCoder.updater.Updater;
 import lombok.Getter;
 import org.sql2o.Connection;
 import org.sql2o.Query;
@@ -153,7 +152,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         getDatabase().shutdownDB();
         getMessages().saveMessages();
         LavaCheck.clearStats();
-        TopTen.topTenSave();
+        //TopTen.topTenSave();
         getTManager().saveData();
 
         Utils.send("&cASkyBlock has been successfully disabled. Goodbye!");
@@ -228,7 +227,7 @@ public class ASkyBlock extends ASkyBlockAPI {
             // Hmm we will never know lol
             return;
         }
-        // To developers: Don't remove this please.\
+        // To developers: Don't remove this please.
         Utils.sendDebug("§7ASkyBlock Git Information:");
         Utils.sendDebug("§7Build number: " + properties.getProperty("git.commit.id.describe", ""));
         Utils.sendDebug("§7Commit number: " + properties.getProperty("git.commit.id"));
@@ -258,6 +257,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         Utils.EnsureDirectory(Utils.DIRECTORY);
         Utils.EnsureDirectory(Utils.LOCALES_DIRECTORY);
         Utils.EnsureDirectory(Utils.SCHEMATIC_DIRECTORY);
+        Utils.EnsureDirectory(Utils.UPDATES_DIRECTORY);
 
         // Use common sense on every damn thing
         saveResource("config.yml");

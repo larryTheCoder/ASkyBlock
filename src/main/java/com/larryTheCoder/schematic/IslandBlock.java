@@ -41,11 +41,6 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import org.jnbt.*;
-import org.json.simple.JSONValue;
-import org.json.simple.parser.ContainerFactory;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
 import java.util.*;
 
 import static com.larryTheCoder.utils.Utils.TASK_SCHEDULED;
@@ -228,108 +223,7 @@ class IslandBlock extends BlockMinecraftId {
             text.add(line);
         }
 
-        JSONParser parser = new JSONParser();
-        ContainerFactory containerFactory = new ContainerFactory() {
-            @Override
-            public List createArrayContainer() {
-                return new LinkedList<>();
-            }
-
-            @Override
-            public Map createObjectContainer() {
-                return new LinkedHashMap<>();
-            }
-
-        };
-        // This just removes all the JSON formatting and provides the raw text
-        for (int line = 0; line < 4; line++) {
-            String lineText = "";
-            if (!text.get(line).equals("\"\"") && !text.get(line).isEmpty()) {
-                //String lineText = text.get(line).replace("{\"extra\":[\"", "").replace("\"],\"text\":\"\"}", "");
-                //Bukkit.getLogger().info("DEBUG: sign text = '" + text.get(line) + "'");
-                if (text.get(line).startsWith("{")) {
-                    // JSON string
-                    try {
-
-                        Map json = (Map) parser.parse(text.get(line), containerFactory);
-                        List list = (List) json.get("extra");
-                        //System.out.println("DEBUG1:" + JSONValue.toJSONString(list));
-                        if (list != null) {
-                            Iterator iter = list.iterator();
-                            StringBuilder lineTextBuilder = new StringBuilder();
-                            while (iter.hasNext()) {
-                                Object next = iter.next();
-                                String format = JSONValue.toJSONString(next);
-                                //System.out.println("DEBUG2:" + format);
-                                // This doesn't see right, but appears to be the easiest way to identify this string as JSON...
-                                if (format.startsWith("{")) {
-                                    // JSON string
-                                    Map jsonFormat = (Map) parser.parse(format, containerFactory);
-                                    for (Object o : jsonFormat.entrySet()) {
-                                        Map.Entry entry = (Map.Entry) o;
-                                        //System.out.println("DEBUG3:" + entry.getKey() + "=>" + entry.getValue());
-                                        String key = entry.getKey().toString();
-                                        String value = entry.getValue().toString();
-                                        if (key.equalsIgnoreCase("color")) {
-                                            try {
-                                                lineTextBuilder.append(TextFormat.valueOf(value.toUpperCase()));
-                                            } catch (Exception noColor) {
-                                                Utils.send("Unknown color " + value + " in sign when pasting schematic, skipping...");
-                                            }
-                                        } else if (key.equalsIgnoreCase("text")) {
-                                            lineTextBuilder.append(value);
-                                        } else // Formatting - usually the value is always true, but check just in case
-                                            if (key.equalsIgnoreCase("obfuscated") && value.equalsIgnoreCase("true")) {
-                                                lineTextBuilder.append(TextFormat.OBFUSCATED);
-                                            } else if (key.equalsIgnoreCase("underlined") && value.equalsIgnoreCase("true")) {
-                                                lineTextBuilder.append(TextFormat.UNDERLINE);
-                                            } else {
-                                                // The rest of the formats
-                                                try {
-                                                    lineTextBuilder.append(TextFormat.valueOf(key.toUpperCase()));
-                                                } catch (Exception noFormat) {
-                                                    // Ignore
-                                                    //System.out.println("DEBUG3:" + key + "=>" + value);
-                                                    Utils.send("Unknown format " + value + " in sign when pasting schematic, skipping...");
-                                                }
-                                            }
-                                    }
-                                } else// This is unformatted text. It is included in "". A reset is required to clear
-                                // any previous formatting
-                                {
-                                    if (format.length() > 1) {
-                                        lineTextBuilder.append(TextFormat.RESET).append(format, format.indexOf('"') + 1, format.lastIndexOf('"'));
-                                    }
-                                }
-                            }
-                            lineText = lineTextBuilder.toString();
-                        } else {
-                            // No extra tag
-                            json = (Map) parser.parse(text.get(line), containerFactory);
-                            String value = (String) json.get("text");
-                            //System.out.println("DEBUG text only?:" + value);
-                            lineText += value;
-                        }
-                    } catch (ParseException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                } else // This is unformatted text (not JSON). It is included in "".
-                    if (text.get(line).length() > 1) {
-                        try {
-                            lineText = text.get(line).substring(text.get(line).indexOf('"') + 1, text.get(line).lastIndexOf('"'));
-                        } catch (Exception e) {
-                            //There may not be those "'s, so just use the raw line
-                            lineText = text.get(line);
-                        }
-                    } else {
-                        // just in case it isn't - show the raw line
-                        lineText = text.get(line);
-                    }
-                //Bukkit.getLogger().info("Line " + line + " is " + lineText);
-            }
-            signText.add(lineText);
-        }
+        // TODO: Find out doable way to convert json based sign into raw texts.
 
         boolean change = true;
         for (String texts : signText) {

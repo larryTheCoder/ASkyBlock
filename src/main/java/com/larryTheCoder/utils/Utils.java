@@ -54,8 +54,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Utils {
 
-    public static final String SCHEMATIC_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "schematics";
-    public static final String LOCALES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "locale";
+    public static final String UPDATES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "updates" + File.separator;
+    public static final String SCHEMATIC_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "schematics" + File.separator;
+    public static final String LOCALES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "locale" + File.separator;
     public static final String DIRECTORY = ASkyBlock.get().getDataFolder() + File.separator;
     public static final Map<String, Runnable> TASK_SCHEDULED = new HashMap<>();
     private static final ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap<>();

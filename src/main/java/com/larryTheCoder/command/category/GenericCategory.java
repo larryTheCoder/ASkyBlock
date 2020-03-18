@@ -33,10 +33,11 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Location;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.cache.PlayerData;
 import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.island.TopTen;
 import com.larryTheCoder.locales.ASlocales;
-import com.larryTheCoder.cache.PlayerData;
+import com.larryTheCoder.updater.Updater;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import org.sql2o.Connection;
@@ -76,6 +77,8 @@ public class GenericCategory extends SubCategory {
                 return sender.hasPermission("is.topten");
             case "about":
                 return true;
+            case "download":
+                return sender.hasPermission("is.command.download");
             default:
                 return false;
         }
@@ -201,6 +204,15 @@ public class GenericCategory extends SubCategory {
                 sender.sendMessage("§7GitHub link: §6" + prep.getProperty("git.remote.origin.url", "§cUnverified"));
                 sender.sendMessage("§7Last commit by: §6" + prep.getProperty("git.commit.user.name", "Unknown"));
                 sender.sendMessage("-- EOL");
+                break;
+            case "download":
+                if (Updater.getUpdateStatus() == Updater.NEW_UPDATE_FOUND) {
+                    sender.sendMessage(TextFormat.RED + "No new updates were found.");
+
+                    break;
+                }
+
+                Updater.scheduleDownload(sender);
                 break;
             case "status":
                 // TODO: SkyBlock status and stats.

@@ -25,16 +25,21 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package org.json.simple;
+package com.larryTheCoder.utils;
 
-/**
- * Beans that support customized output of JSON text shall implement this interface.
- *
- * @author FangYidong<fangyidong       @       yahoo.com.cn>
- */
-public interface JSONAware {
-    /**
-     * @return JSON text
-     */
-    String toJSONString();
+public class Statistics {
+    // Cool statistics and aesthetics stuff for real high end
+    // Technology experience.
+
+    // Uptime: 0ms, 12ms, 20ms,
+    // Software Instability: Minimum
+    // Database Response Rate: Excellent
+
+    public void databaseReply() {
+        // TODO: Read database replies.
+    }
+
+    public void cacheReply() {
+        // TODO: Read cache reply rate.
+    }
 }
