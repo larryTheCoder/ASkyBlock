@@ -36,6 +36,11 @@ import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
+import com.larryTheCoder.cache.FastCache;
+import com.larryTheCoder.cache.IslandData;
+import com.larryTheCoder.cache.PlayerData;
+import com.larryTheCoder.cache.inventory.InventorySave;
+import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.command.Commands;
 import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.database.config.AbstractConfig;
@@ -50,19 +55,14 @@ import com.larryTheCoder.listener.LavaCheck;
 import com.larryTheCoder.listener.PlayerEvent;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.locales.ASlocales;
-import com.larryTheCoder.cache.PlayerData;
 import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.schematic.SchematicHandler;
-import com.larryTheCoder.cache.FastCache;
-import com.larryTheCoder.cache.inventory.InventorySave;
-import com.larryTheCoder.cache.IslandData;
-import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.task.TaskManager;
+import com.larryTheCoder.updater.Updater;
 import com.larryTheCoder.utils.ConfigManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
-import com.larryTheCoder.updater.Updater;
 import lombok.Getter;
 import org.sql2o.Connection;
 import org.sql2o.Query;
@@ -79,10 +79,6 @@ import java.util.Properties;
 import static com.larryTheCoder.database.TableSet.*;
 
 /**
- * High quality SkyBlock mainframe
- * Fully documented for better looking
- * in your eyes
- *
  * @author larryTheCoder
  */
 public class ASkyBlock extends ASkyBlockAPI {
@@ -140,8 +136,14 @@ public class ASkyBlock extends ASkyBlockAPI {
         // Only defaults
         initIslands();
         registerObject();
+        test();
 
         getServer().getLogger().info(getPrefix() + "§aASkyBlock has been successfully enabled!");
+    }
+
+    private void test() {
+        List<IslandData> data = getFastCache().getIslandsFrom("larryZ00");
+        Utils.sendDebug("Island Size: " + data.size());
     }
 
     @Override
@@ -309,12 +311,14 @@ public class ASkyBlock extends ASkyBlockAPI {
 
             ArrayList<WorldSettings> settings = new ArrayList<>();
             for (String levelName : levels) {
+                String levelSafeName = levelName.replace(" ", "_");
+
                 Utils.loadLevelSeed(levelName);
 
                 Level level = getServer().getLevelByName(levelName);
                 WorldSettings worldSettings;
-                if (worldConfig.isSection(levelName)) {
-                    ConfigSection section = worldConfig.getSection(levelName);
+                if (worldConfig.isSection(levelSafeName)) {
+                    ConfigSection section = worldConfig.getSection(levelSafeName);
                     worldSettings = WorldSettings.builder()
                             .setPermission(section.getString("permission"))
                             .setPlotMax(section.getInt("maxHome"))
@@ -337,6 +341,8 @@ public class ASkyBlock extends ASkyBlockAPI {
                 loadedLevel.add(levelName);
             }
             this.level = settings;
+
+            saveLevel(false);
         });
     }
 

@@ -75,4 +75,8 @@ public class IslandDataBuilder {
         return data;
     }
 
+    public IslandDataBuilder setIslandHomeId(int islandHomeId) {
+        data.setHomeCountId(islandHomeId);
+        return this;
+    }
 }

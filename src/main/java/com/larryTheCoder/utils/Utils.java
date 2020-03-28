@@ -306,6 +306,8 @@ public class Utils {
      * @return the compressed integer
      */
     public static String getVector3Pair(Vector3 vec) {
+        if (vec == null) return "0:0:0";
+
         return vec.getFloorX() + ":" + vec.getFloorY() + ":" + vec.getFloorZ();
     }
 
@@ -317,6 +319,8 @@ public class Utils {
      * @return the compressed integer
      */
     public static String getVector2Pair(Vector2 vec) {
+        if (vec == null) return "0:0";
+
         return vec.getFloorX() + ":" + vec.getFloorY();
     }
 

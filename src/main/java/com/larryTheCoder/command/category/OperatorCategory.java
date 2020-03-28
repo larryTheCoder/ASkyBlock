@@ -34,10 +34,10 @@ import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.SkyBlockGenerator;
-import com.larryTheCoder.listener.LavaCheck;
-import com.larryTheCoder.cache.PlayerData;
 import com.larryTheCoder.cache.IslandData;
+import com.larryTheCoder.cache.PlayerData;
 import com.larryTheCoder.cache.settings.WorldSettings;
+import com.larryTheCoder.listener.LavaCheck;
 import com.larryTheCoder.task.DeleteIslandTask;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Utils;
@@ -59,7 +59,7 @@ public class OperatorCategory extends SubCategory {
 
     @Override
     public List<String> getCommands() {
-        return Collections.singletonList("help");
+        return Arrays.asList("help", "generate", "kick", "rename", "delete", "clear", "cobblestats");
     }
 
     @Override
@@ -92,25 +92,36 @@ public class OperatorCategory extends SubCategory {
                     break;
                 }
 
-                if (getPlugin().loadedLevel.contains(args[1])) {
+                StringBuilder lvlName = new StringBuilder();
+                for (int i = 1; i < args.length; i++) {
+                    lvlName.append(args[i]).append(" ");
+                }
+
+                String levelName = lvlName.toString();
+                String levelSafeName = levelName.replace(" ", "_");
+
+                if (getPlugin().loadedLevel.contains(levelName)) {
                     sender.sendMessage(getPlugin().getPrefix() + getPlugin().getLocale(pl).errorLevelGenerated);
                     break;
-                } else if (!getPlugin().getServer().isLevelGenerated(args[1])) {
-                    getPlugin().getServer().generateLevel(args[1], System.currentTimeMillis(), SkyBlockGenerator.class);
-                    getPlugin().getServer().loadLevel(args[1]);
-                    WorldSettings world = new WorldSettings(getPlugin().getServer().getLevelByName(args[1]));
+                } else if (!getPlugin().getServer().isLevelGenerated(levelName)) {
+                    getPlugin().getServer().generateLevel(levelName, System.currentTimeMillis(), SkyBlockGenerator.class);
+                    getPlugin().getServer().loadLevel(levelName);
+
+                    WorldSettings world = new WorldSettings(getPlugin().getServer().getLevelByName(levelName));
                     Config cfg = new Config(new File(getPlugin().getDataFolder(), "worlds.yml"), Config.YAML);
-                    cfg.set(args[1] + ".permission", world.getPermission());
-                    cfg.set(args[1] + ".maxHome", world.getMaximumIsland());
-                    cfg.set(args[1] + ".protectionRange", world.getProtectionRange());
-                    cfg.set(args[1] + ".stopTime", world.isStopTime());
-                    cfg.set(args[1] + ".seaLevel", world.getSeaLevel());
+                    cfg.set(levelSafeName + ".permission", world.getPermission());
+                    cfg.set(levelSafeName + ".maxHome", world.getMaximumIsland());
+                    cfg.set(levelSafeName + ".protectionRange", world.getProtectionRange());
+                    cfg.set(levelSafeName + ".stopTime", world.isStopTime());
+                    cfg.set(levelSafeName + ".seaLevel", world.getSeaLevel());
                     cfg.save();
+
                     getPlugin().saveLevel(false);
                     getPlugin().getLevel().add(world);
-                    sender.sendMessage(getPlugin().getPrefix() + getPlugin().getLocale(pl).generalSuccess);
+                    sender.sendMessage(getPlugin().getPrefix() + String.format(getPlugin().getLocale(pl).generateWorldSuccess, levelName));
                     break;
                 }
+
                 sender.sendMessage(getPlugin().getPrefix() + getPlugin().getLocale(pl).errorLevelGenerated);
                 break;
             case "clear": // TODO: Is it reasonable to use this command anymore?

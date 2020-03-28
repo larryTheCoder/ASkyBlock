@@ -128,8 +128,9 @@ public final class ASlocales {
     public String createSuccess = "§aSuccessfully created you an island!";
     public String resetSuccess = "§aSuccessfully cleared your island!";
     public String renameSuccess = "§aSuccessfully renamed island!";
-    private String setWorldSuccess = "§aSuccessfully changed island world location!";
+    public String setWorldSuccess = "§aSuccessfully changed island world location!";
     public String setHomeSuccess = "§aSuccessfully changed island home location!";
+    public String generateWorldSuccess = "§aSuccessfully generated SkyBlock world, {0}!";
     public String generalSuccess = "§aSuccess!";
     public String biomeChangeComplete = "§aChanged your island biome to: [biome]";
     public String inviteSuccess = "§aInvited [player] to your island.";

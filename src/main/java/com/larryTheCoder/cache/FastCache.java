@@ -35,6 +35,7 @@ import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Utils;
 import lombok.Getter;
+import lombok.NonNull;
 import org.sql2o.Connection;
 import org.sql2o.data.Row;
 import org.sql2o.data.Table;
@@ -66,11 +67,11 @@ public class FastCache {
         this.loadFastCache();
     }
 
-    public final void addAllCacheData(List<FastCacheData> list) {
+    private void addAllCacheData(List<FastCacheData> list) {
         dataCache.addAll(list);
     }
 
-    public void loadFastCache() {
+    private void loadFastCache() {
         Config config = new Config(Utils.DIRECTORY + "cache.yml", Config.YAML);
 
         plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
@@ -142,67 +143,27 @@ public class FastCache {
     /**
      * Retrieves an information of an island with a given position.
      * This is a thread blocking operation if the information were not found in cache.
-     *
-     * @param pos The position of an island.
-     * @return The desired IslandData object.
      */
     public IslandData getIslandData(Position pos) {
         int id = plugin.getIslandManager().generateIslandKey(pos.getFloorX(), pos.getFloorZ(), pos.getLevel().getName());
 
-        FastCacheData result = dataCache.stream().filter(i -> i.anyIslandMatch(id)).findFirst().orElse(null);
+        FastCacheData result = dataCache.stream().filter(i -> i.anyIslandUidMatch(id)).findFirst().orElse(null);
         if (result == null) {
             Connection connection = plugin.getDatabase().getConnection();
 
             List<IslandData> islandList = parseData(connection.createQuery(FETCH_LEVEL_PLOT.getQuery())
-                    .addParameter("pName", id)
+                    .addParameter("islandId", id)
                     .addParameter("levelName", pos.getLevel().getName())
                     .executeAndFetchTable().rows(), connection);
 
             putIslandUnspecified(islandList);
 
-            result = dataCache.stream().filter(i -> i.anyIslandMatch(id)).findFirst().orElse(null);
+            result = dataCache.stream().filter(i -> i.anyIslandUidMatch(id)).findFirst().orElse(null);
 
-            return result == null ? null : result.getIslandById(1);
+            return result == null ? null : result.getIslandByUId(id);
         }
 
-        return result.getIslandById(1);
-    }
-
-    /**
-     * Retrieves an information of an island with a given position.
-     *
-     * @param pos          The position of an island.
-     * @param resultOutput Result of the search query.
-     */
-    public void getIslandData(Position pos, Consumer<IslandData> resultOutput) {
-        int id = plugin.getIslandManager().generateIslandKey(pos.getFloorX(), pos.getFloorZ(), pos.getLevel().getName());
-
-        FastCacheData result = dataCache.stream().filter(i -> i.anyIslandMatch(id)).findFirst().orElse(null);
-        if (result == null) {
-            plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
-                @Override
-                public void executeQuery(Connection connection) {
-                    List<IslandData> islandList = parseData(connection.createQuery(FETCH_LEVEL_PLOT.getQuery())
-                            .addParameter("pName", id)
-                            .addParameter("levelName", pos.getLevel().getName())
-                            .executeAndFetchTable().rows(), connection);
-
-                    putIslandUnspecified(islandList);
-                }
-
-                @Override
-                public void onCompletion(Exception err) {
-                    FastCacheData result = dataCache.stream().filter(i -> i.anyIslandMatch(id)).findFirst().orElse(null);
-
-                    IslandData pd = result == null ? null : result.getIslandById(1);
-
-                    resultOutput.accept(pd);
-                }
-            });
-            return;
-        }
-
-        resultOutput.accept(result.getIslandById(1));
+        return result.getIslandByUId(id);
     }
 
     public IslandData getIslandData(String playerName) {
@@ -214,9 +175,16 @@ public class FastCache {
         if (result == null) {
             Connection connection = plugin.getDatabase().getConnection();
 
-            List<IslandData> islandList = parseData(connection.createQuery(FETCH_ISLAND_PLOT.getQuery())
+            List<Row> data = connection.createQuery(FETCH_ISLAND_PLOT.getQuery())
                     .addParameter("pName", playerName)
-                    .executeAndFetchTable().rows(), connection);
+                    .addParameter("islandId", homeNum)
+                    .executeAndFetchTable().rows();
+
+            if (data == null || data.isEmpty()) {
+                return null;
+            }
+
+            List<IslandData> islandList = parseData(data, connection);
 
             saveIntoDb(playerName, islandList);
 
@@ -224,6 +192,69 @@ public class FastCache {
         }
 
         return result.getIslandById(homeNum);
+    }
+
+    /**
+     * Retrieves all islands from this player.
+     * This method is a thread blocking operation if the given name is not found in the cache.
+     */
+    @NonNull
+    public List<IslandData> getIslandsFrom(String plName) {
+        FastCacheData result = dataCache.stream().filter(i -> i.anyMatch(plName)).findFirst().orElse(null);
+        if (result == null) {
+            Connection connection = plugin.getDatabase().getConnection();
+
+            List<IslandData> islandList = parseData(connection.createQuery(FETCH_ISLAND_PLOTS.getQuery())
+                    .addParameter("pName", plName)
+                    .executeAndFetchTable().rows(), connection);
+
+            putIslandUnspecified(islandList);
+
+            return islandList;
+        }
+
+        return new ArrayList<>(result.islandData.values());
+    }
+
+    /**
+     * Retrieves an information of an island with a given position.
+     */
+    public void getIslandData(Position pos, Consumer<IslandData> resultOutput) {
+        int id = plugin.getIslandManager().generateIslandKey(pos.getFloorX(), pos.getFloorZ(), pos.getLevel().getName());
+
+        FastCacheData result = dataCache.stream().filter(i -> i.anyIslandUidMatch(id)).findFirst().orElse(null);
+        if (result == null) {
+            plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
+                List<IslandData> islandList = null;
+
+                @Override
+                public void executeQuery(Connection connection) {
+                    islandList = parseData(connection.createQuery(FETCH_LEVEL_PLOT.getQuery())
+                            .addParameter("islandId", id)
+                            .addParameter("levelName", pos.getLevel().getName())
+                            .executeAndFetchTable().rows(), connection);
+                }
+
+                @Override
+                public void onCompletion(Exception err) {
+                    if (err != null) {
+                        resultOutput.accept(null);
+
+                        err.printStackTrace();
+                        return;
+                    }
+                    putIslandUnspecified(islandList);
+
+                    FastCacheData result = dataCache.stream().filter(i -> i.anyIslandUidMatch(id)).findFirst().orElse(null);
+
+                    IslandData pd = result == null ? null : result.getIslandById(id);
+                    resultOutput.accept(pd);
+                }
+            });
+            return;
+        }
+
+        resultOutput.accept(result.getIslandByUId(id));
     }
 
     public void getIslandData(String playerName, Consumer<IslandData> resultOutput) {
@@ -249,6 +280,50 @@ public class FastCache {
         resultOutput.accept(result.getIslandById(homeNum));
     }
 
+    /**
+     * Retrieves all islands from this player
+     * This method is not a thread-blocking operation.
+     */
+    public void getIslandFrom(String plName, Consumer<List<IslandData>> resultOutput) {
+        FastCacheData result = dataCache.stream().filter(i -> i.anyMatch(plName)).findFirst().orElse(null);
+        if (result == null) {
+            plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
+                List<IslandData> islandList = null;
+
+                @Override
+                public void executeQuery(Connection connection) {
+                    islandList = parseData(connection.createQuery(FETCH_ISLAND_PLOTS.getQuery())
+                            .addParameter("pName", plName)
+                            .executeAndFetchTable().rows(), connection);
+                }
+
+                @Override
+                public void onCompletion(Exception exception) {
+                    if (exception != null) {
+                        resultOutput.accept(null);
+
+                        exception.printStackTrace();
+                        return;
+                    }
+                    putIslandUnspecified(islandList);
+
+                    resultOutput.accept(islandList);
+                }
+            });
+
+            return;
+        }
+
+        resultOutput.accept(new ArrayList<>(result.islandData.values()));
+    }
+
+    /**
+     * Fetch a player data, this is an asynchronous operation.
+     * The result output is being stored as it works as a function for the command.
+     *
+     * @param pl           The target player class
+     * @param resultOutput The result
+     */
     public void getPlayerData(Player pl, Consumer<PlayerData> resultOutput) {
         getPlayerData(pl.getName(), resultOutput);
     }
@@ -257,7 +332,7 @@ public class FastCache {
      * Fetch a player data, this is an asynchronous operation.
      * The result output is being stored as it works as a function for the command.
      *
-     * @param player       The target player
+     * @param player       The target player name
      * @param resultOutput The result
      */
     public void getPlayerData(String player, Consumer<PlayerData> resultOutput) {
@@ -317,19 +392,17 @@ public class FastCache {
         for (IslandData pd : data) {
             int keyVal = 0;
 
-            if (playerNames[0].isEmpty()) {
+            if (playerNames[0] == null || playerNames[0].isEmpty()) {
                 playerNames[0] = pd.getPlotOwner();
                 cacheObject[0] = new FastCacheData(pd.getPlotOwner());
             } else {
-                while (playerNames[keyVal].equalsIgnoreCase(pd.getPlotOwner()) || playerNames[keyVal].isEmpty()) {
-                    if (keyVal++ > 30) break;
+                // If the array of this key is null, then there is no player in this value.
+                while (playerNames[keyVal] != null) {
+                    keyVal++;
                 }
 
-                // If the array of this key is empty, then there is no player in this value.
-                if (playerNames[keyVal].isEmpty()) {
-                    playerNames[keyVal] = pd.getPlotOwner();
-                    cacheObject[keyVal] = new FastCacheData(pd.getPlotOwner());
-                }
+                playerNames[keyVal] = pd.getPlotOwner();
+                cacheObject[keyVal] = new FastCacheData(pd.getPlotOwner());
             }
 
             cacheObject[keyVal].addIslandData(pd);
@@ -338,6 +411,10 @@ public class FastCache {
         dataCache.addAll(Arrays.asList(cacheObject));
     }
 
+    /**
+     * Adds an island data into this player cache data.
+     * This method is used internally. Using this function may lead to severe critical errors.
+     */
     public void addIslandIntoDb(String playerName, IslandData newData) {
         FastCacheData object = dataCache.stream().filter(i -> i.anyMatch(playerName)).findFirst().orElse(null);
         if (object == null) {
@@ -378,6 +455,8 @@ public class FastCache {
      * @param data PlayerData for this player
      */
     public void saveIntoDb(PlayerData data) {
+        if (data == null) return;
+
         FastCacheData object = dataCache.stream().filter(i -> i.anyMatch(data.getPlayerName())).findFirst().orElse(null);
         if (object == null) {
             object = new FastCacheData(data.getPlayerName());
@@ -410,11 +489,11 @@ public class FastCache {
         return islandList;
     }
 
-    public static class FastCacheData {
+    private static class FastCacheData {
 
         private Timestamp lastUpdatedQuery;
 
-        private String ownedBy = "";
+        private String ownedBy;
 
         @Getter
         private Map<Integer, IslandData> islandData = new HashMap<>();
@@ -433,14 +512,14 @@ public class FastCache {
         }
 
         public void addIslandData(IslandData newData) {
-            Preconditions.checkState(this.islandData.containsKey(newData.getIslandUniquePlotId()), "IslandData already exists in this cache.");
+            Preconditions.checkState(!islandData.containsKey(newData.getIslandUniquePlotId()), "IslandData already exists in this cache.");
             updateTime();
 
             islandData.put(newData.getIslandUniquePlotId(), newData);
         }
 
         void setPlayerData(PlayerData playerData) {
-            Preconditions.checkState(this.playerData != null, "PlayerData already exists in this cache.");
+            Preconditions.checkState(this.playerData == null, "PlayerData already exists in this cache.");
             updateTime();
 
             this.playerData = playerData;
@@ -450,6 +529,12 @@ public class FastCache {
             updateTime();
 
             return playerData == null ? ownedBy.equalsIgnoreCase(pl) : playerData.getPlayerName().equalsIgnoreCase(pl);
+        }
+
+        boolean anyIslandUidMatch(int islandUId) {
+            updateTime();
+
+            return islandData.values().stream().anyMatch(o -> o.getIslandUniquePlotId() == islandUId);
         }
 
         boolean anyIslandMatch(int islandId) {

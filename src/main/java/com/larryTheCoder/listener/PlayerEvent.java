@@ -133,6 +133,8 @@ public class PlayerEvent implements Listener {
                             .addParameter("resetLeft", Settings.reset)
                             .addParameter("banList", "")
                             .executeUpdate();
+
+                    Utils.sendDebug("Executed.");
                 }
 
                 @Override

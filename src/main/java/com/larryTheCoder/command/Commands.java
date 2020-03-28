@@ -78,7 +78,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
 
         if (args.length == 0) {
             if (p == null) {
-                sender.sendMessage("§cUnknown command. Please use /is help for a list of commands");
+                sender.sendMessage(String.format("§cUnknown command. Please use /%s help for a list of commands", label));
             } else {
                 getPlugin().getIslandManager().handleIslandCommand(p, false);
             }
@@ -109,7 +109,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
 
         SubCategory cmdCategory = commandCategory.stream().filter(i -> i.getCommands().contains(args[0].toLowerCase())).findFirst().orElse(null);
         if (cmdCategory == null || !cmdCategory.canUse(sender, args[0])) {
-            sender.sendMessage("§cUnknown command. Please use /is help for a list of commands");
+            sender.sendMessage(String.format("§cUnknown command. Please use /%s help for a list of commands", label));
 
             return true;
         }

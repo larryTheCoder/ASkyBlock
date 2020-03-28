@@ -99,24 +99,31 @@ public class ServerPanel implements Listener {
                     break;
                 }
 
+                // MAX: 6
+                // MIN: 4
                 FormWindowCustom windowCustom = (FormWindowCustom) event.getWindow();
                 // Get the response form from player
                 FormResponseCustom response = windowCustom.getResponse();
 
                 // The input respond
                 int responseId = 1;
+
+                // Value 1:
                 String islandName = response.getInputResponse(responseId++);
                 String worldName;
 
-                if (response.getResponse(responseId++) instanceof FormResponseData) {
-                    worldName = response.getDropdownResponse(responseId++).getElementContent(); // Dropdown respond
-                } else {
-                    worldName = defaultLevel.remove(p);
+                // Value 2:
+                FormResponseData temp;
+                if ((temp = response.getDropdownResponse(responseId++)) == null || !plugin.getLevels().contains(temp.getElementContent())) {
                     responseId--;
+
+                    worldName = defaultLevel.remove(p);
+                } else {
+                    worldName = temp.getElementContent();
                 }
 
-                // 6 - 5
-                // The island schematic ID respond
+                // Value 3:
+
                 int id = 1;
                 if (!ASkyBlock.get().getSchematics().isUseDefaultGeneration()) {
                     FormResponseData form = response.getDropdownResponse(responseId++); // Dropdown respond
@@ -125,10 +132,11 @@ public class ServerPanel implements Listener {
 
                     id = ASkyBlock.get().getSchematics().getSchemaId(schematicType);
                 }
-                // Nope it just a Label
-                responseId++;
-                boolean locked = response.getToggleResponse(responseId++);
 
+                // Value 4:
+                responseId++;
+
+                boolean locked = response.getToggleResponse(responseId++);
                 boolean teleport = response.getToggleResponse(responseId);
 
                 plugin.getIslandManager().createIsland(p, id, worldName, islandName, locked, EnumBiome.PLAINS, teleport);
@@ -165,7 +173,7 @@ public class ServerPanel implements Listener {
 //                if (plugin.getChallenges().isLevelAvailable(p, role)) {
 //                    showChallengeType(p, role);
 //                } else {
-                    sendChallengeError(p);
+                sendChallengeError(p);
 //                }
                 break;
             case TYPE_HOMES:
@@ -319,7 +327,7 @@ public class ServerPanel implements Listener {
 //            if (plugin.getChallenges().isLevelAvailable(player, levels)) {
 //                panelIsland.addButton(new ElementButton(levels));
 //            } else {
-                panelIsland.addButton(new ElementButton(TextFormat.RED + levels));
+            panelIsland.addButton(new ElementButton(TextFormat.RED + levels));
 //            }
         }
 
@@ -358,28 +366,36 @@ public class ServerPanel implements Listener {
         ArrayList<String> worldName = plugin.getLevels();
         // TODO: Check max homes
 
-        int homes = plugin.getIslandsInfo(player.getName()).size();
-        FormWindowCustom panelIsland = new FormWindowCustom("Island Menu");
+        plugin.getFastCache().getIslandFrom(player.getName(), result -> {
+            if (result == null) {
+                player.sendMessage(getLocale(player).errorFailedCritical);
 
-        panelIsland.addElement(new ElementLabel(getLocale(player).panelIslandHeader));
-        panelIsland.addElement(new ElementInput(getLocale(player).panelIslandHome, "", "Home #" + (homes + 1)));
-        if (worldName.size() > 1) {
-            panelIsland.addElement(new ElementDropdown(getLocale(player).panelIslandWorld, worldName));
-        } else {
-            defaultLevel.put(player, worldName.remove(0));
-        }
+                return;
+            }
+            int homes = result.size();
 
-        SchematicHandler bindTo = ASkyBlock.get().getSchematics();
-        if (!bindTo.isUseDefaultGeneration()) {
-            panelIsland.addElement(new ElementDropdown(getLocale(player).panelIslandTemplate, bindTo.getSchemaList(), bindTo.getDefaultIsland() - 1));
-        }
+            FormWindowCustom panelIsland = new FormWindowCustom("Island Menu");
 
-        panelIsland.addElement(new ElementLabel(getLocale(player).panelIslandDefault));
-        panelIsland.addElement(new ElementToggle("Locked", false));
-        panelIsland.addElement(new ElementToggle("Teleport to world", true));
+            panelIsland.addElement(new ElementLabel(getLocale(player).panelIslandHeader));
+            panelIsland.addElement(new ElementInput(getLocale(player).panelIslandHome, "", "Home #" + (homes + 1)));
+            if (worldName.size() > 1) {
+                panelIsland.addElement(new ElementDropdown(getLocale(player).panelIslandWorld, worldName));
+            } else {
+                defaultLevel.put(player, worldName.remove(0));
+            }
 
-        int id = player.showFormWindow(panelIsland);
-        panelDataId.put(id, PanelType.TYPE_ISLAND);
+            SchematicHandler bindTo = ASkyBlock.get().getSchematics();
+            if (!bindTo.isUseDefaultGeneration()) {
+                panelIsland.addElement(new ElementDropdown(getLocale(player).panelIslandTemplate, bindTo.getSchemaList(), bindTo.getDefaultIsland() - 1));
+            }
+
+            panelIsland.addElement(new ElementLabel(getLocale(player).panelIslandDefault));
+            panelIsland.addElement(new ElementToggle("Locked", false));
+            panelIsland.addElement(new ElementToggle("Teleport to world", true));
+
+            int id = player.showFormWindow(panelIsland);
+            panelDataId.put(id, PanelType.TYPE_ISLAND);
+        });
     }
 
     public void addHomeFormOverlay(Player p) {

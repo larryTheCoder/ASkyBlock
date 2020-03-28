@@ -164,7 +164,7 @@ public class IslandManager {
     }
 
     public boolean checkIsland(Player p) {
-        return plugin.getFastCache().getIslandData(p.getName()) != null;
+        return plugin.getFastCache().getIslandsFrom(p.getName()).size() > 0;
     }
 
     private void createIsland(Player p) {
@@ -172,6 +172,8 @@ public class IslandManager {
     }
 
     public void createIsland(Player pl, int templateId, String levelName, String home, boolean locked, EnumBiome biome, boolean teleport) {
+        Utils.sendDebug("Creating an island");
+
         if (Settings.useEconomy) {
             double money = ASkyBlock.econ.getMoney(pl);
             if (Settings.islandCost > money && Settings.islandCost != money) {
@@ -191,6 +193,8 @@ public class IslandManager {
 
         // Make sure the search didn't interrupt other processes.
         TaskManager.runTaskAsync(() -> {
+            List<IslandData> islands = plugin.getFastCache().getIslandsFrom(pl.getName());
+
             for (int i = 0; i < Integer.MAX_VALUE; ++i) {
                 int width = i * settings.getIslandDistance() * 2;
                 int wx = (int) (Math.random() * width);
@@ -208,14 +212,17 @@ public class IslandManager {
                         return;
                     }
 
-                    IslandData resultData = new IslandDataBuilder()
+                    final IslandData resultData = new IslandDataBuilder()
                             .setGridCoordinates(new Vector2(x, z))
+                            .setIslandHomeId(islands.size() + 1)
                             .setIslandUniquePlotId(generatedData)
                             .setPlotOwner(pl.getName())
                             .setLevelName(levelName)
                             .setLocked(locked)
                             .setPlotBiome("Plains")
                             .setIslandName(home).build();
+
+                    Utils.sendDebug(resultData.toString());
 
                     // Then we call a task to run them in the main thread.
                     TaskManager.runTask(() -> {
@@ -233,39 +240,50 @@ public class IslandManager {
                         ASkyBlock.get().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
                             @Override
                             public void executeQuery(Connection connection) {
+                                Utils.sendDebug("Inserting into table");
+
                                 connection.createQuery(TableSet.ISLAND_INSERT_MAIN.getQuery())
+                                        .addParameter("playerName", pl.getName())
                                         .addParameter("islandId", resultData.getHomeCountId())
                                         .addParameter("islandUniqueId", resultData.getIslandUniquePlotId())
                                         .addParameter("gridPos", Utils.getVector2Pair(resultData.getCenter()))
-                                        .addParameter("spawnPos", Utils.getVector3Pair(resultData.getHome()))
+                                        .addParameter("spawnPos", Utils.getVector3Pair(resultData.getHomeCoordinates()))
                                         .addParameter("gridSize", resultData.getProtectionSize())
                                         .addParameter("levelName", resultData.getLevelName())
-                                        .addParameter("player", resultData.getPlotOwner())
                                         .executeUpdate();
+
+                                Utils.sendDebug("Inserting into table 2");
 
                                 connection.createQuery(TableSet.ISLAND_INSERT_DATA.getQuery())
                                         .addParameter("islandUniqueId", resultData.getIslandUniquePlotId())
                                         .addParameter("plotBiome", resultData.getPlotBiome())
-                                        .addParameter("isLocked", resultData.isLocked())
+                                        .addParameter("isLocked", resultData.isLocked() ? 1 : 0)
                                         .addParameter("protectionData", resultData.getIgsSettings().getSettings())
                                         .addParameter("levelHandicap", resultData.getLevelHandicap())
                                         .executeUpdate();
+
+                                Utils.sendDebug("Inserting complete");
                             }
 
                             @Override
                             public void onCompletion(Exception err) {
-                                if (err == null) {
+                                if (err != null) {
+                                    err.printStackTrace();
+
                                     pl.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).errorFailedCritical);
                                     return;
                                 }
 
-                                pl.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).createSuccess);
                                 uniqueId.add(Integer.toString(resultData.getIslandUniquePlotId()));
+                                plugin.getFastCache().addIslandIntoDb(pl.getName(), resultData);
 
+                                pl.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).createSuccess);
                                 if (teleport) plugin.getGrid().homeTeleport(pl, resultData.getHomeCountId());
                             }
                         });
                     });
+
+                    return;
                 }
             }
         });

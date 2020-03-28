@@ -35,31 +35,33 @@ public enum TableSet {
     // Default tables
     WORLD_TABLE("CREATE TABLE IF NOT EXISTS worldList(" +
             "worldName TEXT PRIMARY KEY) %OPTIMIZE"),
+
     PLAYER_TABLE("CREATE TABLE IF NOT EXISTS player(" +
             "playerName VARCHAR(100)," +
-            "playerUUID VARCHAR(36) NOT NULL," +
+            "playerUUID VARCHAR(36)," +
             "locale TEXT NOT NULL," +
             "banList TEXT NOT NULL," +
             "resetAttempts INTEGER NOT NULL," +
             "islandLevels INTEGER DEFAULT 0," +
-            "PRIMARY KEY (playerName, playerUUID)) %OPTIMIZE"),
+            "PRIMARY KEY (playerName)) %OPTIMIZE"),
+
     PLAYER_CHALLENGES("CREATE TABLE IF NOT EXISTS challenges(" +
             "player VARCHAR(100) PRIMARY KEY NOT NULL," +
             "challengesList TEXT," +
             "challengesTimes TEXT," +
             "FOREIGN KEY (player) REFERENCES player(playerName) ON UPDATE CASCADE) %OPTIMIZE"),
+
     ISLAND_TABLE("CREATE TABLE IF NOT EXISTS island(" +
-            "islandId INTEGER," +
-            "islandUniqueId INTEGER," +
+            "islandUniqueId INTEGER PRIMARY KEY NOT NULL," +
+            "islandId INTEGER NOT NULL," +
             "gridPosition TEXT NOT NULL," +
-            "spawnPosition TEXT NOT NULL," +
+            "spawnPosition TEXT DEFAULT ''," +
             "gridSize INTEGER NOT NULL," +
-            "levelName TEXT," +
-            "islandName TEXT," +
-            "player VARCHAR(100)," +
-            "FOREIGN KEY (player) REFERENCES player(playerName) ON UPDATE CASCADE," +
-            "FOREIGN KEY (levelName) REFERENCES worldList(worldName) ON UPDATE CASCADE," +
-            "PRIMARY KEY (islandUniqueId, player)) %OPTIMIZE"),
+            "levelName TEXT NOT NULL," +
+            "islandName TEXT DEFAULT ''," +
+            "playerName VARCHAR(100) NOT NULL," +
+            "FOREIGN KEY (levelName) REFERENCES worldList(worldName) ON UPDATE CASCADE) %OPTIMIZE"),
+
     ISLAND_DATA("CREATE TABLE IF NOT EXISTS islandData(" +
             "dataId INT PRIMARY KEY," +
             "biome INTEGER DEFAULT 0," +
@@ -67,6 +69,7 @@ public enum TableSet {
             "protectionData TEXT DEFAULT ''," +
             "levelHandicap INTEGER DEFAULT 0," +
             "FOREIGN KEY (dataId) REFERENCES island(islandUniqueId) ON UPDATE CASCADE) %OPTIMIZE"),
+
     ISLAND_RELATIONS("CREATE TABLE IF NOT EXISTS islandRelations(" +
             "defaultIsland INT NOT NULL," +
             "islandLeader VARCHAR(100)," +
@@ -75,6 +78,8 @@ public enum TableSet {
             "FOREIGN KEY (islandLeader) REFERENCES player(playerName) ON UPDATE CASCADE," +
             "PRIMARY KEY (defaultIsland, islandLeader)) %OPTIMIZE"),
 
+    // Note: Enabling this will make sure that everything will be strict.
+    //       Better be strict than having flaws.
     SQLITE_PRAGMA_ON("PRAGMA foreign_keys = ON"),
     FOR_TABLE_OPTIMIZE_A("SET GLOBAL innodb_file_per_table=1"),
     FOR_TABLE_OPTIMIZE_B("SET GLOBAL innodb_file_format=Barracuda"),
@@ -84,20 +89,21 @@ public enum TableSet {
     FETCH_PLAYER_DATA("SELECT * FROM challenges WHERE player = :playerName"),
     FETCH_ISLAND_UNIQUE("SELECT * FROM island WHERE islandUniqueId = :islandUniqueId AND levelName = :levelName"),
     FETCH_LEVEL_PLOT("SELECT * FROM island WHERE levelName = :levelName AND islandUniqueId = :islandId"),
-    FETCH_ISLAND_PLOT("SELECT * FROM island WHERE player = :pName AND islandId = :islandId"),
-    FETCH_ISLAND_NAME("SELECT * FROM island WHERE player = :pName AND islandName = :islandName"),
+    FETCH_ISLAND_PLOTS("SELECT * FROM island WHERE playerName = :pName"),
+    FETCH_ISLAND_PLOT("SELECT * FROM island WHERE playerName = :pName AND islandId = :islandId"),
+    FETCH_ISLAND_NAME("SELECT * FROM island WHERE playerName = :pName AND islandName = :islandName"),
     FETCH_ISLAND_DATA("SELECT * FROM islandData WHERE dataId = :islandUniquePlotId"),
-    FETCH_ISLANDS_PLOT("SELECT * FROM island WHERE player = :pName"),
+    FETCH_ISLANDS_PLOT("SELECT * FROM island WHERE playerName = :pName"),
     FETCH_ALL_ISLAND_UNIQUE("SELECT islandUniqueId FROM island"),
 
     // Mysql and SQLite database syntax are very different.
     // Therefore we must INSERT data precisely.
-    ISLAND_INSERT_MAIN("INSERT %IGNORE INTO island(islandId, islandUniqueId, gridPosition, spawnPosition, gridSize, levelName, player, islandName) VALUES (:islandId, :islandUniqueId, :gridPos, :spawnPos, :gridSize, :levelName, :player, :islandName) %DUPLICATE_A islandId = :islandId, gridPosition = :gridPos, spawnPosition` = :spawnPos,`gridSize` = :gridSize, `levelName` = :levelName, `player` = :plotOwner, islandName = :islandName"),
-    ISLAND_INSERT_DATA("INSERT %IGNORE INTO islandData(dataId, biome, locked, protectionData, levelHandicap) VALUES (:islandUniqueId, :plotBiome, :isLocked, :protectionData, :levelHandicap) %DUPLICATE_B biome = :plotBiome, locked = :isLocked, protectionData = :protectionData, levelHandicap = :levelHandicap"),
+    ISLAND_INSERT_MAIN("INSERT INTO island(islandId, islandUniqueId, gridPosition, spawnPosition, gridSize, levelName, playerName, islandName) VALUES (:islandId, :islandUniqueId, :gridPos, :spawnPos, :gridSize, :levelName, :playerName, :islandName)"),
+    ISLAND_INSERT_DATA("INSERT INTO islandData(dataId, biome, locked, protectionData, levelHandicap) VALUES (:islandUniqueId, :plotBiome, :isLocked, :protectionData, :levelHandicap)"),
     PLAYER_INSERT_MAIN("INSERT %IGNORE INTO player(playerName, playerUUID, locale, banList, resetAttempts) VALUES (:playerName, :playerUUID, :locale, :banList, :resetLeft)"),
-    PLAYER_INSERT_DATA("INSERT %IGNORE INTO challenges(player, challengesList, challengesTimes) VALUES (:playerName, :challengesList, :challengesTimes %DUPLICATE_D challengesList = :challengesList, challengesTimes = :challengesTimes)"),
+    PLAYER_INSERT_DATA("INSERT %IGNORE INTO challenges(player, challengesList, challengesTimes) VALUES (:playerName, :challengesList, :challengesTimes)"),
 
-    ISLAND_UPDATE_MAIN("UPDATE island SET islandId = :islandId, gridPosition = :gridPos, spawnPosition = :spawnPos, gridSize = :gridSize, levelName = :levelName, player = :plotOwner, islandName = :islandName WHERE islandUniqueId = :islandUniqueId"),
+    ISLAND_UPDATE_MAIN("UPDATE island SET islandId = :islandId, gridPosition = :gridPos, spawnPosition = :spawnPos, gridSize = :gridSize, levelName = :levelName, playerName = :plotOwner, islandName = :islandName WHERE islandUniqueId = :islandUniqueId"),
     ISLAND_UPDATE_DATA("UPDATE islandData SET biome = :plotBiome, locked = :isLocked, protectionData = :protectionData, levelHandicap = :levelHandicap WHERE dataId = :islandUniqueId"),
     PLAYER_UPDATE_MAIN("UPDATE player SET locale = :locale, banList = :banList, resetAttempts = :resetLeft, islandLevels = :islandLevels WHERE playerName = :playerName, playerUUID = :playerUUID"),
     PLAYER_UPDATE_DATA("UPDATE challenges SET challengesList = :challengesList, challengesTimes = :challengesTimes WHERE player = :playerName"),

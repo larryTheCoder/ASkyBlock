@@ -164,28 +164,27 @@ public class DatabaseManager {
         // Use Thread instead of Async?
         TaskManager.runTaskAsync(() -> {
             while (!isClosed.get()) {
-                DatabaseImpl consumer;
-                while ((consumer = requestQueue.poll()) != null) {
-                    Exception result = null;
-                    try {
-                        consumer.executeQuery(connection);
-                    } catch (Exception ex) {
-                        result = ex;
+                try {
+                    DatabaseImpl consumer;
+                    while ((consumer = requestQueue.poll()) != null) {
+                        Exception result = null;
+                        try {
+                            consumer.executeQuery(connection);
+                        } catch (Exception ex) {
+                            result = ex;
+                        }
+
+                        final Exception resultFinal = result;
+                        final DatabaseImpl dbImpl = consumer;
+
+                        TaskManager.runTask(() -> dbImpl.onCompletion(resultFinal));
                     }
 
-                    final Exception resultFinal = result;
-                    final DatabaseImpl dbImpl = consumer;
-
-                    TaskManager.runTask(() -> {
-                        
-                        dbImpl.onCompletion(resultFinal);
-                    });
-                }
-
-                try {
                     Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (Throwable e) {
+                    // Sync up with console.
+
+                    TaskManager.runTask(e::printStackTrace);
                 }
             }
         });

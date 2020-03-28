@@ -35,6 +35,7 @@ import com.larryTheCoder.cache.settings.IslandSettings;
 import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.database.TableSet;
 import com.larryTheCoder.utils.Utils;
+import lombok.Getter;
 import lombok.Setter;
 import org.sql2o.Connection;
 import org.sql2o.data.Row;
@@ -52,6 +53,7 @@ public class IslandData implements Cloneable {
     private int homeCountId = 0;
 
     // Coordinates of the home spawn location
+    @Getter
     private Vector3 homeCoordinates;
     private Vector2 gridCoordinates;
 
@@ -61,7 +63,7 @@ public class IslandData implements Cloneable {
     // Island information
     private String levelName = "";
     private String plotOwner = "";
-    private String plotBiome  = "";
+    private String plotBiome = "";
     private String islandName = "";
 
     // Protection size
@@ -96,7 +98,7 @@ public class IslandData implements Cloneable {
 
     private IslandData(Row islandObj, Row dataObj) {
         this.levelName = islandObj.getString("levelName");
-        this.plotOwner = islandObj.getString("player");
+        this.plotOwner = islandObj.getString("playerName");
         this.gridCoordinates = Utils.unpairVector2(islandObj.getString("gridPosition"));
         this.homeCoordinates = Utils.unpairVector3(islandObj.getString("spawnPosition"));
         this.protectionRange = islandObj.getInteger("gridSize");
@@ -106,7 +108,7 @@ public class IslandData implements Cloneable {
         this.islandUniquePlotId = islandObj.getInteger("islandUniqueId");
 
         this.plotBiome = dataObj.getString("biome");
-        this.isLocked = dataObj.getBoolean("locked");
+        this.isLocked = dataObj.getInteger("locked") == 1;
         this.levelHandicap = dataObj.getInteger("levelHandicap");
         this.settings = new IslandSettings(dataObj.getString("protectionData"));
     }
@@ -114,7 +116,7 @@ public class IslandData implements Cloneable {
     public static IslandData fromRows(Row row) {
         return new IslandData(
                 row.getString("levelName"),
-                row.getString("player"),
+                row.getString("playerName"),
                 Utils.unpairVector2(row.getString("gridPosition")),
                 Utils.unpairVector3(row.getString("spawnPosition")),
                 row.getInteger("gridSize"),
@@ -155,6 +157,8 @@ public class IslandData implements Cloneable {
 
     public void setHomeLocation(Vector3 vector) {
         this.homeCoordinates = vector.clone();
+
+        saveIslandData();
     }
 
     /**
@@ -317,7 +321,13 @@ public class IslandData implements Cloneable {
 
     @Override
     public String toString() {
-        return "IslandData(x=" + gridCoordinates.getFloorX() + ", z= " + gridCoordinates.getFloorY() + ")";
+        return "IslandData(" +
+                "homeId=" + homeCountId + ", " +
+                "islandUId=" + islandUniquePlotId + ", " +
+                "x=" + gridCoordinates.getFloorX() + ", " +
+                "z=" + gridCoordinates.getFloorY() + ", " +
+                "plotOwner=" + plotOwner + ", " +
+                "levelName=" + levelName + ")";
     }
 
     @Override

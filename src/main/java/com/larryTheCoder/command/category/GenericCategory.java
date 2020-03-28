@@ -30,7 +30,9 @@ package com.larryTheCoder.command.category;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.PlayerData;
@@ -55,12 +57,14 @@ public class GenericCategory extends SubCategory {
 
     @Override
     public List<String> getCommands() {
-        return Arrays.asList("expel", "kick", "lobby", "leave", "spawn", "locale", "protection", "settings", "top", "about");
+        return Arrays.asList("expel", "kick", "lobby", "leave", "spawn", "locale", "protection", "settings", "top", "about", "test");
     }
 
     @Override
     public boolean canUse(CommandSender sender, String command) {
         switch (command.toLowerCase()) {
+            case "test":
+                return sender.isOp();
             case "expel":
             case "kick":
                 return sender.hasPermission("is.command.expel") && sender.isPlayer();
@@ -113,6 +117,11 @@ public class GenericCategory extends SubCategory {
         Player p = Server.getInstance().getPlayer(sender.getName());
 
         switch (args[0].toLowerCase()) {
+            case "test":
+                Level level = Server.getInstance().getLevelByName("SkyBlock");
+
+                p.teleport(Location.fromObject(new Vector3(100, 100, 300), level));
+                break;
             case "expel":
             case "kick":
                 if (getPlugin().getIslandManager().checkIsland(p)) {
