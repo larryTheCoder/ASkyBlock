@@ -26,7 +26,7 @@ package com.larryTheCoder.cache.settings;
 
 import cn.nukkit.level.Level;
 import cn.nukkit.utils.Config;
-import com.larryTheCoder.cache.buider.WorldSettingsBuilder;
+import com.larryTheCoder.cache.builder.WorldSettingsBuilder;
 import com.larryTheCoder.utils.Utils;
 
 /**

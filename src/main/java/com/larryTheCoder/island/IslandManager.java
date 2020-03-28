@@ -37,7 +37,7 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.IslandData;
-import com.larryTheCoder.cache.buider.IslandDataBuilder;
+import com.larryTheCoder.cache.builder.IslandDataBuilder;
 import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.database.TableSet;

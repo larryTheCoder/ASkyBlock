@@ -23,7 +23,7 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.larryTheCoder.cache.buider;
+package com.larryTheCoder.cache.builder;
 
 
 import cn.nukkit.level.Level;

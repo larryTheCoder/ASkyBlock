@@ -35,15 +35,18 @@ import cn.nukkit.level.Position;
 import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.math.Vector3;
-import cn.nukkit.scheduler.NukkitRunnable;
-import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import org.jnbt.*;
-import java.util.*;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
-import static com.larryTheCoder.utils.Utils.TASK_SCHEDULED;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static com.larryTheCoder.utils.Utils.loadChunkAt;
 
 /**
@@ -206,39 +209,43 @@ class IslandBlock extends BlockMinecraftId {
     }
 
     /**
-     * Sets this block's sign data
-     *
-     * @param tileData
+     * Sets the block sign data
      */
     void setSign(Map<String, Tag> tileData) {
         signText = new ArrayList<>();
-        List<String> text = new ArrayList<>();
+
         for (int i = 1; i < 5; i++) {
-            String line = ((StringTag) tileData.get("Text" + String.valueOf(i))).getValue();
-            // This value can actually be a string that says null sometimes.
+            String line = ((StringTag) tileData.get("Text" + i)).getValue();
+
             if (line.equalsIgnoreCase("null")) {
                 line = "";
+            } else if (line.startsWith("{") && line.endsWith("}")) { // JSON Format
+                JSONObject jsonObject = new JSONObject(new JSONTokener(line));
+
+                line = jsonObject.getString("text"); // TODO: Find more references for this JSON Object.
+            } else if (line.startsWith("\"") && line.endsWith("\"")) { // Something
+                line = line.substring(0, line.length() - 1).substring(1);
             }
-            //System.out.println("DEBUG: line " + i + " = '"+ line + "' of length " + line.length());
-            text.add(line);
-        }
 
-        // TODO: Find out doable way to convert json based sign into raw texts.
-
-        boolean change = true;
-        for (String texts : signText) {
-            if (!texts.isEmpty()) {
-                change = false;
-                break;
+            // Only if the sign is empty, we put in the sign names
+            if (line.isEmpty()) {
+                switch (i) {
+                    case 1:
+                        signText.add("§aWelcome to");
+                        break;
+                    case 2:
+                        signText.add("§e[player]'s");
+                        break;
+                    case 3:
+                        signText.add("§aIsland! Enjoy.");
+                        break;
+                    case 4:
+                        signText.add("");
+                        break;
+                }
+            } else {
+                signText.add(line);
             }
-        }
-
-        if (change) {
-            signText.clear();
-            signText.add("§aWelcome to");
-            signText.add("§e[player]'s");
-            signText.add("§aisland! Enjoy.");
-            signText.add("");
         }
     }
 
@@ -323,23 +330,20 @@ class IslandBlock extends BlockMinecraftId {
             BlockEntitySpawnable e = null;
             // Usually when the chunk is loaded it will be fully loaded, no need task anymore
             if (signText != null) {
-                // Various bug fixed (Nukkit bug)
                 BaseFullChunk chunk = blockLoc.getLevel().getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
-                cn.nukkit.nbt.tag.CompoundTag nbt = new cn.nukkit.nbt.tag.CompoundTag()
-                        .putList(new cn.nukkit.nbt.tag.ListTag<>("Items"))
-                        .putString("id", BlockEntity.SIGN)
-                        .putInt("x", (int) loc.x)
-                        .putInt("y", (int) loc.y)
-                        .putInt("z", (int) loc.z)
-                        .putString("Text1", signText.get(0).replace("[player]", p.getName()))
-                        .putString("Text2", signText.get(1).replace("[player]", p.getName()))
-                        .putString("Text3", signText.get(2).replace("[player]", p.getName()))
-                        .putString("Text4", signText.get(3).replace("[player]", p.getName()));
+                e = (BlockEntitySign) BlockEntity.createBlockEntity(BlockEntity.SIGN, chunk, BlockEntity.getDefaultCompound(loc, BlockEntity.SIGN));
 
-                e = (BlockEntitySign) BlockEntity.createBlockEntity(
-                        BlockEntity.SIGN,
-                        chunk,
-                        nbt);
+                int intVal = 0;
+
+                // Well, this is stupid, an absolute bullshit
+                String[] signData = new String[signText.size()];
+                for (String sign : signText) {
+                    signData[intVal] = sign.replace("[player]", p.getName());
+
+                    intVal++;
+                }
+
+                ((BlockEntitySign) e).setText(signData);
 
                 blockLoc.getLevel().addBlockEntity(e);
             } else if (potItem != null) {
@@ -352,10 +356,7 @@ class IslandBlock extends BlockMinecraftId {
                         .putShort("item", potItem.getId())
                         .putInt("data", potItemData);
 
-                e = (BlockEntityFlowerPot) BlockEntity.createBlockEntity(
-                        BlockEntity.FLOWER_POT,
-                        chunk,
-                        nbt);
+                e = (BlockEntityFlowerPot) BlockEntity.createBlockEntity(BlockEntity.FLOWER_POT, chunk, nbt);
 
                 blockLoc.getLevel().addBlockEntity(e);
             } else if (Block.get(typeId, data).getId() == Block.CHEST) {
@@ -367,10 +368,7 @@ class IslandBlock extends BlockMinecraftId {
                         .putInt("y", (int) loc.y)
                         .putInt("z", (int) loc.z);
 
-                e = (BlockEntityChest) BlockEntity.createBlockEntity(
-                        BlockEntity.CHEST,
-                        chunk,
-                        nbt);
+                e = (BlockEntityChest) BlockEntity.createBlockEntity(BlockEntity.CHEST, chunk, nbt);
 
                 if (ASkyBlock.get().getSchematics().isUsingDefaultChest(islandId) || chestContents.isEmpty()) {
                     int count = 0;
@@ -389,16 +387,10 @@ class IslandBlock extends BlockMinecraftId {
 
             // Run as runnable, spawn them in next move.
             if (blockEntity != null) {
-                NukkitRunnable runnable = new NukkitRunnable() {
-                    @Override
-                    public void run() {
-                        blockEntity.spawnToAll();
-                    }
-                };
+                blockLoc.getLevel().scheduleBlockEntityUpdate(blockEntity);
 
-                TASK_SCHEDULED.put(p.getName(), runnable);
+                blockEntity.spawnToAll();
             }
-
         } catch (Exception ignored) {
             Utils.sendDebug("&7Warning: Block " + typeId + ":" + data + " not found. Ignoring...");
         }

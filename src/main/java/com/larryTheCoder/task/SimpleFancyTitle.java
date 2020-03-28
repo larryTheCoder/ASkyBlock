@@ -86,9 +86,5 @@ public class SimpleFancyTitle extends Task {
                 p.sendTitle(TextFormat.GOLD + plugin.getLocale(p).islandTitle.replace("[player]", ownership.getPlotOwner()));
             }
         });
-
-        if (Utils.TASK_SCHEDULED.containsKey(p.getName())) {
-            TaskManager.runTaskLater(Utils.TASK_SCHEDULED.remove(p.getName()), 5);
-        }
     }
 }

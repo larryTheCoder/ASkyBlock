@@ -1,6 +1,4 @@
 /*
- * Adapted from the Wizardry License
- *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -25,7 +23,60 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.larryTheCoder.integration.luckperms;
+package com.larryTheCoder.cache.builder;
 
-public interface Permission {
+import cn.nukkit.math.Vector2;
+import com.larryTheCoder.cache.IslandData;
+
+public class IslandDataBuilder {
+
+    private IslandData data = new IslandData();
+
+    public IslandDataBuilder setGridCoordinates(Vector2 vec) {
+        data.setCenter(vec);
+
+        return this;
+    }
+
+    public IslandDataBuilder setIslandUniquePlotId(int generatedData) {
+        data.setIslandUniquePlotId(generatedData);
+
+        return this;
+    }
+
+    public IslandDataBuilder setPlotOwner(String plotOwner) {
+        data.setPlotOwner(plotOwner);
+
+        return this;
+    }
+
+    public IslandDataBuilder setLevelName(String levelName) {
+        data.setLevelName(levelName);
+
+        return this;
+    }
+
+    public IslandDataBuilder setLocked(boolean isLocked) {
+        data.setLocked(isLocked);
+        return this;
+    }
+
+    public IslandDataBuilder setPlotBiome(String biomeName) {
+        data.setPlotBiome(biomeName);
+        return this;
+    }
+
+    public IslandDataBuilder setIslandName(String islandName) {
+        data.setIslandName(islandName);
+        return this;
+    }
+
+    public IslandData build() {
+        return data;
+    }
+
+    public IslandDataBuilder setIslandHomeId(int islandHomeId) {
+        data.setHomeCountId(islandHomeId);
+        return this;
+    }
 }

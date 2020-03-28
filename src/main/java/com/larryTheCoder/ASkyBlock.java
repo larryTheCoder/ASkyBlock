@@ -46,7 +46,7 @@ import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.database.config.AbstractConfig;
 import com.larryTheCoder.database.config.MySQLConfig;
 import com.larryTheCoder.database.config.SQLiteConfig;
-import com.larryTheCoder.integration.economy.Economy;
+import com.larryTheCoder.utils.integration.economy.Economy;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
 import com.larryTheCoder.listener.ChatHandler;

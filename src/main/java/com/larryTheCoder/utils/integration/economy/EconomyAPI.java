@@ -1,4 +1,6 @@
 /*
+ * Adapted from the Wizardry License
+ *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -22,61 +24,32 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.larryTheCoder.utils.integration.economy;
 
-package com.larryTheCoder.cache.buider;
+import cn.nukkit.Player;
 
-import cn.nukkit.math.Vector2;
-import com.larryTheCoder.cache.IslandData;
+/**
+ * @author larryTheCoder
+ */
+public class EconomyAPI implements Economy {
 
-public class IslandDataBuilder {
-
-    private IslandData data = new IslandData();
-
-    public IslandDataBuilder setGridCoordinates(Vector2 vec) {
-        data.setCenter(vec);
-
-        return this;
+    @Override
+    public boolean reduceMoney(Player p, double amount) {
+        double money = me.onebone.economyapi.EconomyAPI.getInstance().myMoney(p);
+        if (money < amount) {
+            int ret = me.onebone.economyapi.EconomyAPI.getInstance().reduceMoney(p, amount);
+            return ret == me.onebone.economyapi.EconomyAPI.RET_SUCCESS;
+        }
+        return false;
     }
 
-    public IslandDataBuilder setIslandUniquePlotId(int generatedData) {
-        data.setIslandUniquePlotId(generatedData);
-
-        return this;
+    @Override
+    public boolean addMoney(Player p, double amount) {
+        return me.onebone.economyapi.EconomyAPI.getInstance().addMoney(p, amount, true) == me.onebone.economyapi.EconomyAPI.RET_SUCCESS;
     }
 
-    public IslandDataBuilder setPlotOwner(String plotOwner) {
-        data.setPlotOwner(plotOwner);
-
-        return this;
-    }
-
-    public IslandDataBuilder setLevelName(String levelName) {
-        data.setLevelName(levelName);
-
-        return this;
-    }
-
-    public IslandDataBuilder setLocked(boolean isLocked) {
-        data.setLocked(isLocked);
-        return this;
-    }
-
-    public IslandDataBuilder setPlotBiome(String biomeName) {
-        data.setPlotBiome(biomeName);
-        return this;
-    }
-
-    public IslandDataBuilder setIslandName(String islandName) {
-        data.setIslandName(islandName);
-        return this;
-    }
-
-    public IslandData build() {
-        return data;
-    }
-
-    public IslandDataBuilder setIslandHomeId(int islandHomeId) {
-        data.setHomeCountId(islandHomeId);
-        return this;
+    @Override
+    public double getMoney(Player p) {
+        return me.onebone.economyapi.EconomyAPI.getInstance().myMoney(p);
     }
 }

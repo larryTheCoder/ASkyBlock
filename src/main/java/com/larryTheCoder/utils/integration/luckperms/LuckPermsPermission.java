@@ -24,18 +24,53 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.integration.economy;
+
+package com.larryTheCoder.utils.integration.luckperms;
 
 import cn.nukkit.Player;
+import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.task.TaskManager;
+import com.larryTheCoder.utils.Utils;
+import me.lucko.luckperms.LuckPerms;
+import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.User;
 
 /**
- * @author larryTheCoder
+ * Implementation to LuckPermsPermission
+ * aka, PermissionEx
  */
-public interface Economy {
+public class LuckPermsPermission {
 
-    boolean reduceMoney(Player p, double amount);
+    private final ASkyBlock plugin;
+    private LuckPermsApi pubApi;
 
-    boolean addMoney(Player p, double amount);
+    public LuckPermsPermission(ASkyBlock instance) {
+        this.plugin = instance;
+        this.getLuckPerms();
+    }
 
-    double getMoney(Player p);
+    private void getLuckPerms() {
+        try {
+            pubApi = LuckPerms.getApi();
+        } catch (IllegalStateException ignored) {
+            TaskManager.runTaskLater(this::getLuckPerms, 60);
+            return;
+        }
+        Utils.send("&aSuccessfully integrated with LuckPerms plugin.");
+    }
+
+    public boolean hasPermission(Player p, String permission) {
+        User user = pubApi.getUser(p.getName());
+        for (Node perm : user.getPermissions()) {
+            if (!perm.getPermission().equalsIgnoreCase(permission) && !perm.getValue()) {
+                continue;
+            }
+            return true;
+        }
+        // Permission either not found or doesn't applied to
+        // This user.
+        return false;
+    }
+
 }
