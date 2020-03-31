@@ -209,7 +209,7 @@ public class IslandManager {
                     Location locIsland = new Location(x, Settings.islandHeight, z, world);
 
                     if (!checkIslandAt(locIsland.getLevel())) {
-                        return;
+                        continue;
                     }
 
                     final IslandData resultData = new IslandDataBuilder()
@@ -218,6 +218,7 @@ public class IslandManager {
                             .setIslandUniquePlotId(generatedData)
                             .setPlotOwner(pl.getName())
                             .setLevelName(levelName)
+                            .setProtectionSize(settings.getIslandDistance())
                             .setLocked(locked)
                             .setPlotBiome("Plains")
                             .setIslandName(home).build();
@@ -234,7 +235,11 @@ public class IslandManager {
                             return;
                         }
 
+                        Utils.sendDebug("Pasting schematic");
+
                         plugin.getSchematics().pasteSchematic(pl, locIsland, templateId, biome);
+
+                        Utils.sendDebug("Pushing query");
 
                         // Then apply another async query.
                         ASkyBlock.get().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
@@ -283,7 +288,7 @@ public class IslandManager {
                         });
                     });
 
-                    return;
+                    break;
                 }
             }
         });

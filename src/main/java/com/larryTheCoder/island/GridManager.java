@@ -264,9 +264,13 @@ public class GridManager {
         if (island == null) {
             return null;
         }
+        Utils.sendDebug("Island is not null");
         if (island.onIsland(location)) {
+            Utils.sendDebug("Island is in protected area");
             return island;
         }
+
+        Utils.sendDebug("Not inside protected area");
         return null;
     }
 

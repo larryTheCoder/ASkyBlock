@@ -30,6 +30,8 @@ import cn.nukkit.level.Level;
 import com.google.common.base.Preconditions;
 import com.larryTheCoder.cache.settings.WorldSettings;
 
+import java.util.List;
+
 public class WorldSettingsBuilder {
 
     private WorldSettings realSettings = new WorldSettings(null);
@@ -74,6 +76,11 @@ public class WorldSettingsBuilder {
         return this;
     }
 
+    public WorldSettingsBuilder setSignSettings(List<String> section) {
+        realSettings.signConfig = section.toArray(new String[0]);
+
+        return this;
+    }
 
     public WorldSettings build() {
         Preconditions.checkState(realSettings.level != null, "World level cannot be null!");

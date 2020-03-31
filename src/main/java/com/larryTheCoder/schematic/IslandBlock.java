@@ -35,6 +35,7 @@ import cn.nukkit.level.Position;
 import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
@@ -42,9 +43,8 @@ import org.jnbt.*;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.larryTheCoder.utils.Utils.loadChunkAt;
@@ -67,7 +67,7 @@ class IslandBlock extends BlockMinecraftId {
     private final HashMap<Integer, Item> chestContents;
     private short typeId;
     private int data;
-    private List<String> signText;
+    private String[] signText;
     // Pot items
     private Block potItem;
     private int potItemData;
@@ -114,24 +114,6 @@ class IslandBlock extends BlockMinecraftId {
         this.data = data;
     }
 
-    /**
-     * @return the signText
-     */
-    public List<String> getSignText() {
-        return signText;
-    }
-
-    /**
-     * @param signText the signText to set
-     */
-    public void setSignText(List<String> signText) {
-        this.signText = signText;
-    }
-
-    /**
-     * @param s
-     * @param b
-     */
     void setBlock(int s, byte b) {
         this.typeId = (short) s;
         this.data = b;
@@ -212,8 +194,9 @@ class IslandBlock extends BlockMinecraftId {
      * Sets the block sign data
      */
     void setSign(Map<String, Tag> tileData) {
-        signText = new ArrayList<>();
+        signText = new String[4];
 
+        // I wonder why tastybento write the code too... complex?
         for (int i = 1; i < 5; i++) {
             String line = ((StringTag) tileData.get("Text" + i)).getValue();
 
@@ -227,25 +210,7 @@ class IslandBlock extends BlockMinecraftId {
                 line = line.substring(0, line.length() - 1).substring(1);
             }
 
-            // Only if the sign is empty, we put in the sign names
-            if (line.isEmpty()) {
-                switch (i) {
-                    case 1:
-                        signText.add("§aWelcome to");
-                        break;
-                    case 2:
-                        signText.add("§e[player]'s");
-                        break;
-                    case 3:
-                        signText.add("§aIsland! Enjoy.");
-                        break;
-                    case 4:
-                        signText.add("");
-                        break;
-                }
-            } else {
-                signText.add(line);
-            }
+            signText[i - 1] = line;
         }
     }
 
@@ -317,33 +282,29 @@ class IslandBlock extends BlockMinecraftId {
      */
     void paste(Player p, Position blockLoc, EnumBiome biome) {
         Vector3 loc = new Vector3(x, y, z).add(blockLoc);
-        // OH! So this was the issue why the chunk isn't gonna load :/
-        // Checked the return type of `loc`, its should be Vector3 not Location.
-        while (!blockLoc.getLevel().isChunkLoaded((int) loc.getX() >> 4, (int) loc.getZ() >> 4)) {
-            loadChunkAt(new Position(loc.getFloorX(), loc.getFloorY(), loc.getFloorZ(), blockLoc.getLevel()));
-        }
+        loadChunkAt(new Position(loc.getFloorX(), loc.getFloorY(), loc.getFloorZ(), blockLoc.getLevel()));
 
         try {
             blockLoc.getLevel().setBlock(loc, Block.get(typeId, data), true, true);
             blockLoc.getLevel().setBiomeId(loc.getFloorX(), loc.getFloorZ(), (byte) biome.id);
 
             BlockEntitySpawnable e = null;
-            // Usually when the chunk is loaded it will be fully loaded, no need task anymore
             if (signText != null) {
                 BaseFullChunk chunk = blockLoc.getLevel().getChunk(loc.getFloorX() >> 4, loc.getFloorZ() >> 4);
-                e = (BlockEntitySign) BlockEntity.createBlockEntity(BlockEntity.SIGN, chunk, BlockEntity.getDefaultCompound(loc, BlockEntity.SIGN));
+                BlockEntitySign signDb = (BlockEntitySign) (e = (BlockEntitySign) BlockEntity.createBlockEntity(BlockEntity.SIGN, chunk, BlockEntity.getDefaultCompound(loc, BlockEntity.SIGN)));
 
                 int intVal = 0;
 
-                // Well, this is stupid, an absolute bullshit
-                String[] signData = new String[signText.size()];
-                for (String sign : signText) {
-                    signData[intVal] = sign.replace("[player]", p.getName());
+                String[] currentText = signText;
 
-                    intVal++;
+                boolean isCleanLine = Arrays.stream(signText).allMatch(i -> TextFormat.clean(i).replace("\n", "").isEmpty());
+                if (isCleanLine) currentText = ASkyBlock.get().getSettings(blockLoc.getLevel().getName()).signConfig;
+
+                String[] replacedString = new String[4];
+                for (String result : currentText) {
+                    replacedString[intVal++] = TextFormat.colorize(result.replace("[player]", p.getName()));
                 }
-
-                ((BlockEntitySign) e).setText(signData);
+                signDb.setText(replacedString);
 
                 blockLoc.getLevel().addBlockEntity(e);
             } else if (potItem != null) {

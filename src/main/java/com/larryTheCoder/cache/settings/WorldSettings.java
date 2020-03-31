@@ -42,6 +42,7 @@ public class WorldSettings {
     public int seaLevel;
     public int plotRange;
     public boolean useDefaultChest;
+    public String[] signConfig;
 
     public WorldSettings(Level level) {
         this.level = level;
@@ -112,9 +113,10 @@ public class WorldSettings {
         cfg.set(levelName + ".maxHome", 5);
         cfg.set(levelName + ".plotSize", plotSize);
         cfg.set(levelName + ".protectionRange", plotRange);
-        cfg.set(levelName + ".stopTime", false);
+        cfg.set(levelName + ".stopTime", stopTime);
         cfg.set(levelName + ".seaLevel", seaLevel);
-        cfg.set(levelName + ".useDefaultChest", true);
+        cfg.set(levelName + ".useDefaultChest", useDefaultChest);
+        cfg.set(levelName + ".signConfig", new String[]{"&aWelcome to", "&e[player]'s", "&e[player]'", ""});
         cfg.save();
     }
 

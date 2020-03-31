@@ -30,3 +30,11 @@ SkyBlock:
   # If sea level is less than about 10, then players will drop right through it
   # if it exists. Makes for an interesting variation on SkyBlock.
   seaLevel: 3
+  # As requested, custom sign configurations. This section must be an array,
+  # you can also use '&' as colour codes. The configuration are as follow:
+  # [player] -> The player name
+  signConfig:
+    - "&aWelcome to"
+    - "&e[player]'s"
+    - "&aIsland! Enjoy.'"
+    - ""

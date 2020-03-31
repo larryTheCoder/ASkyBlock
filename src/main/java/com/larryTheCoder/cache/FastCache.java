@@ -44,6 +44,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static com.larryTheCoder.database.TableSet.*;
@@ -60,11 +61,16 @@ public class FastCache {
 
     // To securely store FastCache timestamp into a .json file.
     public static final ConcurrentLinkedQueue<FastCacheData> storeSchedule = new ConcurrentLinkedQueue<>();
+    public final AtomicBoolean isClosed = new AtomicBoolean(true);
 
     public FastCache(ASkyBlock plugin) {
         this.plugin = plugin;
 
         this.loadFastCache();
+    }
+
+    public void shutdownCache() {
+        isClosed.compareAndSet(true, false);
     }
 
     private void addAllCacheData(List<FastCacheData> list) {
@@ -123,19 +129,24 @@ public class FastCache {
         });
 
         TaskManager.runTaskAsync(() -> {
-            FastCacheData consumer;
-            while ((consumer = storeSchedule.poll()) != null) {
-                ConfigSection playerSec = new ConfigSection();
-                playerSec.set("lastFetched", consumer.lastUpdatedQuery);
-                playerSec.set("islandIds", new ArrayList<>(consumer.getIslandData().keySet()));
+            while (isClosed.get()) {
+                FastCacheData consumer;
+                while ((consumer = storeSchedule.poll()) != null) {
+                    Utils.sendDebug("Handling data info " + consumer.ownedBy);
 
-                config.set(consumer.getDataIdentifier(), playerSec);
-            }
+                    ConfigSection playerSec = new ConfigSection();
+                    playerSec.set("lastFetched", consumer.lastUpdatedQuery);
+                    playerSec.set("islandIds", new ArrayList<>(consumer.getIslandData().keySet()));
 
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                    config.set(consumer.getDataIdentifier(), playerSec);
+                    config.save();
+                }
+
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }

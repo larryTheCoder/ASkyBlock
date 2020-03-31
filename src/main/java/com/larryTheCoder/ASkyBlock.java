@@ -151,6 +151,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         Utils.send("&7Saving all island framework...");
 
         saveLevel(true);
+        getFastCache().shutdownCache();
         getDatabase().shutdownDB();
         getMessages().saveMessages();
         LavaCheck.clearStats();
@@ -328,6 +329,7 @@ public class ASkyBlock extends ASkyBlockAPI {
                             .useDefaultChest(section.getBoolean("useDefaultChest"))
                             .setSeaLevel(section.getInt("seaLevel"))
                             .setLevel(level)
+                            .setSignSettings(section.getList("signConfig"))
                             .build();
 
                     worldSettings.verifyWorldSettings();

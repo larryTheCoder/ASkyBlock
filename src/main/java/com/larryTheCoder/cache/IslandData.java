@@ -67,6 +67,7 @@ public class IslandData implements Cloneable {
     private String islandName = "";
 
     // Protection size
+    @Setter
     private int protectionRange = 0;
     private int levelHandicap = 0;
 
@@ -209,7 +210,7 @@ public class IslandData implements Cloneable {
      * @return int
      */
     public int getMinProtectedZ() {
-        return (gridCoordinates.getFloorY() - protectionRange / 2);
+        return (gridCoordinates.getFloorY() - (protectionRange / 2));
     }
 
     /**
@@ -218,7 +219,7 @@ public class IslandData implements Cloneable {
      * @return int
      */
     public int getMinProtectedX() {
-        return (gridCoordinates.getFloorX() - protectionRange / 2);
+        return (gridCoordinates.getFloorX() - (protectionRange / 2));
     }
 
     /**
@@ -239,6 +240,13 @@ public class IslandData implements Cloneable {
     public boolean onIsland(Location target) {
         Level level = Server.getInstance().getLevelByName(levelName);
         if (level == null || levelName == null) return false;
+
+        Utils.sendDebug(toString());
+        Utils.sendDebug("Statement A: " + target.getLevel().getName().equalsIgnoreCase(levelName));
+        Utils.sendDebug("Statement B: " + (target.getFloorX() >= getMinProtectedX()));
+        Utils.sendDebug("Statement C: " + (target.getFloorX() <= (getMinProtectedX() + protectionRange)));
+        Utils.sendDebug("Statement D: " + (target.getFloorZ() >= getMinProtectedZ()));
+        Utils.sendDebug("Statement E: " + (target.getFloorZ() <= (getMinProtectedZ() + protectionRange)));
 
         return target.getLevel().getName().equalsIgnoreCase(levelName)
                 && target.getFloorX() >= getMinProtectedX()
@@ -327,6 +335,7 @@ public class IslandData implements Cloneable {
                 "x=" + gridCoordinates.getFloorX() + ", " +
                 "z=" + gridCoordinates.getFloorY() + ", " +
                 "plotOwner=" + plotOwner + ", " +
+                "gridSize=" + getProtectionSize() + ", " +
                 "levelName=" + levelName + ")";
     }
 

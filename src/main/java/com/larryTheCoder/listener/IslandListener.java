@@ -103,32 +103,34 @@ public class IslandListener implements Listener {
      */
     private boolean actionAllowed(Player player, Location location, SettingsFlag flag) {
         if (player == null) {
-            //deb.debug("DEBUG: Checking by default");
             return actionAllowed(location, flag);
         }
         // This permission bypasses protection
         if (player.isOp() || player.hasPermission("is.mod.bypassprotect")) {
-            //deb.debug("DEBUG: Player has permission to bypass");
             return true;
         }
+
+        Utils.sendDebug("Finding island info");
         IslandData island = plugin.getGrid().getProtectedIslandAt(location);
         TeamManager pd = plugin.getTManager();
         if (island != null && (island.getIgsSettings().getIgsFlag(flag) || (pd.getLeaderCoop(island.getPlotOwner()) == null || pd.getLeaderCoop(island.getPlotOwner()).isMember(player.getName())))) {
             //deb.debug("DEBUG: Action is allowed, flag=" + island.getIgsSettings().getIgsFlag(flag) + " member=" + island.getMembers().contains(player.getName()));
+            Utils.sendDebug("Finding island info");
             return true;
         }
 
         if (island == null || island.getPlotOwner() == null) {
-            //deb.debug("DEBUG: Action not allowed: actionAllowed() check");
+            Utils.sendDebug("Island got no viable owner? Bug");
             return false;
         }
 
         if (island.getPlotOwner().equalsIgnoreCase(player.getName())) {
-            //deb.debug("DEBUG: Action is allowed: actionAllowed() check");
+            Utils.sendDebug("Action is allowed, the player is the owner");
+
             return true;
         }
 
-        //deb.debug("DEBUG: Action is defined by settings");
+        Utils.sendDebug("Action is defined by settings");
         // Fixed
         return Settings.defaultWorldSettings.get(flag);
     }

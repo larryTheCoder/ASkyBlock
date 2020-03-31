@@ -56,6 +56,12 @@ public class IslandDataBuilder {
         return this;
     }
 
+    public IslandDataBuilder setProtectionSize(int gridSize){
+        data.setProtectionRange(gridSize);
+
+        return this;
+    }
+
     public IslandDataBuilder setLocked(boolean isLocked) {
         data.setLocked(isLocked);
         return this;
