@@ -73,6 +73,11 @@ public class OperatorCategory extends SubCategory {
     }
 
     @Override
+    public String getParameters(String commandName) {
+        return ""; // Command parameters are overridden by the code
+    }
+
+    @Override
     public void execute(CommandSender sender, String commandLabel, String[] args) {
         Player pl = sender.isPlayer() ? sender.getServer().getPlayer(sender.getName()) : null;
 
@@ -196,60 +201,6 @@ public class OperatorCategory extends SubCategory {
                     }
                 }
                 break;
-            case "cc":
-            case "completechallenge":
-                if (!sender.hasPermission("is.admin.completechallenge")) {
-                    sender.sendMessage(getPlugin().getLocale(pl).errorNoPermission);
-                    break;
-                }
-                if (args.length <= 1) {
-                    sender.sendMessage(getPlugin().getPrefix() + "§aUsage: /" + commandLabel + " completechallenge <player>");
-                    break;
-                }
-                IPlayer offlinePlayer = Server.getInstance().getOfflinePlayer(args[1]);
-                PlayerData pld = getPlugin().getPlayerInfo(offlinePlayer.getName());
-                if (pld == null) {
-                    sender.sendMessage(TextFormat.RED + getPlugin().getLocale(pl).errorUnknownPlayer);
-                    break;
-                }
-                if (pld.checkChallenge(args[2].toLowerCase()) || pld.challengeNotExists(args[2].toLowerCase())) {
-                    sender.sendMessage(TextFormat.RED + getPlugin().getLocale(pl).errorChallengeDoesNotExist);
-                    break;
-                }
-                pld.completeChallenge(args[2].toLowerCase());
-                pld.saveData();
-
-                sender.sendMessage(TextFormat.YELLOW + getPlugin().getLocale(pl).completeChallengeCompleted
-                        .replace("[challengename]", args[2].toLowerCase())
-                        .replace("[name]", args[1]));
-                break;
-            case "rc":
-            case "resetchallenge":
-                if (!sender.hasPermission("is.admin.resetchallenge")) {
-                    sender.sendMessage(getPlugin().getLocale(pl).errorNoPermission);
-                    break;
-                }
-                if (args.length <= 1) {
-                    sender.sendMessage(getPlugin().getPrefix() + "§aUsage: /" + commandLabel + " resetchallenge <player>");
-                    break;
-                }
-
-                offlinePlayer = Server.getInstance().getOfflinePlayer(args[1]);
-                pld = getPlugin().getPlayerInfo(offlinePlayer.getName());
-                if (pld == null) {
-                    sender.sendMessage(TextFormat.RED + getPlugin().getLocale(pl).errorUnknownPlayer);
-                    break;
-                }
-                if (!pld.checkChallenge(args[2].toLowerCase()) || pld.challengeNotExists(args[2].toLowerCase())) {
-                    sender.sendMessage(TextFormat.RED + getPlugin().getLocale(pl).errorChallengeDoesNotExist);
-                    break;
-                }
-                pld.resetChallenge(args[2].toLowerCase());
-                pld.saveData();
-                sender.sendMessage(TextFormat.YELLOW + getPlugin().getLocale(pl).resetChallengeReset
-                        .replace("[challengename]", args[2].toLowerCase())
-                        .replace("[name]", args[1]));
-                break;
             case "delete":
                 if (!sender.hasPermission("is.admin.delete")) {
                     sender.sendMessage(getPlugin().getLocale(pl).errorNoPermission);
@@ -260,21 +211,21 @@ public class OperatorCategory extends SubCategory {
                 if (pl == null) {
                     // Well its console, so they could perform it by deleting it with command isn't?
                     if (args.length <= 2) {
-                        sender.sendMessage(getPlugin().getPrefix() + "§aUsage: /" + commandLabel + " delete <player> <id>");
+                        sender.sendMessage(getPlugin().getPrefix() + "§aUsage: /" + commandLabel + " delete [player] [Home number]");
                         break;
                     }
                     int id = Integer.getInteger(args[2]);
 
                     // Show them, lets see if this dude got a data in database
-                    offlinePlayer = Server.getInstance().getOfflinePlayer(args[1]);
-                    island = getPlugin().getIslandInfo(offlinePlayer.getName(), id);
-                    if (island == null) {
-                        sender.sendMessage(getPlugin().getLocale("").errorUnknownPlayer);
-                        break;
-                    }
+                    getPlugin().getFastCache().getIslandData(args[1], id, islandData -> {
+                        if (islandData == null) {
+                            sender.sendMessage(getPlugin().getLocale("").errorUnknownPlayer);
+                            return;
+                        }
 
-                    sender.sendMessage(getPlugin().getLocale("").deleteRemoving.replace("[name]", "null"));
-                    deleteIslands(island, sender);
+                        sender.sendMessage(getPlugin().getLocale("").deleteRemoving.replace("[name]", "null"));
+                        deleteIslands(islandData, sender);
+                    });
                     break;
                 }
 
@@ -302,61 +253,47 @@ public class OperatorCategory extends SubCategory {
                     deleteIslands(island, sender);
                 }
                 break;
-            case "info":
-            case "challenges":
-                if (!sender.hasPermission("is.admin.challenges")) {
-                    sender.sendMessage(getPlugin().getLocale(pl).errorNoPermission);
-                    break;
-                }
-                if (args.length <= 1) {
-                    sender.sendMessage(getPlugin().getPrefix() + "§aUsage: /" + commandLabel + " info <player>");
-                    break;
-                }
-
-                // Show them, lets see if this dude got a data in database
-                showInfoChallenges(Server.getInstance().getOfflinePlayer(args[1]), sender);
-                break;
         }
     }
-
-    /**
-     * Shows info on the challenge situation for player,
-     *
-     * @param player The Offline player to be checked on
-     * @param sender Sender who performed the command
-     */
-    private void showInfoChallenges(IPlayer player, CommandSender sender) {
-        PlayerData pd = getPlugin().getPlayerInfo(player.getName());
-        // No way
-        if (pd == null) {
-            sender.sendMessage(TextFormat.RED + getPlugin().getLocale("").errorUnknownPlayer);
-            return;
-        }
-        sender.sendMessage("Name:" + TextFormat.GREEN + player.getName());
-        sender.sendMessage("UUID: " + TextFormat.YELLOW + player.getUniqueId());
-
-        // Completed challenges
-        sender.sendMessage(TextFormat.WHITE + "Challenges:");
-        Map<String, Boolean> challenges = pd.getChallengeStatus();
-        Map<String, Integer> challengeTimes = pd.getChallengeTimes();
-        if (challenges.isEmpty()) {
-            sender.sendMessage(TextFormat.RED + "Empty in here...");
-            return;
-        }
-        for (String c : challenges.keySet()) {
-            if (challengeTimes.containsKey(c)) {
-                sender.sendMessage(c + ": " + (challenges.get(c) ?
-                        TextFormat.GREEN + "Complete" :
-                        TextFormat.AQUA + "Incomplete")
-                        + "(" + pd.checkChallengeTimes(c) + ")");
-
-            } else {
-                sender.sendMessage(c + ": " + (challenges.get(c) ?
-                        TextFormat.GREEN + "Complete" :
-                        TextFormat.AQUA + "Incomplete"));
-            }
-        }
-    }
+//
+//    /**
+//     * Shows info on the challenge situation for player,
+//     *
+//     * @param player The Offline player to be checked on
+//     * @param sender Sender who performed the command
+//     */
+//    private void showInfoChallenges(IPlayer player, CommandSender sender) {
+//        PlayerData pd = getPlugin().getPlayerInfo(player.getName());
+//        // No way
+//        if (pd == null) {
+//            sender.sendMessage(TextFormat.RED + getPlugin().getLocale("").errorUnknownPlayer);
+//            return;
+//        }
+//        sender.sendMessage("Name:" + TextFormat.GREEN + player.getName());
+//        sender.sendMessage("UUID: " + TextFormat.YELLOW + player.getUniqueId());
+//
+//        // Completed challenges
+//        sender.sendMessage(TextFormat.WHITE + "Challenges:");
+//        Map<String, Boolean> challenges = pd.getChallengeStatus();
+//        Map<String, Integer> challengeTimes = pd.getChallengeTimes();
+//        if (challenges.isEmpty()) {
+//            sender.sendMessage(TextFormat.RED + "Empty in here...");
+//            return;
+//        }
+//        for (String c : challenges.keySet()) {
+//            if (challengeTimes.containsKey(c)) {
+//                sender.sendMessage(c + ": " + (challenges.get(c) ?
+//                        TextFormat.GREEN + "Complete" :
+//                        TextFormat.AQUA + "Incomplete")
+//                        + "(" + pd.checkChallengeTimes(c) + ")");
+//
+//            } else {
+//                sender.sendMessage(c + ": " + (challenges.get(c) ?
+//                        TextFormat.GREEN + "Complete" :
+//                        TextFormat.AQUA + "Incomplete"));
+//            }
+//        }
+//    }
 
     /**
      * Deletes the overworld and nether islands together

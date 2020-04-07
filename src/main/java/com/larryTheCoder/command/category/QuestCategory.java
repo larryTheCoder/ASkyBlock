@@ -60,4 +60,9 @@ public class QuestCategory extends SubCategory {
     public String getDescription(String commandName) {
         return null;
     }
+
+    @Override
+    public String getParameters(String commandName) {
+        return null;
+    }
 }

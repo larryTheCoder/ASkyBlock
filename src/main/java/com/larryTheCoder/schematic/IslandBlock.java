@@ -30,7 +30,6 @@ import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.*;
 import cn.nukkit.item.Item;
-import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.level.format.generic.BaseFullChunk;
@@ -72,11 +71,6 @@ class IslandBlock extends BlockMinecraftId {
     private Block potItem;
     private int potItemData;
 
-    /**
-     * @param x
-     * @param y
-     * @param z
-     */
     IslandBlock(int x, int y, int z, int islandId) {
         this.x = x;
         this.y = y;
@@ -91,13 +85,6 @@ class IslandBlock extends BlockMinecraftId {
      */
     int getTypeId() {
         return typeId;
-    }
-
-    /**
-     * @param type the type to set
-     */
-    public void setTypeId(short type) {
-        this.typeId = type;
     }
 
     /**
@@ -356,34 +343,4 @@ class IslandBlock extends BlockMinecraftId {
             Utils.sendDebug("&7Warning: Block " + typeId + ":" + data + " not found. Ignoring...");
         }
     }
-
-    /**
-     * This is the function where the Minecraft PC block bugs (Ex. vine)
-     * Were placed and crapping the server
-     * <p>
-     * Revert function is multi-purposes cause
-     */
-    void revert(Position blockLoc) {
-        try {
-            Location loc = new Location(x, y, z, 0, 0, blockLoc.getLevel()).add(blockLoc);
-            loadChunkAt(loc);
-            blockLoc.getLevel().setBlock(loc, Block.get(Block.AIR), true, true);
-
-            // Remove block entity
-            BlockEntity entity = blockLoc.getLevel().getBlockEntity(loc);
-            if (entity != null) {
-                blockLoc.getLevel().removeBlockEntity(entity);
-            }
-        } catch (Exception ex) {
-            // Nope do noting. This just avoiding a crap message on console
-        }
-    }
-
-    /**
-     * @return Vector for where this block is in the schematic
-     */
-    public Vector3 getVector() {
-        return new Vector3(x, y, z);
-    }
-
 }

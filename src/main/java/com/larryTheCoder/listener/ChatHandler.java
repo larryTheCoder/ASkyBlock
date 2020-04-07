@@ -37,7 +37,6 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.player.CoopData;
 import com.larryTheCoder.utils.Settings;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,7 +60,7 @@ public class ChatHandler implements Listener {
         // Add all online player Levels
         plugin.getServer().getOnlinePlayers().values()
                 .stream()
-                .peek((player) -> playerLevels.put(player, String.valueOf(plugin.getIslandLevel(player))))
+                .peek((player) -> playerLevels.put(player, "0")) // String.valueOf(plugin.getIslandLevel(player))))
                 .forEachOrdered((player) -> playerChallengeLevels.put(player.getUniqueId(), ""));
 
     }

@@ -97,7 +97,6 @@ public class GridManager {
             }
         }
 
-        Utils.sendDebug("DEBUG: Safe Blocks " + safeBlock);
         return safeBlock > 6;
     }
 
@@ -190,8 +189,6 @@ public class GridManager {
                 return locationSafe;
             }
 
-            Utils.sendDebug("Adding a block up");
-
             // To cover slabs, stairs and other half blocks, try one block above
             Location locPlusOne = locationSafe.clone();
             locPlusOne.add(new Vector3(0, 1, 0));
@@ -201,7 +198,6 @@ public class GridManager {
                 return locPlusOne;
             }
 
-            Utils.sendDebug("Trying to check all way up");
             // Try to find all the way up
             for (int y = 0; y < 255; y++) {
                 Position locPlusY = locPlusOne.setComponents(locationSafe.getX(), y, locationSafe.getZ());
@@ -212,7 +208,6 @@ public class GridManager {
                 }
             }
 
-            Utils.sendDebug("Trying to check another way");
             Vector2 center = pd.getCenter();
             for (int dy = 0; dy <= 128; dy++) {
                 for (int dx = center.getFloorX() - 25; dx <= center.getFloorX() + 25; dx++) {
@@ -264,13 +259,10 @@ public class GridManager {
         if (island == null) {
             return null;
         }
-        Utils.sendDebug("Island is not null");
         if (island.onIsland(location)) {
-            Utils.sendDebug("Island is in protected area");
             return island;
         }
 
-        Utils.sendDebug("Not inside protected area");
         return null;
     }
 

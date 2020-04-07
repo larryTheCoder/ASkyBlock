@@ -30,7 +30,6 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.utils.Settings;
 
 import java.util.List;
@@ -84,16 +83,17 @@ public class Invitation {
         sender.sendMessage(plugin.getPrefix() + plugin.getLocale(sender.isPlayer() ? (Player) sender : null).acceptedTo.replace("[player]", receiver.getName()));
         receiver.sendMessage(plugin.getPrefix() + plugin.getLocale(receiver).acceptedFrom.replace("[player]", sender.getName()));
 
-        List<IslandData> dataList = plugin.getIslandsInfo(receiver.getName());
-        // Check if the player has an island
-        if (!dataList.isEmpty()) {
-            receiver.sendMessage(plugin.getPrefix() + "Deleting all of your islands");
-            //dataList.forEach((island) -> plugin.getDatabase().deleteIsland(island));
-        }
-
-        // Set the team from the sender and the receiver.
-        plugin.getTManager().setTeam(sender.getName(), receiver.getName());
-        handler.removeInvitation(this);
+        // TODO: Compliance under Co-Op regulatory and settings.
+//        List<IslandData> dataList = plugin.getIslandsInfo(receiver.getName());
+//        // Check if the player has an island
+//        if (!dataList.isEmpty()) {
+//            receiver.sendMessage(plugin.getPrefix() + "Deleting all of your islands");
+//            //dataList.forEach((island) -> plugin.getDatabase().deleteIsland(island));
+//        }
+//
+//        // Set the team from the sender and the receiver.
+//        plugin.getTManager().setTeam(sender.getName(), receiver.getName());
+//        handler.removeInvitation(this);
     }
 
     public void denyInvitation() {

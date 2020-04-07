@@ -33,6 +33,7 @@ import com.google.common.base.Preconditions;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.task.TaskManager;
+import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import lombok.Getter;
 import lombok.NonNull;
@@ -88,12 +89,27 @@ public class FastCache {
                 for (String userName : config.getAll().keySet()) {
                     FastCacheData data = new FastCacheData(userName);
 
-                    // Fetch PlayerData first.
+                    Row plData;
+                    Row clData;
+
+                    // Fetch user info
                     Table table = connection.createQuery(FETCH_PLAYER_MAIN.getQuery())
                             .addParameter("plotOwner", userName)
                             .executeAndFetchTable();
 
-                    data.setPlayerData(PlayerData.fromRows(table.rows().get(0)));
+                    plData = table.rows().get(0);
+
+                    table = connection.createQuery(FETCH_PLAYER_DATA.getQuery())
+                            .addParameter("playerName", userName)
+                            .executeAndFetchTable();
+
+                    if (!table.rows().isEmpty()) {
+                        clData = table.rows().get(0);
+                    } else {
+                        clData = null;
+                    }
+
+                    data.setPlayerData(PlayerData.fromRows(plData, clData));
 
                     // Then we fetch IslandData.
                     table = connection.createQuery(FETCH_ISLANDS_PLOT.getQuery())
@@ -122,31 +138,34 @@ public class FastCache {
 
             @Override
             public void onCompletion(Exception err) {
+                if (err != null) {
+                    err.printStackTrace();
+                    return;
+                }
                 Utils.sendDebug(String.format("Loaded %s cache data.", dataCache.size()));
 
                 ASkyBlock.get().getFastCache().addAllCacheData(dataCache);
-            }
-        });
+                storeSchedule.clear(); // Remove useless caches.
 
-        TaskManager.runTaskAsync(() -> {
-            while (isClosed.get()) {
-                FastCacheData consumer;
-                while ((consumer = storeSchedule.poll()) != null) {
-                    Utils.sendDebug("Handling data info " + consumer.ownedBy);
+                TaskManager.runTaskAsync(() -> {
+                    while (isClosed.get()) {
+                        FastCacheData consumer;
+                        while ((consumer = storeSchedule.poll()) != null) {
+                            ConfigSection playerSec = new ConfigSection();
+                            playerSec.set("lastFetched", consumer.lastUpdatedQuery);
+                            playerSec.set("islandIds", new ArrayList<>(consumer.getIslandData().keySet()));
 
-                    ConfigSection playerSec = new ConfigSection();
-                    playerSec.set("lastFetched", consumer.lastUpdatedQuery);
-                    playerSec.set("islandIds", new ArrayList<>(consumer.getIslandData().keySet()));
+                            config.set(consumer.getDataIdentifier(), playerSec);
+                            config.save();
+                        }
 
-                    config.set(consumer.getDataIdentifier(), playerSec);
-                    config.save();
-                }
-
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
         });
     }
@@ -276,13 +295,29 @@ public class FastCache {
         FastCacheData result = dataCache.stream().filter(i -> i.anyMatch(playerName) && i.anyIslandMatch(homeNum)).findFirst().orElse(null);
         if (result == null) {
             plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
+
+                private List<IslandData> islandList;
+
                 @Override
                 public void executeQuery(Connection connection) {
-                    List<IslandData> islandList = parseData(connection.createQuery(FETCH_ISLAND_PLOT.getQuery())
+                    islandList = parseData(connection.createQuery(FETCH_ISLAND_PLOT.getQuery())
                             .addParameter("pName", playerName)
+                            .addParameter("islandId", homeNum)
                             .executeAndFetchTable().rows(), connection);
+                }
 
+                @Override
+                public void onCompletion(Exception exception) {
+                    if (exception != null) {
+                        resultOutput.accept(null);
+
+                        exception.printStackTrace();
+                        return;
+                    }
                     saveIntoDb(playerName, islandList);
+
+                    FastCacheData result = dataCache.stream().filter(i -> i.anyMatch(playerName) && i.anyIslandMatch(homeNum)).findFirst().orElse(null);
+                    resultOutput.accept(result != null ? result.getIslandById(homeNum) : null);
                 }
             });
             return;
@@ -295,7 +330,7 @@ public class FastCache {
      * Retrieves all islands from this player
      * This method is not a thread-blocking operation.
      */
-    public void getIslandFrom(String plName, Consumer<List<IslandData>> resultOutput) {
+    public void getIslandsFrom(String plName, Consumer<List<IslandData>> resultOutput) {
         FastCacheData result = dataCache.stream().filter(i -> i.anyMatch(plName)).findFirst().orElse(null);
         if (result == null) {
             plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
@@ -348,12 +383,15 @@ public class FastCache {
      */
     public void getPlayerData(String player, Consumer<PlayerData> resultOutput) {
         FastCacheData result = dataCache.stream().filter(i -> i.anyMatch(player)).findFirst().orElse(null);
-        if (result == null) {
+        if (result == null || result.getPlayerData() == null) {
             plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
                 private PlayerData playerData = null;
 
                 @Override
                 public void executeQuery(Connection connection) {
+                    Row plData;
+                    Row clData;
+
                     Table data = connection.createQuery(FETCH_PLAYER_MAIN.getQuery())
                             .addParameter("plotOwner", player)
                             .executeAndFetchTable();
@@ -362,10 +400,19 @@ public class FastCache {
                         return;
                     }
 
-                    PlayerData pd = PlayerData.fromRows(data.rows().get(0));
-                    pd.fetchChallengeBody(); // TODO: Remove this after asynchronous target achieved.
+                    plData = data.rows().get(0);
 
-                    playerData = pd;
+                    data = connection.createQuery(FETCH_PLAYER_DATA.getQuery())
+                            .addParameter("playerName", player)
+                            .executeAndFetchTable();
+
+                    if (!data.rows().isEmpty()) {
+                        clData = data.rows().get(0);
+                    } else {
+                        clData = null;
+                    }
+
+                    playerData = PlayerData.fromRows(plData, clData);
                 }
 
                 @Override
@@ -500,6 +547,27 @@ public class FastCache {
         return islandList;
     }
 
+    /**
+     * A method to retrieve default locale of a player.
+     * This method is considered thread safe, while a runnable object will executed when
+     * this player data were not found in cache.
+     *
+     * @param plName The player name
+     * @return Default locale of the player.
+     */
+    public String getDefaultLocale(String plName) {
+        FastCacheData object = dataCache.stream().filter(i -> i.anyMatch(plName)).findFirst().orElse(null);
+        if (object == null || object.getPlayerData() == null) {
+            // Forces the query to fetch all available information about this player.
+            getPlayerData(plName, o -> {
+            });
+
+            return Settings.defaultLanguage;
+        }
+
+        return object.getPlayerData().getLocale();
+    }
+
     private static class FastCacheData {
 
         private Timestamp lastUpdatedQuery;
@@ -530,7 +598,7 @@ public class FastCache {
         }
 
         void setPlayerData(PlayerData playerData) {
-            Preconditions.checkState(this.playerData == null, "PlayerData already exists in this cache.");
+            Preconditions.checkState(playerData != null, "PlayerData cannot be null");
             updateTime();
 
             this.playerData = playerData;

@@ -102,4 +102,12 @@ public abstract class SubCategory {
      * @return The description of the command.
      */
     public abstract String getDescription(String commandName);
+
+    /**
+     * Get the parameters required for the command.
+     *
+     * @param commandName The command name
+     * @return The parameters required for the command.
+     */
+    public abstract String getParameters(String commandName);
 }

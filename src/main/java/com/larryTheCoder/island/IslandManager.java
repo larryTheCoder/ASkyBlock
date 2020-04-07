@@ -172,8 +172,6 @@ public class IslandManager {
     }
 
     public void createIsland(Player pl, int templateId, String levelName, String home, boolean locked, EnumBiome biome, boolean teleport) {
-        Utils.sendDebug("Creating an island");
-
         if (Settings.useEconomy) {
             double money = ASkyBlock.econ.getMoney(pl);
             if (Settings.islandCost > money && Settings.islandCost != money) {
@@ -223,8 +221,6 @@ public class IslandManager {
                             .setPlotBiome("Plains")
                             .setIslandName(home).build();
 
-                    Utils.sendDebug(resultData.toString());
-
                     // Then we call a task to run them in the main thread.
                     TaskManager.runTask(() -> {
                         // Call an event
@@ -234,19 +230,12 @@ public class IslandManager {
                             pl.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).errorBlockedByAPI);
                             return;
                         }
-
-                        Utils.sendDebug("Pasting schematic");
-
                         plugin.getSchematics().pasteSchematic(pl, locIsland, templateId, biome);
-
-                        Utils.sendDebug("Pushing query");
 
                         // Then apply another async query.
                         ASkyBlock.get().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
                             @Override
                             public void executeQuery(Connection connection) {
-                                Utils.sendDebug("Inserting into table");
-
                                 connection.createQuery(TableSet.ISLAND_INSERT_MAIN.getQuery())
                                         .addParameter("playerName", pl.getName())
                                         .addParameter("islandId", resultData.getHomeCountId())
@@ -257,8 +246,6 @@ public class IslandManager {
                                         .addParameter("levelName", resultData.getLevelName())
                                         .executeUpdate();
 
-                                Utils.sendDebug("Inserting into table 2");
-
                                 connection.createQuery(TableSet.ISLAND_INSERT_DATA.getQuery())
                                         .addParameter("islandUniqueId", resultData.getIslandUniquePlotId())
                                         .addParameter("plotBiome", resultData.getPlotBiome())
@@ -266,8 +253,6 @@ public class IslandManager {
                                         .addParameter("protectionData", resultData.getIgsSettings().getSettings())
                                         .addParameter("levelHandicap", resultData.getLevelHandicap())
                                         .executeUpdate();
-
-                                Utils.sendDebug("Inserting complete");
                             }
 
                             @Override
@@ -424,14 +409,9 @@ public class IslandManager {
         // Get the player's island from the grid if it exists
         IslandData island = getIslandAt(local);
         CoopData pd = plugin.getTManager().getLeaderCoop(island.getPlotOwner());
-        if (island != null) {
-            // On an island in the grid
-            // In a protected zone but is on the list of acceptable players
-            // Otherwise return false
-            return island.onIsland(local) && ((pd == null || pd.getMembers().contains(player.getName())) || island.getPlotOwner().equalsIgnoreCase(player.getName()));
-        }
-        return false;
+        // On an island in the grid
+        // In a protected zone but is on the list of acceptable players
+        // Otherwise return false
+        return island.onIsland(local) && ((pd == null || pd.getMembers().contains(player.getName())) || island.getPlotOwner().equalsIgnoreCase(player.getName()));
     }
-
-
 }

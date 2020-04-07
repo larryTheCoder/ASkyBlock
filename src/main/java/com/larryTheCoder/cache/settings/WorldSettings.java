@@ -116,7 +116,7 @@ public class WorldSettings {
         cfg.set(levelName + ".stopTime", stopTime);
         cfg.set(levelName + ".seaLevel", seaLevel);
         cfg.set(levelName + ".useDefaultChest", useDefaultChest);
-        cfg.set(levelName + ".signConfig", new String[]{"&aWelcome to", "&e[player]'s", "&e[player]'", ""});
+        cfg.set(levelName + ".signConfig", new String[]{"&aWelcome to", "&e[player]'s", "&aIsland! Enjoy.", ""});
         cfg.save();
     }
 

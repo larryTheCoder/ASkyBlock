@@ -82,6 +82,11 @@ public class ChatCategory extends SubCategory {
     }
 
     @Override
+    public String getParameters(String commandName) {
+        return "";
+    }
+
+    @Override
     public void execute(CommandSender sender, String commandLabel, String[] args) {
         Player p = Server.getInstance().getPlayer(sender.getName());
 

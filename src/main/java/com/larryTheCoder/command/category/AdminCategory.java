@@ -64,6 +64,7 @@ public class AdminCategory extends SubCategory {
         return false;
     }
 
+    @Override
     public String getDescription(String command) {
         switch (command.toLowerCase()) {
             case "accept":
@@ -79,6 +80,11 @@ public class AdminCategory extends SubCategory {
                 return "Leave from being an island member.";
         }
         return "NaN";
+    }
+
+    @Override
+    public String getParameters(String commandName) {
+        return null;
     }
 
     @Override

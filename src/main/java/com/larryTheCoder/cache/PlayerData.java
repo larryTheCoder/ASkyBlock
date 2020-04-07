@@ -32,11 +32,14 @@ import lombok.Getter;
 import lombok.Setter;
 import org.sql2o.Connection;
 import org.sql2o.data.Row;
-import org.sql2o.data.Table;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
-import static com.larryTheCoder.database.TableSet.*;
+import static com.larryTheCoder.database.TableSet.PLAYER_UPDATE_DATA;
+import static com.larryTheCoder.database.TableSet.PLAYER_UPDATE_MAIN;
 
 /**
  * @author larryTheCoder
@@ -49,22 +52,34 @@ public class PlayerData implements Cloneable {
     @Getter
     public final String playerXUID;
 
-    @Setter @Getter
-    public int resetLeft;
+    @Setter
+    @Getter
+    private int resetLeft;
 
-    @Setter @Getter
-    public int islandLevel;
+    @Setter
+    @Getter
+    private int islandLevel;
 
-    private boolean challengeFetched = false;
     private final HashMap<String, Boolean> challengeList = new HashMap<>();
     private final HashMap<String, Integer> challengeListTimes = new HashMap<>();
 
-    @Getter @Setter
-    public String locale;
     @Getter
-    public List<String> banList;
+    @Setter
+    private String locale;
+    @Getter
+    private List<String> banList;
 
-    private PlayerData(String playerName, String playerXUID, String pubLocale, List<String> banList, int resetAttempts, int islandLevels) {
+    /**
+     * Dummy PlayerData class that were used for challenges initialization.
+     */
+    public PlayerData() {
+        playerName = null;
+        playerXUID = null;
+
+        setupChallengeList();
+    }
+
+    private PlayerData(String playerName, String playerXUID, String pubLocale, List<String> banList, int resetAttempts, int islandLevels, Row clData) {
         this.playerName = playerName;
         this.playerXUID = playerXUID;
 
@@ -72,137 +87,23 @@ public class PlayerData implements Cloneable {
         this.banList = banList;
         this.resetLeft = resetAttempts;
         this.islandLevel = islandLevels;
+
+        if (clData == null) {
+            setupChallengeList();
+        } else {
+            encodeChallengeList(clData.getString("challengesList"), clData.getString("challengesTimes"));
+        }
     }
 
-    public static PlayerData fromRows(Row dataRow) {
+    public static PlayerData fromRows(Row dataRow, Row challengeData) {
         return new PlayerData(
                 dataRow.getString("playerName"),
                 dataRow.getString("playerUUID"),
                 dataRow.getString("locale"),
                 Utils.stringToArray(dataRow.getString("banList"), ":"),
                 dataRow.getInteger("resetAttempts"),
-                dataRow.getInteger("islandLevels"));
-    }
-
-    /**
-     * Checks if a challenge not exists in the player's challenge list
-     *
-     * @param challenge The challenge to be checked
-     * @return true if challenge is listed in the player's challenge list,
-     * otherwise false
-     */
-    public boolean challengeNotExists(final String challenge) {
-        return !challengeList.containsKey(challenge.toLowerCase());
-    }
-
-    /**
-     * Checks if a challenge is recorded as completed in the player's challenge
-     * list or not
-     *
-     * @param challenge The challenge to be checked
-     * @return true if the challenge is listed as complete, false if not
-     */
-    public boolean checkChallenge(final String challenge) {
-        if (challengeList.containsKey(challenge.toLowerCase())) {
-            return challengeList.get(challenge.toLowerCase());
-        }
-        return false;
-    }
-
-    /**
-     * Checks how many times a challenge has been done
-     *
-     * @param challenge The challenge to be checked
-     * @return number of times
-     */
-    public int checkChallengeTimes(String challenge) {
-        if (challengeListTimes.containsKey(challenge.toLowerCase())) {
-            //Utils.sendDebug("DEBUG: check " + challenge + ":" + challengeListTimes.get(challenge.toLowerCase()));
-            return challengeListTimes.get(challenge.toLowerCase());
-        }
-        return 0;
-    }
-
-    /**
-     * Map of all of the known challenges and how many times each
-     * one has been completed. This is a view of the challenges
-     * map that only allows read operations.
-     *
-     * @return The list of all the challenges times
-     */
-    public Map<String, Integer> getChallengeTimes() {
-        if (!challengeFetched) {
-            fetchChallengeBody();
-        }
-
-        return Collections.unmodifiableMap(challengeListTimes);
-    }
-
-    public Map<String, Boolean> getChallengeStatus() {
-        if (!challengeFetched) {
-            fetchChallengeBody();
-        }
-
-        return Collections.unmodifiableMap(challengeList);
-    }
-
-    /**
-     * Fetch challenges body of this player.
-     * <p>
-     * This body is not fetched by default, therefore you may have to execute
-     * this first before fetching any challenges.
-     */
-    public void fetchChallengeBody() {
-        if (challengeFetched) {
-            return;
-        }
-
-        Connection connection = ASkyBlock.get().getDatabase().getConnection();
-
-        Table data = connection.createQuery(FETCH_PLAYER_DATA.getQuery())
-                .addParameter("playerName", playerName)
-                .executeAndFetchTable();
-
-        if (!data.rows().isEmpty()) {
-            Row row = data.rows().get(0);
-
-            encodeChallengeList(row.getString("challengesList"), row.getString("challengesTimes"));
-        }
-
-        challengeFetched = true;
-    }
-
-    /**
-     * Records the challenge as being complete in the player's list. If the
-     * challenge is not listed in the player's challenge list already, then it
-     * will be added.
-     *
-     * @param challenge The challenge name
-     */
-    public void completeChallenge(final String challenge) {
-        // plugin.getLogger().info("DEBUG: Complete challenge");
-        challengeList.put(challenge.toLowerCase(), true);
-        // Count how many times the challenge has been done
-        int times = 0;
-        if (challengeListTimes.containsKey(challenge.toLowerCase())) {
-            times = challengeListTimes.get(challenge.toLowerCase());
-        }
-        times++;
-        challengeListTimes.put(challenge.toLowerCase(), times);
-        // Utils.sendDebug(decodeChallengeList("clt"));
-        // plugin.getLogger().info("DEBUG: complete " + challenge + ":" +
-        // challengeListTimes.get(challenge.toLowerCase()).intValue() );
-    }
-
-    /**
-     * Resets a specific challenge.
-     *
-     * @param challenge the challenge name
-     */
-    public void resetChallenge(final String challenge) {
-        //plugin.getLogger().info("DEBUG: reset challenge");
-        challengeList.put(challenge, false);
-        challengeListTimes.put(challenge, 0);
+                dataRow.getInteger("islandLevels"),
+                challengeData);
     }
 
     /**
@@ -289,22 +190,23 @@ public class PlayerData implements Cloneable {
             public void executeQuery(Connection connection) {
                 connection.createQuery(PLAYER_UPDATE_MAIN.getQuery())
                         .addParameter("playerName", playerName)
-                        .addParameter("playerUUID", playerXUID)
                         .addParameter("locale", locale)
                         .addParameter("banList", Utils.arrayToString(banList))
                         .addParameter("resetLeft", resetLeft)
                         .addParameter("islandLevels", islandLevel)
                         .executeUpdate();
 
-                if (!challengeFetched) {
-                    return;
-                }
-
                 connection.createQuery(PLAYER_UPDATE_DATA.getQuery())
                         .addParameter("playerName", playerName)
                         .addParameter("challengesList", decodeChallengeList("cl"))
                         .addParameter("challengesTimes", decodeChallengeList("clt"))
                         .executeUpdate();
+            }
+
+            public void onCompletion(Exception exception) {
+                if (exception != null) {
+                    exception.printStackTrace();
+                }
             }
         });
     }

@@ -352,82 +352,82 @@ public class LevelCalcTask {
 
                 final int pointsToNextLevel = calculatePointsToNextLevel;
 
-                // Return to main thread
-                plugin.getServer().getScheduler().scheduleTask(plugin, () -> {
-                    PlayerData playerInfo = plugin.getPlayerInfo(pd.getPlotOwner());
-                    // Fire the pre-level event
-                    IslandPreLevelEvent event = new IslandPreLevelEvent(targetPlayer, pd, score, pointsToNextLevel);
-                    plugin.getServer().getPluginManager().callEvent(event);
-                    int oldLevel = playerInfo.getIslandLevel();
-                    if (!event.isCancelled()) {
-                        if (oldLevel != event.getLevel()) {
-                            // Update player and team mates
-                            playerInfo.setIslandLevel(event.getLevel());
-                            playerInfo.saveData();
-                        }
-
-                        // TODO: Update player team members too
-                        TopTen.topTenAddEntry(playerInfo.getPlayerName(), event.getLevel());
-                    }
-
-                    // Fire the island post level calculation event
-                    final IslandPostLevelEvent event3 = new IslandPostLevelEvent(targetPlayer, pd, event.getLevel(), event.getPointsToNextLevel());
-                    plugin.getServer().getPluginManager().callEvent(event3);
-
-                    if (!event3.isCancelled()) {
-                        if (sender == null) {
-                            return;
-                        }
-                        if (sender.isPlayer()) {
-                            // Player
-                            if (!storeLogs) {
-                                // Tell offline team members the island level changed
-                                if (playerInfo.getIslandLevel() != oldLevel) {
-                                    //plugin.getLogger().info("DEBUG: telling offline players");
-                                    plugin.getMessages().tellOfflineTeam(pd.getPlotOwner(), TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel());
-                                }
-                                if (sender instanceof Player && ((Player) sender).isOnline()) {
-                                    String message = TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel();
-                                    if (Settings.deathPenalty != 0) {
-                                        message += TextFormat.RED + " [[number] deaths]".replace("[number]", String.valueOf(deathHandicap));
-                                    }
-                                    sender.sendMessage(TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel());
-                                    if (event.getPointsToNextLevel() >= 0) {
-                                        String toNextLevel = TextFormat.GREEN + "You need [points] more points to reach level [next]!".replace("[points]", String.valueOf(event.getPointsToNextLevel()));
-                                        toNextLevel = toNextLevel.replace("[next]", String.valueOf(playerInfo.getIslandLevel() + 1));
-                                        sender.sendMessage(toNextLevel);
-                                    }
-                                }
-                            } else {
-                                if (((Player) sender).isOnline()) {
-                                    for (String line : reportLines) {
-                                        sender.sendMessage(line);
-                                    }
-                                }
-                                sender.sendMessage(TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel());
-                                if (event.getPointsToNextLevel() >= 0) {
-                                    String toNextLevel = TextFormat.GREEN + "You need [points] more points to reach level [next]!".replace("[points]", String.valueOf(event.getPointsToNextLevel()));
-                                    toNextLevel = toNextLevel.replace("[next]", String.valueOf(playerInfo.getIslandLevel() + 1));
-                                    sender.sendMessage(toNextLevel);
-                                }
-                            }
-                        } else {
-                            if (!storeLogs) {
-                                sender.sendMessage(TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel());
-                            } else {
-                                for (String line : reportLines) {
-                                    sender.sendMessage(line);
-                                }
-                                sender.sendMessage(TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel());
-                                if (event.getPointsToNextLevel() >= 0) {
-                                    String toNextLevel = TextFormat.GREEN + "You need [points] more points to reach level [next]!".replace("[points]", String.valueOf(event.getPointsToNextLevel()));
-                                    toNextLevel = toNextLevel.replace("[next]", String.valueOf(playerInfo.getIslandLevel() + 1));
-                                    sender.sendMessage(toNextLevel);
-                                }
-                            }
-                        }
-                    }
-                });
+                // Wtf is this shit.
+//                plugin.getServer().getScheduler().scheduleTask(plugin, () -> {
+//                    PlayerData playerInfo = plugin.getPlayerInfo(pd.getPlotOwner());
+//                    // Fire the pre-level event
+//                    IslandPreLevelEvent event = new IslandPreLevelEvent(targetPlayer, pd, score, pointsToNextLevel);
+//                    plugin.getServer().getPluginManager().callEvent(event);
+//                    int oldLevel = playerInfo.getIslandLevel();
+//                    if (!event.isCancelled()) {
+//                        if (oldLevel != event.getLevel()) {
+//                            // Update player and team mates
+//                            playerInfo.setIslandLevel(event.getLevel());
+//                            playerInfo.saveData();
+//                        }
+//
+//                        // TODO: Update player team members too
+//                        TopTen.topTenAddEntry(playerInfo.getPlayerName(), event.getLevel());
+//                    }
+//
+//                    // Fire the island post level calculation event
+//                    final IslandPostLevelEvent event3 = new IslandPostLevelEvent(targetPlayer, pd, event.getLevel(), event.getPointsToNextLevel());
+//                    plugin.getServer().getPluginManager().callEvent(event3);
+//
+//                    if (!event3.isCancelled()) {
+//                        if (sender == null) {
+//                            return;
+//                        }
+//                        if (sender.isPlayer()) {
+//                            // Player
+//                            if (!storeLogs) {
+//                                // Tell offline team members the island level changed
+//                                if (playerInfo.getIslandLevel() != oldLevel) {
+//                                    //plugin.getLogger().info("DEBUG: telling offline players");
+//                                    plugin.getMessages().tellOfflineTeam(pd.getPlotOwner(), TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel());
+//                                }
+//                                if (sender instanceof Player && ((Player) sender).isOnline()) {
+//                                    String message = TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel();
+//                                    if (Settings.deathPenalty != 0) {
+//                                        message += TextFormat.RED + " [[number] deaths]".replace("[number]", String.valueOf(deathHandicap));
+//                                    }
+//                                    sender.sendMessage(TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel());
+//                                    if (event.getPointsToNextLevel() >= 0) {
+//                                        String toNextLevel = TextFormat.GREEN + "You need [points] more points to reach level [next]!".replace("[points]", String.valueOf(event.getPointsToNextLevel()));
+//                                        toNextLevel = toNextLevel.replace("[next]", String.valueOf(playerInfo.getIslandLevel() + 1));
+//                                        sender.sendMessage(toNextLevel);
+//                                    }
+//                                }
+//                            } else {
+//                                if (((Player) sender).isOnline()) {
+//                                    for (String line : reportLines) {
+//                                        sender.sendMessage(line);
+//                                    }
+//                                }
+//                                sender.sendMessage(TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel());
+//                                if (event.getPointsToNextLevel() >= 0) {
+//                                    String toNextLevel = TextFormat.GREEN + "You need [points] more points to reach level [next]!".replace("[points]", String.valueOf(event.getPointsToNextLevel()));
+//                                    toNextLevel = toNextLevel.replace("[next]", String.valueOf(playerInfo.getIslandLevel() + 1));
+//                                    sender.sendMessage(toNextLevel);
+//                                }
+//                            }
+//                        } else {
+//                            if (!storeLogs) {
+//                                sender.sendMessage(TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel());
+//                            } else {
+//                                for (String line : reportLines) {
+//                                    sender.sendMessage(line);
+//                                }
+//                                sender.sendMessage(TextFormat.GREEN + "Island level is " + TextFormat.WHITE + playerInfo.getIslandLevel());
+//                                if (event.getPointsToNextLevel() >= 0) {
+//                                    String toNextLevel = TextFormat.GREEN + "You need [points] more points to reach level [next]!".replace("[points]", String.valueOf(event.getPointsToNextLevel()));
+//                                    toNextLevel = toNextLevel.replace("[next]", String.valueOf(playerInfo.getIslandLevel() + 1));
+//                                    sender.sendMessage(toNextLevel);
+//                                }
+//                            }
+//                        }
+//                    }
+//                });
             });
         }
         return true;

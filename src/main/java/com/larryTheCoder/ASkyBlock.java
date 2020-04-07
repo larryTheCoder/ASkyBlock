@@ -38,7 +38,6 @@ import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.cache.FastCache;
 import com.larryTheCoder.cache.IslandData;
-import com.larryTheCoder.cache.PlayerData;
 import com.larryTheCoder.cache.inventory.InventorySave;
 import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.command.Commands;
@@ -46,7 +45,6 @@ import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.database.config.AbstractConfig;
 import com.larryTheCoder.database.config.MySQLConfig;
 import com.larryTheCoder.database.config.SQLiteConfig;
-import com.larryTheCoder.utils.integration.economy.Economy;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
 import com.larryTheCoder.listener.ChatHandler;
@@ -63,6 +61,7 @@ import com.larryTheCoder.updater.Updater;
 import com.larryTheCoder.utils.ConfigManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+import com.larryTheCoder.utils.integration.economy.Economy;
 import lombok.Getter;
 import org.sql2o.Connection;
 import org.sql2o.Query;
@@ -136,14 +135,8 @@ public class ASkyBlock extends ASkyBlockAPI {
         // Only defaults
         initIslands();
         registerObject();
-        test();
 
         getServer().getLogger().info(getPrefix() + "§aASkyBlock has been successfully enabled!");
-    }
-
-    private void test() {
-        List<IslandData> data = getFastCache().getIslandsFrom("larryZ00");
-        Utils.sendDebug("Island Size: " + data.size());
     }
 
     @Override
@@ -408,13 +401,8 @@ public class ASkyBlock extends ASkyBlockAPI {
         if (p == null || p.isEmpty()) {
             return getAvailableLocales().get(Settings.defaultLanguage);
         }
-        PlayerData pd = getPlayerInfo(p);
-        if (!this.getAvailableLocales().containsKey(pd.getLocale())) {
-            Utils.send("&cUnknown locale: &e" + pd.getLocale());
-            Utils.send("&cSwitching to default: &een_US");
-            return getAvailableLocales().get(Settings.defaultLanguage);
-        }
-        return getAvailableLocales().get(pd.getLocale());
+
+        return getAvailableLocales().get(getFastCache().getDefaultLocale(p));
     }
 
     /**
@@ -460,34 +448,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         this.availableLocales = availableLocales;
     }
 
-    // DEPRECATED DUE TO OUR ASYNC TARGET VIOLATION.
-
     // ISLAND DATA STARTING LINE ---
-
-    @Deprecated
-    public List<IslandData> getIslandsInfo(String playerName) {
-        Connection conn = getDatabase().getConnection();
-
-        Table levelPlot = conn.createQuery(FETCH_ISLAND_PLOT.getQuery())
-                .addParameter("pName", playerName)
-                .executeAndFetchTable();
-
-        List<IslandData> islandList = new ArrayList<>();
-        levelPlot.rows().forEach(o -> islandList.add(IslandData.fromRows(o)));
-
-        return islandList;
-    }
-
-    /**
-     * Get an island information from a player's name
-     *
-     * @param player The player name itself.
-     * @return The IslandData class
-     */
-    @Deprecated
-    public IslandData getIslandInfo(String player) {
-        return getIslandInfo(player, 1);
-    }
 
     /**
      * Get a list of SkyBlock worlds/levels that are used for islands.
@@ -500,56 +461,6 @@ public class ASkyBlock extends ASkyBlockAPI {
             level.add(settings.getLevelName());
         }
         return level;
-    }
-
-    /**
-     * Get an island information from a player name.
-     *
-     * @param player The player name
-     * @return IslandData if the data is available otherwise null
-     */
-    @Deprecated
-    public IslandData getIslandInfo(String player, int homeCount) {
-        Connection conn = getDatabase().getConnection();
-
-        Table levelPlot = conn.createQuery(FETCH_ISLAND_PLOT.getQuery())
-                .addParameter("pName", player)
-                .addParameter("islandId", homeCount)
-                .executeAndFetchTable();
-
-        if (levelPlot.rows().isEmpty()) {
-            return null;
-        }
-
-        return IslandData.fromRows(levelPlot.rows().get(0));
-    }
-
-    @Deprecated
-    public IslandData getIslandInfo(String player, String homeName) {
-        Connection conn = getDatabase().getConnection();
-
-        Table levelPlot = conn.createQuery(FETCH_ISLAND_PLOT.getQuery())
-                .addParameter("pName", player)
-                .addParameter("islandName", homeName)
-                .executeAndFetchTable();
-
-        if (levelPlot.rows().isEmpty()) {
-            return null;
-        }
-
-        return IslandData.fromRows(levelPlot.rows().get(0));
-    }
-
-    /**
-     * Get the island level for the player
-     * Coop function that still barely not working
-     *
-     * @param player The player of their island
-     * @return The value of the island level
-     */
-    public Integer getIslandLevel(Player player) {
-        PlayerData pd = getPlayerInfo(player);
-        return pd == null ? 0 : pd.getIslandLevel();
     }
 
     /**
@@ -575,37 +486,21 @@ public class ASkyBlock extends ASkyBlockAPI {
         return getIslandManager().checkIslandAt(p.getLevel());
     }
 
-    /**
-     * Get the data for the player
-     * Each data is being stored centrally
-     *
-     * @param player The player class
-     * @return PlayerData class
-     */
-    @Deprecated
-    public PlayerData getPlayerInfo(Player player) {
-        return getPlayerInfo(player.getName());
-    }
+    // DEPRECATED DUE TO OUR ASYNC TARGET VIOLATION.
 
-    /**
-     * Get the data for the player
-     * Each data is being stored centrally
-     *
-     * @param player The player name
-     * @return PlayerData class
-     */
     @Deprecated
-    public PlayerData getPlayerInfo(String player) {
+    public IslandData getIslandInfo(String player, int homeCount) {
         Connection conn = getDatabase().getConnection();
 
-        Table data = conn.createQuery(FETCH_PLAYER_MAIN.getQuery())
-                .addParameter("plotOwner", player)
+        Table levelPlot = conn.createQuery(FETCH_ISLAND_PLOT.getQuery())
+                .addParameter("pName", player)
+                .addParameter("islandId", homeCount)
                 .executeAndFetchTable();
 
-        if (data.rows().isEmpty()) {
+        if (levelPlot.rows().isEmpty()) {
             return null;
         }
 
-        return PlayerData.fromRows(data.rows().get(0));
+        return IslandData.fromRows(levelPlot.rows().get(0));
     }
 }

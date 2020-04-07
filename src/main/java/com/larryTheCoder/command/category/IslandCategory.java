@@ -80,6 +80,14 @@ public class IslandCategory extends SubCategory {
         }
     }
 
+    @Override
+    public String getParameters(String commandName) {
+        if (commandName.toLowerCase().equals("teleport")) {
+            return "[Home Number]";
+        }
+
+        return "";
+    }
 
     @Override
     public void execute(CommandSender sender, String commandLabel, String[] args) {
@@ -94,15 +102,22 @@ public class IslandCategory extends SubCategory {
                 break;
             case "home":
                 // Only one home? Don't worry. we wont open the form overlay
-                if (getPlugin().getIslandsInfo(sender.getName()).size() == 1) {
-                    getPlugin().getGrid().homeTeleport(p);
-                    break;
-                }
+                getPlugin().getFastCache().getIslandsFrom(p.getName(), listHome -> {
+                    if (listHome == null) {
+                        p.sendMessage(getPlugin().getLocale(p).errorFailedCritical);
+                        return;
+                    }
 
-                getPlugin().getPanel().addHomeFormOverlay(p);
+                    if (listHome.size() == 1) {
+                        getPlugin().getGrid().homeTeleport(p);
+                        return;
+                    }
+
+                    getPlugin().getPanel().addHomeFormOverlay(p, listHome);
+                });
                 break;
             case "sethome":
-                getPlugin().getFastCache().getIslandData(p.getLocation(), pd ->{
+                getPlugin().getFastCache().getIslandData(p.getLocation(), pd -> {
                     // Check if the ground is an air
                     if (!BlockUtil.isBreathable(p.clone().add(p.down()).getLevelBlock())) {
                         p.sendMessage(getLocale(p).groundNoAir);

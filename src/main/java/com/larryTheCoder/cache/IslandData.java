@@ -241,13 +241,6 @@ public class IslandData implements Cloneable {
         Level level = Server.getInstance().getLevelByName(levelName);
         if (level == null || levelName == null) return false;
 
-        Utils.sendDebug(toString());
-        Utils.sendDebug("Statement A: " + target.getLevel().getName().equalsIgnoreCase(levelName));
-        Utils.sendDebug("Statement B: " + (target.getFloorX() >= getMinProtectedX()));
-        Utils.sendDebug("Statement C: " + (target.getFloorX() <= (getMinProtectedX() + protectionRange)));
-        Utils.sendDebug("Statement D: " + (target.getFloorZ() >= getMinProtectedZ()));
-        Utils.sendDebug("Statement E: " + (target.getFloorZ() <= (getMinProtectedZ() + protectionRange)));
-
         return target.getLevel().getName().equalsIgnoreCase(levelName)
                 && target.getFloorX() >= getMinProtectedX()
                 && target.getFloorX() <= (getMinProtectedX() + protectionRange)

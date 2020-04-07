@@ -37,6 +37,7 @@ import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.event.player.PlayerRespawnEvent;
 import cn.nukkit.level.Location;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.cache.PlayerData;
 import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
@@ -45,6 +46,7 @@ import org.sql2o.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.larryTheCoder.database.TableSet.PLAYER_INSERT_DATA;
 import static com.larryTheCoder.database.TableSet.PLAYER_INSERT_MAIN;
 
 /**
@@ -134,7 +136,13 @@ public class PlayerEvent implements Listener {
                             .addParameter("banList", "")
                             .executeUpdate();
 
-                    Utils.sendDebug("Executed.");
+                    PlayerData dummy = new PlayerData();
+
+                    connection.createQuery(PLAYER_INSERT_DATA.getQuery())
+                            .addParameter("playerName", p.getName())
+                            .addParameter("challengesList", dummy.decodeChallengeList("cl"))
+                            .addParameter("challengesTimes", dummy.decodeChallengeList("clt"))
+                            .executeUpdate();
                 }
 
                 @Override

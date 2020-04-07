@@ -35,19 +35,13 @@ import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.cache.PlayerData;
-import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.island.TopTen;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.updater.Updater;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
-import org.sql2o.Connection;
-import org.sql2o.data.Table;
 
 import java.util.*;
-
-import static com.larryTheCoder.database.TableSet.FETCH_PLAYER_MAIN;
 
 public class GenericCategory extends SubCategory {
 
@@ -109,6 +103,19 @@ public class GenericCategory extends SubCategory {
                 return "About this plugin and its version.";
             default:
                 return "NaN";
+        }
+    }
+
+    @Override
+    public String getParameters(String commandName) {
+        switch (commandName.toLowerCase()) {
+            case "expel":
+            case "kick":
+                return "[Player Name]";
+            case "locale":
+                return "[Locale]";
+            default:
+                return "";
         }
     }
 
@@ -178,21 +185,16 @@ public class GenericCategory extends SubCategory {
                     }
 
                     // Now we update them into the list.
-                    getPlugin().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
-                        @Override
-                        public void executeQuery(Connection connection) {
-                            Table data = connection.createQuery(FETCH_PLAYER_MAIN.getQuery())
-                                    .addParameter("plotOwner", p.getName())
-                                    .executeAndFetchTable();
-
-                            if (data.rows().isEmpty()) {
-                                return;
-                            }
-
-                            PlayerData pd = PlayerData.fromRows(data.rows().get(0));
-                            pd.setLocale(locale.getLocaleName());
-                            pd.saveData();
+                    getPlugin().getFastCache().getPlayerData(p.getName(), pd -> {
+                        if (pd == null) {
+                            p.sendMessage("An error occured while attempting to save your data.");
+                            return;
                         }
+
+                        pd.setLocale(locale.getLocaleName());
+                        pd.saveData();
+
+                        p.sendMessage(String.format("Successfully marked %s as your default locale", locale.getLocaleName()));
                     });
                 }
                 break;
@@ -229,6 +231,7 @@ public class GenericCategory extends SubCategory {
     }
 
     private void displayLocales(Player player) {
+        player.sendMessage(TextFormat.GREEN + "Your default locale: " + TextFormat.YELLOW + getPlugin().getLocale(player).getLocaleName());
         player.sendMessage(TextFormat.RED + "/is lang <#>");
 
         TreeMap<Integer, String> locales = new TreeMap<>();
@@ -237,6 +240,7 @@ public class GenericCategory extends SubCategory {
                 locales.put(locale.getIndex(), locale.getLanguageName() + " (" + locale.getCountryName() + ")");
             }
         }
+
         for (Map.Entry<Integer, String> entry : locales.entrySet()) {
             player.sendMessage(entry.getKey() + ": " + entry.getValue());
         }
