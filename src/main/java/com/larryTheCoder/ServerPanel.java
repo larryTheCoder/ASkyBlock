@@ -212,12 +212,13 @@ public class ServerPanel implements Listener {
                     p.sendMessage(plugin.getLocale(p).errorResponseUnknown);
                     break;
                 }
-                boolean lock = response.getToggleResponse(idea++);
-                String nameIsland = response.getInputResponse(idea);
+                String nameIsland = response.getInputResponse(idea++);
+                boolean lock = response.getToggleResponse(idea);
                 if (pd.isLocked() != lock) {
                     pd.setLocked(lock);
                 }
-                if (!pd.getIslandName().equalsIgnoreCase(nameIsland)) {
+
+                if (!pd.getIslandName().equalsIgnoreCase(nameIsland) && !nameIsland.isEmpty()) {
                     pd.setIslandName(nameIsland);
                 }
 
@@ -460,8 +461,8 @@ public class ServerPanel implements Listener {
         FormWindowCustom settingForm = new FormWindowCustom("" + pd.getIslandName() + "'s Settings");
 
         settingForm.addElement(new ElementLabel(getLocale(p).panelSettingHeader));
-        settingForm.addElement(new ElementToggle("Locked", pd.isLocked()));
         settingForm.addElement(new ElementInput("Island Name", "", pd.getIslandName())); // islandMaxNameLong
+        settingForm.addElement(new ElementToggle("Locked", pd.isLocked()));
         mapIslandId.put(p, pd);
 
         int id = p.showFormWindow(settingForm);

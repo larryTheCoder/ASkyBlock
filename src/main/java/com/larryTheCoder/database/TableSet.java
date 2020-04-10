@@ -56,9 +56,9 @@ public enum TableSet {
             "islandId INTEGER NOT NULL," +
             "gridPosition TEXT NOT NULL," +
             "spawnPosition TEXT DEFAULT ''," +
+            "islandName TEXT DEFAULT ''," +
             "gridSize INTEGER NOT NULL," +
             "levelName TEXT NOT NULL," +
-            "islandName TEXT DEFAULT ''," +
             "playerName VARCHAR(100) NOT NULL," +
             "FOREIGN KEY (levelName) REFERENCES worldList(worldName) ON UPDATE CASCADE) %OPTIMIZE"),
 
@@ -105,7 +105,7 @@ public enum TableSet {
     // Mysql and SQLite database syntax are very different.
     // Therefore we must INSERT data precisely.
     TABLE_INSERT_CACHE("INSERT INTO cacheMetadata(dbVersion, cacheUniqueId) VALUES (:dbVersion, :cacheUniqueId)"),
-    ISLAND_INSERT_MAIN("INSERT INTO island(islandId, islandUniqueId, gridPosition, spawnPosition, gridSize, levelName, playerName, islandName) VALUES (:islandId, :islandUniqueId, :gridPos, :spawnPos, :gridSize, :levelName, :playerName, :islandName)"),
+    ISLAND_INSERT_MAIN("INSERT INTO island (islandUniqueId, islandId, gridPosition, spawnPosition, islandName, gridSize, levelName, playerName) VALUES (:islandUniqueId, :islandId, :gridPos, :spawnPos, :islandName, :gridSize, :levelName, :playerName)"),
     ISLAND_INSERT_DATA("INSERT INTO islandData(dataId, biome, locked, protectionData, levelHandicap) VALUES (:islandUniqueId, :plotBiome, :isLocked, :protectionData, :levelHandicap)"),
     PLAYER_INSERT_MAIN("INSERT %IGNORE INTO player(playerName, playerUUID, locale, banList, resetAttempts) VALUES (:playerName, :playerUUID, :locale, :banList, :resetLeft)"),
     PLAYER_INSERT_DATA("INSERT %IGNORE INTO challenges(player, challengesList, challengesTimes) VALUES (:playerName, :challengesList, :challengesTimes)"),

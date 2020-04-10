@@ -205,11 +205,11 @@ public class DatabaseManager {
                         final DatabaseImpl dbImpl = consumer;
 
                         TaskManager.runTask(() -> {
+                            dbImpl.onCompletion(resultFinal);
+
                             if (Settings.verboseCode && resultFinal != null) {
                                 resultFinal.printStackTrace();
                             }
-
-                            dbImpl.onCompletion(resultFinal);
                         });
                     }
 

@@ -242,6 +242,7 @@ public class IslandManager {
                                         .addParameter("spawnPos", Utils.getVector3Pair(resultData.getHomeCoordinates()))
                                         .addParameter("gridSize", resultData.getProtectionSize())
                                         .addParameter("levelName", resultData.getLevelName())
+                                        .addParameter("islandName", resultData.getIslandName())
                                         .executeUpdate();
 
                                 connection.createQuery(TableSet.ISLAND_INSERT_DATA.getQuery())

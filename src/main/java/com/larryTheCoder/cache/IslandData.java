@@ -85,12 +85,13 @@ public class IslandData implements Cloneable {
         this.settings = new IslandSettings(this);
     }
 
-    private IslandData(String levelName, String plotOwner, Vector2 gridPos, Vector3 spawnPos, int plotSize, int homeId, int islandUniquePlotId) {
+    private IslandData(String levelName, String plotOwner, String islandName, Vector2 gridPos, Vector3 spawnPos, int plotSize, int homeId, int islandUniquePlotId) {
         this.levelName = levelName;
         this.plotOwner = plotOwner;
         this.homeCoordinates = spawnPos;
         this.gridCoordinates = gridPos;
         this.protectionRange = plotSize;
+        this.islandName = islandName;
 
         // The most crucial part of this plot
         this.homeCountId = homeId;
@@ -103,6 +104,7 @@ public class IslandData implements Cloneable {
         this.gridCoordinates = Utils.unpairVector2(islandObj.getString("gridPosition"));
         this.homeCoordinates = Utils.unpairVector3(islandObj.getString("spawnPosition"));
         this.protectionRange = islandObj.getInteger("gridSize");
+        this.islandName = islandObj.getString("islandName");
 
         // The most crucial part of this plot
         this.homeCountId = islandObj.getInteger("islandId");
@@ -118,6 +120,7 @@ public class IslandData implements Cloneable {
         return new IslandData(
                 row.getString("levelName"),
                 row.getString("playerName"),
+                row.getString("islandName"),
                 Utils.unpairVector2(row.getString("gridPosition")),
                 Utils.unpairVector3(row.getString("spawnPosition")),
                 row.getInteger("gridSize"),
@@ -369,6 +372,7 @@ public class IslandData implements Cloneable {
                         .addParameter("gridSize", protectionRange)
                         .addParameter("levelName", levelName)
                         .addParameter("plotOwner", plotOwner)
+                        .addParameter("islandName", islandName)
                         .executeUpdate();
 
                 connection.createQuery(TableSet.ISLAND_UPDATE_DATA.getQuery())
