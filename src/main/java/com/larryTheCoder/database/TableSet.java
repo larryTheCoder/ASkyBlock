@@ -78,6 +78,11 @@ public enum TableSet {
             "FOREIGN KEY (islandLeader) REFERENCES player(playerName) ON UPDATE CASCADE," +
             "PRIMARY KEY (defaultIsland, islandLeader)) %OPTIMIZE"),
 
+    METADATA_TABLE("CREATE TABLE IF NOT EXISTS cacheMetadata(" +
+            "dbVersion INT NOT NULL," +
+            "firstInit DEFAULT CURRENT_TIMESTAMP," +
+            "cacheUniqueId VARCHAR(32) NOT NULL) %OPTIMIZE"),
+
     // Note: Enabling this will make sure that everything will be strict.
     //       Better be strict than having flaws.
     SQLITE_PRAGMA_ON("PRAGMA foreign_keys = ON"),
@@ -93,11 +98,13 @@ public enum TableSet {
     FETCH_ISLAND_PLOT("SELECT * FROM island WHERE playerName = :pName AND islandId = :islandId"),
     FETCH_ISLAND_NAME("SELECT * FROM island WHERE playerName = :pName AND islandName = :islandName"),
     FETCH_ISLAND_DATA("SELECT * FROM islandData WHERE dataId = :islandUniquePlotId"),
+    TABLE_FETCH_CACHE("SELECT * FROM cacheMetadata WHERE dbVersion = :dbVersion"),
     FETCH_ISLANDS_PLOT("SELECT * FROM island WHERE playerName = :pName"),
     FETCH_ALL_ISLAND_UNIQUE("SELECT islandUniqueId FROM island"),
 
     // Mysql and SQLite database syntax are very different.
     // Therefore we must INSERT data precisely.
+    TABLE_INSERT_CACHE("INSERT INTO cacheMetadata(dbVersion, cacheUniqueId) VALUES (:dbVersion, :cacheUniqueId)"),
     ISLAND_INSERT_MAIN("INSERT INTO island(islandId, islandUniqueId, gridPosition, spawnPosition, gridSize, levelName, playerName, islandName) VALUES (:islandId, :islandUniqueId, :gridPos, :spawnPos, :gridSize, :levelName, :playerName, :islandName)"),
     ISLAND_INSERT_DATA("INSERT INTO islandData(dataId, biome, locked, protectionData, levelHandicap) VALUES (:islandUniqueId, :plotBiome, :isLocked, :protectionData, :levelHandicap)"),
     PLAYER_INSERT_MAIN("INSERT %IGNORE INTO player(playerName, playerUUID, locale, banList, resetAttempts) VALUES (:playerName, :playerUUID, :locale, :banList, :resetLeft)"),

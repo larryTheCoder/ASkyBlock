@@ -29,6 +29,7 @@ import cn.nukkit.Player;
 import cn.nukkit.level.Position;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
+import cn.nukkit.utils.TextFormat;
 import com.google.common.base.Preconditions;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.database.DatabaseManager;
@@ -60,6 +61,9 @@ public class FastCache {
     // Since ArrayList is modifiable, there's no need to replace the cache again into the list.
     private final List<FastCacheData> dataCache = new ArrayList<>();
 
+    private Config config;
+    private String cacheValidationId;
+
     // To securely store FastCache timestamp into a .json file.
     public static final ConcurrentLinkedQueue<FastCacheData> storeSchedule = new ConcurrentLinkedQueue<>();
     public final AtomicBoolean isClosed = new AtomicBoolean(true);
@@ -79,7 +83,24 @@ public class FastCache {
     }
 
     private void loadFastCache() {
-        Config config = new Config(Utils.DIRECTORY + "cache.yml", Config.YAML);
+        config = new Config(Utils.DIRECTORY + "cache.yml", Config.YAML);
+
+        if (config.getString("cacheVerificationId").isEmpty()) {
+            config.set("cacheVerificationId", DatabaseManager.currentCacheId);
+            config.save();
+
+            cacheValidationId = DatabaseManager.currentCacheId;
+        } else {
+            cacheValidationId = config.getString("cacheVerificationId");
+
+            if (!cacheValidationId.equals(DatabaseManager.currentCacheId)) {
+                Utils.send(TextFormat.RED + "Cache metadata mismatched with database info.");
+                config.setAll(new ConfigSection());
+                config.set("cacheVerificationId", DatabaseManager.currentCacheId);
+
+                config.save();
+            }
+        }
 
         plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
             private final List<FastCacheData> dataCache = new ArrayList<>();
@@ -87,6 +108,10 @@ public class FastCache {
             @Override
             public void executeQuery(Connection connection) {
                 for (String userName : config.getAll().keySet()) {
+                    if (userName.equals("cacheVerificationId")) {
+                        continue;
+                    }
+
                     FastCacheData data = new FastCacheData(userName);
 
                     Row plData;
@@ -139,7 +164,6 @@ public class FastCache {
             @Override
             public void onCompletion(Exception err) {
                 if (err != null) {
-                    err.printStackTrace();
                     return;
                 }
                 Utils.sendDebug(String.format("Loaded %s cache data.", dataCache.size()));
@@ -269,8 +293,6 @@ public class FastCache {
                 public void onCompletion(Exception err) {
                     if (err != null) {
                         resultOutput.accept(null);
-
-                        err.printStackTrace();
                         return;
                     }
                     putIslandUnspecified(islandList);
@@ -418,7 +440,8 @@ public class FastCache {
                 @Override
                 public void onCompletion(Exception err) {
                     if (err != null) {
-                        err.printStackTrace();
+                        resultOutput.accept(playerData);
+
                         return;
                     }
 
@@ -568,6 +591,22 @@ public class FastCache {
         return object.getPlayerData().getLocale();
     }
 
+    public void clearSavedCaches() {
+
+        synchronized (dataCache) {
+            dataCache.clear();
+        }
+
+        synchronized (storeSchedule){
+            storeSchedule.clear();
+
+            config.setAll(new ConfigSection());
+            config.set("cacheVerificationId", cacheValidationId);
+
+            config.save();
+        }
+    }
+
     private static class FastCacheData {
 
         private Timestamp lastUpdatedQuery;
@@ -595,6 +634,8 @@ public class FastCache {
             updateTime();
 
             islandData.put(newData.getIslandUniquePlotId(), newData);
+
+            Utils.sendDebug("Adding new island info on " + ownedBy);
         }
 
         void setPlayerData(PlayerData playerData) {

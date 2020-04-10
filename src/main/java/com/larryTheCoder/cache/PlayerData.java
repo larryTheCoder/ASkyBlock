@@ -52,19 +52,16 @@ public class PlayerData implements Cloneable {
     @Getter
     public final String playerXUID;
 
-    @Setter
-    @Getter
+    @Setter @Getter
     private int resetLeft;
 
-    @Setter
-    @Getter
+    @Setter @Getter
     private int islandLevel;
 
     private final HashMap<String, Boolean> challengeList = new HashMap<>();
     private final HashMap<String, Integer> challengeListTimes = new HashMap<>();
 
-    @Getter
-    @Setter
+    @Getter @Setter
     private String locale;
     @Getter
     private List<String> banList;
@@ -201,12 +198,6 @@ public class PlayerData implements Cloneable {
                         .addParameter("challengesList", decodeChallengeList("cl"))
                         .addParameter("challengesTimes", decodeChallengeList("clt"))
                         .executeUpdate();
-            }
-
-            public void onCompletion(Exception exception) {
-                if (exception != null) {
-                    exception.printStackTrace();
-                }
             }
         });
     }

@@ -42,20 +42,17 @@ import cn.nukkit.event.player.*;
 import cn.nukkit.level.Location;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.events.IslandEnterEvent;
 import com.larryTheCoder.events.IslandExitEvent;
 import com.larryTheCoder.player.TeamManager;
-import com.larryTheCoder.cache.IslandData;
-import com.larryTheCoder.utils.SettingsFlag;
 import com.larryTheCoder.utils.Settings;
+import com.larryTheCoder.utils.SettingsFlag;
 import com.larryTheCoder.utils.Utils;
 
 import static cn.nukkit.block.BlockID.ENDER_CHEST;
 
 /**
- * Rewrite class for IslandGuard messy code
- * Timestamp: 10:57 AM 6/11/2018
- *
  * @author larryTheCoder
  */
 public class IslandListener implements Listener {
@@ -200,7 +197,7 @@ public class IslandListener implements Listener {
             // Lock check
             if (islandTo.isLocked()) {
                 if (!p.isOp() && !p.hasPermission("is.mod.bypassprotect") && !p.hasPermission("is.mod.bypasslock")) {
-                    if (p.riding != null){
+                    if (p.riding != null) {
                         // Dismount
                         ((EntityVehicle) p.riding).mountEntity(p);
                         e.setCancelled();

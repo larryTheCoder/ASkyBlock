@@ -66,7 +66,9 @@ public final class ASlocales {
             "yellow",
             "white"
     ));
-
+    private final ASkyBlock plugin;
+    private final String localeName;
+    private final int index;
     public String firstIslandFree = "§aYour first island are free!";
     public String nextIslandPrice = "§aNext time you may need $§e[price] to buy other island";
     // Help defaults
@@ -102,17 +104,13 @@ public final class ASlocales {
     public String completeChallengeCompleted = "[challengename] has been completed for [name]";
     public String resetChallengeReset = "[challengename] has been reset for [name]";
     public String deathsDied;
-    private String errorCommandNotReady = "§cYou can't use that command right now.";
     public String errorCommandBlocked = "§cYou can't use that command here.";
     public String errorOfflinePlayer = "§cThat player is offline or doesn't exist.";
     public String errorNotOnIsland = "§cYou are not in your/other's island space!";
-    private String errorTooLong = "§cToo long. Maximum size is [length].";
-    private String errorTooShort = "§cToo short. Minimum size is [length].";
     public String adminSetSpawnOverride = "§cThere a player owned this plot. Admin override this command";
     public String errorTooSoon = "§cYou need to wait [secs] to [cmd] your island";
     public String errorUseInGame = "§cThis command must be used in-game.";
     public String errorWrongWorld = "§cYou cannot do that in this world.";
-    private String errorUnknownWorld = "§cUnknown world. Possible worlds are:";
     public String errorMaxIsland = "§cSorry you cant create island at this world any more";
     public String errorInTeam = "§cThe player [player] are already in team!";
     public String errorBlockedByAPI = "§cA plugin using the API blocked this action.";
@@ -161,7 +159,6 @@ public final class ASlocales {
     public String islandSubTitle = "&eNice and cosy";
     public String islandDonate = "§aSource code made by §e@larryTheCoder";
     public String islandURL = "§aLink: http://github.com/larryTheCoder/ASkyBlock-Nukkit";
-    private String islandSupport = "§aLove it? Give us a star on GitHub!";
     public String islandTitle = "[player]'s island";
     public String groundNoAir = "§eWhat do you think you are? You can't set home on air!";
     // Guard island
@@ -187,13 +184,15 @@ public final class ASlocales {
     public String acceptedTo = "§e[player] has accepted your invitation!";
     public String errorNotPending = "§cNo invitation pending! Try again later";
     public String errorNotPending2 = "§cNo invite sent by [player]! Try again later";
+    private String errorCommandNotReady = "§cYou can't use that command right now.";
+    private String errorTooLong = "§cToo long. Maximum size is [length].";
+    private String errorTooShort = "§cToo short. Minimum size is [length].";
+    private String errorUnknownWorld = "§cUnknown world. Possible worlds are:";
+    private String islandSupport = "§aLove it? Give us a star on GitHub!";
     // Localization Strings
     private Config locale = null;
     private File localeFile = null;
-    private final ASkyBlock plugin;
     private Locale localeObject;
-    private final String localeName;
-    private final int index;
 
     /**
      * Creates a locale object full of localized strings for a language

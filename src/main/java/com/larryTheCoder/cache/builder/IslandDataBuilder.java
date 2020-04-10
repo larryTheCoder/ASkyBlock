@@ -56,7 +56,7 @@ public class IslandDataBuilder {
         return this;
     }
 
-    public IslandDataBuilder setProtectionSize(int gridSize){
+    public IslandDataBuilder setProtectionSize(int gridSize) {
         data.setProtectionRange(gridSize);
 
         return this;

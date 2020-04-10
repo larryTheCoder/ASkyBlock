@@ -31,11 +31,15 @@ import cn.nukkit.api.API;
 import com.larryTheCoder.database.config.AbstractConfig;
 import com.larryTheCoder.database.config.MySQLConfig;
 import com.larryTheCoder.task.TaskManager;
+import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import org.sql2o.Connection;
 import org.sql2o.Query;
+import org.sql2o.data.Row;
+import org.sql2o.data.Table;
 
 import java.sql.SQLException;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -51,6 +55,9 @@ import static com.larryTheCoder.database.TableSet.*;
  * will not be interrupted on main thread.
  */
 public class DatabaseManager {
+
+    public static final String DB_VERSION = "0.1.5";
+    public static String currentCacheId;
 
     // Notes: During SELECT, sqlite database can read its database easily without effecting the thread,
     //        But when we are using mysql as our database, it effects the thread uptime. So do we need to
@@ -99,6 +106,7 @@ public class DatabaseManager {
 
     private void startConnection() {
         TableSet[] tableSets = {
+                METADATA_TABLE,
                 WORLD_TABLE,
                 ISLAND_DATA,
                 PLAYER_TABLE,
@@ -118,6 +126,25 @@ public class DatabaseManager {
         // Add all tables into our database.
         for (TableSet set : tableSets) {
             connection.createQuery(set.getQuery()).executeUpdate();
+        }
+
+        // Update database credentials.
+        // TODO: Versioning database stuffs.
+        Table result = connection.createQuery(TABLE_FETCH_CACHE.getQuery())
+                .addParameter("dbVersion", DB_VERSION)
+                .executeAndFetchTable();
+
+        if (result.rows().isEmpty()) {
+            currentCacheId = UUID.randomUUID().toString();
+
+            connection.createQuery(TABLE_INSERT_CACHE.getQuery())
+                    .addParameter("cacheUniqueId", currentCacheId)
+                    .addParameter("dbVersion", DB_VERSION)
+                    .executeUpdate();
+        } else {
+            Row row1 = result.rows().get(0);
+
+            currentCacheId = row1.getString("cacheUniqueId");
         }
 
         // If the database is a mysql database, we can
@@ -162,7 +189,7 @@ public class DatabaseManager {
 
     private void startAsyncPool(int maxPool) {
         // Use Thread instead of Async?
-        TaskManager.runTaskAsync(() -> {
+        Thread asyncThread = new Thread(() -> {
             while (!isClosed.get()) {
                 try {
                     DatabaseImpl consumer;
@@ -177,7 +204,13 @@ public class DatabaseManager {
                         final Exception resultFinal = result;
                         final DatabaseImpl dbImpl = consumer;
 
-                        TaskManager.runTask(() -> dbImpl.onCompletion(resultFinal));
+                        TaskManager.runTask(() -> {
+                            if (Settings.verboseCode && resultFinal != null) {
+                                resultFinal.printStackTrace();
+                            }
+
+                            dbImpl.onCompletion(resultFinal);
+                        });
                     }
 
                     Thread.sleep(50);
@@ -188,6 +221,10 @@ public class DatabaseManager {
                 }
             }
         });
+        asyncThread.setName(String.format("Asynchronous SkyBlock-Database Pool #%s", currentPoolSize));
+        asyncThread.setDaemon(true);
+        asyncThread.start();
+
         currentPoolSize++;
 
         if (currentPoolSize < maxPool) {

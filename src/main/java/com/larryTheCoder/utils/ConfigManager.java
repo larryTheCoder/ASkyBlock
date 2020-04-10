@@ -59,6 +59,8 @@ public class ConfigManager {
         // The order in this file should match the order in config.yml so that it is easy to check that everything is covered
         // ********************** Island settings **************************
         Settings.checkUpdate = cfg.getBoolean("allowUpdate");
+        Settings.verboseCode = cfg.getBoolean("allowVerbose", false);
+
         scheduleCheck(cfg.getBoolean("economy.enable"), cfg);
         Settings.islandHeight = cfg.getInt("island.islandHeight", 100);
 

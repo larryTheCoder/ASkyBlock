@@ -62,9 +62,9 @@ public class MySQLConfig implements AbstractConfig {
         this.connection = null;
     }
 
-    public MySQLConfig(Config config){
+    public MySQLConfig(Config config) {
         this.hostname = config.getString("database.MySQL.host");
-        this.port =  config.getInt("database.MySQL.port");
+        this.port = config.getInt("database.MySQL.port");
         this.database = config.getString("database.MySQL.database");
         this.user = config.getString("database.MySQL.username");
         this.password = config.getString("database.MySQL.password");

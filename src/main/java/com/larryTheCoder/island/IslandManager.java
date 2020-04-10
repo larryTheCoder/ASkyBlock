@@ -55,8 +55,6 @@ import org.sql2o.data.Table;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static com.larryTheCoder.database.TableSet.FETCH_ISLAND_UNIQUE;
-
 /**
  * Core management for SkyBlock world and
  * execution.
@@ -106,7 +104,7 @@ public class IslandManager {
 
     public void kickPlayerByName(final Player pOwner, final String victimName) {
         final Location loc = pOwner.getLocation();
-        final IslandData pd = getIslandAt(loc);
+        final IslandData pd = plugin.getFastCache().getIslandData(loc);
         if (pd == null || pd.getPlotOwner() == null || !pd.getPlotOwner().equals(pOwner.getName())) {
             pOwner.sendMessage(plugin.getPrefix() + plugin.getLocale(pOwner).errorNotOnIsland);
             return;
@@ -258,8 +256,6 @@ public class IslandManager {
                             @Override
                             public void onCompletion(Exception err) {
                                 if (err != null) {
-                                    err.printStackTrace();
-
                                     pl.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).errorFailedCritical);
                                     return;
                                 }
@@ -286,10 +282,9 @@ public class IslandManager {
     }
 
     /**
-     * Generates a new public key by checking the vector values
-     * with their island distances, this will make sure every key
-     * will not be duplicated and will make sure that each key is
-     * unique every X distance.
+     * Generates a new public unique key corresponding to the vector values
+     * and their island distances that is set in the world, this will make sure every
+     * pre-generated keys wont be duplicated and unique at the same time every X distances.
      *
      * @param x     The position of the x vector
      * @param z     The position of the z vector
@@ -326,37 +321,13 @@ public class IslandManager {
         return plugin.getLevels().contains(level.getName());
     }
 
-    public IslandData getIslandAt(Location loc) {
-        if (!checkIslandAt(loc.getLevel())) {
-            return null;
-        }
-        int iKey = generateIslandKey(loc);
-
-        Connection connection = plugin.getDatabase().getConnection();
-
-        List<Row> rows = connection.createQuery(FETCH_ISLAND_UNIQUE.getQuery())
-                .addParameter("islandUniqueId", iKey)
-                .addParameter("levelName", loc.getLevel().getName())
-                .executeAndFetchTable().rows();
-
-        if (rows.isEmpty()) {
-            return null;
-        }
-
-        IslandData res = IslandData.fromRows(rows.get(0));
-        if (res.getPlotOwner() == null) {
-            return null;
-        }
-        return res;
-    }
-
     public void islandInfo(Player p, Location loc) {
         if (!checkIslandAt(loc.getLevel())) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorWrongWorld);
             return;
         }
         final CoopData coopData = plugin.getTManager().getLeaderCoop(p.getName());
-        final IslandData pd = getIslandAt(loc);
+        final IslandData pd = plugin.getFastCache().getIslandData(loc);
         if (pd == null) {
             p.sendMessage(TextFormat.LIGHT_PURPLE + plugin.getLocale(p).errorNotOnIsland);
             return;
@@ -383,13 +354,15 @@ public class IslandManager {
                 p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorOfflinePlayer.replace("[player]", arg));
                 return;
             }
-            Location home = plugin.getGrid().getSafeHomeLocation(pd.getPlotOwner(), pd.getHomeCountId());
-            //if the home null
-            if (home == null) {
-                p.sendMessage(plugin.getPrefix() + TextFormat.RED + "Failed to find your island safe spawn");
-                return;
-            }
-            plugin.getTeleportLogic().safeTeleport(p, home, false, pd.getHomeCountId());
+
+            plugin.getGrid().getSafeHomeLocation(pd.getPlotOwner(), pd.getHomeCountId(), home -> {
+                //if the home null
+                if (home == null) {
+                    p.sendMessage(plugin.getPrefix() + TextFormat.RED + "Failed to find your island safe spawn");
+                    return;
+                }
+                plugin.getTeleportLogic().safeTeleport(p, home, false, pd.getHomeCountId());
+            });
         });
     }
 
@@ -407,7 +380,7 @@ public class IslandManager {
         }
         Location local = new Location(loc.x, loc.y, loc.z, player.getLevel());
         // Get the player's island from the grid if it exists
-        IslandData island = getIslandAt(local);
+        IslandData island = plugin.getFastCache().getIslandData(local);
         CoopData pd = plugin.getTManager().getLeaderCoop(island.getPlotOwner());
         // On an island in the grid
         // In a protected zone but is on the list of acceptable players

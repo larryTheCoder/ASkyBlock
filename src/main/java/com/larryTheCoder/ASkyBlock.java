@@ -37,7 +37,6 @@ import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.cache.FastCache;
-import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.cache.inventory.InventorySave;
 import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.command.Commands;
@@ -63,7 +62,6 @@ import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import com.larryTheCoder.utils.integration.economy.Economy;
 import lombok.Getter;
-import org.sql2o.Connection;
 import org.sql2o.Query;
 import org.sql2o.data.Table;
 
@@ -484,23 +482,5 @@ public class ASkyBlock extends ASkyBlockAPI {
      */
     public boolean inIslandWorld(Player p) {
         return getIslandManager().checkIslandAt(p.getLevel());
-    }
-
-    // DEPRECATED DUE TO OUR ASYNC TARGET VIOLATION.
-
-    @Deprecated
-    public IslandData getIslandInfo(String player, int homeCount) {
-        Connection conn = getDatabase().getConnection();
-
-        Table levelPlot = conn.createQuery(FETCH_ISLAND_PLOT.getQuery())
-                .addParameter("pName", player)
-                .addParameter("islandId", homeCount)
-                .executeAndFetchTable();
-
-        if (levelPlot.rows().isEmpty()) {
-            return null;
-        }
-
-        return IslandData.fromRows(levelPlot.rows().get(0));
     }
 }

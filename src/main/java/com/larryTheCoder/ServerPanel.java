@@ -109,6 +109,10 @@ public class ServerPanel implements Listener {
 
                 // Value 1:
                 String islandName = response.getInputResponse(responseId++);
+                if (islandName == null || islandName.isEmpty()) {
+                    Element rd = windowCustom.getElements().get(1);
+                    if (rd instanceof ElementInput) islandName = ((ElementInput) rd).getDefaultText();
+                }
                 String worldName;
 
                 // Value 2:

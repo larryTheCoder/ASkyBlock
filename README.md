@@ -1,12 +1,24 @@
-![ASkyBlock](https://github.com/larryTheCoder/SkyBlock-legacy/blob/master/.circleci/images/logo.png)
-[![Circle-CI](https://circleci.com/gh/TheSolidCrafter/ASkyBlock-Nukkit.svg?style=shield)](https://jenkins.potatohome.xyz/job/ASkyBlock)
+# ASkyBlock
+[![Jenkins-CI](https://jenkins.potatohome.xyz/job/ASkyBlock/badge/icon)](https://jenkins.potatohome.xyz/job/ASkyBlock)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/Permeable)
 
 Introduction
 -------------
-Welcome to our first Nukkit Epic-Games, SkyBlock. Perfect for a server production and supports NukkitX! We ensure that
-this plugin will be free lag and bug-free. Included with special futures from other contributors from Bukkit. This
-plugin also come with a multi-language that we are still working on it. A lot of commands and feels like the real
-Bukkit plugin.
+Hello players, so as you might know, this repository contains all the
+sources for ASkyBlock or known as SkyBlock, that 'A' in this context
+means nothing so do not even bother it. Okay so, this repo is the first
+SkyBlock game for NukkitX, and the work behind this excellent work is
+from tastybento, he deserved to be credited as this code contains almost
+all of his work, "Almost".
+
+But we welcome you to contribute to our code. Anyways, as I speak, this
+repository is the first SkyBlock project for Nukkit and open-sourced. We
+welcome you to help us code. This project is not owned by
+__[GLaDOS]__(https://en.wikipedia.org/wiki/GLaDOS) so we cannot just do
+everything you asked.
+
+Alright so we are between banks here, so make those cheque into cash,
+into my PayPal account.
 
 Build JAR file
 -------------
@@ -15,12 +27,6 @@ Build JAR file
 
 The compiled JAR can be found in the `target/` directory.
 
-Links
---------------------
-* __[Other ASkyBlock link](https://github.com/Nukkit-coders/ASkyBlock-Nukkit)__
-* __[Donate](http://www.paypal.me/DoubleCheese)__
-* __[Discord Link](https://discordapp.com/invite/7y8WM4F)__
-
 Installation
 -------------
 We recommended to use latest DbLib plugin.
@@ -28,17 +34,12 @@ We recommended to use latest DbLib plugin.
 * DbLib
 * EconomyAPI
 
-Note for developers
-------------
-Pull requests are accepted if they address a specific issue and are of high enough quality.
-The best way to do a pull request is to file an issue, then say that you'll fix it so we know it's coming and can coordinate with you.
-
 License
 ---------
 
     Adapted from the Wizardry License
 
-    Copyright (c) 2016-2018 larryTheCoder and contributors
+    Copyright (c) 2016-2020 larryTheCoder and contributors
 
     Permission is hereby granted to any persons and/or organizations
     using this software to copy, modify, merge, publish, and distribute it.

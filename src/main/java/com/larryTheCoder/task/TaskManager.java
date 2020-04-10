@@ -33,7 +33,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TaskManager {
 
     public static TaskManager IMP;
-    public static AtomicInteger index = new AtomicInteger(0);
 
     public static void runTaskRepeatAsync(Runnable runnable, int interval) {
         if (runnable != null) {

@@ -40,6 +40,7 @@ public class Settings {
     public static List<String> challengeLevels = new ArrayList<>();
 
     // config config
+    public static boolean verboseCode = false;
     public static boolean autoUpdate = false;
     public static boolean checkUpdate;
     public static int islandHeight = 60;

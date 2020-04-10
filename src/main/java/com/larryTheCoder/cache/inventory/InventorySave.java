@@ -73,6 +73,7 @@ public class InventorySave {
     public void clearSavedInventory() {
         inventories.clear();
     }
+
     /**
      * Load the player's inventory
      *

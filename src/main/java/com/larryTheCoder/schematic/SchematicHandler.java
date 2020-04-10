@@ -127,7 +127,7 @@ public final class SchematicHandler {
             return;
         }
 
-        if(configFolder.getInt("version", 0) < 1){
+        if (configFolder.getInt("version", 0) < 1) {
             Utils.send("&cOutdated schematic config version. Updating to a new ones");
             configPath.renameTo(new File(ASkyBlock.get().getDataFolder(), "config.old"));
             ASkyBlock.get().saveResource("schematics/configuration.yml");

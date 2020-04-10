@@ -40,6 +40,7 @@ import com.larryTheCoder.utils.Utils;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static cn.nukkit.math.BlockFace.DOWN;
 import static cn.nukkit.math.BlockFace.UP;
@@ -140,7 +141,7 @@ public class GridManager {
                 int protectionRange = plugin.getSettings(islandTestLocation.getLevel().getName()).getProtectionRange();
                 if (plugin.getIslandManager().checkIslandAt(islandTestLocation.getLevel())) {
                     // Get the protection range for this location if possible
-                    IslandData island = plugin.getIslandManager().getIslandAt(islandTestLocation);
+                    IslandData island = plugin.getFastCache().getIslandData(islandTestLocation);
                     if (island != null) {
                         // We are in a protected island area.
                         protectionRange = island.getProtectionSize();
@@ -161,18 +162,21 @@ public class GridManager {
      * Determines a safe teleport spot on player's island or the team island
      * they belong to.
      *
-     * @param p      The player
-     * @param number Starting home location e.g., 1
-     * @return Location of a safe teleport spot or null if one cannot be found
+     * @param plName         The player name
+     * @param number         Starting home location e.g., 1
+     * @param targetLocation Location of a safe teleport spot or null if one cannot be found
      */
-    public Location getSafeHomeLocation(String p, int number) {
-        IslandData pd = plugin.getIslandInfo(p, number);
-        if (pd == null) {
-            // Get the default home, which may be null too, but that's okay
-            pd = plugin.getIslandInfo(p, 1);
-        }
+    public void getSafeHomeLocation(String plName, int number, Consumer<Location> targetLocation) {
+        plugin.getFastCache().getIslandData(plName, number, pd -> {
+            if (pd == null) {
+                Utils.sendDebug("Island data were not found");
 
-        if (pd != null) {
+                targetLocation.accept(null);
+                return;
+            }
+            Utils.sendDebug("Island data were found");
+            Utils.sendDebug(pd.toString());
+
             Location locationSafe = pd.getHome();
             if (locationSafe.getFloorX() == 0 || locationSafe.getFloorY() == 0 || locationSafe.getFloorY() == 0) {
                 Vector2 cartesianPlane = pd.getCenter();
@@ -186,7 +190,8 @@ public class GridManager {
             // Check if it is safe
             // Homes are stored as integers and need correcting to be more central
             if (isSafeLocation(locationSafe)) {
-                return locationSafe;
+                targetLocation.accept(locationSafe);
+                return;
             }
 
             // To cover slabs, stairs and other half blocks, try one block above
@@ -195,7 +200,8 @@ public class GridManager {
             if (isSafeLocation(locPlusOne) && checkSurrounding(locPlusOne)) {
                 // Adjust the home location accordingly
                 pd.setHomeLocation(locPlusOne);
-                return locPlusOne;
+                targetLocation.accept(locPlusOne);
+                return;
             }
 
             // Try to find all the way up
@@ -204,7 +210,8 @@ public class GridManager {
                 if (isSafeLocation(locPlusY) && checkSurrounding(locPlusY)) {
                     // Adjust the home location accordingly
                     pd.setHomeLocation(locPlusY);
-                    return locPlusY.getLocation();
+                    targetLocation.accept(locPlusY.getLocation());
+                    return;
                 }
             }
 
@@ -215,15 +222,18 @@ public class GridManager {
                         Position pos = locPlusOne.setComponents(dx, dy, dz);
                         if (isSafeLocation(pos) && checkSurrounding(pos)) {
                             pd.setHomeLocation(pos);
-                            return pos.getLocation();
+                            targetLocation.accept(pos.getLocation());
+                            return;
                         }
                     }
                 }
             }
-        }
 
-        // Unsuccessful
-        return null;
+            Utils.sendDebug("Unsuccessful home location, ");
+
+            // Unsuccessful
+            targetLocation.accept(null);
+        });
     }
 
     /**
@@ -244,14 +254,15 @@ public class GridManager {
      * @param number Starting home location e.g., 1
      */
     public void homeTeleport(Player player, int number) {
-        Location home = getSafeHomeLocation(player.getName(), number);
-        //if the home null
-        if (home == null) {
-            player.sendMessage(plugin.getPrefix() + TextFormat.RED + "Failed to find your island safe spawn");
-            return;
-        }
-        plugin.getTeleportLogic().safeTeleport(player, home, false, number);
-        plugin.getIslandManager().showFancyTitle(player);
+        getSafeHomeLocation(player.getName(), number, home -> {
+            if (home == null) {
+                player.sendMessage(plugin.getPrefix() + TextFormat.RED + "Failed to find your island safe spawn");
+                return;
+            }
+
+            plugin.getTeleportLogic().safeTeleport(player, home, false, number);
+            plugin.getIslandManager().showFancyTitle(player);
+        });
     }
 
     public IslandData getProtectedIslandAt(Location location) {

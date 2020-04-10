@@ -25,9 +25,7 @@
 
 package com.larryTheCoder.command.category;
 
-import cn.nukkit.IPlayer;
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.Config;
@@ -35,7 +33,6 @@ import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.SkyBlockGenerator;
 import com.larryTheCoder.cache.IslandData;
-import com.larryTheCoder.cache.PlayerData;
 import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.listener.LavaCheck;
 import com.larryTheCoder.task.DeleteIslandTask;
@@ -44,7 +41,10 @@ import com.larryTheCoder.utils.Utils;
 
 import java.io.File;
 import java.text.Collator;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.TreeSet;
 
 public class OperatorCategory extends SubCategory {
 
@@ -129,11 +129,12 @@ public class OperatorCategory extends SubCategory {
 
                 sender.sendMessage(getPlugin().getPrefix() + getPlugin().getLocale(pl).errorLevelGenerated);
                 break;
-            case "clear": // TODO: Is it reasonable to use this command anymore?
+            case "clear":
                 if (!sender.hasPermission("is.admin.clear")) {
                     sender.sendMessage(getPlugin().getLocale(pl).errorNoPermission);
                     break;
                 }
+                getPlugin().getFastCache().clearSavedCaches();
                 getPlugin().getInventory().clearSavedInventory();
                 sender.sendMessage(TextFormat.RED + "Cleared memory usage.");
                 sender.sendMessage(TextFormat.RED + "Warning: Player data may be lost during this cleanup");
@@ -230,7 +231,7 @@ public class OperatorCategory extends SubCategory {
                 }
 
                 // Get the island I am on
-                island = getPlugin().getIslandManager().getIslandAt(pl);
+                island = getPlugin().getFastCache().getIslandData(pl);
 
                 if (island == null) {
                     sender.sendMessage(getPlugin().getLocale(pl).adminDeleteIslandnoid);

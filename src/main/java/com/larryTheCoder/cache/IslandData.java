@@ -54,8 +54,8 @@ public class IslandData implements Cloneable {
 
     // Coordinates of the home spawn location
     @Getter
-    private Vector3 homeCoordinates;
-    private Vector2 gridCoordinates;
+    private Vector3 homeCoordinates = new Vector3();
+    private Vector2 gridCoordinates = new Vector2();
 
     // Plot metadata
     private boolean isLocked = false;
@@ -368,13 +368,13 @@ public class IslandData implements Cloneable {
                         .addParameter("spawnPos", Utils.getVector3Pair(homeCoordinates))
                         .addParameter("gridSize", protectionRange)
                         .addParameter("levelName", levelName)
-                        .addParameter("player", plotOwner)
+                        .addParameter("plotOwner", plotOwner)
                         .executeUpdate();
 
                 connection.createQuery(TableSet.ISLAND_UPDATE_DATA.getQuery())
                         .addParameter("islandUniqueId", islandUniquePlotId)
                         .addParameter("plotBiome", plotBiome)
-                        .addParameter("isLocked", isLocked)
+                        .addParameter("isLocked", isLocked ? 1 : 0)
                         .addParameter("protectionData", settings.getSettings())
                         .addParameter("levelHandicap", levelHandicap)
                         .executeUpdate();

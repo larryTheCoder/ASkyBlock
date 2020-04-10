@@ -86,10 +86,11 @@ public class PlayerEvent implements Listener {
         }
         if (respawn.contains(p.getName())) {
             respawn.remove(p.getName());
-            Location respawnLocation = plugin.getGrid().getSafeHomeLocation(p.getName(), 1);
-            if (respawnLocation != null) {
-                e.setRespawnPosition(respawnLocation);
-            }
+            plugin.getGrid().getSafeHomeLocation(p.getName(), 1, respawnLocation -> {
+                if (respawnLocation != null) {
+                    p.teleport(respawnLocation); // Cannot use e.setRespawnPosition(), because the player already been teleported.
+                }
+            });
         }
     }
 
@@ -148,7 +149,6 @@ public class PlayerEvent implements Listener {
                 @Override
                 public void onCompletion(Exception ex) {
                     if (ex != null) {
-                        ex.printStackTrace();
                         return;
                     }
 
