@@ -14,7 +14,7 @@ all of his work, "Almost".
 But we welcome you to contribute to our code. Anyways, as I speak, this
 repository is the first SkyBlock project for Nukkit and open-sourced. We
 welcome you to help us code. This project is not owned by
-__[GLaDOS]__(https://en.wikipedia.org/wiki/GLaDOS) so we cannot just do
+[GLaDOS](https://en.wikipedia.org/wiki/GLaDOS) so we cannot just do
 everything you asked.
 
 Alright so we are between banks here, so make those cheque into cash,
