@@ -64,6 +64,7 @@ public class GenericCategory extends SubCategory {
                 return sender.hasPermission("is.command.expel") && sender.isPlayer();
             case "lobby":
             case "spawn":
+            case "leave":
                 return sender.hasPermission("is.command.leave") && sender.isPlayer();
             case "locale":
                 return sender.hasPermission("is.command.lang") && sender.isPlayer();
@@ -85,11 +86,9 @@ public class GenericCategory extends SubCategory {
     @Override
     public String getDescription(String commandName) {
         switch (commandName.toLowerCase()) {
-            case "expel":
             case "kick":
                 return "Kick out a member from your island.";
             case "lobby":
-            case "spawn":
                 return "Leave your island and teleport to server lobby.";
             case "locale":
                 return "Change your preferred locale.";
@@ -102,7 +101,7 @@ public class GenericCategory extends SubCategory {
             case "about":
                 return "About this plugin and its version.";
             default:
-                return "NaN";
+                return null;
         }
     }
 
@@ -146,8 +145,9 @@ public class GenericCategory extends SubCategory {
                 break;
             case "lobby":
             case "spawn":
+            case "leave":
                 if (getPlugin().getLevel().stream()
-                        .noneMatch(i -> i.getLevelName().equalsIgnoreCase(p.getLevel().getName()))) {
+                        .noneMatch(i -> i.getLevel().getName().equalsIgnoreCase(p.getLevel().getName()))) {
                     sender.sendMessage(getPrefix() + getLocale(p).errorWrongWorld);
                     break;
                 }

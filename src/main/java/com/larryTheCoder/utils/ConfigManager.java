@@ -59,7 +59,7 @@ public class ConfigManager {
         // The order in this file should match the order in config.yml so that it is easy to check that everything is covered
         // ********************** Island settings **************************
         Settings.checkUpdate = cfg.getBoolean("allowUpdate");
-        Settings.verboseCode = cfg.getBoolean("allowVerbose", false);
+        Settings.verboseCode = cfg.getBoolean("debug", false);
 
         scheduleCheck(cfg.getBoolean("economy.enable"), cfg);
         Settings.islandHeight = cfg.getInt("island.islandHeight", 100);
@@ -105,13 +105,13 @@ public class ConfigManager {
                     }
 
                 } catch (IllegalArgumentException ex) {
-                    if (ASkyBlock.get().isDebug()) {
+                    if (Settings.verboseCode) {
                         ex.printStackTrace();
                     }
                     Server.getInstance().getLogger().error("Problem loading chest item from config.yml so skipping it: " + chestItemString[i]);
                     Server.getInstance().getLogger().error("Error is : " + ex.getMessage());
                 } catch (Exception e) {
-                    if (ASkyBlock.get().isDebug()) {
+                    if (Settings.verboseCode) {
                         e.printStackTrace();
                     }
                     Server.getInstance().getLogger().error("Problem loading chest item from config.yml so skipping it: " + chestItemString[i]);

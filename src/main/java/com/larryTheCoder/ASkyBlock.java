@@ -68,12 +68,10 @@ import org.sql2o.data.Table;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
-import static com.larryTheCoder.database.TableSet.*;
+import static com.larryTheCoder.database.TableSet.FETCH_WORLDS;
+import static com.larryTheCoder.database.TableSet.WORLDS_INSERT;
 
 /**
  * @author larryTheCoder
@@ -85,7 +83,7 @@ public class ASkyBlock extends ASkyBlockAPI {
     public final ArrayList<String> loadedLevel = new ArrayList<>();
     // Arrays
     @Getter
-    private ArrayList<WorldSettings> level = new ArrayList<>();
+    private final ArrayList<WorldSettings> level = new ArrayList<>();
 
     // Configs
     private Config cfg;
@@ -292,17 +290,22 @@ public class ASkyBlock extends ASkyBlockAPI {
         }
 
         database.pushQuery((connection) -> {
-            List<String> levels = new ArrayList<>();
+            HashMap<Integer, String> levels = new HashMap<>();
             try (Query query = connection.createQuery(FETCH_WORLDS.getQuery())) {
                 Table table = query.executeAndFetchTable();
 
-                table.rows().forEach(i -> levels.add(i.getString("worldName")));
+                table.rows().forEach(i -> levels.put(i.getInteger("levelId"), i.getString("worldName")));
             }
 
-            if (!levels.contains("SkyBlock")) levels.add("SkyBlock");
+            if (!levels.containsValue("SkyBlock")) {
+                levels.put(1, "SkyBlock");
+                Utils.levelProvidedId.add(1);
+            }
 
             ArrayList<WorldSettings> settings = new ArrayList<>();
-            for (String levelName : levels) {
+            for (Map.Entry<Integer, String> values : levels.entrySet()) {
+                String levelName = values.getValue();
+
                 String levelSafeName = levelName.replace(" ", "_");
 
                 Utils.loadLevelSeed(levelName);
@@ -321,6 +324,7 @@ public class ASkyBlock extends ASkyBlockAPI {
                             .setSeaLevel(section.getInt("seaLevel"))
                             .setLevel(level)
                             .setSignSettings(section.getList("signConfig"))
+                            .setLevelId(values.getKey())
                             .build();
 
                     worldSettings.verifyWorldSettings();
@@ -332,21 +336,12 @@ public class ASkyBlock extends ASkyBlockAPI {
 
                 settings.add(worldSettings);
                 loadedLevel.add(levelName);
+                Utils.levelProvidedId.add(values.getKey());
             }
-            this.level = settings;
+            level.addAll(settings);
 
             saveLevel(false);
         });
-    }
-
-    /**
-     * Get if debugging enabled,
-     * maybe not worth it
-     *
-     * @return true if enabled
-     */
-    public boolean isDebug() {
-        return cfg.getBoolean("debug");
     }
 
     /**
@@ -358,7 +353,7 @@ public class ASkyBlock extends ASkyBlockAPI {
      */
     public WorldSettings getSettings(String levelName) {
         return level.stream()
-                .filter(i -> i.getLevelName().equalsIgnoreCase(levelName))
+                .filter(i -> i.getLevel().getName().equalsIgnoreCase(levelName))
                 .findFirst()
                 .orElse(null);
     }
@@ -414,7 +409,9 @@ public class ASkyBlock extends ASkyBlockAPI {
         database.pushQuery((connection) -> {
             try (Query queue = connection.createQuery(WORLDS_INSERT.getQuery())) {
                 for (WorldSettings settings : this.level) {
-                    queue.addParameter("levelName", settings.getLevelName());
+                    queue.addParameter("levelName", settings.getLevel().getName());
+                    queue.addParameter("levelId", settings.getLevelId());
+
                     queue.executeUpdate();
                 }
             } catch (Exception err) {
@@ -456,7 +453,7 @@ public class ASkyBlock extends ASkyBlockAPI {
     public ArrayList<String> getLevels() {
         ArrayList<String> level = new ArrayList<>();
         for (WorldSettings settings : this.level) {
-            level.add(settings.getLevelName());
+            level.add(settings.getLevel().getName());
         }
         return level;
     }

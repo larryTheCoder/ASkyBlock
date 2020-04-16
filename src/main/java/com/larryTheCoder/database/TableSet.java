@@ -34,7 +34,8 @@ public enum TableSet {
 
     // Default tables
     WORLD_TABLE("CREATE TABLE IF NOT EXISTS worldList(" +
-            "worldName TEXT PRIMARY KEY) %OPTIMIZE"),
+            "worldName TEXT PRIMARY KEY," +
+            "levelId INT NOT NULL) %OPTIMIZE"),
 
     PLAYER_TABLE("CREATE TABLE IF NOT EXISTS player(" +
             "playerName VARCHAR(100)," +
@@ -89,7 +90,7 @@ public enum TableSet {
     FOR_TABLE_OPTIMIZE_A("SET GLOBAL innodb_file_per_table=1"),
     FOR_TABLE_OPTIMIZE_B("SET GLOBAL innodb_file_format=Barracuda"),
 
-    FETCH_WORLDS("SELECT worldName FROM worldList"),
+    FETCH_WORLDS("SELECT * FROM worldList"),
     FETCH_PLAYER_MAIN("SELECT * FROM player WHERE playerName = :plotOwner"),
     FETCH_PLAYER_DATA("SELECT * FROM challenges WHERE player = :playerName"),
     FETCH_ISLAND_UNIQUE("SELECT * FROM island WHERE islandUniqueId = :islandUniqueId AND levelName = :levelName"),
@@ -115,7 +116,10 @@ public enum TableSet {
     PLAYER_UPDATE_MAIN("UPDATE player SET locale = :locale, banList = :banList, resetAttempts = :resetLeft, islandLevels = :islandLevels WHERE playerName = :playerName"),
     PLAYER_UPDATE_DATA("UPDATE challenges SET challengesList = :challengesList, challengesTimes = :challengesTimes WHERE player = :playerName"),
 
-    WORLDS_INSERT("INSERT %IGNORE INTO worldList (worldName) VALUES (:levelName)");
+    DELETE_ISLAND_MAIN("DELETE FROM island WHERE (islandUniqueId = :islandUniqueId)"),
+    DELETE_ISLAND_DATA("DELETE FROM islandData WHERE (dataId = :islandUniqueId)"),
+
+    WORLDS_INSERT("INSERT %IGNORE INTO worldList (worldName, levelId) VALUES (:levelName, :levelId)");
 
     private final String query;
 

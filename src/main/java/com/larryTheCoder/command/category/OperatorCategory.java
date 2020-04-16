@@ -102,8 +102,8 @@ public class OperatorCategory extends SubCategory {
                     lvlName.append(args[i]).append(" ");
                 }
 
-                String levelName = lvlName.toString();
-                String levelSafeName = levelName.replace(" ", "_");
+                String levelName = lvlName.toString().substring(0, lvlName.toString().length() - 1);
+                String levelSafeName = levelName.replaceAll(" ", "_");
 
                 if (getPlugin().loadedLevel.contains(levelName)) {
                     sender.sendMessage(getPlugin().getPrefix() + getPlugin().getLocale(pl).errorLevelGenerated);
@@ -119,6 +119,7 @@ public class OperatorCategory extends SubCategory {
                     cfg.set(levelSafeName + ".protectionRange", world.getProtectionRange());
                     cfg.set(levelSafeName + ".stopTime", world.isStopTime());
                     cfg.set(levelSafeName + ".seaLevel", world.getSeaLevel());
+                    cfg.set(levelSafeName + ".signConfig", new String[]{"&aWelcome to", "&e[player]'s", "&aIsland! Enjoy.", ""});
                     cfg.save();
 
                     getPlugin().saveLevel(false);
@@ -240,16 +241,20 @@ public class OperatorCategory extends SubCategory {
 
                 // Try to get the owner of this island
                 String owner = island.getPlotOwner();
-                if (!args[1].equalsIgnoreCase("confirm")) {
+                if (args.length < 2 || !args[1].equalsIgnoreCase("confirm")) {
                     sender.sendMessage(getPlugin().getPrefix() + getPlugin().getLocale(pl).adminDeleteIslandError.replace("[player]", owner));
                     break;
                 }
 
                 if (owner != null) {
+                    Utils.sendDebug("Issuer island is not found.");
+
                     sender.sendMessage(getPlugin().getLocale(pl).adminSetSpawnOwnedBy.replace("[name]", owner));
                     sender.sendMessage(getPlugin().getLocale(pl).adminDeleteIslandUse.replace("[name]", owner));
                     break;
                 } else {
+                    Utils.sendDebug("Issuer island is deleted");
+
                     sender.sendMessage(getPlugin().getLocale(pl).deleteRemoving.replace("[name]", "null"));
                     deleteIslands(island, sender);
                 }

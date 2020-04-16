@@ -44,6 +44,7 @@ import com.larryTheCoder.cache.settings.IslandSettings;
 import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -70,7 +71,7 @@ public class Utils {
                 config = new Config();
                 config.load(DIRECTORY + file, Config.YAML);
             } catch (Exception e) {
-                if (ASkyBlock.get().isDebug()) {
+                if (Settings.verboseCode) {
                     e.printStackTrace();
                 }
             }
@@ -92,6 +93,20 @@ public class Utils {
             }
         }
         return config;
+    }
+
+    public static final List<Integer> levelProvidedId = new ArrayList<>();
+
+    /**
+     * Generates a secure level id for each generated levels.
+     */
+    public static int generateLevelId() {
+        Random randGen = new SecureRandom();
+        int randomGen = randGen.nextInt(1024);
+
+        while (levelProvidedId.contains(randomGen)) randomGen = randGen.nextInt(1024);
+
+        return randomGen;
     }
 
     public static String hashObject(String hashedObject) {

@@ -33,6 +33,7 @@ import cn.nukkit.utils.TextFormat;
 import com.google.common.base.Preconditions;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.database.DatabaseManager;
+import com.larryTheCoder.database.TableSet;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
@@ -60,6 +61,7 @@ public class FastCache {
 
     // Since ArrayList is modifiable, there's no need to replace the cache again into the list.
     private final List<FastCacheData> dataCache = new ArrayList<>();
+    private final List<String> uniqueId = new ArrayList<>();
 
     private Config config;
     private String cacheValidationId;
@@ -159,6 +161,12 @@ public class FastCache {
 
                     dataCache.add(data);
                 }
+
+                Table table = connection.createQuery(TableSet.FETCH_ALL_ISLAND_UNIQUE.getQuery()).executeAndFetchTable();
+
+                for (Row rows : table.rows()) {
+                    uniqueId.add(rows.getString("islandUniqueId"));
+                }
             }
 
             @Override
@@ -192,6 +200,11 @@ public class FastCache {
                 });
             }
         });
+    }
+
+
+    public boolean containsId(String value){
+        return uniqueId.contains(value);
     }
 
     /**
@@ -497,6 +510,8 @@ public class FastCache {
      * This method is used internally. Using this function may lead to severe critical errors.
      */
     public void addIslandIntoDb(String playerName, IslandData newData) {
+        uniqueId.add(Integer.toString(newData.getIslandUniquePlotId()));
+
         FastCacheData object = dataCache.stream().filter(i -> i.anyMatch(playerName)).findFirst().orElse(null);
         if (object == null) {
             object = new FastCacheData(playerName);
@@ -507,6 +522,42 @@ public class FastCache {
         }
 
         object.addIslandData(newData);
+    }
+
+    /**
+     * Deletes an island from the data given.
+     */
+    public void deleteIsland(IslandData islandData) {
+        FastCacheData object = dataCache.stream().filter(i -> i.anyIslandUidMatch(islandData.getIslandUniquePlotId())).findFirst().orElse(null);
+        if (object == null) {
+            Utils.sendDebug("Attempting to delete an unknown player island");
+            return;
+        }
+
+        plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
+
+            @Override
+            public void executeQuery(Connection connection) {
+                Utils.sendDebug("Deleting attempt");
+
+                connection.createQuery(DELETE_ISLAND_DATA.getQuery())
+                        .addParameter("islandUniqueId", islandData.getIslandUniquePlotId())
+                        .executeUpdate();
+
+                Utils.sendDebug("Executed delete #1");
+
+                connection.createQuery(DELETE_ISLAND_MAIN.getQuery())
+                        .addParameter("islandUniqueId", islandData.getIslandUniquePlotId())
+                        .executeUpdate();
+
+                Utils.sendDebug("Executed delete #2");
+            }
+
+            @Override
+            public void onCompletion(Exception err) {
+                object.removeIsland(islandData);
+            }
+        });
     }
 
     /**
@@ -597,7 +648,7 @@ public class FastCache {
             dataCache.clear();
         }
 
-        synchronized (storeSchedule){
+        synchronized (storeSchedule) {
             storeSchedule.clear();
 
             config.setAll(new ConfigSection());
@@ -643,6 +694,12 @@ public class FastCache {
             updateTime();
 
             this.playerData = playerData;
+        }
+
+        public void removeIsland(IslandData pd) {
+            islandData.remove(pd.getIslandUniquePlotId());
+
+            updateTime();
         }
 
         boolean anyMatch(String pl) {

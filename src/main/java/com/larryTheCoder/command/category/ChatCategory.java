@@ -77,7 +77,7 @@ public class ChatCategory extends SubCategory {
             case "messages":
                 return "Read a new messages from island leader.";
             default:
-                return "NaN";
+                return null;
         }
     }
 

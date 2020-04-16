@@ -107,7 +107,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
             return true;
         }
 
-        SubCategory cmdCategory = commandCategory.stream().filter(i -> i.getCommands().contains(args[0].toLowerCase())).findFirst().orElse(null);
+        SubCategory cmdCategory = commandCategory.stream().filter(i -> i.getCommands().contains(args[0].toLowerCase()) && i.baseCommands().contains(label.toLowerCase())).findFirst().orElse(null);
         if (cmdCategory == null || !cmdCategory.canUse(sender, args[0])) {
             sender.sendMessage(String.format("§cUnknown command. Please use /%s help for a list of commands", label));
 
@@ -131,7 +131,10 @@ public class Commands extends PluginCommand<ASkyBlock> {
 
         switch (helpId) {
             case 0:
-                commandCategory.forEach(i -> i.getCommands().stream().filter(h -> i.canUse(sender, h)).forEach(a -> {
+                commandCategory.forEach(i -> i.getCommands().stream()
+                        .filter(h -> i.canUse(sender, h) && i.getDescription(h) != null && i.baseCommands().contains("is"))
+                        .forEach(a -> {
+
                     String param = i.getParameters(a);
                     if (param == null || param.isEmpty()) {
                         helpList.add(String.format("&6/%s %s &l&5»&r&f %s", Utils.compactSmall(i.baseCommands().toArray(new String[0])), a, i.getDescription(a)));
@@ -139,6 +142,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
                         helpList.add(String.format("&6/%s %s &a%s &l&5»&r&f %s", Utils.compactSmall(i.baseCommands().toArray(new String[0])), a, param, i.getDescription(a)));
                     }
                 }));
+                helpList.add("&6/isa help &l&5»&r&f Special command for admins to control other islands");
 
                 int totalPage = helpList.size() % pageHeight == 0 ? helpList.size() / pageHeight : helpList.size() / pageHeight + 1;
                 pageNumber = Math.min(pageNumber, totalPage);

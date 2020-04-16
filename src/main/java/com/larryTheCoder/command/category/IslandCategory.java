@@ -43,7 +43,7 @@ public class IslandCategory extends SubCategory {
 
     @Override
     public List<String> getCommands() {
-        return Arrays.asList("create", "reset", "home", "sethome", "teleport");
+        return Arrays.asList("create", "reset", "delete", "home", "sethome", "teleport");
     }
 
     @Override
@@ -52,6 +52,7 @@ public class IslandCategory extends SubCategory {
             case "create":
                 return sender.hasPermission("is.create") && sender.isPlayer();
             case "reset":
+            case "delete":
                 return sender.hasPermission("is.command.reset") && sender.isPlayer();
             case "home":
             case "sethome":
@@ -76,7 +77,7 @@ public class IslandCategory extends SubCategory {
             case "teleport":
                 return "Teleport to your island spawn position.";
             default:
-                return "NaN";
+                return null;
         }
     }
 
@@ -97,6 +98,7 @@ public class IslandCategory extends SubCategory {
             case "create":
                 getPlugin().getPanel().addIslandFormOverlay(p);
                 break;
+            case "delete":
             case "reset":
                 getPlugin().getPanel().addDeleteFormOverlay(p);
                 break;

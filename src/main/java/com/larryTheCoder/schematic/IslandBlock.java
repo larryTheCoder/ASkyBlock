@@ -255,7 +255,7 @@ class IslandBlock extends BlockMinecraftId {
             }
         } catch (Exception e) {
             Utils.send("Could not parse schematic file item, skipping!");
-            if (ASkyBlock.get().isDebug()) {
+            if (Settings.verboseCode) {
                 e.printStackTrace();
             }
         }
@@ -285,7 +285,7 @@ class IslandBlock extends BlockMinecraftId {
                 String[] currentText = signText;
 
                 boolean isCleanLine = Arrays.stream(signText).allMatch(i -> TextFormat.clean(i).replace("\n", "").isEmpty());
-                if (isCleanLine) currentText = ASkyBlock.get().getSettings(blockLoc.getLevel().getName()).signConfig;
+                if (isCleanLine) currentText = ASkyBlock.get().getSettings(blockLoc.getLevel().getName()).getSignConfig();
 
                 String[] replacedString = new String[4];
                 for (String result : currentText) {

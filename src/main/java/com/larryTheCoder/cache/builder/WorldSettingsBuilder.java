@@ -29,62 +29,90 @@ package com.larryTheCoder.cache.builder;
 import cn.nukkit.level.Level;
 import com.google.common.base.Preconditions;
 import com.larryTheCoder.cache.settings.WorldSettings;
+import lombok.Getter;
 
 import java.util.List;
 
 public class WorldSettingsBuilder {
 
-    private WorldSettings realSettings = new WorldSettings(null);
+    @Getter
+    private int levelId;
+
+    @Getter
+    private Level level;
+    @Getter
+    private String permission;
+    @Getter
+    private int plotMax;
+    @Getter
+    private int plotSize;
+    @Getter
+    private boolean stopTime;
+    @Getter
+    private int seaLevel;
+    @Getter
+    private int plotRange;
+    @Getter
+    private boolean useDefaultChest;
+    @Getter
+    private String[] signConfig;
 
     public WorldSettingsBuilder setPermission(String permission) {
-        realSettings.permission = permission;
+        this.permission = permission;
         return this;
     }
 
     public WorldSettingsBuilder setPlotMax(int plotMax) {
-        realSettings.plotMax = plotMax;
+        this.plotMax = plotMax;
         return this;
     }
 
     public WorldSettingsBuilder setPlotSize(int plotSize) {
-        realSettings.plotSize = plotSize;
+        this.plotSize = plotSize;
         return this;
     }
 
     public WorldSettingsBuilder setPlotRange(int plotRange) {
-        realSettings.plotRange = plotRange;
+        this.plotRange = plotRange;
         return this;
     }
 
     public WorldSettingsBuilder isStopTime(boolean isStopTime) {
-        realSettings.stopTime = isStopTime;
+        this.stopTime = isStopTime;
         return this;
     }
 
     public WorldSettingsBuilder useDefaultChest(boolean defaultChest) {
-        realSettings.useDefaultChest = defaultChest;
+        this.useDefaultChest = defaultChest;
         return this;
     }
 
     public WorldSettingsBuilder setSeaLevel(int seaLevel) {
-        realSettings.seaLevel = seaLevel;
+        this.seaLevel = seaLevel;
         return this;
     }
 
     public WorldSettingsBuilder setLevel(Level level) {
-        realSettings.level = level;
+        this.level = level;
         return this;
     }
 
-    public WorldSettingsBuilder setSignSettings(List<String> section) {
-        realSettings.signConfig = section.toArray(new String[0]);
+    @SuppressWarnings("rawtypes")
+    public WorldSettingsBuilder setSignSettings(List section) {
+        this.signConfig = (String[]) section.toArray(new String[0]);
+
+        return this;
+    }
+
+    public WorldSettingsBuilder setLevelId(int value) {
+        this.levelId = value;
 
         return this;
     }
 
     public WorldSettings build() {
-        Preconditions.checkState(realSettings.level != null, "World level cannot be null!");
+        Preconditions.checkState(this.level != null, "World level cannot be null!");
 
-        return realSettings;
+        return new WorldSettings(this);
     }
 }

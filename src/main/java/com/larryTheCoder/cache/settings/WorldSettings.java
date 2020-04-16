@@ -28,33 +28,54 @@ import cn.nukkit.level.Level;
 import cn.nukkit.utils.Config;
 import com.larryTheCoder.cache.builder.WorldSettingsBuilder;
 import com.larryTheCoder.utils.Utils;
+import lombok.Getter;
 
 /**
  * @author larryTheCoder
  */
 public class WorldSettings {
 
-    public Level level;
-    public String permission;
-    public int plotMax;
-    public int plotSize;
-    public boolean stopTime;
-    public int seaLevel;
-    public int plotRange;
-    public boolean useDefaultChest;
-    public String[] signConfig;
+    @Getter
+    private int levelId;
+
+    @Getter
+    private Level level;
+    @Getter
+    private String permission = "is.create";
+    @Getter
+    private int maximumIsland = 5;
+    @Getter
+    private int islandDistance = 200;
+    @Getter
+    private int protectionRange = 100;
+    @Getter
+    private boolean stopTime = false;
+    @Getter
+    private int seaLevel = 0;
+    @Getter
+    private String[] signConfig = new String[]{"&aWelcome to", "&e[player]'s", "&aIsland! Enjoy.", ""};
+    @Getter
+    private boolean useDefaultChest = false;
 
     public WorldSettings(Level level) {
         this.level = level;
 
-        // By using default parameters
-        this.permission = "is.create";
-        this.plotMax = 5;
-        this.plotSize = 200;
-        this.stopTime = false;
-        this.seaLevel = 0;
-        this.plotRange = 100;
-        this.useDefaultChest = false;
+        this.levelId = Utils.generateLevelId();
+    }
+
+    public WorldSettings(WorldSettingsBuilder builder) {
+        this.level = builder.getLevel();
+
+        this.permission = builder.getPermission();
+        this.maximumIsland = builder.getPlotMax();
+        this.islandDistance = builder.getPlotSize();
+        this.stopTime = builder.isStopTime();
+        this.seaLevel = builder.getSeaLevel();
+        this.protectionRange = builder.getPlotRange();
+        this.useDefaultChest = builder.isUseDefaultChest();
+        this.signConfig = builder.getSignConfig();
+
+        this.levelId = builder.getLevelId();
     }
 
     public void verifyWorldSettings() {
@@ -63,47 +84,19 @@ public class WorldSettings {
             level.stopTime();
         }
 
-        if (plotRange % 2 != 0) {
-            plotRange--;
-            Utils.send("&cThe protection range must be even, using " + plotRange);
+        if (protectionRange % 2 != 0) {
+            protectionRange--;
+            Utils.send("&cThe protection range must be even, using " + protectionRange);
         }
 
-        if (plotRange > plotSize) {
+        if (protectionRange > islandDistance) {
             Utils.send("&cThe protection range cannot be bigger then the island distance. Setting them to be half equal.");
-            plotRange = plotSize / 2; // Avoiding players from CANNOT break their island
+            protectionRange = islandDistance / 2; // Avoiding players from CANNOT break their island
         }
 
-        if (plotRange < 0) {
-            plotRange = 0;
+        if (protectionRange < 0) {
+            protectionRange = 0;
         }
-    }
-
-    public int getSeaLevel() {
-        return seaLevel;
-    }
-
-    public boolean isStopTime() {
-        return stopTime;
-    }
-
-    public int getIslandDistance() {
-        return plotSize;
-    }
-
-    public String getPermission() {
-        return permission;
-    }
-
-    public String getLevelName() {
-        return level.getName();
-    }
-
-    public int getProtectionRange() {
-        return plotRange;
-    }
-
-    public int getMaximumIsland() {
-        return plotMax;
     }
 
     public void saveConfig(Config cfg) {
@@ -111,8 +104,8 @@ public class WorldSettings {
 
         cfg.set(levelName + ".permission", permission);
         cfg.set(levelName + ".maxHome", 5);
-        cfg.set(levelName + ".plotSize", plotSize);
-        cfg.set(levelName + ".protectionRange", plotRange);
+        cfg.set(levelName + ".plotSize", islandDistance);
+        cfg.set(levelName + ".protectionRange", protectionRange);
         cfg.set(levelName + ".stopTime", stopTime);
         cfg.set(levelName + ".seaLevel", seaLevel);
         cfg.set(levelName + ".useDefaultChest", useDefaultChest);

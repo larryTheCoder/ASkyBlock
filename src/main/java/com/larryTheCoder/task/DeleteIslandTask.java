@@ -68,17 +68,18 @@ public class DeleteIslandTask implements Runnable {
     @Override
     public void run() {
         // Use chunk instead of using loop
-        // Deleting island now faster ~99%
+        // Deleting island now ~99% faster
         if (pd.onIsland(player.getServer().getPlayer(player.getName()))) {
             Server.getInstance().dispatchCommand(player, "is leave"); // Easy
         }
+
         Level level = plugin.getServer().getLevelByName(pd.getLevelName());
-        WorldSettings settings = plugin.getSettings(level.getName());
         if (level == null) {
             Utils.send("ERROR: Cannot find the level " + pd.getLevelName());
             Utils.send("The sender who execute this: " + pd.getPlotOwner());
             return;
         }
+        WorldSettings settings = plugin.getSettings(level.getName());
 
         // Determine if chunks need to be cleaned up or not
         boolean cleanUpBlocks = false;
@@ -136,7 +137,7 @@ public class DeleteIslandTask implements Runnable {
 
                 if (regen) {
                     // Loop in loop are not recommended.
-                    // So we seperate some chunks and let the task do it works
+                    // So we separate some chunks and let the task do it works
                     chunksToRemoved.add(level.getChunk(x, z));
                 } else {
                     // Add to clear up list if requested
@@ -184,8 +185,8 @@ public class DeleteIslandTask implements Runnable {
 
         // Clear up any chunks
         if (!chunksToClear.isEmpty()) {
-            Utils.send("&eIsland delete Task-2: There are &a" + chunksToClear.size() + " &echunks that need to be cleared up.");
-            Utils.send("&eClean rate is &a" + Settings.cleanRate + " &echunks per second. Should take ~" + Math.round(chunksToClear.size() / Settings.cleanRate) + "s");
+            Utils.sendDebug("&eIsland delete Task-2: There are &a" + chunksToClear.size() + " &echunks that need to be cleared up.");
+            Utils.sendDebug("&eClean rate is &a" + Settings.cleanRate + " &echunks per second. Should take ~" + Math.round((float) (chunksToClear.size() / Settings.cleanRate)) + "s");
             new NukkitRunnable() {
                 @Override
                 public void run() {
@@ -201,7 +202,6 @@ public class DeleteIslandTask implements Runnable {
                                 if (pd.inIslandSpace(xCoord, zCoord)) {
                                     // Delete all the chunks here
                                     for (int y = 0; y < 255 - settings.getSeaLevel(); y++) {
-                                        // Overworld
                                         Vector3 vec = new Vector3(xCoord, y + settings.getSeaLevel(), zCoord);
                                         level.setBlock(vec, Block.get(Block.AIR), true, true);
                                     }
@@ -212,7 +212,7 @@ public class DeleteIslandTask implements Runnable {
                         it.remove();
                     }
                     if (chunksToClear.isEmpty()) {
-                        Utils.send("&aFinished island deletion Task-2");
+                        Utils.sendDebug("&aFinished island deletion Task-2");
                         this.cancel();
                     }
                 }
@@ -220,10 +220,7 @@ public class DeleteIslandTask implements Runnable {
         }
 
         // Remove from database
-        //boolean result = ASkyBlock.get().getDatabase().deleteIsland(pd);
-//        if (!result) {
-//            //Utils.sendDebug"Unable to delete player island data from database");
-//        }
+        plugin.getFastCache().deleteIsland(pd);
     }
 
 }

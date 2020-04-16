@@ -200,7 +200,7 @@ public class IslandManager {
                 int z = wz - wz % settings.getIslandDistance() + settings.getIslandDistance() / 2;
 
                 int generatedData = generateIslandKey(wx, wz, levelName);
-                boolean uniqueData = uniqueId.contains(Integer.toString(generatedData));
+                boolean uniqueData = plugin.getFastCache().containsId(Integer.toString(generatedData));
                 if (!uniqueData) {
                     Location locIsland = new Location(x, Settings.islandHeight, z, world);
 
@@ -221,6 +221,8 @@ public class IslandManager {
 
                     // Then we call a task to run them in the main thread.
                     TaskManager.runTask(() -> {
+                        Utils.sendDebug("Pasting island.");
+
                         // Call an event
                         IslandCreateEvent event = new IslandCreateEvent(pl, templateId, resultData);
                         plugin.getServer().getPluginManager().callEvent(event);
@@ -229,6 +231,8 @@ public class IslandManager {
                             return;
                         }
                         plugin.getSchematics().pasteSchematic(pl, locIsland, templateId, biome);
+
+                        Utils.sendDebug("Island pasted, attempting to insert into database.");
 
                         // Then apply another async query.
                         ASkyBlock.get().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
@@ -261,7 +265,6 @@ public class IslandManager {
                                     return;
                                 }
 
-                                uniqueId.add(Integer.toString(resultData.getIslandUniquePlotId()));
                                 plugin.getFastCache().addIslandIntoDb(pl.getName(), resultData);
 
                                 pl.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).createSuccess);
@@ -276,6 +279,12 @@ public class IslandManager {
         });
     }
 
+    /**
+     * Generates a new public unique key based on a given location.
+     *
+     * @param loc The location of the target.
+     * @return A unique island key
+     */
     public int generateIslandKey(Location loc) {
         int x = loc.getFloorX();
         int z = loc.getFloorZ();
@@ -294,7 +303,7 @@ public class IslandManager {
      */
     public int generateIslandKey(int x, int z, String level) {
         WorldSettings settings = plugin.getSettings(level);
-        return x / settings.getIslandDistance() + z / settings.getIslandDistance() * Integer.MAX_VALUE;
+        return (x / settings.getIslandDistance() + z / settings.getIslandDistance() * Integer.MAX_VALUE) + settings.getLevelId();
     }
 
     public void deleteIsland(Player p, IslandData pd) {

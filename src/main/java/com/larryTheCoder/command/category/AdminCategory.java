@@ -69,7 +69,6 @@ public class AdminCategory extends SubCategory {
         switch (command.toLowerCase()) {
             case "accept":
                 return "Accept an invitation from a player.";
-            case "deny":
             case "reject":
                 return "Denies an invitation from a player.";
             case "invite":
@@ -79,7 +78,7 @@ public class AdminCategory extends SubCategory {
             case "quit":
                 return "Leave from being an island member.";
         }
-        return "NaN";
+        return null;
     }
 
     @Override
