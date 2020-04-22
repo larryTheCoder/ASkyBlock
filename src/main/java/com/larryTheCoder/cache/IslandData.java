@@ -71,6 +71,9 @@ public class IslandData implements Cloneable {
     private int protectionRange = 0;
     private int levelHandicap = 0;
 
+    // CoopDatabase
+    private IslandCoop coopData;
+
     // IslandSettings
     private IslandSettings settings = new IslandSettings(this);
 
@@ -116,7 +119,7 @@ public class IslandData implements Cloneable {
         this.settings = new IslandSettings(dataObj.getString("protectionData"));
     }
 
-    public static IslandData fromRows(Row row) {
+    static IslandData fromRows(Row row) {
         return new IslandData(
                 row.getString("levelName"),
                 row.getString("playerName"),
@@ -128,8 +131,12 @@ public class IslandData implements Cloneable {
                 row.getInteger("islandUniqueId"));
     }
 
-    public static IslandData fromRows(Row islandObject, Row dataObject) {
+    static IslandData fromRows(Row islandObject, Row dataObject) {
         return new IslandData(islandObject, dataObject);
+    }
+
+    void loadRelationData(Row relationData) {
+
     }
 
     /**
@@ -386,4 +393,10 @@ public class IslandData implements Cloneable {
         });
     }
 
+    public static class IslandCoop {
+
+        public IslandCoop(Row coopRows) {
+
+        }
+    }
 }

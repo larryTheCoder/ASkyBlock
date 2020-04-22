@@ -27,8 +27,27 @@
 
 package com.larryTheCoder.player;
 
+import cn.nukkit.Player;
+import com.larryTheCoder.ASkyBlock;
+
 /**
  * ASkyBlock Cooperative Testing Initiative.
  */
 public class CoopManager {
+
+    private final ASkyBlock plugin;
+
+    public CoopManager(ASkyBlock plugin){
+        this.plugin = plugin;
+    }
+
+    /**
+     * Checks either the player has joined a coop island or not.
+     * This also checks if the player is the owner of the coop island.
+     *
+     * @return {@code true} if the the condition is true.
+     */
+    public boolean hasCoop(Player pl){
+        return false;
+    }
 }

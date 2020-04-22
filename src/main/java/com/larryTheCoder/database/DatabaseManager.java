@@ -28,6 +28,7 @@
 package com.larryTheCoder.database;
 
 import cn.nukkit.api.API;
+import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.database.config.AbstractConfig;
 import com.larryTheCoder.database.config.MySQLConfig;
 import com.larryTheCoder.task.TaskManager;
@@ -56,7 +57,7 @@ import static com.larryTheCoder.database.TableSet.*;
  */
 public class DatabaseManager {
 
-    public static final String DB_VERSION = "0.1.5";
+    public static final String DB_VERSION = "0.1.6";
     public static String currentCacheId;
 
     // Notes: During SELECT, sqlite database can read its database easily without effecting the thread,
@@ -130,9 +131,7 @@ public class DatabaseManager {
 
         // Update database credentials.
         // TODO: Versioning database stuffs.
-        Table result = connection.createQuery(TABLE_FETCH_CACHE.getQuery())
-                .addParameter("dbVersion", DB_VERSION)
-                .executeAndFetchTable();
+        Table result = connection.createQuery(TABLE_FETCH_CACHE.getQuery()).executeAndFetchTable();
 
         if (result.rows().isEmpty()) {
             currentCacheId = UUID.randomUUID().toString();
@@ -145,6 +144,24 @@ public class DatabaseManager {
             Row row1 = result.rows().get(0);
 
             currentCacheId = row1.getString("cacheUniqueId");
+
+            String dbVersion = row1.getString("dbVersion");
+            if (!dbVersion.equalsIgnoreCase(DB_VERSION)) {
+                switch (dbVersion) {
+                    case "0.1.5":
+                        connection.createQuery("DROP TABLE islandRelations").executeUpdate();
+                        connection.createQuery(ISLAND_RELATIONS.getQuery()).executeUpdate();
+                    case "0.1.6":
+                        // TODO: Future updates?
+                }
+
+                connection.createQuery(TABLE_CACHE_UPDATE.getQuery())
+                        .addParameter("dbVersion", DB_VERSION)
+                        .addParameter("cacheUniqueId", currentCacheId)
+                        .executeUpdate();
+
+                Utils.send(TextFormat.GOLD + "Updated database information to " + TextFormat.YELLOW + "v" + DB_VERSION);
+            }
         }
 
         // If the database is a mysql database, we can

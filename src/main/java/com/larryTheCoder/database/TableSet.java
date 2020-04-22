@@ -73,6 +73,7 @@ public enum TableSet {
 
     ISLAND_RELATIONS("CREATE TABLE IF NOT EXISTS islandRelations(" +
             "defaultIsland INT NOT NULL," +
+            "islandTeamName TEXT," +
             "islandLeader VARCHAR(100)," +
             "islandMembers TEXT DEFAULT ''," +
             "FOREIGN KEY (defaultIsland) REFERENCES island(islandUniqueId) ON UPDATE CASCADE," +
@@ -99,7 +100,8 @@ public enum TableSet {
     FETCH_ISLAND_PLOT("SELECT * FROM island WHERE playerName = :pName AND islandId = :islandId"),
     FETCH_ISLAND_NAME("SELECT * FROM island WHERE playerName = :pName AND islandName = :islandName"),
     FETCH_ISLAND_DATA("SELECT * FROM islandData WHERE dataId = :islandUniquePlotId"),
-    TABLE_FETCH_CACHE("SELECT * FROM cacheMetadata WHERE dbVersion = :dbVersion"),
+    FETCH_RELATION_DATA("SELECT * FROM islandRelations WHERE defaultIsland = :islandId"),
+    TABLE_FETCH_CACHE("SELECT * FROM cacheMetadata"),
     FETCH_ISLANDS_PLOT("SELECT * FROM island WHERE playerName = :pName"),
     FETCH_ALL_ISLAND_UNIQUE("SELECT islandUniqueId FROM island"),
 
@@ -111,6 +113,7 @@ public enum TableSet {
     PLAYER_INSERT_MAIN("INSERT %IGNORE INTO player(playerName, playerUUID, locale, banList, resetAttempts) VALUES (:playerName, :playerUUID, :locale, :banList, :resetLeft)"),
     PLAYER_INSERT_DATA("INSERT %IGNORE INTO challenges(player, challengesList, challengesTimes) VALUES (:playerName, :challengesList, :challengesTimes)"),
 
+    TABLE_CACHE_UPDATE("UPDATE cacheMetadata SET dbVersion = :dbVersion WHERE cacheUniqueId = :cacheUniqueId"),
     ISLAND_UPDATE_MAIN("UPDATE island SET islandId = :islandId, gridPosition = :gridPos, spawnPosition = :spawnPos, gridSize = :gridSize, levelName = :levelName, playerName = :plotOwner, islandName = :islandName WHERE islandUniqueId = :islandUniqueId"),
     ISLAND_UPDATE_DATA("UPDATE islandData SET biome = :plotBiome, locked = :isLocked, protectionData = :protectionData, levelHandicap = :levelHandicap WHERE dataId = :islandUniqueId"),
     PLAYER_UPDATE_MAIN("UPDATE player SET locale = :locale, banList = :banList, resetAttempts = :resetLeft, islandLevels = :islandLevels WHERE playerName = :playerName"),

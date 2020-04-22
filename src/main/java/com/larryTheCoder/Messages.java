@@ -28,7 +28,7 @@ package com.larryTheCoder;
 
 import cn.nukkit.Player;
 import cn.nukkit.utils.Config;
-import com.larryTheCoder.player.CoopData;
+import com.larryTheCoder.cache.CoopData;
 import com.larryTheCoder.utils.Utils;
 
 import java.util.ArrayList;

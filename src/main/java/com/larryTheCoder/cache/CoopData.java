@@ -25,9 +25,10 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.larryTheCoder.player;
+package com.larryTheCoder.cache;
 
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.player.TeamManager;
 
 import java.util.ArrayList;
 import java.util.List;

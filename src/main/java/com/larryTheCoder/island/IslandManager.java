@@ -42,7 +42,7 @@ import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.database.TableSet;
 import com.larryTheCoder.events.IslandCreateEvent;
-import com.larryTheCoder.player.CoopData;
+import com.larryTheCoder.cache.CoopData;
 import com.larryTheCoder.task.DeleteIslandTask;
 import com.larryTheCoder.task.SimpleFancyTitle;
 import com.larryTheCoder.task.TaskManager;

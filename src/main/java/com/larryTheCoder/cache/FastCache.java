@@ -61,6 +61,7 @@ public class FastCache {
 
     // Since ArrayList is modifiable, there's no need to replace the cache again into the list.
     private final List<FastCacheData> dataCache = new ArrayList<>();
+    private final List<RelationsFastData> relationData = new ArrayList<>();
     private final List<String> uniqueId = new ArrayList<>();
 
     private Config config;
@@ -202,8 +203,31 @@ public class FastCache {
         });
     }
 
+    /**
+     * Get all of the relations in which the player itself
+     * from this exact position.
+     *
+     * @param pos The position of the level.
+     * @return The list of players that are related to this island.
+     */
+    public List<String> getRelations(Position pos) {
+        int id = plugin.getIslandManager().generateIslandKey(pos.getFloorX(), pos.getFloorZ(), pos.getLevel().getName());
 
-    public boolean containsId(String value){
+        RelationsFastData data = relationData.stream().filter(i -> i.islandUniqueId == id).findFirst().orElse(null);
+        if (data == null) {
+            // Check again this island, the cache might not have yet loaded.
+            if (getIslandData(pos) != null) {
+                data = relationData.stream().filter(i -> i.islandUniqueId == id).findFirst().orElse(null);
+                if (data != null) return data.islandMembers;
+            }
+
+            return new ArrayList<>();
+        }
+
+        return data.islandMembers;
+    }
+
+    public boolean containsId(String value) {
         return uniqueId.contains(value);
     }
 
@@ -606,16 +630,28 @@ public class FastCache {
         List<IslandData> islandList = new ArrayList<>();
 
         for (Row o : data) {
-            List<Row> row = connection.createQuery(FETCH_ISLAND_DATA.getQuery())
+            //relationData
+            List<Row> sharedRows = connection.createQuery(FETCH_ISLAND_DATA.getQuery())
                     .addParameter("islandUniquePlotId", o.getInteger("islandUniqueId"))
                     .executeAndFetchTable().rows();
 
-            if (row.isEmpty()) {
-                islandList.add(IslandData.fromRows(o));
-                continue;
+            IslandData pd;
+            if (sharedRows.isEmpty()) {
+                pd = IslandData.fromRows(o);
+            } else {
+                pd = IslandData.fromRows(o, sharedRows.get(0));
             }
 
-            islandList.add(IslandData.fromRows(o, row.get(0)));
+            sharedRows = connection.createQuery(FETCH_RELATION_DATA.getQuery())
+                    .addParameter("islandId", o.getInteger("islandUniqueId"))
+                    .executeAndFetchTable().rows();
+
+            if (!sharedRows.isEmpty()) {
+                pd.loadRelationData(sharedRows.get(0));
+            } else {
+                islandList.add(pd);
+            }
+
         }
 
         return islandList;
@@ -643,7 +679,6 @@ public class FastCache {
     }
 
     public void clearSavedCaches() {
-
         synchronized (dataCache) {
             dataCache.clear();
         }
@@ -741,5 +776,20 @@ public class FastCache {
         public String getDataIdentifier() {
             return ownedBy;
         }
+    }
+
+    /**
+     * Contains a Coop, or known as Relations Islands data
+     * This methods shares distinct information about the island data
+     * and its ownership between island and owner.
+     */
+    private static class RelationsFastData {
+
+        public int islandUniqueId;
+
+        public String islandLeader;
+        public List<String> islandMembers;
+
+
     }
 }

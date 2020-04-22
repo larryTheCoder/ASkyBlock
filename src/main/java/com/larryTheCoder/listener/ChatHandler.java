@@ -34,7 +34,7 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.player.CoopData;
+import com.larryTheCoder.cache.CoopData;
 import com.larryTheCoder.utils.Settings;
 
 import java.util.List;

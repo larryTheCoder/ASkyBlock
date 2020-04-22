@@ -32,6 +32,7 @@ import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.cache.CoopData;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Utils;
 
@@ -185,7 +186,7 @@ public class TeamManager {
         return true;
     }
 
-    void storeCoopData(CoopData pd) {
+    public void storeCoopData(CoopData pd) {
         dataList.put(pd.getLeaderName().toLowerCase(), pd);
     }
 

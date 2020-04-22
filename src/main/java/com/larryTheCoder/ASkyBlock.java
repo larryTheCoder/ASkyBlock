@@ -27,7 +27,6 @@
 package com.larryTheCoder;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.generator.Generator;
@@ -67,8 +66,10 @@ import org.sql2o.data.Table;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 import static com.larryTheCoder.database.TableSet.FETCH_WORLDS;
 import static com.larryTheCoder.database.TableSet.WORLDS_INSERT;
@@ -115,17 +116,22 @@ public class ASkyBlock extends ASkyBlockAPI {
         Generator.addGenerator(SkyBlockGenerator.class, "island", SkyBlockGenerator.TYPE_SKYBLOCK);
         // Register TaskManager
         TaskManager.IMP = new TaskManager();
+
+        // Then we initialize database.
+        disabled = !initDatabase();
     }
 
     @Override
     public void onEnable() {
         // A Simple issue could cause a huge problem
-        if (disabled || !initDatabase()) {
+        if (disabled) {
+            getServer().getPluginManager().disablePlugin(this);
+            getServer().getLogger().info(getPrefix() + "§cRecent exceptions from database class disabled this plugin functionality.");
             return;
         }
 
         // Wohooo! Fast! Unique and Colorful!
-        generateLevel(); // Regenerate The world
+        generateLevel();
         getServer().getLogger().info(getPrefix() + "§7Loading ASkyBlock - Bedrock Edition (API 30)");
 
         // Only defaults
@@ -137,15 +143,17 @@ public class ASkyBlock extends ASkyBlockAPI {
 
     @Override
     public void onDisable() {
-        Utils.send("&7Saving all island framework...");
+        if (!disabled) {
+            Utils.send("&7Saving all island framework...");
 
-        saveLevel(true);
-        getFastCache().shutdownCache();
-        getDatabase().shutdownDB();
-        getMessages().saveMessages();
-        LavaCheck.clearStats();
-        //TopTen.topTenSave();
-        getTManager().saveData();
+            saveLevel(true);
+            getFastCache().shutdownCache();
+            getDatabase().shutdownDB();
+            getMessages().saveMessages();
+            LavaCheck.clearStats();
+            //TopTen.topTenSave();
+            getTManager().saveData();
+        }
 
         Utils.send("&cASkyBlock has been successfully disabled. Goodbye!");
     }
@@ -172,7 +180,7 @@ public class ASkyBlock extends ASkyBlockAPI {
             database = new DatabaseManager(dbConfig);
 
             return true;
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
             return false;
         }
@@ -282,13 +290,6 @@ public class ASkyBlock extends ASkyBlockAPI {
     }
 
     private void generateLevel() {
-        if (!Server.getInstance().isLevelGenerated("SkyBlock")) {
-            Server.getInstance().generateLevel("SkyBlock", 0, SkyBlockGenerator.class);
-        }
-        if (!Server.getInstance().isLevelLoaded("SkyBlock")) {
-            Server.getInstance().loadLevel("SkyBlock");
-        }
-
         database.pushQuery((connection) -> {
             HashMap<Integer, String> levels = new HashMap<>();
             try (Query query = connection.createQuery(FETCH_WORLDS.getQuery())) {
@@ -404,6 +405,10 @@ public class ASkyBlock extends ASkyBlockAPI {
      * @param showEnd Check if there should be a stop message
      */
     public void saveLevel(boolean showEnd) {
+        if (disabled) {
+            return;
+        }
+
         if (showEnd) Utils.send("&eSaving worlds...");
 
         database.pushQuery((connection) -> {

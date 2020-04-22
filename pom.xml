@@ -68,10 +68,10 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-			<groupId>me.lucko.luckperms</groupId>
-			<artifactId>luckperms-api</artifactId>
-			<version>4.3</version>
-		</dependency>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-api</artifactId>
+            <version>4.3</version>
+        </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
@@ -144,7 +144,8 @@
                             <include>org.json:*</include>
                         </includes>
                     </artifactSet>
-                    <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
+                    <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml
+                    </dependencyReducedPomLocation>
                 </configuration>
             </plugin>
             <plugin>
@@ -167,7 +168,8 @@
                     <dateFormatTimeZone>${user.timezone}</dateFormatTimeZone>
                     <verbose>true</verbose>
                     <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git-sb.properties</generateGitPropertiesFilename>
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git-sb.properties
+                    </generateGitPropertiesFilename>
                     <format>properties</format>
                     <skipPoms>true</skipPoms>
                     <injectAllReactorProjects>false</injectAllReactorProjects>
