@@ -17,22 +17,28 @@ welcome you to help us code. This project is not owned by
 [GLaDOS](https://en.wikipedia.org/wiki/GLaDOS) so we cannot just do
 everything you asked.
 
-Alright so we are between banks here, so make those cheque into cash,
+So anyway, we're between banks right now, just make those checks out to cash,
 into my PayPal account.
-
-Build JAR file
--------------
-- `git submodule update --init`
-- `mvn clean package`
-
-The compiled JAR can be found in the `target/` directory.
 
 Installation
 -------------
-We recommended to use latest DbLib plugin.
+To install this plugin, you must at least have [DbLib](https://nukkitx.com/resources/dblib.12) plugin installed.
+Therefore, you may download the latest version of ASkyBlock in my [Jenkins-CI](https://jenkins.potatohome.xyz/job/ASkyBlock/) and drop both DbLib and ASkyBlock files into `/plugins` folder in your server.
 
-* DbLib
-* EconomyAPI
+Features
+-------------
+* Asynchronous island operations, there is no lag guarantee.
+* Fantastic Gridding Technique proposed by tastybento
+* Safe teleportation and is guarantee that you will not be teleported into lava.
+* Supports many types of island in `.schematic` format.
+* Supports more than 1 world in this plugin.
+* No more 1 island in 1 world, every islands are shared distinctly. ~~[Unlike this plugin](https://github.com/GiantQuartz/SkyBlock)~~
+* Supports Mysql* and Sqlite databases, cleaner and readable database.
+* Island Settings, now you can configure what is needed in your island.
+* Magic cobblestone generator, yes we have that too here.
+* Per world configuration, you can configure your world settings in `world.yml`
+
+*Mysql operations may not be working for now.
 
 License
 ---------
