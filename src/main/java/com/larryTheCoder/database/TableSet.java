@@ -118,6 +118,7 @@ public enum TableSet {
     ISLAND_UPDATE_DATA("UPDATE islandData SET biome = :plotBiome, locked = :isLocked, protectionData = :protectionData, levelHandicap = :levelHandicap WHERE dataId = :islandUniqueId"),
     PLAYER_UPDATE_MAIN("UPDATE player SET locale = :locale, banList = :banList, resetAttempts = :resetLeft, islandLevels = :islandLevels WHERE playerName = :playerName"),
     PLAYER_UPDATE_DATA("UPDATE challenges SET challengesList = :challengesList, challengesTimes = :challengesTimes WHERE player = :playerName"),
+    ISLAND_UPDATE_RELATIONS("UPDATE islandRelations SET islandLeader = :teamName, islandLeader = :leaderName, islandMembers = :members WHERE defaultIsland = :islandUniqueId"),
 
     DELETE_ISLAND_MAIN("DELETE FROM island WHERE (islandUniqueId = :islandUniqueId)"),
     DELETE_ISLAND_DATA("DELETE FROM islandData WHERE (dataId = :islandUniqueId)"),

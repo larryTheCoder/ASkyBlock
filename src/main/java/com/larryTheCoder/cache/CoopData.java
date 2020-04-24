@@ -28,9 +28,13 @@
 package com.larryTheCoder.cache;
 
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.player.TeamManager;
+import com.larryTheCoder.database.DatabaseManager;
+import com.larryTheCoder.database.TableSet;
+import com.larryTheCoder.utils.Utils;
+import lombok.Getter;
+import org.sql2o.Connection;
+import org.sql2o.data.Row;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,51 +42,93 @@ import java.util.List;
  */
 public class CoopData {
 
+    @Getter
+    private final String islandUniqueId;
+
+    @Getter
     private String leaderName;
+    @Getter
     private String teamName;
+    @Getter
     private List<String> members;
 
-    public CoopData(String leaderName, String teamName, ArrayList<String> members) {
-        this.leaderName = leaderName;
-        this.teamName = teamName;
-        this.members = members;
+    public CoopData(Row coopData) {
+        this.islandUniqueId = coopData.getString("defaultIsland");
+        this.leaderName = coopData.getString("islandLeader");
+        this.teamName = coopData.getString("islandLeader");
+        this.members = Utils.stringToArray(coopData.getString("islandMembers"), ", ");
     }
 
-    public String getLeaderName() {
-        return leaderName;
+    /**
+     * Sets this island leader name, this overrides
+     * the original island owner from island data.
+     *
+     * @param playerName The player name.
+     */
+    public void setLeaderName(String playerName) {
+        this.leaderName = playerName;
+
+        updateData();
     }
 
-    public void setLeaderName(String leaderName) {
-        this.leaderName = leaderName;
-        saveData();
-    }
-
-    public String getTeamName() {
-        return teamName;
-    }
-
+    /**
+     * Sets the name for this coop island.
+     * Self-explanatory.
+     *
+     * @param teamName The name of the team.
+     */
     public void setTeamName(String teamName) {
         this.teamName = teamName;
-        saveData();
+
+        updateData();
     }
 
-    public boolean isMember(String name) {
-        return members.contains(name) || name.equalsIgnoreCase(leaderName);
+    /**
+     * Check if the player with this name is a member of this
+     * island relations.
+     *
+     * @param plName The player name itself.
+     * @return {@code true} if the player is the member of this island
+     */
+    public boolean isMember(String plName) {
+        return members.stream().anyMatch(i -> i.equalsIgnoreCase(plName)) || plName.equalsIgnoreCase(leaderName);
     }
 
-    public void addMembers(String members) {
-        this.members.add(members);
-        saveData();
+    /**
+     * Adds a player name into this coop list, the new member will
+     * always be related to this island.
+     *
+     * @param plName self-explanatory
+     */
+    public void addMember(String plName) {
+        this.members.add(plName);
+
+        updateData();
     }
 
-    public void removeMembers(String member) {
+    /**
+     * Removes a player from this coop list.
+     *
+     * @param member self-explanatory
+     */
+    public void removeMember(String member) {
         this.members.remove(member);
-        saveData();
+
+        updateData();
     }
 
-    void saveData() {
-        TeamManager teamData = ASkyBlock.get().getTManager();
-        teamData.storeCoopData(this);
+    private void updateData() {
+        ASkyBlock.get().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
+            @Override
+            public void executeQuery(Connection connection) {
+                connection.createQuery(TableSet.ISLAND_UPDATE_RELATIONS.getQuery())
+                        .addParameter("islandUniqueId", islandUniqueId)
+                        .addParameter("leaderName", leaderName)
+                        .addParameter("teamName", teamName)
+                        .addParameter("members", Utils.arrayToString(members))
+                        .executeUpdate();
+            }
+        });
     }
 
     @Override
@@ -92,9 +138,5 @@ public class CoopData {
         i += teamName.hashCode() / 32;
 
         return i + super.hashCode();
-    }
-
-    public List<String> getMembers() {
-        return members;
     }
 }

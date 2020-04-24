@@ -61,7 +61,6 @@ public class FastCache {
 
     // Since ArrayList is modifiable, there's no need to replace the cache again into the list.
     private final List<FastCacheData> dataCache = new ArrayList<>();
-    private final List<RelationsFastData> relationData = new ArrayList<>();
     private final List<String> uniqueId = new ArrayList<>();
 
     private Config config;
@@ -203,32 +202,32 @@ public class FastCache {
         });
     }
 
+    public boolean containsId(String value) {
+        return uniqueId.contains(value);
+    }
+
     /**
-     * Get all of the relations in which the player itself
-     * from this exact position.
+     * Gets the island relations data for this position,
+     * If there is not relationship with this island, it will return null.
      *
      * @param pos The position of the level.
-     * @return The list of players that are related to this island.
+     * @return The coop data that are related to this island.
      */
-    public List<String> getRelations(Position pos) {
+    public CoopData getRelations(Position pos) {
         int id = plugin.getIslandManager().generateIslandKey(pos.getFloorX(), pos.getFloorZ(), pos.getLevel().getName());
 
-        RelationsFastData data = relationData.stream().filter(i -> i.islandUniqueId == id).findFirst().orElse(null);
+        FastCacheData data = dataCache.stream().filter(i -> i.anyIslandUidMatch(id)).findFirst().orElse(null);
         if (data == null) {
             // Check again this island, the cache might not have yet loaded.
             if (getIslandData(pos) != null) {
-                data = relationData.stream().filter(i -> i.islandUniqueId == id).findFirst().orElse(null);
-                if (data != null) return data.islandMembers;
+                data = dataCache.stream().filter(i -> i.anyIslandUidMatch(id)).findFirst().orElse(null);
+                if (data != null) return data.getIslandByUId(id).getCoopData();
             }
 
-            return new ArrayList<>();
+            return null;
         }
 
-        return data.islandMembers;
-    }
-
-    public boolean containsId(String value) {
-        return uniqueId.contains(value);
+        return data.getIslandByUId(id).getCoopData();
     }
 
     /**
@@ -305,6 +304,79 @@ public class FastCache {
         }
 
         return new ArrayList<>(result.islandData.values());
+    }
+
+    /**
+     * Gets the island relations data for this position,
+     * If there is not relationship with this island, it will return null.
+     *
+     * @param pos          The position of the level.
+     * @param resultOutput The coop data that are related to this island.
+     */
+    public void getRelations(Position pos, Consumer<CoopData> resultOutput) {
+        int id = plugin.getIslandManager().generateIslandKey(pos.getFloorX(), pos.getFloorZ(), pos.getLevel().getName());
+
+        FastCacheData data = dataCache.stream().filter(i -> i.anyIslandUidMatch(id)).findFirst().orElse(null);
+        if (data == null) {
+            // Check again this island, the cache might not have yet loaded.
+            getIslandData(pos, pd -> {
+                if (pd != null) {
+                    FastCacheData rData = dataCache.stream().filter(i -> i.anyIslandUidMatch(id)).findFirst().orElse(null);
+                    if (rData != null) {
+                        resultOutput.accept(rData.getIslandByUId(id).getCoopData());
+                        return;
+                    }
+                }
+
+                resultOutput.accept(null);
+            });
+
+            return;
+        }
+
+        resultOutput.accept(data.getIslandByUId(id).getCoopData());
+    }
+
+    /**
+     * Gets the island relations data for a player,
+     * If there is not relationship with this player, it will return null.
+     *
+     * @param plName       The name of the player itself.
+     * @param resultOutput The coop data that are related to this island.
+     */
+    public void getRelations(String plName, Consumer<CoopData> resultOutput) {
+        FastCacheData data = dataCache.stream().filter(i -> i.getIslandData().values().stream().anyMatch(v -> v.getCoopData().isMember(plName))).findFirst().orElse(null);
+
+        if (data == null) {
+            // Check again this island, the cache might not have yet loaded.
+            getIslandData(plName, pd -> {
+                if (pd != null) {
+                    FastCacheData rData = dataCache.stream().filter(i -> i.getIslandData().values().stream().anyMatch(v -> v.getCoopData().isMember(plName))).findFirst().orElse(null);
+                    if (rData != null) {
+                        IslandData iPlData = rData.getIslandData().values().stream().filter(v -> v.getCoopData().isMember(plName)).findFirst().orElse(null);
+                        if (iPlData == null) {
+                            resultOutput.accept(null);
+                            return;
+                        }
+
+                        resultOutput.accept(iPlData.getCoopData());
+                        return;
+                    }
+                }
+
+                resultOutput.accept(null);
+            });
+
+            return;
+        }
+
+        IslandData iPlData = data.getIslandData().values().stream().filter(v -> v.getCoopData().isMember(plName)).findFirst().orElse(null);
+        if (iPlData == null) {
+            resultOutput.accept(null);
+            return;
+        }
+
+        resultOutput.accept(iPlData.getCoopData());
     }
 
     /**
@@ -648,10 +720,9 @@ public class FastCache {
 
             if (!sharedRows.isEmpty()) {
                 pd.loadRelationData(sharedRows.get(0));
-            } else {
-                islandList.add(pd);
             }
 
+            islandList.add(pd);
         }
 
         return islandList;
@@ -720,8 +791,6 @@ public class FastCache {
             updateTime();
 
             islandData.put(newData.getIslandUniquePlotId(), newData);
-
-            Utils.sendDebug("Adding new island info on " + ownedBy);
         }
 
         void setPlayerData(PlayerData playerData) {
@@ -776,20 +845,5 @@ public class FastCache {
         public String getDataIdentifier() {
             return ownedBy;
         }
-    }
-
-    /**
-     * Contains a Coop, or known as Relations Islands data
-     * This methods shares distinct information about the island data
-     * and its ownership between island and owner.
-     */
-    private static class RelationsFastData {
-
-        public int islandUniqueId;
-
-        public String islandLeader;
-        public List<String> islandMembers;
-
-
     }
 }

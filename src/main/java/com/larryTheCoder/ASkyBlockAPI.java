@@ -28,16 +28,15 @@
 package com.larryTheCoder;
 
 import cn.nukkit.plugin.PluginBase;
+import com.larryTheCoder.cache.FastCache;
+import com.larryTheCoder.cache.inventory.InventorySave;
 import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
+import com.larryTheCoder.island.TeleportLogic;
 import com.larryTheCoder.listener.ChatHandler;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
-import com.larryTheCoder.player.TeamManager;
-import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.schematic.SchematicHandler;
-import com.larryTheCoder.cache.FastCache;
-import com.larryTheCoder.cache.inventory.InventorySave;
 import lombok.Getter;
 
 public class ASkyBlockAPI extends PluginBase {
@@ -54,8 +53,6 @@ public class ASkyBlockAPI extends PluginBase {
     protected GridManager grid;
     @Getter
     protected InventorySave inventory;
-    @Getter
-    protected TeamManager tManager;
     @Getter
     protected TeleportLogic teleportLogic;
     @Getter

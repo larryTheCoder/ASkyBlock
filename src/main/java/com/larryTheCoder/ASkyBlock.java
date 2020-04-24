@@ -45,14 +45,13 @@ import com.larryTheCoder.database.config.MySQLConfig;
 import com.larryTheCoder.database.config.SQLiteConfig;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
+import com.larryTheCoder.island.TeleportLogic;
 import com.larryTheCoder.listener.ChatHandler;
 import com.larryTheCoder.listener.IslandListener;
 import com.larryTheCoder.listener.LavaCheck;
 import com.larryTheCoder.listener.PlayerEvent;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.locales.ASlocales;
-import com.larryTheCoder.player.TeamManager;
-import com.larryTheCoder.player.TeleportLogic;
 import com.larryTheCoder.schematic.SchematicHandler;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.updater.Updater;
@@ -130,15 +129,24 @@ public class ASkyBlock extends ASkyBlockAPI {
             return;
         }
 
-        // Wohooo! Fast! Unique and Colorful!
-        generateLevel();
-        getServer().getLogger().info(getPrefix() + "§7Loading ASkyBlock - Bedrock Edition (API 30)");
+        try {
+            // Wohooo! Fast! Unique and Colorful!
+            generateLevel();
+            getServer().getLogger().info(getPrefix() + "§7Loading ASkyBlock - Bedrock Edition (API 30)");
 
-        // Only defaults
-        initIslands();
-        registerObject();
+            // Only defaults
+            initIslands();
+            registerObject();
 
-        getServer().getLogger().info(getPrefix() + "§aASkyBlock has been successfully enabled!");
+            getServer().getLogger().info(getPrefix() + "§aASkyBlock has been successfully enabled!");
+        } catch (Exception err) {
+            err.printStackTrace();
+
+            disabled = true;
+
+            getServer().getPluginManager().disablePlugin(this);
+            getServer().getLogger().info(getPrefix() + "§cRecent exceptions from SB-Core disabled this plugin functionality.");
+        }
     }
 
     @Override
@@ -152,7 +160,6 @@ public class ASkyBlock extends ASkyBlockAPI {
             getMessages().saveMessages();
             LavaCheck.clearStats();
             //TopTen.topTenSave();
-            getTManager().saveData();
         }
 
         Utils.send("&cASkyBlock has been successfully disabled. Goodbye!");
@@ -248,7 +255,6 @@ public class ASkyBlock extends ASkyBlockAPI {
 
         islandManager = new IslandManager(this);
         grid = new GridManager(this);
-        tManager = new TeamManager(this);
         inventory = new InventorySave();
     }
 

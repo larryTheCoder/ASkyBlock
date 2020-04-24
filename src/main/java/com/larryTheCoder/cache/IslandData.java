@@ -72,7 +72,8 @@ public class IslandData implements Cloneable {
     private int levelHandicap = 0;
 
     // CoopDatabase
-    private IslandCoop coopData;
+    @Getter
+    private CoopData coopData = null;
 
     // IslandSettings
     private IslandSettings settings = new IslandSettings(this);
@@ -136,7 +137,7 @@ public class IslandData implements Cloneable {
     }
 
     void loadRelationData(Row relationData) {
-
+        this.coopData = new CoopData(relationData);
     }
 
     /**
@@ -391,12 +392,5 @@ public class IslandData implements Cloneable {
                         .executeUpdate();
             }
         });
-    }
-
-    public static class IslandCoop {
-
-        public IslandCoop(Row coopRows) {
-
-        }
     }
 }

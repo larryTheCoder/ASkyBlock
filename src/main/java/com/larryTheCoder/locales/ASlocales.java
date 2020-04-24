@@ -184,6 +184,7 @@ public final class ASlocales {
     public String acceptedTo = "§e[player] has accepted your invitation!";
     public String errorNotPending = "§cNo invitation pending! Try again later";
     public String errorNotPending2 = "§cNo invite sent by [player]! Try again later";
+    public String errorIslandRelation = "§cPlease leave any of your coop island to create a new island.";
     private String errorCommandNotReady = "§cYou can't use that command right now.";
     private String errorTooLong = "§cToo long. Maximum size is [length].";
     private String errorTooShort = "§cToo short. Minimum size is [length].";

@@ -85,7 +85,7 @@ public class Updater {
                 TaskManager.runTask(() -> {
                     updateStatus = UPDATE_FAILED;
 
-                    Utils.send("&cFailed to check for update.");
+                    Utils.send("&cFailed to check for an update.");
                 });
                 return;
             }

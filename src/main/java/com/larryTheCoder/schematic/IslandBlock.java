@@ -285,7 +285,8 @@ class IslandBlock extends BlockMinecraftId {
                 String[] currentText = signText;
 
                 boolean isCleanLine = Arrays.stream(signText).allMatch(i -> TextFormat.clean(i).replace("\n", "").isEmpty());
-                if (isCleanLine) currentText = ASkyBlock.get().getSettings(blockLoc.getLevel().getName()).getSignConfig();
+                if (isCleanLine)
+                    currentText = ASkyBlock.get().getSettings(blockLoc.getLevel().getName()).getSignConfig();
 
                 String[] replacedString = new String[4];
                 for (String result : currentText) {

@@ -31,7 +31,6 @@ import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerDeathEvent;
-import cn.nukkit.event.weather.WeatherChangeEvent;
 import cn.nukkit.inventory.Inventory;
 import cn.nukkit.item.Item;
 import com.larryTheCoder.ASkyBlock;
@@ -133,19 +132,5 @@ class AcidEffect implements Listener {
     public void onPlayerDeath(PlayerDeathEvent e) {
         burningPlayers.remove(e.getEntity());
         wetPlayers.remove(e.getEntity());
-    }
-
-    /**
-     * Tracks weather changes and acid rain
-     *
-     * @param e
-     */
-    @EventHandler(priority = EventPriority.NORMAL)
-    public void onWeatherChange(final WeatherChangeEvent e) {
-        // Check that they are in the ASkyBlock world
-        if (!plugin.getLevel().contains(e.getLevel().getName())) {
-            return;
-        }
-        boolean isRaining = e.toWeatherState();
     }
 }

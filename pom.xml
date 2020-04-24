@@ -47,7 +47,7 @@
         <dependency>
             <groupId>cn.nukkit</groupId>
             <artifactId>nukkit</artifactId>
-            <version>1.0-20200218.200014-748</version>
+            <version>1.0-20200423.205734-801</version>
         </dependency>
 
         <dependency>

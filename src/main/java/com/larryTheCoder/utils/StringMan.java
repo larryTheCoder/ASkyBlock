@@ -207,8 +207,8 @@ public class StringMan {
             n = m;
             m = t.length();
         }
-        int p[] = new int[n + 1];
-        int d[] = new int[n + 1];
+        int[] p = new int[n + 1];
+        int[] d = new int[n + 1];
         int i;
         for (i = 0; i <= n; i++) {
             p[i] = i;

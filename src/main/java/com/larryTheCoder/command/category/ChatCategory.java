@@ -31,7 +31,6 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.player.TeamManager;
 
 import java.util.Arrays;
 import java.util.List;
@@ -97,11 +96,14 @@ public class ChatCategory extends SubCategory {
                     break;
                 }
 
-                TeamManager manager = getPlugin().getTManager();
-                if (manager.hasTeam(p.getName())) {
+                getPlugin().getFastCache().getRelations(p.getName(), pd -> {
+                    if (pd == null) {
+                        return;
+                    }
+
                     // Check if team members are online
                     boolean online = false;
-                    for (String teamMember : manager.getPlayerCoop(p.getName()).getMembers()) {
+                    for (String teamMember : pd.getMembers()) {
                         if (!teamMember.equals(p.getName()) && getPlugin().getServer().getPlayer(teamMember) != null) {
                             online = true;
                         }
@@ -110,8 +112,9 @@ public class ChatCategory extends SubCategory {
                         p.sendMessage(getPrefix() + getLocale(p).teamChatNoTeamAround);
                         p.sendMessage(getPrefix() + getLocale(p).teamChatStatusOff);
                         getPlugin().getChatHandler().unSetPlayer(p);
-                        break;
+                        return;
                     }
+
                     if (getPlugin().getChatHandler().isTeamChat(p)) {
                         // Toggle
                         p.sendMessage(getPrefix() + getLocale(p).teamChatStatusOff);
@@ -120,7 +123,7 @@ public class ChatCategory extends SubCategory {
                         p.sendMessage(getPrefix() + getLocale(p).teamChatStatusOn);
                         getPlugin().getChatHandler().setPlayer(p);
                     }
-                }
+                });
                 break;
             case "messages":
                 List<String> list = getPlugin().getMessages().getMessages(p.getName());

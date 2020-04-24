@@ -28,6 +28,7 @@
 package org.jnbt;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * A class which holds constant values.
@@ -39,7 +40,7 @@ public final class NBTConstants {
     /**
      * The character set used by NBT (UTF-8).
      */
-    public static final Charset CHARSET = Charset.forName("UTF-8");
+    public static final Charset CHARSET = StandardCharsets.UTF_8;
 
     /**
      * Tag type constants.

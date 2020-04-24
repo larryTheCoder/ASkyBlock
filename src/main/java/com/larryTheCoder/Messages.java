@@ -28,7 +28,6 @@ package com.larryTheCoder;
 
 import cn.nukkit.Player;
 import cn.nukkit.utils.Config;
-import com.larryTheCoder.cache.CoopData;
 import com.larryTheCoder.utils.Utils;
 
 import java.util.ArrayList;
@@ -38,7 +37,7 @@ import java.util.List;
 
 /**
  * Handles offline messaging to players and teams
- * <p>
+ *
  * @author tastybento
  * @author: larryTheCoder
  */
@@ -138,17 +137,7 @@ public class Messages {
      * @param message
      */
     public void tellOfflineTeam(String player, String message) {
-        if (!plugin.getTManager().hasTeam(player)) {
-            return;
-        }
-        CoopData pd = plugin.getTManager().getLeaderCoop(player);
-        List<String> teamMembers = pd.getMembers();
-        for (String member : teamMembers) {
-            if (plugin.getServer().getPlayer(player) == null) {
-                // Offline player
-                setMessage(member, message);
-            }
-        }
+
     }
 
     /**
@@ -158,20 +147,7 @@ public class Messages {
      * @param message
      */
     public void tellTeam(String player, String message) {
-        // getLogger().info("DEBUG: tell offline team called");
-        if (!plugin.getTManager().hasTeam(player)) {
-            // getLogger().info("DEBUG: player is not in a team");
-            return;
-        }
-        CoopData pd = plugin.getTManager().getLeaderCoop(player);
-        List<String> teamMembers = pd.getMembers();
-        for (String member : teamMembers) {
-            // getLogger().info("DEBUG: trying String " + member.toString());
-            if (!member.equals(player) && plugin.getServer().getPlayer(member) != null) {
-                // Online player
-                plugin.getServer().getPlayer(member).sendMessage(message);
-            }
-        }
+
     }
 
     /**

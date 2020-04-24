@@ -42,10 +42,10 @@ import cn.nukkit.event.player.*;
 import cn.nukkit.level.Location;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.cache.CoopData;
 import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.events.IslandEnterEvent;
 import com.larryTheCoder.events.IslandExitEvent;
-import com.larryTheCoder.player.TeamManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.SettingsFlag;
 import com.larryTheCoder.utils.Utils;
@@ -102,14 +102,15 @@ public class IslandListener implements Listener {
         if (player == null) {
             return actionAllowed(location, flag);
         }
+
         // This permission bypasses protection
         if (player.isOp() || player.hasPermission("is.mod.bypassprotect")) {
             return true;
         }
 
         IslandData island = plugin.getGrid().getProtectedIslandAt(location);
-        TeamManager pd = plugin.getTManager();
-        if (island != null && (island.getIgsSettings().getIgsFlag(flag) || (pd.getLeaderCoop(island.getPlotOwner()) == null || pd.getLeaderCoop(island.getPlotOwner()).isMember(player.getName())))) {
+        CoopData pd = plugin.getFastCache().getRelations(location);
+        if (island != null && (island.getIgsSettings().getIgsFlag(flag) || (pd != null && pd.isMember(player.getName())))) {
             return true;
         }
 
@@ -199,7 +200,7 @@ public class IslandListener implements Listener {
                 if (!p.isOp() && !p.hasPermission("is.mod.bypassprotect") && !p.hasPermission("is.mod.bypasslock")) {
                     if (p.riding != null) {
                         // Dismount
-                        ((EntityVehicle) p.riding).mountEntity(p);
+                        p.riding.mountEntity(p);
                         e.setCancelled();
                     }
                     // TODO: Find a best way to back off the player from the locked island

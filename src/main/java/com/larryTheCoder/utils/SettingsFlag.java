@@ -223,7 +223,7 @@ public enum SettingsFlag {
      * Create a value for the enum
      *
      * @param name The name for the enum
-     * @param id The id for the enum
+     * @param id   The id for the enum
      */
     SettingsFlag(String name, int id) {
         this.name = name;

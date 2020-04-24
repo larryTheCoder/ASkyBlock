@@ -298,37 +298,43 @@ public class ServerPanel implements Listener {
     public void addIslandFormOverlay(Player player) {
         // First check the availability for worlds
         ArrayList<String> worldName = plugin.getLevels();
-        // TODO: Check max homes
 
-        plugin.getFastCache().getIslandsFrom(player.getName(), result -> {
-            if (result == null) {
-                player.sendMessage(getLocale(player).errorFailedCritical);
-
+        plugin.getFastCache().getRelations(player.getName(), relations -> {
+            if (relations != null) {
+                player.sendMessage(getLocale(player).errorIslandRelation);
                 return;
             }
-            int homes = result.size();
 
-            FormWindowCustom panelIsland = new FormWindowCustom("Island Menu");
+            plugin.getFastCache().getIslandsFrom(player.getName(), result -> {
+                if (result == null) {
+                    player.sendMessage(getLocale(player).errorFailedCritical);
 
-            panelIsland.addElement(new ElementLabel(getLocale(player).panelIslandHeader));
-            panelIsland.addElement(new ElementInput(getLocale(player).panelIslandHome, "", "Home #" + (homes + 1)));
-            if (worldName.size() > 1) {
-                panelIsland.addElement(new ElementDropdown(getLocale(player).panelIslandWorld, worldName));
-            } else {
-                defaultLevel.put(player, worldName.remove(0));
-            }
+                    return;
+                }
+                int homes = result.size(); // TODO: Check player homes
 
-            SchematicHandler bindTo = ASkyBlock.get().getSchematics();
-            if (!bindTo.isUseDefaultGeneration()) {
-                panelIsland.addElement(new ElementDropdown(getLocale(player).panelIslandTemplate, bindTo.getSchemaList(), bindTo.getDefaultIsland() - 1));
-            }
+                FormWindowCustom panelIsland = new FormWindowCustom("Island Menu");
 
-            panelIsland.addElement(new ElementLabel(getLocale(player).panelIslandDefault));
-            panelIsland.addElement(new ElementToggle("Locked", false));
-            panelIsland.addElement(new ElementToggle("Teleport to world", true));
+                panelIsland.addElement(new ElementLabel(getLocale(player).panelIslandHeader));
+                panelIsland.addElement(new ElementInput(getLocale(player).panelIslandHome, "", "Home #" + (homes + 1)));
+                if (worldName.size() > 1) {
+                    panelIsland.addElement(new ElementDropdown(getLocale(player).panelIslandWorld, worldName));
+                } else {
+                    defaultLevel.put(player, worldName.remove(0));
+                }
 
-            int id = player.showFormWindow(panelIsland);
-            panelDataId.put(id, PanelType.TYPE_ISLAND);
+                SchematicHandler bindTo = ASkyBlock.get().getSchematics();
+                if (!bindTo.isUseDefaultGeneration()) {
+                    panelIsland.addElement(new ElementDropdown(getLocale(player).panelIslandTemplate, bindTo.getSchemaList(), bindTo.getDefaultIsland() - 1));
+                }
+
+                panelIsland.addElement(new ElementLabel(getLocale(player).panelIslandDefault));
+                panelIsland.addElement(new ElementToggle("Locked", false));
+                panelIsland.addElement(new ElementToggle("Teleport to world", true));
+
+                int id = player.showFormWindow(panelIsland);
+                panelDataId.put(id, PanelType.TYPE_ISLAND);
+            });
         });
     }
 

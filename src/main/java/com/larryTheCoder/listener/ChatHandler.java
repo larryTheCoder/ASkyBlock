@@ -34,11 +34,9 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.cache.CoopData;
 import com.larryTheCoder.utils.Settings;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -49,20 +47,12 @@ public class ChatHandler implements Listener {
 
     private final ASkyBlock plugin;
     private final ConcurrentHashMap<Player, String> playerLevels;
-    private final ConcurrentHashMap<UUID, String> playerChallengeLevels;
     private final ConcurrentHashMap<Player, Boolean> teamChatUsers;
 
     public ChatHandler(ASkyBlock plugin) {
         this.plugin = plugin;
         this.playerLevels = new ConcurrentHashMap<>();
         this.teamChatUsers = new ConcurrentHashMap<>();
-        this.playerChallengeLevels = new ConcurrentHashMap<>();
-        // Add all online player Levels
-        plugin.getServer().getOnlinePlayers().values()
-                .stream()
-                .peek((player) -> playerLevels.put(player, "0")) // String.valueOf(plugin.getIslandLevel(player))))
-                .forEachOrdered((player) -> playerChallengeLevels.put(player.getUniqueId(), ""));
-
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -85,36 +75,40 @@ public class ChatHandler implements Listener {
 
     private void teamChat(PlayerChatEvent event, String message) {
         Player player = event.getPlayer();
-        String playerUUID = player.getName();
-        // Is team chat on for this player
-        // Find out if this player is in a team (should be if team chat is on)
+        String playerName = player.getName();
+
         // TODO: remove when player resets or leaves team
-        CoopData pd = plugin.getTManager().getPlayerCoop(player.getName());
-        if (!pd.getMembers().isEmpty()) {
-            List<String> teams = pd.getMembers();
-            // Tell only the team members if they are online
-            boolean online = false;
-            for (String teamMembers : teams) {
-                Player teamPlayer = plugin.getServer().getPlayer(teamMembers);
-                if (teamPlayer != null) {
-                    teamPlayer.sendMessage(plugin.getPrefix() + message);
-                    if (!teamMembers.equals(playerUUID)) {
-                        online = true;
+        plugin.getFastCache().getRelations(player.getName(), pd -> {
+            if (pd == null) {
+                return;
+            }
+
+            if (!pd.getMembers().isEmpty()) {
+                List<String> teams = pd.getMembers();
+                // Tell only the team members if they are online
+                boolean online = false;
+                for (String teamMembers : teams) {
+                    Player teamPlayer = plugin.getServer().getPlayer(teamMembers);
+                    if (teamPlayer != null) {
+                        teamPlayer.sendMessage(plugin.getPrefix() + message);
+                        if (!teamMembers.equals(playerName)) {
+                            online = true;
+                        }
                     }
                 }
-            }
-            // todo spy function
-            if (!online) {
+
+                if (!online) {
+                    player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getLocale(player).teamChatNoTeamAround);
+                    player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getLocale(player).teamChatStatusOff);
+                    teamChatUsers.remove(player);
+                }
+            } else {
                 player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getLocale(player).teamChatNoTeamAround);
                 player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getLocale(player).teamChatStatusOff);
+                // Not in a team any more so delete
                 teamChatUsers.remove(player);
             }
-        } else {
-            player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getLocale(player).teamChatNoTeamAround);
-            player.sendMessage(plugin.getPrefix() + TextFormat.RED + plugin.getLocale(player).teamChatStatusOff);
-            // Not in a team any more so delete
-            teamChatUsers.remove(player);
-        }
+        });
     }
 
     /**

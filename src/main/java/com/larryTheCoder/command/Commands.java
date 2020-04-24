@@ -134,14 +134,14 @@ public class Commands extends PluginCommand<ASkyBlock> {
                 commandCategory.forEach(i -> i.getCommands().stream()
                         .filter(h -> i.canUse(sender, h) && i.getDescription(h) != null && i.baseCommands().contains("is"))
                         .forEach(a -> {
+                            String param = i.getParameters(a);
+                            if (param == null || param.isEmpty()) {
+                                helpList.add(String.format("&6/%s %s &l&5»&r&f %s", Utils.compactSmall(i.baseCommands().toArray(new String[0])), a, i.getDescription(a)));
+                            } else {
+                                helpList.add(String.format("&6/%s %s &a%s &l&5»&r&f %s", Utils.compactSmall(i.baseCommands().toArray(new String[0])), a, param, i.getDescription(a)));
+                            }
+                        }));
 
-                    String param = i.getParameters(a);
-                    if (param == null || param.isEmpty()) {
-                        helpList.add(String.format("&6/%s %s &l&5»&r&f %s", Utils.compactSmall(i.baseCommands().toArray(new String[0])), a, i.getDescription(a)));
-                    } else {
-                        helpList.add(String.format("&6/%s %s &a%s &l&5»&r&f %s", Utils.compactSmall(i.baseCommands().toArray(new String[0])), a, param, i.getDescription(a)));
-                    }
-                }));
                 helpList.add("&6/isa help &l&5»&r&f Special command for admins to control other islands");
 
                 int totalPage = helpList.size() % pageHeight == 0 ? helpList.size() / pageHeight : helpList.size() / pageHeight + 1;

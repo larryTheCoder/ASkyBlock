@@ -36,13 +36,13 @@ import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.cache.CoopData;
 import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.cache.builder.IslandDataBuilder;
 import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.database.TableSet;
 import com.larryTheCoder.events.IslandCreateEvent;
-import com.larryTheCoder.cache.CoopData;
 import com.larryTheCoder.task.DeleteIslandTask;
 import com.larryTheCoder.task.SimpleFancyTitle;
 import com.larryTheCoder.task.TaskManager;
@@ -336,22 +336,24 @@ public class IslandManager {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorWrongWorld);
             return;
         }
-        final CoopData coopData = plugin.getTManager().getLeaderCoop(p.getName());
-        final IslandData pd = plugin.getFastCache().getIslandData(loc);
-        if (pd == null) {
-            p.sendMessage(TextFormat.LIGHT_PURPLE + plugin.getLocale(p).errorNotOnIsland);
-            return;
-        }
-        p.sendMessage(TextFormat.LIGHT_PURPLE + "- Island Owner: " + TextFormat.YELLOW + pd.getPlotOwner());
-        String strMembers;
-        if (coopData == null || coopData.getMembers().isEmpty()) {
-            strMembers = "none";
-        } else {
-            strMembers = Utils.arrayToString(coopData.getMembers());
-        }
 
-        p.sendMessage(TextFormat.LIGHT_PURPLE + "- Members: " + TextFormat.AQUA + strMembers);
-        p.sendMessage(TextFormat.LIGHT_PURPLE + "- Flags: " + TextFormat.GOLD + "Allow Teleport: " + pd.isLocked());
+        plugin.getFastCache().getIslandData(loc, pd -> plugin.getFastCache().getRelations(loc, coopData -> {
+            if (pd == null) {
+                p.sendMessage(TextFormat.LIGHT_PURPLE + plugin.getLocale(p).errorNotOnIsland);
+                return;
+            }
+
+            p.sendMessage(TextFormat.LIGHT_PURPLE + "- Island Owner: " + TextFormat.YELLOW + pd.getPlotOwner());
+            String strMembers;
+            if (coopData == null || coopData.getMembers().isEmpty()) {
+                strMembers = "none";
+            } else {
+                strMembers = Utils.arrayToString(coopData.getMembers());
+            }
+
+            p.sendMessage(TextFormat.LIGHT_PURPLE + "- Members: " + TextFormat.AQUA + strMembers);
+            p.sendMessage(TextFormat.LIGHT_PURPLE + "- Flags: " + TextFormat.GOLD + "Allow Teleport: " + pd.isLocked());
+        }));
     }
 
     public void teleportPlayer(Player p, String arg) {
@@ -391,7 +393,7 @@ public class IslandManager {
         Location local = new Location(loc.x, loc.y, loc.z, player.getLevel());
         // Get the player's island from the grid if it exists
         IslandData island = plugin.getFastCache().getIslandData(local);
-        CoopData pd = plugin.getTManager().getLeaderCoop(island.getPlotOwner());
+        CoopData pd = plugin.getFastCache().getRelations(local);
         // On an island in the grid
         // In a protected zone but is on the list of acceptable players
         // Otherwise return false

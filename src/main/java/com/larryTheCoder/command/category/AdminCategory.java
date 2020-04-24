@@ -30,7 +30,6 @@ import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.listener.invitation.Invitation;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
-import com.larryTheCoder.player.TeamManager;
 
 import java.util.Arrays;
 import java.util.List;
@@ -129,7 +128,7 @@ public class AdminCategory extends SubCategory {
 
                 invite.denyInvitation();
                 break;
-            case "locale":
+            case "invite":
                 if (args.length != 2) {
                     break;
                 }
@@ -147,16 +146,13 @@ public class AdminCategory extends SubCategory {
                     break;
                 }
 
-                // This checks either the player already set into a team
-                // or not.
-                TeamManager manager = getPlugin().getTManager();
-                if (manager.hasTeam(inviter.getName())) {
-                    sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
-                    break;
-                }
-
-                // Now we add the invitation into list.
-                getPlugin().getInvitationHandler().addInvitation(p, inviter);
+                getPlugin().getFastCache().getRelations(p.getName(), data -> {
+                    if (data == null) {
+                        getPlugin().getInvitationHandler().addInvitation(p, inviter);
+                    } else {
+                        sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
+                    }
+                });
         }
     }
 }
