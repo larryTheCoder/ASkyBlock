@@ -28,12 +28,15 @@
 package com.larryTheCoder.updater;
 
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import lombok.Getter;
+import net.lingala.zip4j.ZipFile;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -45,6 +48,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -52,87 +56,143 @@ import java.util.concurrent.TimeUnit;
  */
 public class Updater {
 
+    // Cannot directly use the download link, jar file name may be changed.
+    public static final String JENKINS_DEFAULT_URL = "https://jenkins.potatohome.xyz/job/ASkyBlock/lastSuccessfulBuild/artifact/target/*zip*/target.zip";
+
     public static final int UPDATE_FAILED = -1;
     public static final int UPDATE_NOT_FOUND = 0;
     public static final int NEW_UPDATE_FOUND = 1;
     public static final int NEW_UPDATE_DOWNLOAD = 2;
+    public static final int NEW_UPDATE_FOUND_NO_LINK = 3;
 
     @Getter
     private static int updateStatus = UPDATE_NOT_FOUND;
-    private static String buildId;
+    private static String gitHashId;
 
-    private static JSONObject updateLocation;
+    private static String updateUrl;
+    private static Config updateManifest;
 
     public static void getUpdate() {
-        buildId = ASkyBlock.get().getDescription().getVersion();
+        gitHashId = ASkyBlock.get().getGitInfo().getProperty("git.commit.id");
+
+        try {
+            // Get the manifest file from this SB source first
+            Enumeration<URL> resources = ASkyBlock.get().getClass().getClassLoader().getResources("META-INF/MANIFEST.MF");
+            while (resources.hasMoreElements()) {
+                Config config = new Config(Config.YAML);
+                config.load(resources.nextElement().openStream());
+
+                // Simple sanity checks.
+                if (config.exists("Implementation-Title") && config.getString("Implementation-Title").equalsIgnoreCase("ASkyBlock")) {
+                    updateManifest = config;
+                }
+            }
+        } catch (Exception err) {
+            err.printStackTrace();
+
+            Utils.send("&cFailed to check for an update.");
+            return;
+        }
+
+        // Update proposal:
+        // When the program are starting to fetch an update, the main thing required are
+        // - Github hash commit ID
+        // - Jenkins build number
+        // These two are required to ensure that the update capability are fulfilled.
+        // The GitHub hash ID is needed to compare recent changes from GitHub.
+        // However, if GitHub hash ID is presence and Jenkins build number is not presence,
+        // We can notify the user to update the plugin via GitHub link instead.
 
         Thread updateThread = new Thread(() -> {
-            // Retrieve update from GitHub
+            // Check if this build is from jenkins, otherwise the automatic updates
+            // Will notify the user about new commit from github
+            if (updateManifest.getInt("jenkinsBuildId", -1) == -1) {
+                Utils.send("&6You are not using a build from jenkins, use with caution.");
+            }
 
-            JSONObject config;
+            // Retrieve update from GitHub
+            JSONArray gitCommit = new JSONArray();
+            JSONObject config = null;
             try {
-                URL link = new URL("https://api.github.com/repos/larryTheCoder/ASkyBlock/releases/latest");
+                // Get all of the commits available.
+                URL link = new URL("https://api.github.com/repos/larryTheCoder/ASkyBlock/commits");
                 HttpsURLConnection conn = (HttpsURLConnection) link.openConnection();
 
                 conn.setRequestMethod("GET");
                 conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
 
                 BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+                gitCommit = new JSONArray(new JSONTokener(rd));
+                rd.close();
+
+                // Now get the latest release from the source
+                link = new URL("https://api.github.com/repos/larryTheCoder/releases/latest");
+                conn = (HttpsURLConnection) link.openConnection();
+
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+
+                rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 config = new JSONObject(new JSONTokener(rd));
 
                 rd.close();
             } catch (IOException e) {
-                TaskManager.runTask(() -> {
-                    updateStatus = UPDATE_FAILED;
+                if (gitCommit.length() == 0) {
+                    TaskManager.runTask(() -> {
+                        updateStatus = UPDATE_FAILED;
 
-                    Utils.send("&cFailed to check for an update.");
-                });
-                return;
-            }
+                        Utils.send("&cFailed to check for an update.");
+                    });
 
-            JSONObject jsonData = null;
-            String downloadFile = null;
-            if (!config.getString("tag_name").equalsIgnoreCase(buildId)) {
-                for (Object obj : config.getJSONArray("assets")) {
-                    if (!(obj instanceof JSONObject)) {
-                        continue;
-                    }
-
-                    jsonData = ((JSONObject) obj);
-                    if (jsonData.getString("browser_download_url").endsWith(".jar")) {
-                        downloadFile = jsonData.getString("browser_download_url");
-                        break;
-                    }
+                    return;
                 }
-
-                if (downloadFile == null) TaskManager.runTask(() -> {
-                    updateStatus = UPDATE_FAILED;
-
-                    Utils.send("&cError to check an update for ASkyBlock source, wrong link?");
-                });
             }
 
-            final JSONObject objectJson = jsonData;
-            TaskManager.runTask(() -> setTargetUpdate(objectJson));
+            // Check for difference in git commits.
+            int i = 0;
+            for (; i < gitCommit.length(); i++) {
+                JSONObject object = gitCommit.getJSONObject(i);
+
+                if (object.getString("sha").equals(gitHashId)) {
+                    break;
+                }
+            }
+
+            // Now check if this build is a stable build, do not bother stable build with
+            // Development builds.
+            if (config != null) {
+                // Stable builds
+                // TODO: Figure out the right way to compare it.
+            } else {
+                // Development builds
+                if (i > 0) {
+                    TaskManager.runTask(() -> setTargetUpdate(JENKINS_DEFAULT_URL));
+                } else {
+                    TaskManager.runTask(() -> setTargetUpdate(null));
+                }
+            }
         });
         updateThread.setDaemon(true);
         updateThread.start();
     }
 
-    static void setTargetUpdate(JSONObject objectJson) {
+    static void setTargetUpdate(String objectJson) {
         if (objectJson == null) {
             updateStatus = UPDATE_NOT_FOUND;
+
+            Utils.send("&eThere is no new update found.");
             return;
         }
         updateStatus = NEW_UPDATE_FOUND;
-        updateLocation = objectJson;
+        updateUrl = objectJson;
 
         if (Settings.autoUpdate) {
             Utils.send("&aDownloading a new version of ASkyBlock now.");
 
             scheduleDownload(null);
         } else {
-            Utils.send("&aAvailable update is ready to download, &6/is download &a to install the plugin automatically.");
+            Utils.send("&aA new build of ASkyBlock is available to download.");
         }
     }
 
@@ -145,9 +205,15 @@ public class Updater {
 
         long changeInTime = System.currentTimeMillis();
         Thread updateThread = new Thread(() -> {
-            String updatePath = Utils.UPDATES_DIRECTORY + updateLocation.getString("name");
+            String updatePath;
+            if (updateUrl.equals(JENKINS_DEFAULT_URL)) {
+                updatePath = Utils.UPDATES_DIRECTORY + "target.zip";
+            } else {
+                updatePath = Utils.UPDATES_DIRECTORY + "target.jar";
+            }
+
             try {
-                URL website = new URL(updateLocation.getString("browser_download_url"));
+                URL website = new URL(updateUrl);
                 HttpsURLConnection conn = (HttpsURLConnection) website.openConnection();
 
                 ReadableByteChannel rbc = Channels.newChannel(conn.getInputStream());
@@ -166,6 +232,8 @@ public class Updater {
                 if (sender != null) sender.sendMessage(TextFormat.GREEN + notice);
 
                 Utils.send(notice);
+
+                applyUpdateFor(updatePath);
             });
         });
         updateThread.setDaemon(true);
@@ -174,5 +242,9 @@ public class Updater {
         updateStatus = NEW_UPDATE_DOWNLOAD;
 
         if (sender != null) sender.sendMessage(TextFormat.GREEN + "Downloading a new version of ASkyBlock now.");
+    }
+
+    private static void applyUpdateFor(String updatePath) {
+        // TODO
     }
 }

@@ -249,13 +249,12 @@ public class ASkyBlock extends ASkyBlockAPI {
     private void registerObject() {
         Utils.send(TextFormat.GRAY + "Loading all island framework. Please wait...");
         schematics = new SchematicHandler(this, new File(getDataFolder(), "schematics"));
-        if (Settings.checkUpdate) {
-            Updater.getUpdate();
-        }
 
         islandManager = new IslandManager(this);
         grid = new GridManager(this);
         inventory = new InventorySave();
+
+        Updater.getUpdate();
     }
 
     private void initConfig() {
