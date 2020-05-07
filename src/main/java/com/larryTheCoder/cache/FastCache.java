@@ -345,15 +345,15 @@ public class FastCache {
      * @param resultOutput The coop data that are related to this island.
      */
     public void getRelations(String plName, Consumer<CoopData> resultOutput) {
-        FastCacheData data = dataCache.stream().filter(i -> i.getIslandData().values().stream().anyMatch(v -> v.getCoopData().isMember(plName))).findFirst().orElse(null);
+        FastCacheData data = dataCache.stream().filter(i -> i.getIslandData().values().stream().anyMatch(v -> ((v.getCoopData() != null) && v.getCoopData().isMember(plName)))).findFirst().orElse(null);
 
         if (data == null) {
             // Check again this island, the cache might not have yet loaded.
             getIslandData(plName, pd -> {
                 if (pd != null) {
-                    FastCacheData rData = dataCache.stream().filter(i -> i.getIslandData().values().stream().anyMatch(v -> v.getCoopData().isMember(plName))).findFirst().orElse(null);
+                    FastCacheData rData = dataCache.stream().filter(i -> i.getIslandData().values().stream().anyMatch(v -> ((v.getCoopData() != null) && v.getCoopData().isMember(plName)))).findFirst().orElse(null);
                     if (rData != null) {
-                        IslandData iPlData = rData.getIslandData().values().stream().filter(v -> v.getCoopData().isMember(plName)).findFirst().orElse(null);
+                        IslandData iPlData = rData.getIslandData().values().stream().filter(v -> ((v.getCoopData() != null) && v.getCoopData().isMember(plName))).findFirst().orElse(null);
                         if (iPlData == null) {
                             resultOutput.accept(null);
                             return;
@@ -370,7 +370,7 @@ public class FastCache {
             return;
         }
 
-        IslandData iPlData = data.getIslandData().values().stream().filter(v -> v.getCoopData().isMember(plName)).findFirst().orElse(null);
+        IslandData iPlData = data.getIslandData().values().stream().filter(v -> ((v.getCoopData() != null) && v.getCoopData().isMember(plName))).findFirst().orElse(null);
         if (iPlData == null) {
             resultOutput.accept(null);
             return;
