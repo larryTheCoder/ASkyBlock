@@ -40,6 +40,8 @@
         <project.jdkVersion>1.8</project.jdkVersion>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <jenkins.build>-1</jenkins.build>
+        <project.released>false</project.released>
     </properties>
 
     <!-- Dependencies -->
@@ -77,10 +79,15 @@
             <artifactId>json</artifactId>
             <version>20160810</version>
         </dependency>
+        <dependency>
+            <groupId>net.lingala.zip4j</groupId>
+            <artifactId>zip4j</artifactId>
+            <version>2.5.2</version>
+        </dependency>
     </dependencies>
 
     <build>
-        <defaultGoal>clean package install</defaultGoal>
+        <defaultGoal>clean install</defaultGoal>
         <finalName>SkyBlock-${project.version}</finalName>
         <resources>
             <resource>
@@ -116,13 +123,23 @@
                 </includes>
             </resource>
         </resources>
+
         <plugins>
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <jenkinsBuildId>${jenkins.build}</jenkinsBuildId>
+                            <isBuildVerified>${project.released}</isBuildVerified>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
             <plugin>

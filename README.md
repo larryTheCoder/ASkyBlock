@@ -32,7 +32,7 @@ Features
 * Safe teleportation and is guarantee that you will not be teleported into lava.
 * Supports many types of island in `.schematic` format.
 * Supports more than 1 world in this plugin.
-* No more 1 island in 1 world, every islands are shared distinctly. ~~[Unlike this plugin](https://github.com/GiantQuartz/SkyBlock)~~
+* No more 1 island in 1 world, every islands are shared distinctly.
 * Supports Mysql* and Sqlite databases, cleaner and readable database.
 * Island Settings, now you can configure what is needed in your island.
 * Magic cobblestone generator, yes we have that too here.
