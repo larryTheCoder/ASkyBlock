@@ -35,74 +35,33 @@ import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector2;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.IslandData;
+import lombok.Getter;
 
 /**
  * @author larryTheCoder
  * @author tastybento
  */
-public class IslandCreateEvent extends Event implements Cancellable {
+public class IslandCreateEvent extends SkyBlockEvent implements Cancellable {
 
     private static final HandlerList HANDLERS = new HandlerList();
-    private final Player player;
-    private final int schematicId;
-    private final IslandData island;
 
     /**
-     * @param player
-     * @param schematicId
-     * @param island
+     * The schematic id of the island.
+     */
+    @Getter
+    private final int schematicId;
+
+    /**
+     * @param player The player class who is involved in this event
+     * @param schematicId The schematic id of the island.
+     * @param island The data of the island.
      */
     public IslandCreateEvent(Player player, int schematicId, IslandData island) {
-        this.player = player;
+        super(player, island);
         this.schematicId = schematicId;
-        this.island = island;
     }
 
     public static HandlerList getHandlers() {
         return HANDLERS;
-    }
-
-    /**
-     * @return the player
-     */
-    public Player getPlayer() {
-        return player;
-    }
-
-    /**
-     * @return the schematicName
-     */
-    public int getSchematicId() {
-        return schematicId;
-    }
-
-    /**
-     * @return the island
-     */
-    public Location getIslandLocation() {
-        Vector2 center = island.getCenter();
-
-        return new Location(center.getFloorX(), 0, center.getFloorY(), Server.getInstance().getLevelByName(island.getLevelName()));
-    }
-
-    /**
-     * @return the protectionSize
-     */
-    public int getProtectionSize() {
-        return island.getProtectionSize();
-    }
-
-    /**
-     * @return the isLocked
-     */
-    public boolean isLocked() {
-        return island.isLocked();
-    }
-
-    /**
-     * @return the islandDistance
-     */
-    public int getIslandDistance() {
-        return ASkyBlock.get().getSettings(island.getLevelName()).getIslandDistance();
     }
 }

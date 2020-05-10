@@ -1,6 +1,4 @@
 /*
- * Adapted from the Wizardry License
- *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -24,6 +22,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.larryTheCoder.events;
 
 import cn.nukkit.Player;
@@ -34,47 +33,30 @@ import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector2;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.IslandData;
+import lombok.Getter;
 
-/**
- * @author larryTheCoder
- * @author tastybento
- */
-class ASkyBlockEvent extends Event {
+public class SkyBlockEvent extends Event {
 
+    @Getter
     private static final HandlerList handlers = new HandlerList();
-    private final Player player;
+
+    /**
+     * The island involved in the event.
+     */
+    @Getter
     private final IslandData island;
 
     /**
-     * @param player The player that is involved in this event
-     * @param island The island that is involved in this event
+     * The player class who exited the island's protected area.
      */
-    ASkyBlockEvent(Player player, IslandData island) {
-        this.player = player;
+    @Getter
+    private final Player player;
+
+    public SkyBlockEvent(Player player, IslandData island) {
         this.island = island;
+        this.player = player;
     }
 
-    public static HandlerList getHandlers() {
-        return handlers;
-    }
-
-    /**
-     * Gets the player involved in this event
-     *
-     * @return the player
-     */
-    public Player getPlayer() {
-        return player;
-    }
-
-    /**
-     * The island involved in the event
-     *
-     * @return the island
-     */
-    public IslandData getIsland() {
-        return island;
-    }
 
     /**
      * Convenience function to obtain the island's protection size
@@ -101,13 +83,6 @@ class ASkyBlockEvent extends Event {
      */
     public int getIslandDistance() {
         return ASkyBlock.get().getSettings(island.getLevelName()).getIslandDistance();
-    }
-
-    /**
-     * @return the teamLeader
-     */
-    public Player getTeamLeader() {
-        return Server.getInstance().getPlayer(island.getPlotOwner());
     }
 
     /**

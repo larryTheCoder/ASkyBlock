@@ -29,6 +29,7 @@ package com.larryTheCoder.events;
 import cn.nukkit.Player;
 import cn.nukkit.level.Location;
 import com.larryTheCoder.cache.IslandData;
+import lombok.Getter;
 
 /**
  * Fired when a player enters an island's area
@@ -36,28 +37,22 @@ import com.larryTheCoder.cache.IslandData;
  * @author larryTheCoder
  * @author tastybento
  */
-public class IslandEnterEvent extends ASkyBlockEvent {
+public class IslandEnterEvent extends SkyBlockEvent {
 
+    /**
+     * Location of where the player entered the island or tried to enter
+     */
+    @Getter
     private final Location location;
 
     /**
      * Called to create the event
      *
-     * @param player
-     * @param island - island the player is entering
-     * @param loc    - Location of where the player entered the island or tried to enter
+     * @param island The island where the player is entering to
+     * @param loc    Location of where the player entered the island or tried to enter
      */
     public IslandEnterEvent(Player player, IslandData island, Location loc) {
         super(player, island);
         this.location = loc;
-    }
-
-    /**
-     * Location of where the player entered the island or tried to enter
-     *
-     * @return the location
-     */
-    public Location getLocation() {
-        return location;
     }
 }

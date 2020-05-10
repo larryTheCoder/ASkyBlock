@@ -227,7 +227,7 @@ public class IslandManager {
                         IslandCreateEvent event = new IslandCreateEvent(pl, templateId, resultData);
                         plugin.getServer().getPluginManager().callEvent(event);
                         if (event.isCancelled()) {
-                            pl.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).errorBlockedByAPI);
+                            // The plugin should notify why the action is cancelled.
                             return;
                         }
                         plugin.getSchematics().pasteSchematic(pl, locIsland, templateId, biome);

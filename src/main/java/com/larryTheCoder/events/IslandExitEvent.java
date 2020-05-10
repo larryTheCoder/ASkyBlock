@@ -29,6 +29,7 @@ package com.larryTheCoder.events;
 import cn.nukkit.Player;
 import cn.nukkit.level.Location;
 import com.larryTheCoder.cache.IslandData;
+import lombok.Getter;
 
 /**
  * Fired when a player exits an island's protected area
@@ -36,26 +37,22 @@ import com.larryTheCoder.cache.IslandData;
  * @author larryTheCoder
  * @author tastybento
  */
-public class IslandExitEvent extends ASkyBlockEvent {
+public class IslandExitEvent extends SkyBlockEvent {
+
+    /**
+     * Location of where the player exited the island's protected area.
+     */
+    @Getter
     private final Location location;
 
     /**
-     * @param player
-     * @param island   that the player is leaving
-     * @param location - Location of where the player exited the island's protected area
+     * @param player   The player who is leaving the island
+     * @param island   The island that the player is leaving
+     * @param location Location of where the player exited the island's protected area
      */
     public IslandExitEvent(Player player, IslandData island, Location location) {
         super(player, island);
         this.location = location;
-    }
-
-    /**
-     * Location of where the player exited the island's protected area
-     *
-     * @return the location
-     */
-    public Location getLocation() {
-        return location;
     }
 
 }
