@@ -53,6 +53,7 @@ import com.larryTheCoder.listener.PlayerEvent;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.locales.ASlocales;
 import com.larryTheCoder.schematic.SchematicHandler;
+import com.larryTheCoder.task.LevelCalcTask;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.updater.Updater;
 import com.larryTheCoder.utils.ConfigManager;
@@ -159,6 +160,7 @@ public class ASkyBlock extends ASkyBlockAPI {
             getDatabase().shutdownDB();
             getMessages().saveMessages();
             LavaCheck.clearStats();
+            getLevelCalcThread().shutdown();
             //TopTen.topTenSave();
         }
 
@@ -209,7 +211,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         // This should be loaded first
         messages = new Messages(this);
         messages.loadMessages();
-        // new LevelCalcTask(this);
+        levelCalcThread = new LevelCalcTask(this);
         //TopTen.topTenLoad();
 
         pm.registerEvents(chatHandler, this);

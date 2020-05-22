@@ -154,4 +154,8 @@ public class CoopData {
 
         return i + super.hashCode();
     }
+
+    public boolean isAdmin(Player p) {
+        return admins.stream().anyMatch(i -> i.equalsIgnoreCase(p.getName()));
+    }
 }

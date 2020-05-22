@@ -30,7 +30,7 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.cache.CoopData;
+import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.utils.Settings;
 
 /**
@@ -42,7 +42,7 @@ public class Invitation {
     private final CommandSender sender;
     private final Player receiver;
     private final ASkyBlock plugin;
-    private final CoopData coopData;
+    private final IslandData islandData;
 
     private int time;
 
@@ -53,11 +53,11 @@ public class Invitation {
      * @param sender   The sender of this invite
      * @param receiver The receiver of this invite
      */
-    Invitation(InvitationHandler handler, CommandSender sender, Player receiver, CoopData pd) {
+    Invitation(InvitationHandler handler, CommandSender sender, Player receiver, IslandData islandData) {
         this.handler = handler;
         this.sender = sender;
         this.receiver = receiver;
-        this.coopData = pd;
+        this.islandData = islandData;
         this.time = Settings.memberTimeOut;
         this.plugin = ASkyBlock.get();
     }
@@ -84,8 +84,17 @@ public class Invitation {
         sender.sendMessage(plugin.getPrefix() + plugin.getLocale(sender.isPlayer() ? (Player) sender : null).acceptedTo.replace("[player]", receiver.getName()));
         receiver.sendMessage(plugin.getPrefix() + plugin.getLocale(receiver).acceptedFrom.replace("[player]", sender.getName()));
 
-        coopData.addMember(sender.getName());
-        handler.removeInvitation(this);
+        // TODO: Compliance under Co-Op regulatory and settings.
+//        List<IslandData> dataList = plugin.getIslandsInfo(receiver.getName());
+//        // Check if the player has an island
+//        if (!dataList.isEmpty()) {
+//            receiver.sendMessage(plugin.getPrefix() + "Deleting all of your islands");
+//            //dataList.forEach((island) -> plugin.getDatabase().deleteIsland(island));
+//        }
+//
+//        // Set the team from the sender and the receiver.
+//        plugin.getTManager().setTeam(sender.getName(), receiver.getName());
+//        handler.removeInvitation(this);
     }
 
     public void denyInvitation() {

@@ -147,37 +147,36 @@ public class CoopCategory extends SubCategory {
                 // Player cannot invite other players when he have no island
                 getPlugin().getFastCache().getRelations(p.getPosition(), data -> {
                     if (data == null) {
-                        p.sendMessage(getPrefix() + "You must be on your island to invite other members.");
+                        p.sendMessage(getPrefix() + "The location from where you standing is not your island.");
                         return;
                     }
 
-                    if(!data.isAdmin(p)){
-                        p.sendMessage(getPrefix() + "You are not an admin in this island.");
+                    if (!data.isAdmin(p)) {
+                        p.sendMessage(getPrefix() + "You are not an admin in this server.");
                         return;
                     }
 
-                    // Get the island data of this Coop island.
                     getPlugin().getFastCache().getIslandData(data.getIslandUniqueId(), pd -> {
-                        if (!pd.getPlotOwner().equalsIgnoreCase(p.getName())) {
-                            p.sendMessage(getPrefix() + "That is not your island!");
-                            return;
-                        }
 
-                        Player inviter = p.getServer().getPlayer(args[1]);
-                        if (inviter == null) {
-                            p.sendMessage(getPrefix() + getLocale(p).errorOfflinePlayer);
-                            return;
-                        }
-
-                        // Now check if this player is already in a coop island.
-                        getPlugin().getFastCache().getRelations(p.getName(), relation -> {
-                            if (relation == null) {
-                                getPlugin().getInvitationHandler().addInvitation(p, inviter, data);
-                            } else {
-                                sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
-                            }
-                        });
                     });
+//                    if (!data.getPlotOwner().equalsIgnoreCase(p.getName())) {
+//                        p.sendMessage(getPrefix() + "That is not your island!");
+//                        return;
+//                    }
+//
+//                    Player inviter = p.getServer().getPlayer(args[1]);
+//                    if (inviter == null) {
+//                        p.sendMessage(getPrefix() + getLocale(p).errorOfflinePlayer);
+//                        return;
+//                    }
+//
+//                    getPlugin().getFastCache().getRelations(p.getName(), relation -> {
+//                        if (relation == null) {
+//                            //getPlugin().getInvitationHandler().addInvitation(p, inviter, );
+//                        } else {
+//                            sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
+//                        }
+//                    });
                 });
                 break;
         }

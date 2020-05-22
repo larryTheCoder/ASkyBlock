@@ -29,35 +29,29 @@ package com.larryTheCoder.utils;
 
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.cache.IslandData;
+import lombok.Getter;
 
 /**
- * Stores a data regarding the user and its
- * sender
+ * Stores a data regarding the user and its sender
  */
 public class StoreMetadata {
 
     private static int DATA_COUNT = 0;
 
-    private int id;
-    private IslandData player;
-    private CommandSender sender;
+    private final int id;
+    @Getter
+    private final IslandData islandData;
+    @Getter
+    private final CommandSender sender;
 
     public StoreMetadata(IslandData p, CommandSender sender) {
-        this.player = p;
+        this.islandData = p;
         this.sender = sender;
         this.id = StoreMetadata.DATA_COUNT++;
     }
 
-    public IslandData getIslandData() {
-        return player;
-    }
-
-    public CommandSender getSender() {
-        return sender;
-    }
-
     @Override
     public int hashCode() {
-        return player.hashCode() + sender.hashCode() * id;
+        return islandData.hashCode() + sender.hashCode() * id;
     }
 }

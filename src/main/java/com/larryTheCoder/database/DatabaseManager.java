@@ -60,15 +60,11 @@ public class DatabaseManager {
     public static final String DB_VERSION = "0.1.7";
     public static String currentCacheId;
 
-    // Notes: During SELECT, sqlite database can read its database easily without effecting the thread,
-    //        But when we are using mysql as our database, it effects the thread uptime. So do we need to
-    //        Optimize our code so it can be async-compatible?
+    private final AbstractConfig database;
+    private final Connection connection;
 
-    private AbstractConfig database;
-    private Connection connection;
-
-    private AtomicBoolean isClosed = new AtomicBoolean(false);
-    private ConcurrentLinkedQueue<DatabaseImpl> requestQueue = new ConcurrentLinkedQueue<>();
+    private final AtomicBoolean isClosed = new AtomicBoolean(false);
+    private final ConcurrentLinkedQueue<DatabaseImpl> requestQueue = new ConcurrentLinkedQueue<>();
 
     public static boolean isMysql = false;
 
@@ -109,7 +105,6 @@ public class DatabaseManager {
         TableSet[] tableSets = {
                 METADATA_TABLE,
                 WORLD_TABLE,
-                ISLAND_DATA,
                 PLAYER_TABLE,
                 PLAYER_CHALLENGES,
                 ISLAND_TABLE,
@@ -130,7 +125,6 @@ public class DatabaseManager {
         }
 
         // Update database credentials.
-        // TODO: Versioning database stuffs.
         Table result = connection.createQuery(TABLE_FETCH_CACHE.getQuery()).executeAndFetchTable();
 
         if (result.rows().isEmpty()) {
@@ -154,7 +148,7 @@ public class DatabaseManager {
                     case "0.1.6":
                         connection.createQuery("ALTER TABLE islandRelations ADD COLUMN islandAdmins TEXT DEFAULT ''").executeUpdate();
                     case "0.1.7":
-                        // TODO: Future updates?
+                        break;
                 }
 
                 connection.createQuery(TABLE_CACHE_UPDATE.getQuery())
@@ -211,6 +205,7 @@ public class DatabaseManager {
         Thread asyncThread = new Thread(() -> {
             while (!isClosed.get()) {
                 try {
+                    long lastTick = System.currentTimeMillis();
                     DatabaseImpl consumer;
                     while ((consumer = requestQueue.poll()) != null) {
                         Exception result = null;
@@ -231,8 +226,13 @@ public class DatabaseManager {
                             }
                         });
                     }
+                    long nowTick = System.currentTimeMillis() - lastTick;
 
-                    Thread.sleep(50);
+                    // The execution took 50ms to execute, do not bother sleeping this thread.
+                    // Continue execution.
+                    if (nowTick >= 50) continue;
+
+                    Thread.sleep(50 - nowTick);
                 } catch (Throwable e) {
                     // Sync up with console.
 
@@ -246,9 +246,7 @@ public class DatabaseManager {
 
         currentPoolSize++;
 
-        if (currentPoolSize < maxPool) {
-            startAsyncPool(maxPool);
-        }
+        if (currentPoolSize < maxPool) startAsyncPool(maxPool);
     }
 
     public abstract static class DatabaseImpl {

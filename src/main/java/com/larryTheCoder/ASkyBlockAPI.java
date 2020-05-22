@@ -37,6 +37,7 @@ import com.larryTheCoder.island.TeleportLogic;
 import com.larryTheCoder.listener.ChatHandler;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.schematic.SchematicHandler;
+import com.larryTheCoder.task.LevelCalcTask;
 import lombok.Getter;
 
 public class ASkyBlockAPI extends PluginBase {
@@ -63,4 +64,6 @@ public class ASkyBlockAPI extends PluginBase {
     protected FastCache fastCache;
     @Getter
     protected SchematicHandler schematics;
+    @Getter
+    protected LevelCalcTask levelCalcThread;
 }
