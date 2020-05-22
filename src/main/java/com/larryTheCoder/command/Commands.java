@@ -59,7 +59,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
         commandCategory.add(new GenericCategory(getPlugin()));
         commandCategory.add(new IslandCategory(getPlugin()));
         commandCategory.add(new ChatCategory(getPlugin()));
-        commandCategory.add(new AdminCategory(getPlugin()));
+        //commandCategory.add(new CoopCategory(getPlugin()));
         commandCategory.add(new OperatorCategory(getPlugin()));
 
         // Then we add them into the array.

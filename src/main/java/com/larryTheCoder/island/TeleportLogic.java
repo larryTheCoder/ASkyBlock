@@ -1,4 +1,6 @@
 /*
+ * Adapted from the Wizardry License
+ *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations

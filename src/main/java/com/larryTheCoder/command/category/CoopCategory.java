@@ -1,4 +1,6 @@
 /*
+ * Adapted from the Wizardry License
+ *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -34,15 +36,20 @@ import com.larryTheCoder.listener.invitation.InvitationHandler;
 import java.util.Arrays;
 import java.util.List;
 
-public class AdminCategory extends SubCategory {
+public class CoopCategory extends SubCategory {
 
-    public AdminCategory(ASkyBlock plugin) {
+    public CoopCategory(ASkyBlock plugin) {
         super(plugin);
     }
 
     @Override
+    public List<String> baseCommands() {
+        return Arrays.asList("coop", "co");
+    }
+
+    @Override
     public List<String> getCommands() {
-        return Arrays.asList("accept", "deny", "reject", "invite", "kick", "quit");
+        return Arrays.asList("invite", "accept", "decline", "kick", "promote", "demote", "transfer", "leave");
     }
 
     @Override
@@ -87,19 +94,23 @@ public class AdminCategory extends SubCategory {
 
     @Override
     public void execute(CommandSender sender, String commandLabel, String[] args) {
-        Player p = sender.getServer().getPlayer(sender.getName());
-        InvitationHandler pd = getPlugin().getInvitationHandler();
+        Player p = sender instanceof Player ? (Player) sender : null;
+        if (p == null) {
+            return;
+        }
+
+        InvitationHandler handler = getPlugin().getInvitationHandler();
 
         switch (args[0].toLowerCase()) {
             case "accept":
-                Invitation invite = pd.getInvitation(p);
+                Invitation invite = handler.getInvitation(p);
                 if (invite == null) {
                     sender.sendMessage(getPrefix() + getLocale(p).errorNotPending);
                     break;
                 }
 
                 if (args.length == 2) {
-                    invite = pd.getInvitation(p, args[1]);
+                    invite = handler.getInvitation(p, args[1]);
 
                     if (invite == null) {
                         sender.sendMessage(getPrefix() + getLocale(p).errorNotPending2.replace("[player]", args[1]));
@@ -111,14 +122,14 @@ public class AdminCategory extends SubCategory {
                 break;
             case "deny":
             case "reject":
-                invite = pd.getInvitation(p);
+                invite = handler.getInvitation(p);
                 if (invite == null) {
                     sender.sendMessage(getPrefix() + getLocale(p).errorNotPending);
                     break;
                 }
 
                 if (args.length == 2) {
-                    invite = pd.getInvitation(p, args[1]);
+                    invite = handler.getInvitation(p, args[1]);
 
                     if (invite == null) {
                         sender.sendMessage(getPrefix() + getLocale(p).errorNotPending2.replace("[player]", args[1]));
@@ -134,25 +145,41 @@ public class AdminCategory extends SubCategory {
                 }
 
                 // Player cannot invite other players when he have no island
-                if (!getPlugin().getIslandManager().checkIsland(p)) {
-                    sender.sendMessage(getPrefix() + getLocale(p).errorNoIsland);
-                    break;
-                }
-
-                // The invite player.
-                Player inviter = sender.getServer().getPlayer(args[1]);
-                if (inviter == null) {
-                    sender.sendMessage(getPrefix() + getLocale(p).errorOfflinePlayer);
-                    break;
-                }
-
-                getPlugin().getFastCache().getRelations(p.getName(), data -> {
+                getPlugin().getFastCache().getRelations(p.getPosition(), data -> {
                     if (data == null) {
-                        getPlugin().getInvitationHandler().addInvitation(p, inviter);
-                    } else {
-                        sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
+                        p.sendMessage(getPrefix() + "You must be on your island to invite other members.");
+                        return;
                     }
+
+                    if(!data.isAdmin(p)){
+                        p.sendMessage(getPrefix() + "You are not an admin in this island.");
+                        return;
+                    }
+
+                    // Get the island data of this Coop island.
+                    getPlugin().getFastCache().getIslandData(data.getIslandUniqueId(), pd -> {
+                        if (!pd.getPlotOwner().equalsIgnoreCase(p.getName())) {
+                            p.sendMessage(getPrefix() + "That is not your island!");
+                            return;
+                        }
+
+                        Player inviter = p.getServer().getPlayer(args[1]);
+                        if (inviter == null) {
+                            p.sendMessage(getPrefix() + getLocale(p).errorOfflinePlayer);
+                            return;
+                        }
+
+                        // Now check if this player is already in a coop island.
+                        getPlugin().getFastCache().getRelations(p.getName(), relation -> {
+                            if (relation == null) {
+                                getPlugin().getInvitationHandler().addInvitation(p, inviter, data);
+                            } else {
+                                sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
+                            }
+                        });
+                    });
                 });
+                break;
         }
     }
 }

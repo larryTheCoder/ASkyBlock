@@ -1,4 +1,6 @@
 /*
+ * Adapted from the Wizardry License
+ *
  * Copyright (c) 2016-2020 larryTheCoder and contributors
  *
  * Permission is hereby granted to any persons and/or organizations
@@ -243,7 +245,6 @@ public class FastCache {
 
             List<IslandData> islandList = parseData(connection.createQuery(FETCH_LEVEL_PLOT.getQuery())
                     .addParameter("islandId", id)
-                    .addParameter("levelName", pos.getLevel().getName())
                     .executeAndFetchTable().rows(), connection);
 
             putIslandUnspecified(islandList);
@@ -384,7 +385,10 @@ public class FastCache {
      */
     public void getIslandData(Position pos, Consumer<IslandData> resultOutput) {
         int id = plugin.getIslandManager().generateIslandKey(pos.getFloorX(), pos.getFloorZ(), pos.getLevel().getName());
+        getIslandData(id, resultOutput);
+    }
 
+    public void getIslandData(int id, Consumer<IslandData> resultOutput){
         FastCacheData result = dataCache.stream().filter(i -> i.anyIslandUidMatch(id)).findFirst().orElse(null);
         if (result == null) {
             plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
@@ -394,7 +398,6 @@ public class FastCache {
                 public void executeQuery(Connection connection) {
                     islandList = parseData(connection.createQuery(FETCH_LEVEL_PLOT.getQuery())
                             .addParameter("islandId", id)
-                            .addParameter("levelName", pos.getLevel().getName())
                             .executeAndFetchTable().rows(), connection);
                 }
 

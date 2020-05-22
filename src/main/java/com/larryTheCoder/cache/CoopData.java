@@ -27,6 +27,7 @@
 
 package com.larryTheCoder.cache;
 
+import cn.nukkit.Player;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.database.TableSet;
@@ -51,12 +52,15 @@ public class CoopData {
     private String teamName;
     @Getter
     private List<String> members;
+    @Getter
+    private List<String> admins;
 
     public CoopData(Row coopData) {
         this.islandUniqueId = coopData.getString("defaultIsland");
         this.leaderName = coopData.getString("islandLeader");
         this.teamName = coopData.getString("islandLeader");
         this.members = Utils.stringToArray(coopData.getString("islandMembers"), ", ");
+        this.admins = Utils.stringToArray(coopData.getString("islandAdmins"), ", ");
     }
 
     /**
@@ -81,6 +85,16 @@ public class CoopData {
         this.teamName = teamName;
 
         updateData();
+    }
+
+    /**
+     * Check either this player is an admin in this island.
+     *
+     * @param pl The player class
+     * @return true if the player is an admin, false if otherwise.
+     */
+    public boolean isAdmin(Player pl) {
+        return admins.stream().anyMatch(o -> o.equalsIgnoreCase(pl.getName()));
     }
 
     /**
@@ -125,6 +139,7 @@ public class CoopData {
                         .addParameter("islandUniqueId", islandUniqueId)
                         .addParameter("leaderName", leaderName)
                         .addParameter("teamName", teamName)
+                        .addParameter("admins", Utils.arrayToString(admins))
                         .addParameter("members", Utils.arrayToString(members))
                         .executeUpdate();
             }

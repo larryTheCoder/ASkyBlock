@@ -30,6 +30,7 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.cache.CoopData;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -89,8 +90,8 @@ public class InvitationHandler {
     }
 
     /**
-     * Gets an invite by the receiver with the
-     * player who sent the invite
+     * Get an invites given by a specific player towards
+     * the target player.
      *
      * @param player The receiver of the invite
      * @return The invite class itself, otherwise null.
@@ -109,11 +110,11 @@ public class InvitationHandler {
      * @param sender   The sender itself
      * @param receiver The receiver of the invitation
      */
-    public void addInvitation(CommandSender sender, Player receiver) {
+    public void addInvitation(CommandSender sender, Player receiver, CoopData pd) {
         sender.sendMessage(plugin.getPrefix() + plugin.getLocale(sender.isPlayer() ? (Player) sender : null).inviteSuccess);
         receiver.sendMessage(plugin.getPrefix() + plugin.getLocale(receiver).newInvitation.replace("[player]", sender.getName()));
 
         // Add into the list.
-        invitation.add(new Invitation(this, sender, receiver));
+        invitation.add(new Invitation(this, sender, receiver, pd));
     }
 }

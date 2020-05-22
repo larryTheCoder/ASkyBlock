@@ -57,7 +57,7 @@ import static com.larryTheCoder.database.TableSet.*;
  */
 public class DatabaseManager {
 
-    public static final String DB_VERSION = "0.1.6";
+    public static final String DB_VERSION = "0.1.7";
     public static String currentCacheId;
 
     // Notes: During SELECT, sqlite database can read its database easily without effecting the thread,
@@ -152,6 +152,8 @@ public class DatabaseManager {
                         connection.createQuery("DROP TABLE islandRelations").executeUpdate();
                         connection.createQuery(ISLAND_RELATIONS.getQuery()).executeUpdate();
                     case "0.1.6":
+                        connection.createQuery("ALTER TABLE islandRelations ADD COLUMN islandAdmins TEXT DEFAULT ''").executeUpdate();
+                    case "0.1.7":
                         // TODO: Future updates?
                 }
 
