@@ -388,7 +388,7 @@ public class FastCache {
         getIslandData(id, resultOutput);
     }
 
-    public void getIslandData(int id, Consumer<IslandData> resultOutput){
+    public void getIslandData(int id, Consumer<IslandData> resultOutput) {
         FastCacheData result = dataCache.stream().filter(i -> i.anyIslandUidMatch(id)).findFirst().orElse(null);
         if (result == null) {
             plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {

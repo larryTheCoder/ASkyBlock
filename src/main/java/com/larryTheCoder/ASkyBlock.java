@@ -27,11 +27,12 @@
 package com.larryTheCoder;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.generator.Generator;
+import cn.nukkit.plugin.Plugin;
 import cn.nukkit.plugin.PluginManager;
-import cn.nukkit.scheduler.ServerScheduler;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
@@ -60,6 +61,8 @@ import com.larryTheCoder.utils.ConfigManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import com.larryTheCoder.utils.integration.economy.Economy;
+import com.larryTheCoder.utils.integration.luckperms.InternalPermission;
+import com.larryTheCoder.utils.integration.luckperms.LuckPermsPermission;
 import lombok.Getter;
 import org.sql2o.Query;
 import org.sql2o.data.Table;
@@ -212,14 +215,22 @@ public class ASkyBlock extends ASkyBlockAPI {
         messages = new Messages(this);
         messages.loadMessages();
         levelCalcThread = new LevelCalcTask(this);
+        loadPermissionNodes();
         //TopTen.topTenLoad();
 
         pm.registerEvents(chatHandler, this);
         pm.registerEvents(new IslandListener(this), this);
         pm.registerEvents(new LavaCheck(this), this);
         pm.registerEvents(new PlayerEvent(this), this);
-        ServerScheduler pd = getServer().getScheduler();
-        pd.scheduleRepeatingTask(new PluginTask(this), 20); // tick every 1 sec
+    }
+
+    private void loadPermissionNodes() {
+        Plugin plugin = Server.getInstance().getPluginManager().getPlugin("LuckPerms");
+        if (plugin == null) {
+            permissionHandler = new InternalPermission();
+        } else {
+            permissionHandler = new LuckPermsPermission();
+        }
     }
 
     /**

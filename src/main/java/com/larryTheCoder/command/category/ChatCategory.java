@@ -60,9 +60,9 @@ public class ChatCategory extends SubCategory {
     public boolean canUse(CommandSender sender, String command) {
         switch (command.toLowerCase()) {
             case "chat":
-                return sender.hasPermission("is.command.teamChat") && sender.isPlayer();
+                return hasPermission(sender, "is.command.teamChat") && sender.isPlayer();
             case "messages":
-                return sender.hasPermission("is.command.messages") && sender.isPlayer();
+                return hasPermission(sender, "is.command.messages") && sender.isPlayer();
             default:
                 return false;
         }

@@ -110,4 +110,16 @@ public abstract class SubCategory {
      * @return The parameters required for the command.
      */
     public abstract String getParameters(String commandName);
+
+    /**
+     * Check either the sender has the permission to execute this command
+     * using the libraries present in the server.
+     *
+     * @param sender     The command sender that executes this command.
+     * @param permission The permission node name.
+     * @return {@code true} if the player has the permission.
+     */
+    public boolean hasPermission(CommandSender sender, String permission) {
+        return ASkyBlock.get().getPermissionHandler().hasPermission(sender, permission);
+    }
 }

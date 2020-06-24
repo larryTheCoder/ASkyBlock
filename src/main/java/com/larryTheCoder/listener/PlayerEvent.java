@@ -131,7 +131,7 @@ public class PlayerEvent implements Listener {
                 public void executeQuery(Connection connection) {
                     connection.createQuery(PLAYER_INSERT_MAIN.getQuery())
                             .addParameter("playerName", p.getName())
-                            .addParameter("playerUUID", p.getLoginChainData().getXUID())
+                            .addParameter("playerUUID", p.getUniqueId().toString())
                             .addParameter("locale", p.getLoginChainData().getLanguageCode())
                             .addParameter("resetLeft", Settings.reset)
                             .addParameter("banList", "")

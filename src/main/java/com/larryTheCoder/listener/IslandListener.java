@@ -29,7 +29,6 @@ package com.larryTheCoder.listener;
 import cn.nukkit.Player;
 import cn.nukkit.block.BlockLava;
 import cn.nukkit.entity.item.EntityPrimedTNT;
-import cn.nukkit.entity.item.EntityVehicle;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
@@ -104,7 +103,7 @@ public class IslandListener implements Listener {
         }
 
         // This permission bypasses protection
-        if (player.isOp() || player.hasPermission("is.mod.bypassprotect")) {
+        if (player.isOp() || hasPermission(player, "is.mod.bypassprotect")) {
             return true;
         }
 
@@ -146,7 +145,7 @@ public class IslandListener implements Listener {
         if (e.getTo().getFloorX() - e.getFrom().getFloorX() == 0 && e.getTo().getFloorZ() - e.getFrom().getFloorZ() == 0) {
             return;
         }
-        if (e.getPlayer().isOp() && e.getPlayer().hasPermission("is.mod.bypassprotect")) {
+        if (e.getPlayer().isOp() && hasPermission(e.getPlayer(), "is.mod.bypassprotect")) {
             return;
         }
 
@@ -197,7 +196,7 @@ public class IslandListener implements Listener {
         } else if (islandTo != null && (islandTo.getPlotOwner() != null)) {
             // Lock check
             if (islandTo.isLocked()) {
-                if (!p.isOp() && !p.hasPermission("is.mod.bypassprotect") && !p.hasPermission("is.mod.bypasslock")) {
+                if (!p.isOp() && !hasPermission(e.getPlayer(), "is.mod.bypassprotect") && !hasPermission(e.getPlayer(), "is.mod.bypasslock")) {
                     if (p.riding != null) {
                         // Dismount
                         p.riding.mountEntity(p);
@@ -262,7 +261,7 @@ public class IslandListener implements Listener {
             //deb.debug("Event is not in world");
             return;
         }
-        if (p.isOp() || p.hasPermission("is.mod.bypassprotect")) {
+        if (p.isOp() || hasPermission(p, "is.mod.bypassprotect")) {
             return;
         }
         // Too bad that the item is not a vector3
@@ -289,7 +288,7 @@ public class IslandListener implements Listener {
             //deb.debug("Event is not in world");
             return;
         }
-        if (p.isOp() || p.hasPermission("is.mod.bypassprotect")) {
+        if (p.isOp() || hasPermission(p, "is.mod.bypassprotect")) {
             return;
         }
         if (plugin.getIslandManager().locationIsOnIsland(p, e.getBlock()) || plugin.getIslandManager().locationIsOnIsland(p, p.getLocation())) {
@@ -350,7 +349,7 @@ public class IslandListener implements Listener {
             if (actionAllowed(p, e.getEntity().getLocation(), SettingsFlag.BREAK_BLOCKS)) {
                 return;
             }
-            if (p.isOp() && p.hasPermission("is.mod.bypassprotect")) {
+            if (p.isOp() && hasPermission(p, "is.mod.bypassprotect")) {
                 return;
             }
         }
@@ -422,9 +421,13 @@ public class IslandListener implements Listener {
         if (notInWorld(player)) {
             return;
         }
-        if (event.getRecipe().getResult().getId() == ENDER_CHEST && !player.hasPermission("is.craft.enderchest")) {
+        if (event.getRecipe().getResult().getId() == ENDER_CHEST && !hasPermission(player, "is.craft.enderchest")) {
             player.sendMessage(plugin.getLocale(player).errorNoPermission);
             event.setCancelled(true);
         }
+    }
+
+    public boolean hasPermission(Player player, String permission) {
+        return plugin.getPermissionHandler().hasPermission(player, permission);
     }
 }

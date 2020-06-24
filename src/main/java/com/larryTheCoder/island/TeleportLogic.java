@@ -79,7 +79,7 @@ public class TeleportLogic implements Listener {
         final Location targetLoc = homeSweetHome.clone().add(0.5, 0, 0.5);
         Utils.loadChunkAt(targetLoc);
 
-        if (player.hasPermission("is.bypass.wait") || (teleportDelay == 0) || force) {
+        if (plugin.getPermissionHandler().hasPermission(player, "is.bypass.wait") || (teleportDelay == 0) || force) {
             player.teleport(targetLoc);
         } else {
             player.sendMessage(plugin.getPrefix() + plugin.getLocale(player).teleportDelay.replace("{0}", "" + teleportDelay));

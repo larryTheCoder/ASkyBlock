@@ -24,14 +24,37 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.larryTheCoder.task;
 
-import cn.nukkit.scheduler.AsyncTask;
+package com.larryTheCoder.utils.integration.luckperms;
 
-public class UpdatePluginAsync extends AsyncTask {
+import cn.nukkit.IPlayer;
+import cn.nukkit.Server;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.permission.PermissionAttachmentInfo;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class InternalPermission extends Permission {
 
     @Override
-    public void onRun() {
-        // TODO: Use jenkins repo?
+    public boolean hasPermission(CommandSender player, String permission) {
+        return player.hasPermission(permission);
+    }
+
+    @Override
+    public Map<String, Boolean> getPermissions(UUID uuid) {
+        IPlayer player = Server.getInstance().getOfflinePlayer(uuid);
+        if (!player.isOnline()) {
+            return null;
+        }
+
+        Map<String, Boolean> parsedData = new HashMap<>();
+        for (Map.Entry<String, PermissionAttachmentInfo> pType : player.getPlayer().getEffectivePermissions().entrySet()) {
+            parsedData.put(pType.getKey(), pType.getValue().getValue());
+        }
+
+        return parsedData;
     }
 }

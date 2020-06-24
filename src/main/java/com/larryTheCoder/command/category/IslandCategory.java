@@ -50,15 +50,15 @@ public class IslandCategory extends SubCategory {
     public boolean canUse(CommandSender sender, String command) {
         switch (command) {
             case "create":
-                return sender.hasPermission("is.create") && sender.isPlayer();
+                return hasPermission(sender, "is.create") && sender.isPlayer();
             case "reset":
             case "delete":
-                return sender.hasPermission("is.command.reset") && sender.isPlayer();
+                return hasPermission(sender, "is.command.reset") && sender.isPlayer();
             case "home":
             case "sethome":
-                return sender.hasPermission("is.command.home") && sender.isPlayer();
+                return hasPermission(sender, "is.command.home") && sender.isPlayer();
             case "teleport":
-                return sender.hasPermission("is.command.teleport") && sender.isPlayer();
+                return hasPermission(sender, "is.command.teleport") && sender.isPlayer();
         }
 
         return false;

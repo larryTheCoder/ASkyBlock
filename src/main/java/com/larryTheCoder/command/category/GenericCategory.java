@@ -61,23 +61,23 @@ public class GenericCategory extends SubCategory {
                 return sender.isOp();
             case "expel":
             case "kick":
-                return sender.hasPermission("is.command.expel") && sender.isPlayer();
+                return hasPermission(sender, "is.command.expel") && sender.isPlayer();
             case "lobby":
             case "spawn":
             case "leave":
-                return sender.hasPermission("is.command.leave") && sender.isPlayer();
+                return hasPermission(sender, "is.command.leave") && sender.isPlayer();
             case "locale":
-                return sender.hasPermission("is.command.lang") && sender.isPlayer();
+                return hasPermission(sender, "is.command.lang") && sender.isPlayer();
             case "protection":
-                return sender.hasPermission("is.panel.protection") && sender.isPlayer();
+                return hasPermission(sender, "is.panel.protection") && sender.isPlayer();
             case "settings":
-                return sender.hasPermission("is.panel.setting") && sender.isPlayer();
+                return hasPermission(sender, "is.panel.setting") && sender.isPlayer();
             case "top":
-                return sender.hasPermission("is.topten");
+                return hasPermission(sender, "is.topten");
             case "about":
                 return true;
             case "download":
-                return sender.hasPermission("is.command.download");
+                return hasPermission(sender, "is.command.download");
             default:
                 return false;
         }

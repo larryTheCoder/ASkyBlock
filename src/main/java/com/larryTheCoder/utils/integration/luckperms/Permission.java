@@ -27,5 +27,29 @@
 
 package com.larryTheCoder.utils.integration.luckperms;
 
-public interface Permission {
+import cn.nukkit.command.CommandSender;
+
+import java.util.Map;
+import java.util.UUID;
+
+public abstract class Permission {
+
+    /**
+     * Check either the sender has the permission for the given string
+     *
+     * @param sender     The command sender class itself.
+     * @param permission The permission that need to be checked.
+     * @return {@code true} if the sender has the permission to execute this.
+     */
+    public abstract boolean hasPermission(CommandSender sender, String permission);
+
+    /**
+     * Gets all permissions nodes from the UUID given, this may return null if
+     * the UUID doesn't exists. This function is a blocking-thread operation
+     * and which should NEVER be called other than an async tasks or threads.
+     *
+     * @param uniqueId The player unique id that needs to be checked.
+     * @return {@code true} the list of permissions that the player had.
+     */
+    public abstract Map<String, Boolean> getPermissions(UUID uuid);
 }

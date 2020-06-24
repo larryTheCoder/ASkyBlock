@@ -66,7 +66,7 @@ public class OperatorCategory extends SubCategory {
 
     @Override
     public boolean canUse(CommandSender sender, String command) {
-        return sender.hasPermission("is.admin.command");
+        return hasPermission(sender, "is.admin.command");
     }
 
     @Override
@@ -89,7 +89,7 @@ public class OperatorCategory extends SubCategory {
 
         switch (args[0]) {
             case "generate":
-                if (!sender.hasPermission("is.admin.generate")) {
+                if (!hasPermission(sender, "is.admin.generate")) {
                     sender.sendMessage(getPlugin().getLocale(pl).errorNoPermission);
                     break;
                 }
@@ -133,7 +133,7 @@ public class OperatorCategory extends SubCategory {
                 sender.sendMessage(getPlugin().getPrefix() + getPlugin().getLocale(pl).errorLevelGenerated);
                 break;
             case "clear":
-                if (!sender.hasPermission("is.admin.clear")) {
+                if (!hasPermission(sender, "is.admin.clear")) {
                     sender.sendMessage(getPlugin().getLocale(pl).errorNoPermission);
                     break;
                 }
@@ -148,14 +148,14 @@ public class OperatorCategory extends SubCategory {
                     break;
                 }
 
-                if (!sender.hasPermission("is.admin.kick")) {
+                if (!hasPermission(sender, "is.admin.kick")) {
                     sender.sendMessage(getPlugin().getLocale(pl).errorNoPermission);
                     break;
                 }
                 getPlugin().getIslandManager().kickPlayerByAdmin(sender, args[1]);
                 break;
             case "rename":
-                if (!sender.hasPermission("is.admin.rename")) {
+                if (!hasPermission(sender, "is.admin.rename")) {
                     sender.sendMessage(getPlugin().getLocale(pl).errorNoPermission);
                     break;
                 }
@@ -177,7 +177,7 @@ public class OperatorCategory extends SubCategory {
                 });
                 break;
             case "cobblestats":
-                if (!sender.hasPermission("is.admin.cobblestats")) {
+                if (!hasPermission(sender, "is.admin.cobblestats")) {
                     sender.sendMessage(getPlugin().getLocale(pl).errorNoPermission);
                     break;
                 }
@@ -206,7 +206,7 @@ public class OperatorCategory extends SubCategory {
                 }
                 break;
             case "delete":
-                if (!sender.hasPermission("is.admin.delete")) {
+                if (!hasPermission(sender, "is.admin.delete")) {
                     sender.sendMessage(getPlugin().getLocale(pl).errorNoPermission);
                     break;
                 }

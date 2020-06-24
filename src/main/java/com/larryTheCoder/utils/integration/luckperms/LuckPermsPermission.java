@@ -28,49 +28,77 @@
 package com.larryTheCoder.utils.integration.luckperms;
 
 import cn.nukkit.Player;
-import com.larryTheCoder.ASkyBlock;
+import cn.nukkit.command.CommandSender;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Utils;
-import me.lucko.luckperms.LuckPerms;
-import me.lucko.luckperms.api.LuckPermsApi;
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.User;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.cacheddata.CachedPermissionData;
+import net.luckperms.api.context.ContextManager;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.model.user.UserManager;
+import net.luckperms.api.query.QueryOptions;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Implementation to LuckPermsPermission
  * aka, PermissionEx
  */
-public class LuckPermsPermission {
+public class LuckPermsPermission extends Permission {
 
-    private final ASkyBlock plugin;
-    private LuckPermsApi pubApi;
+    private LuckPerms luckPerms;
 
-    public LuckPermsPermission(ASkyBlock instance) {
-        this.plugin = instance;
-        this.getLuckPerms();
+    public LuckPermsPermission() {
+        getLuckPerms();
     }
 
     private void getLuckPerms() {
         try {
-            pubApi = LuckPerms.getApi();
+            luckPerms = LuckPermsProvider.get();
+
+            Utils.send("&7Successfully integrated with LuckPerms &7plugin.");
         } catch (IllegalStateException ignored) {
             TaskManager.runTaskLater(this::getLuckPerms, 60);
-            return;
         }
-        Utils.send("&aSuccessfully integrated with LuckPerms plugin.");
     }
 
-    public boolean hasPermission(Player p, String permission) {
-        User user = pubApi.getUser(p.getName());
-        for (Node perm : user.getPermissions()) {
-            if (!perm.getPermission().equalsIgnoreCase(permission) && !perm.getValue()) {
-                continue;
-            }
-            return true;
+    @Override
+    public boolean hasPermission(CommandSender sender, String permission) {
+        if (!(sender instanceof Player)) return true;
+
+        User user = luckPerms.getUserManager().getUser(((Player) sender).getUniqueId());
+        if (user == null) {
+            Utils.sendDebug("The user " + sender.getName() + " were not found in LuckPermsAPI");
+            return false;
         }
-        // Permission either not found or doesn't applied to
-        // This user.
-        return false;
+
+        ContextManager cm = luckPerms.getContextManager();
+
+        QueryOptions queryOptions = cm.getQueryOptions(user).orElse(cm.getStaticQueryOptions());
+        CachedPermissionData permissionData = user.getCachedData().getPermissionData(queryOptions);
+
+        return permissionData.checkPermission(permission).asBoolean();
     }
 
+    public Map<String, Boolean> getPermissions(UUID uniqueId) {
+        UserManager userManager = luckPerms.getUserManager();
+        CompletableFuture<User> userFuture = userManager.loadUser(uniqueId);
+
+        User user = userFuture.join();
+        if (user == null) {
+            Utils.sendDebug("The UUID " + uniqueId.toString() + " were not found in LuckPermsAPI");
+            return null;
+        }
+
+        ContextManager cm = luckPerms.getContextManager();
+
+        QueryOptions queryOptions = cm.getQueryOptions(user).orElse(cm.getStaticQueryOptions());
+        CachedPermissionData permissionData = user.getCachedData().getPermissionData(queryOptions);
+
+        return permissionData.getPermissionMap();
+
+    }
 }

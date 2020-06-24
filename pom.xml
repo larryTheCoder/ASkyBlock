@@ -1,4 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Adapted from the Wizardry License
+  ~
+  ~ Copyright (c) 2016-2020 larryTheCoder and contributors
+  ~
+  ~ Permission is hereby granted to any persons and/or organizations
+  ~ using this software to copy, modify, merge, publish, and distribute it.
+  ~ Said persons and/or organizations are not allowed to use the software or
+  ~ any derivatives of the work for commercial use or any other means to generate
+  ~ income, nor are they allowed to claim this software as their own.
+  ~
+  ~ The persons and/or organizations are also disallowed from sub-licensing
+  ~ and/or trademarking this software without explicit permission from larryTheCoder.
+  ~
+  ~ Any persons and/or organizations using this software must disclose their
+  ~ source code and have it publicly available, include this license,
+  ~ provide sufficient credit to the original authors of the project (IE: larryTheCoder),
+  ~ as well as provide a link to the original project.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+  ~ INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR
+  ~ PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+  ~ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  ~ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+  ~ USE OR OTHER DEALINGS IN THE SOFTWARE.
+  -->
+
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -70,9 +97,10 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>me.lucko.luckperms</groupId>
-            <artifactId>luckperms-api</artifactId>
-            <version>4.3</version>
+            <groupId>net.luckperms</groupId>
+            <artifactId>api</artifactId>
+            <version>5.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>

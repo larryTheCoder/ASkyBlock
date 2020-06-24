@@ -56,16 +56,16 @@ public class CoopCategory extends SubCategory {
     public boolean canUse(CommandSender sender, String command) {
         switch (command.toLowerCase()) {
             case "accept":
-                return sender.hasPermission("is.command.accept") && sender.isPlayer();
+                return hasPermission(sender, "is.command.accept") && sender.isPlayer();
             case "deny":
             case "reject":
-                return sender.hasPermission("is.command.reject") && sender.isPlayer();
+                return hasPermission(sender, "is.command.reject") && sender.isPlayer();
             case "invite":
-                return sender.hasPermission("is.command.invite") && sender.isPlayer();
+                return hasPermission(sender, "is.command.invite") && sender.isPlayer();
             case "kickmember":
-                return sender.hasPermission("is.command.kick") && sender.isPlayer();
+                return hasPermission(sender, "is.command.kick") && sender.isPlayer();
             case "quit":
-                return sender.hasPermission("is.command.quit") && sender.isPlayer();
+                return hasPermission(sender, "is.command.quit") && sender.isPlayer();
         }
         return false;
     }

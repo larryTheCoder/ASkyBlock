@@ -27,13 +27,8 @@
 package com.larryTheCoder.events;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.event.Cancellable;
-import cn.nukkit.event.Event;
 import cn.nukkit.event.HandlerList;
-import cn.nukkit.level.Location;
-import cn.nukkit.math.Vector2;
-import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.IslandData;
 import lombok.Getter;
 
@@ -52,9 +47,9 @@ public class IslandCreateEvent extends SkyBlockEvent implements Cancellable {
     private final int schematicId;
 
     /**
-     * @param player The player class who is involved in this event
+     * @param player      The player class who is involved in this event
      * @param schematicId The schematic id of the island.
-     * @param island The data of the island.
+     * @param island      The data of the island.
      */
     public IslandCreateEvent(Player player, int schematicId, IslandData island) {
         super(player, island);

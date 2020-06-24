@@ -33,7 +33,6 @@ import cn.nukkit.block.Block;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.permission.PermissionAttachmentInfo;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.larryTheCoder.ASkyBlock;
@@ -136,9 +135,13 @@ public class LevelCalcTask extends Thread {
             // Get the player multiplier if it available
             int levelMultiplier = 1;
             if (targetPlayer != null) {
-                for (Map.Entry<String, PermissionAttachmentInfo> pType : targetPlayer.getEffectivePermissions().entrySet()) {
+                Map<String, Boolean> plPermission = plugin.getPermissionHandler().getPermissions(targetPlayer.getUniqueId());
+
+                for (Map.Entry<String, Boolean> pType : plPermission.entrySet()) {
                     String type = pType.getKey();
-                    if (!type.startsWith("is.multiplier.")) {
+
+                    // Statement: The player has the multiplier, but the player do not have the permission
+                    if (!type.startsWith("is.multiplier.") || !pType.getValue()) {
                         continue;
                     }
 

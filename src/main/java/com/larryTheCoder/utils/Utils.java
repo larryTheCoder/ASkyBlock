@@ -137,7 +137,7 @@ public class Utils {
     }
 
     public static boolean canBypassTimer(Player p, String what, int seconds) {
-        if (p.hasPermission("is.bypass.wait")) {
+        if (ASkyBlock.get().getPermissionHandler().hasPermission(p, "is.bypass.wait")) {
             return true;
         }
         String key = what + "." + p.getName();
