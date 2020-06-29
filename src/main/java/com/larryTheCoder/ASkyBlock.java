@@ -68,7 +68,6 @@ import org.sql2o.Query;
 import org.sql2o.data.Table;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -240,7 +239,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         Properties properties = new Properties();
         try {
             properties.load(getResource("git-sb.properties"));
-        } catch (IOException e) {
+        } catch (Throwable e) {
             getServer().getLogger().info("§cERROR! We cannot load the git loader for this ASkyBlock build!");
             // Wtf? Maybe this user is trying to using unofficial build of ASkyBlock?
             // Or they just wanna to create a PR to do a fix?
@@ -278,9 +277,9 @@ public class ASkyBlock extends ASkyBlockAPI {
         Utils.EnsureDirectory(Utils.UPDATES_DIRECTORY);
 
         // Use common sense on every damn thing
-        saveResource("config.yml");
+        saveResource("config.yml", true);
         saveResource("worlds.yml");
-        saveResource("quests.yml");
+        //saveResource("quests.yml"); // TODO
         saveResource("blockvalues.yml", true);
         saveResource("schematics/island.schematic");
         saveResource("schematics/featured.schematic");
@@ -290,21 +289,21 @@ public class ASkyBlock extends ASkyBlockAPI {
 
         cfg = new Config(new File(getDataFolder(), "config.yml"), Config.YAML);
         worldConfig = new Config(new File(getDataFolder(), "worlds.yml"), Config.YAML);
-        recheck();
+
         ConfigManager.load();
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void recheck() {
+    public static void recheck() {
         File file = new File(ASkyBlock.get().getDataFolder(), "config.yml");
         Config config = new Config(file, Config.YAML);
-        if (!Utils.isNumeric(config.get("version")) || config.getInt("version", 0) < 1) {
+        if (!Utils.isNumeric(config.get("version")) || config.getInt("version", 0) < 2) {
             file.renameTo(new File(ASkyBlock.get().getDataFolder(), "config.old"));
             ASkyBlock.get().saveResource("config.yml");
             Utils.send("&cYour configuration file is outdated! We are creating you new one, please wait...");
             Utils.send("&aYour old config will be renamed into config.old!");
         }
-        cfg.reload(); // Reload the config
+        ASkyBlock.get().cfg.reload(); // Reload the config
     }
 
     private void generateLevel() {

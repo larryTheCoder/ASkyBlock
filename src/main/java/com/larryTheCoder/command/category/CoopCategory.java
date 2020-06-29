@@ -152,31 +152,19 @@ public class CoopCategory extends SubCategory {
                     }
 
                     if (!data.isAdmin(p)) {
-                        p.sendMessage(getPrefix() + "You are not an admin in this server.");
+                        p.sendMessage(getPrefix() + "You are not an admin in this island.");
                         return;
                     }
 
                     getPlugin().getFastCache().getIslandData(data.getIslandUniqueId(), pd -> {
+                        Player inviter = p.getServer().getPlayer(args[1]);
+                        if (inviter == null) {
+                            p.sendMessage(getPrefix() + getLocale(p).errorOfflinePlayer);
+                            return;
+                        }
 
+                        getPlugin().getInvitationHandler().addInvitation(sender, inviter, pd);
                     });
-//                    if (!data.getPlotOwner().equalsIgnoreCase(p.getName())) {
-//                        p.sendMessage(getPrefix() + "That is not your island!");
-//                        return;
-//                    }
-//
-//                    Player inviter = p.getServer().getPlayer(args[1]);
-//                    if (inviter == null) {
-//                        p.sendMessage(getPrefix() + getLocale(p).errorOfflinePlayer);
-//                        return;
-//                    }
-//
-//                    getPlugin().getFastCache().getRelations(p.getName(), relation -> {
-//                        if (relation == null) {
-//                            //getPlugin().getInvitationHandler().addInvitation(p, inviter, );
-//                        } else {
-//                            sender.sendMessage(getPrefix() + getLocale(p).errorInTeam.replace("[player]", args[1]));
-//                        }
-//                    });
                 });
                 break;
         }

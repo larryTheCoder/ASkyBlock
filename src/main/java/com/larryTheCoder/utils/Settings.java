@@ -50,7 +50,7 @@ public class Settings {
     public static int deathPenalty;
     public static boolean sumTeamDeaths;
     public static final ArrayList<String> bannedCommands = new ArrayList<>();
-    public static int reset = 3;
+    public static int islandReset = 3;
     public static int gameMode;
     public static int memberTimeOut;
     public static Item[] chestItems = new Item[0];
@@ -59,6 +59,7 @@ public class Settings {
     public static boolean saveInventory;
     public static int resetTime;
     public static String defaultLanguage;
+    public static int loadCacheBefore = 30;
 
     // Levels
     // The format are as 'FullID => Level'

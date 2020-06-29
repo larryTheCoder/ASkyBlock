@@ -54,6 +54,7 @@ public class ConfigManager {
      * Loads the various settings from the config.yml file into the plugin
      */
     public static void load() {
+        ASkyBlock.recheck();
         Config cfg = new Config(new File(ASkyBlock.get().getDataFolder(), "config.yml"), Config.YAML);
 
         // The order in this file should match the order in config.yml so that it is easy to check that everything is covered
@@ -78,11 +79,11 @@ public class ConfigManager {
                 }
             }
         }
-        Settings.reset = cfg.getInt("island.reset", 0);
+        Settings.islandReset = cfg.getInt("island.reset", 0);
         Settings.gameMode = cfg.getInt("island.gameMode", 0);
         Settings.memberTimeOut = cfg.getInt("island.timeOut", 0);
         //Chest Items
-        Settings.resetTime = cfg.getInt("island.deleteTiming", 0);
+        Settings.resetTime = cfg.getInt("island.island-delay-timeout", 0);
         String chestItems = cfg.getString("island.items.chestItems", "");
         // Check chest items
         if (!chestItems.isEmpty()) {
@@ -125,6 +126,7 @@ public class ConfigManager {
             Settings.chestItems = new Item[0];
         }
         Settings.saveInventory = cfg.getBoolean("island.saveInventory");
+        Settings.loadCacheBefore = cfg.getInt("island.cache-load-before", 30);
         // Challenges
         Settings.broadcastMessages = cfg.getBoolean("general.broadcastmessages", true);
         // ******************** Biome Settings *********************

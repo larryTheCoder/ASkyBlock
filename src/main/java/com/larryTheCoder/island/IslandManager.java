@@ -35,6 +35,7 @@ import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
+import com.google.common.base.Preconditions;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.CoopData;
 import com.larryTheCoder.cache.IslandData;
@@ -46,14 +47,12 @@ import com.larryTheCoder.events.IslandCreateEvent;
 import com.larryTheCoder.task.DeleteIslandTask;
 import com.larryTheCoder.task.SimpleFancyTitle;
 import com.larryTheCoder.task.TaskManager;
+import com.larryTheCoder.utils.IslandAwaitStore;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import org.sql2o.Connection;
-import org.sql2o.data.Row;
-import org.sql2o.data.Table;
 
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Core management for SkyBlock world and
@@ -64,19 +63,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class IslandManager {
 
     private final ASkyBlock plugin;
-    private CopyOnWriteArrayList<String> uniqueId = new CopyOnWriteArrayList<>();
 
     public IslandManager(ASkyBlock plugin) {
         this.plugin = plugin;
-
-        // Saves island UniqueIds into an array.
-        plugin.getDatabase().pushQuery((conn) -> {
-            Table table = conn.createQuery(TableSet.FETCH_ALL_ISLAND_UNIQUE.getQuery()).executeAndFetchTable();
-
-            for (Row rows : table.rows()) {
-                uniqueId.add(rows.getString("islandUniqueId"));
-            }
-        });
     }
 
     public void handleIslandCommand(Player pl, boolean reset) {
@@ -221,8 +210,6 @@ public class IslandManager {
 
                     // Then we call a task to run them in the main thread.
                     TaskManager.runTask(() -> {
-                        Utils.sendDebug("Pasting island.");
-
                         // Call an event
                         IslandCreateEvent event = new IslandCreateEvent(pl, templateId, resultData);
                         plugin.getServer().getPluginManager().callEvent(event);
@@ -232,7 +219,7 @@ public class IslandManager {
                         }
                         plugin.getSchematics().pasteSchematic(pl, locIsland, templateId, biome);
 
-                        Utils.sendDebug("Island pasted, attempting to insert into database.");
+                        IslandAwaitStore.storeAwaitData(pl.getUniqueId());
 
                         // Then apply another async query.
                         ASkyBlock.get().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
@@ -311,7 +298,8 @@ public class IslandManager {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNoIsland);
             return;
         }
-        if (!Utils.canBypassTimer(p, p.getName() + pd.getIslandUniquePlotId(), Settings.resetTime)) {
+
+        if (!IslandAwaitStore.canBypassAwait(p)) {
             p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorTooSoon.replace("[secs]", Utils.getPlayerRTime(p, p.getName() + pd.getIslandUniquePlotId(), 0)).replace("[cmds]", "delete"));
             return;
         }
@@ -379,24 +367,24 @@ public class IslandManager {
     }
 
     /**
-     * Check either the location given is the player
-     * island
+     * Check if the location desired is the player's island location, this can be used
+     * if the checks are related to the player.
      *
      * @param player The player to be check
      * @param loc    Location to be checked
      * @return true if the location is player's island
      */
     public boolean locationIsOnIsland(Player player, Vector3 loc) {
-        if (player == null) {
-            return false;
-        }
+        Preconditions.checkArgument(player != null, "Player class cannot be null.");
+
         Location local = new Location(loc.x, loc.y, loc.z, player.getLevel());
         // Get the player's island from the grid if it exists
         IslandData island = plugin.getFastCache().getIslandData(local);
         CoopData pd = plugin.getFastCache().getRelations(local);
+
         // On an island in the grid
         // In a protected zone but is on the list of acceptable players
         // Otherwise return false
-        return island.onIsland(local) && ((pd == null || pd.getMembers().contains(player.getName())) || island.getPlotOwner().equalsIgnoreCase(player.getName()));
+        return island != null && (island.onIsland(local) && ((pd == null || pd.getMembers().contains(player.getName())) || island.getPlotOwner().equalsIgnoreCase(player.getName())));
     }
 }

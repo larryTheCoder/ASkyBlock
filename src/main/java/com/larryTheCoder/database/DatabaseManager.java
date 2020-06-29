@@ -29,11 +29,15 @@ package com.larryTheCoder.database;
 
 import cn.nukkit.api.API;
 import cn.nukkit.utils.TextFormat;
+import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.cache.FastCache;
 import com.larryTheCoder.database.config.AbstractConfig;
 import com.larryTheCoder.database.config.MySQLConfig;
 import com.larryTheCoder.task.TaskManager;
+import com.larryTheCoder.utils.IslandAwaitStore;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+import lombok.extern.log4j.Log4j2;
 import org.sql2o.Connection;
 import org.sql2o.Query;
 import org.sql2o.data.Row;
@@ -55,6 +59,7 @@ import static com.larryTheCoder.database.TableSet.*;
  * to execute the query using FIFO order. This method is more reliable as the process
  * will not be interrupted on main thread.
  */
+@Log4j2
 public class DatabaseManager {
 
     public static final String DB_VERSION = "0.1.7";
@@ -109,7 +114,8 @@ public class DatabaseManager {
                 PLAYER_CHALLENGES,
                 ISLAND_TABLE,
                 ISLAND_DATA,
-                ISLAND_RELATIONS
+                ISLAND_RELATIONS,
+                ISLAND_LIMIT_COUNT
         };
 
         if (isMysql) {
@@ -159,6 +165,7 @@ public class DatabaseManager {
                 Utils.send(TextFormat.GOLD + "Updated database information to " + TextFormat.YELLOW + "v" + DB_VERSION);
             }
         }
+        IslandAwaitStore.init(connection);
 
         // If the database is a mysql database, we can
         // apply as many connections we want since this database
@@ -226,6 +233,10 @@ public class DatabaseManager {
                             }
                         });
                     }
+                    IslandAwaitStore.databaseTick(connection);
+                    FastCache cache = ASkyBlock.get().getFastCache();
+                    if (cache != null) cache.databaseTick();
+
                     long nowTick = System.currentTimeMillis() - lastTick;
 
                     // The execution took 50ms to execute, do not bother sleeping this thread.
@@ -235,8 +246,7 @@ public class DatabaseManager {
                     Thread.sleep(50 - nowTick);
                 } catch (Throwable e) {
                     // Sync up with console.
-
-                    TaskManager.runTask(e::printStackTrace);
+                    log.throwing(e);
                 }
             }
         });
@@ -249,6 +259,7 @@ public class DatabaseManager {
         if (currentPoolSize < maxPool) startAsyncPool(maxPool);
     }
 
+    // TODO: Use Future<> class for better performance?
     public abstract static class DatabaseImpl {
 
         /**

@@ -33,7 +33,7 @@
     <name>ASkyBlock</name>
     <groupId>larryTheCoder</groupId>
     <artifactId>SkyBlock</artifactId>
-    <version>v0.5.1-BLEEDING</version>
+    <version>v0.5.2-BETA</version>
     <description>Minecraft BE SkyBlock minigame plugin for Nukkit</description>
     <inceptionYear>2016</inceptionYear>
 
@@ -76,7 +76,7 @@
         <dependency>
             <groupId>cn.nukkit</groupId>
             <artifactId>nukkit</artifactId>
-            <version>1.0-20200423.205734-801</version>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>

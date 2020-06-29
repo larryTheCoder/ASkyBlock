@@ -36,7 +36,6 @@ import com.google.common.base.Preconditions;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.database.TableSet;
-import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import lombok.Getter;
@@ -69,8 +68,8 @@ public class FastCache {
     private String cacheValidationId;
 
     // To securely store FastCache timestamp into a .json file.
-    public static final ConcurrentLinkedQueue<FastCacheData> storeSchedule = new ConcurrentLinkedQueue<>();
-    public final AtomicBoolean isClosed = new AtomicBoolean(true);
+    public final ConcurrentLinkedQueue<FastCacheData> storeSchedule = new ConcurrentLinkedQueue<>();
+    public final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     public FastCache(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -79,7 +78,7 @@ public class FastCache {
     }
 
     public void shutdownCache() {
-        isClosed.compareAndSet(true, false);
+        isRunning.compareAndSet(true, false);
     }
 
     private void addAllCacheData(List<FastCacheData> list) {
@@ -87,7 +86,7 @@ public class FastCache {
     }
 
     private void loadFastCache() {
-        config = new Config(Utils.DIRECTORY + "cache.yml", Config.YAML);
+        config = new Config(Utils.DIRECTORY + "cache.json", Config.JSON);
 
         if (config.getString("cacheVerificationId").isEmpty()) {
             config.set("cacheVerificationId", DatabaseManager.currentCacheId);
@@ -181,27 +180,31 @@ public class FastCache {
                 ASkyBlock.get().getFastCache().addAllCacheData(dataCache);
                 storeSchedule.clear(); // Remove useless caches.
 
-                TaskManager.runTaskAsync(() -> {
-                    while (isClosed.get()) {
-                        FastCacheData consumer;
-                        while ((consumer = storeSchedule.poll()) != null) {
-                            ConfigSection playerSec = new ConfigSection();
-                            playerSec.set("lastFetched", consumer.lastUpdatedQuery);
-                            playerSec.set("islandIds", new ArrayList<>(consumer.getIslandData().keySet()));
-
-                            config.set(consumer.getDataIdentifier(), playerSec);
-                            config.save();
-                        }
-
-                        try {
-                            Thread.sleep(50);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
+                isRunning.compareAndSet(true, false);
             }
         });
+    }
+
+    /**
+     * This function is to be used by Database class to save the config file without
+     * sacrificing the server TPS by running this in another thread.
+     * <p>
+     * This usage is INTERNAL ONLY, DO NOT RUN THIS IN ANY CODE.
+     */
+    public void databaseTick() {
+        if (!isRunning.get()) return;
+
+        FastCacheData consumer;
+        while ((consumer = storeSchedule.poll()) != null) {
+            ConfigSection playerSec = new ConfigSection();
+            playerSec.set("lastFetched", consumer.lastUpdatedQuery);
+            playerSec.set("islandIds", new ArrayList<>(consumer.getIslandData().keySet()));
+
+            config.set(consumer.getDataIdentifier(), playerSec);
+            config.save();
+        }
+
+        Utils.send("Ticking...");
     }
 
     public boolean containsId(String value) {
@@ -771,12 +774,12 @@ public class FastCache {
 
         private Timestamp lastUpdatedQuery;
 
-        private String ownedBy;
-
         @Getter
         private Map<Integer, IslandData> islandData = new HashMap<>();
         @Getter
         private PlayerData playerData = null;
+
+        private final String ownedBy;
 
         FastCacheData(String playerName) {
             this.ownedBy = playerName;
@@ -842,7 +845,7 @@ public class FastCache {
         void updateTime() {
             lastUpdatedQuery = Timestamp.from(Instant.now());
 
-            storeSchedule.offer(this);
+            ASkyBlock.get().getFastCache().storeSchedule.offer(this);
         }
 
         public String getDataIdentifier() {

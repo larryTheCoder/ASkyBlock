@@ -45,7 +45,7 @@ public class SQLiteConfig implements AbstractConfig {
     private Sql2o connection;
 
     public SQLiteConfig(Config data) {
-        this.file = new File(ASkyBlock.get().getDataFolder(), data.getString("database.SQLite.file-name") + ".db");
+        this.file = new File(ASkyBlock.get().getDataFolder(), data.getString("database.SQLite.file-name"));
         this.dbLocation = file.getAbsolutePath();
     }
 

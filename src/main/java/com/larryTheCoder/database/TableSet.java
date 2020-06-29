@@ -80,6 +80,11 @@ public enum TableSet {
             "FOREIGN KEY (islandLeader) REFERENCES player(playerName) ON UPDATE CASCADE," +
             "PRIMARY KEY (defaultIsland, islandLeader)) %OPTIMIZE"),
 
+    ISLAND_LIMIT_COUNT("CREATE TABLE IF NOT EXISTS lastExecution(" +
+            "playerUniqueId VARCHAR(64) NOT NULL," +
+            "lastQueried BIGINT NOT NULL" +
+            ") %OPTIMIZE"),
+
     METADATA_TABLE("CREATE TABLE IF NOT EXISTS cacheMetadata(" +
             "dbVersion INT NOT NULL," +
             "firstInit DEFAULT CURRENT_TIMESTAMP," +
@@ -95,7 +100,7 @@ public enum TableSet {
     FETCH_PLAYER_MAIN("SELECT * FROM player WHERE playerName = :plotOwner"),
     FETCH_PLAYER_DATA("SELECT * FROM challenges WHERE player = :playerName"),
     FETCH_ISLAND_UNIQUE("SELECT * FROM island WHERE islandUniqueId = :islandUniqueId AND levelName = :levelName"),
-    FETCH_LEVEL_PLOT("SELECT * FROM island WHERE AND islandUniqueId = :islandId"),
+    FETCH_LEVEL_PLOT("SELECT * FROM island WHERE islandUniqueId = :islandId"),
     FETCH_ISLAND_PLOTS("SELECT * FROM island WHERE playerName = :pName"),
     FETCH_ISLAND_PLOT("SELECT * FROM island WHERE playerName = :pName AND islandId = :islandId"),
     FETCH_ISLAND_NAME("SELECT * FROM island WHERE playerName = :pName AND islandName = :islandName"),

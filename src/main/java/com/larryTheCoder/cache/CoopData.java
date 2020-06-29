@@ -51,9 +51,9 @@ public class CoopData {
     @Getter
     private String teamName;
     @Getter
-    private List<String> members;
+    private final List<String> members;
     @Getter
-    private List<String> admins;
+    private final List<String> admins;
 
     public CoopData(Row coopData) {
         this.islandUniqueId = coopData.getString("defaultIsland");

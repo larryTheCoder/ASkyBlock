@@ -53,7 +53,6 @@ import static com.larryTheCoder.database.TableSet.PLAYER_INSERT_MAIN;
  * Events that associate to player
  * behaviors and etc
  */
-@SuppressWarnings("unused")
 public class PlayerEvent implements Listener {
 
     private final ASkyBlock plugin;
@@ -133,7 +132,7 @@ public class PlayerEvent implements Listener {
                             .addParameter("playerName", p.getName())
                             .addParameter("playerUUID", p.getUniqueId().toString())
                             .addParameter("locale", p.getLoginChainData().getLanguageCode())
-                            .addParameter("resetLeft", Settings.reset)
+                            .addParameter("resetLeft", Settings.islandReset)
                             .addParameter("banList", "")
                             .executeUpdate();
 

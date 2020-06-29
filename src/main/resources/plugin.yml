@@ -1,9 +1,9 @@
 name: "ASkyBlock"
-version: "0.5.1-BLEEDING"
+version: "0.5.2-BETA"
 author: "larryTheCoder"
 api: ["1.0.0"]
 main: com.larryTheCoder.ASkyBlock
-website: http://github.com/TheSolidCrafter/ASkyBlock-Nukkit
+website: http://github.com/larryTheCoder/ASkyBlock-Nukkit
 authors:
   - PikyCZ
   - Skull3x
