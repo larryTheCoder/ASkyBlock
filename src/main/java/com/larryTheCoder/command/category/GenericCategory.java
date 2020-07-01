@@ -36,7 +36,7 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.island.TopTen;
-import com.larryTheCoder.locales.ASlocales;
+import com.larryTheCoder.locales.LocaleInstance;
 import com.larryTheCoder.updater.Updater;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
@@ -173,7 +173,7 @@ public class GenericCategory extends SubCategory {
                         break;
                     }
 
-                    ASlocales locale = getPlugin().getAvailableLocales()
+                    LocaleInstance locale = getPlugin().getAvailableLocales()
                             .values().stream()
                             .filter(i -> i.getIndex() == index)
                             .findAny().orElse(null);
@@ -235,7 +235,7 @@ public class GenericCategory extends SubCategory {
         player.sendMessage(TextFormat.RED + "/is lang <#>");
 
         TreeMap<Integer, String> locales = new TreeMap<>();
-        for (ASlocales locale : getPlugin().getAvailableLocales().values()) {
+        for (LocaleInstance locale : getPlugin().getAvailableLocales().values()) {
             if (!locale.getLocaleName().equalsIgnoreCase("locale")) {
                 locales.put(locale.getIndex(), locale.getLanguageName() + " (" + locale.getCountryName() + ")");
             }

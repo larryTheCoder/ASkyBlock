@@ -33,7 +33,7 @@ import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.command.PluginCommand;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.command.category.*;
-import com.larryTheCoder.locales.ASlocales;
+import com.larryTheCoder.locales.LocaleInstance;
 import com.larryTheCoder.utils.Utils;
 
 import java.util.ArrayList;
@@ -184,7 +184,7 @@ public class Commands extends PluginCommand<ASkyBlock> {
         }
     }
 
-    private ASlocales getLocale(Player key) {
+    private LocaleInstance getLocale(Player key) {
         return getPlugin().getLocale(key);
     }
 }

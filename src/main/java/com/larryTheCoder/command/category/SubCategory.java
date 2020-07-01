@@ -31,7 +31,7 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import com.google.common.base.Preconditions;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.locales.ASlocales;
+import com.larryTheCoder.locales.LocaleInstance;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -58,7 +58,7 @@ public abstract class SubCategory {
         this.plugin = plugin;
     }
 
-    protected ASlocales getLocale(Player key) {
+    protected LocaleInstance getLocale(Player key) {
         return plugin.getLocale(key);
     }
 

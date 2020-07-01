@@ -35,7 +35,7 @@ import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.listener.LavaCheck;
-import com.larryTheCoder.locales.ASlocales;
+import com.larryTheCoder.locales.LocaleInstance;
 import com.larryTheCoder.locales.FileLister;
 import com.larryTheCoder.utils.integration.economy.EconomyAPI;
 
@@ -268,13 +268,13 @@ public class ConfigManager {
         }
 
         // Load languages
-        HashMap<String, ASlocales> availableLocales = new HashMap<>();
+        HashMap<String, LocaleInstance> availableLocales = new HashMap<>();
         FileLister fl = new FileLister(ASkyBlock.get());
         try {
             int index = 1;
             for (String code : fl.list()) {
                 //Utils.sendDebug("DEBUG: lang file = " + code);
-                availableLocales.put(code, new ASlocales(ASkyBlock.get(), code, index++));
+                availableLocales.put(code, new LocaleInstance(ASkyBlock.get(), code, index++));
             }
         } catch (IOException e1) {
             Utils.send("&cCould not add locales!");
@@ -282,7 +282,7 @@ public class ConfigManager {
         if (!availableLocales.containsKey(Settings.defaultLanguage)) {
             Utils.send("&c'" + Settings.defaultLanguage + ".yml' not found in /locale folder. Using /locale/en_US.yml");
             Settings.defaultLanguage = "en_US";
-            availableLocales.put(Settings.defaultLanguage, new ASlocales(ASkyBlock.get(), Settings.defaultLanguage, 0));
+            availableLocales.put(Settings.defaultLanguage, new LocaleInstance(ASkyBlock.get(), Settings.defaultLanguage, 0));
         }
         ASkyBlock.get().setAvailableLocales(availableLocales);
         Utils.send(TextFormat.YELLOW + "Successfully checked config.yml");

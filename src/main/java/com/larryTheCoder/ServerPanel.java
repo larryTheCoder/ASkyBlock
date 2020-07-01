@@ -41,7 +41,7 @@ import cn.nukkit.form.window.FormWindowSimple;
 import cn.nukkit.level.biome.EnumBiome;
 import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.cache.settings.IslandSettings;
-import com.larryTheCoder.locales.ASlocales;
+import com.larryTheCoder.locales.LocaleInstance;
 import com.larryTheCoder.schematic.SchematicHandler;
 import com.larryTheCoder.utils.SettingsFlag;
 
@@ -477,7 +477,7 @@ public class ServerPanel implements Listener {
         panelDataId.put(id, PanelType.SECOND_TIME_SETTING);
     }
 
-    private ASlocales getLocale(Player p) {
+    private LocaleInstance getLocale(Player p) {
         return plugin.getLocale(p);
     }
 
