@@ -46,7 +46,7 @@ import java.util.Set;
  * @author larryTheCoder
  * @author tastybento
  */
-public final class ASlocales {
+public final class LocaleInstance {
 
     private final static Set<String> TITLE_COLORS = new HashSet<>(Arrays.asList(
             "black",
@@ -202,7 +202,7 @@ public final class ASlocales {
      * @param localeName - name of the yml file that will be used
      * @param index      The count of the file processed
      */
-    public ASlocales(ASkyBlock plugin, String localeName, int index) {
+    public LocaleInstance(ASkyBlock plugin, String localeName, int index) {
         this.plugin = plugin;
         this.index = index;
         this.localeName = localeName;

@@ -52,7 +52,7 @@ import com.larryTheCoder.listener.IslandListener;
 import com.larryTheCoder.listener.LavaCheck;
 import com.larryTheCoder.listener.PlayerEvent;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
-import com.larryTheCoder.locales.ASlocales;
+import com.larryTheCoder.locales.LocaleInstance;
 import com.larryTheCoder.schematic.SchematicHandler;
 import com.larryTheCoder.task.LevelCalcTask;
 import com.larryTheCoder.task.TaskManager;
@@ -94,7 +94,7 @@ public class ASkyBlock extends ASkyBlockAPI {
 
     private boolean disabled = false;
     // Localization Strings
-    private HashMap<String, ASlocales> availableLocales = new HashMap<>();
+    private HashMap<String, LocaleInstance> availableLocales = new HashMap<>();
     private Properties pluginGit;
 
     /**
@@ -386,7 +386,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         return cfg.getString("Prefix").replace("&", "§");
     }
 
-    public ASlocales getLocale(CommandSender sender) {
+    public LocaleInstance getLocale(CommandSender sender) {
         return sender.isPlayer() ? getLocale((Player) sender) : getLocale("");
     }
 
@@ -397,7 +397,7 @@ public class ASkyBlock extends ASkyBlockAPI {
      * @param p Player|null
      * @return ASlocales class
      */
-    public ASlocales getLocale(Player p) {
+    public LocaleInstance getLocale(Player p) {
         return p == null ? getLocale("") : getLocale(p.getName());
     }
 
@@ -408,12 +408,12 @@ public class ASkyBlock extends ASkyBlockAPI {
      * @param p Player name
      * @return ASlocales class
      */
-    public ASlocales getLocale(String p) {
+    public LocaleInstance getLocale(String p) {
         if (p == null || p.isEmpty()) {
             return getAvailableLocales().get(Settings.defaultLanguage);
         }
 
-        return getAvailableLocales().get(getFastCache().getDefaultLocale(p));
+        return getAvailableLocales().getOrDefault(getFastCache().getDefaultLocale(p), getAvailableLocales().get(Settings.defaultLanguage));
     }
 
     /**
@@ -450,7 +450,7 @@ public class ASkyBlock extends ASkyBlockAPI {
      *
      * @return HashMap that contains String and ASlocales
      */
-    public HashMap<String, ASlocales> getAvailableLocales() {
+    public HashMap<String, LocaleInstance> getAvailableLocales() {
         return availableLocales;
     }
 
@@ -461,7 +461,7 @@ public class ASkyBlock extends ASkyBlockAPI {
      *
      * @param availableLocales HashMap that contains String and ASlocales
      */
-    public void setAvailableLocales(HashMap<String, ASlocales> availableLocales) {
+    public void setAvailableLocales(HashMap<String, LocaleInstance> availableLocales) {
         this.availableLocales = availableLocales;
     }
 
