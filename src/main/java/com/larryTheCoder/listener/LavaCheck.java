@@ -39,8 +39,10 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.IslandData;
+import com.larryTheCoder.utils.BlockUtil;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,10 +56,12 @@ import static cn.nukkit.block.BlockID.*;
  * @author tastybento
  * @author larryTheCoder
  */
+@Log4j2
 public class LavaCheck implements Listener {
 
-    private static Map<Integer, Multiset<Block>> stats = new HashMap<>();
-    private static Map<Integer, Map<Block, Double>> configChances = new HashMap<>();
+    private static final Map<Integer, Multiset<Block>> stats = new HashMap<>();
+    private static final Map<Integer, Map<Block, Double>> configChances = new HashMap<>();
+
     private final ASkyBlock plugin;
 
     public LavaCheck(ASkyBlock plugin) {
@@ -123,31 +127,46 @@ public class LavaCheck implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onCleanstoneGen(BlockFromToEvent e) {
         // If magic cobble gen isn't used
-        if (!Settings.useMagicCobbleGen) {
-            return;
-        }
+        if (!Settings.useMagicCobbleGen) return;
+
         // Do this only in the SkyBlock world
         if (notInWorld(e.getBlock().getLocation())) {
             return;
         }
 
-        Block block = e.getTo();
-        if (block.getId() == WATER || block.getId() == STILL_WATER || block.getId() == LAVA || block.getId() == STILL_LAVA) {
-            Block flowedFrom = e.getBlock();
+        log.debug("DEBUG: BlockFromToEvent - magicCobbleStone");
+        log.debug("DEBUG: BlockTo: " + e.getTo().toString());
+        log.debug("DEBUG: BlockFrom: " + e.getFrom().toString());
+        log.debug("DEBUG: Original Block: " + e.getBlock().toString());
 
-            if (!generatesCobble(block, flowedFrom)) {
-                return;
-            }
-
-            IslandData pd = plugin.getFastCache().getIslandData(e.getBlock());
-            if (pd != null && pd.getPlotOwner() != null) {
-                plugin.getFastCache().getPlayerData(pd.getPlotOwner(), pd2 -> invokeGenerate(e, pd2.getIslandLevel()));
-
-                return;
-            }
-
-            invokeGenerate(e, Integer.MIN_VALUE);
+        Block fluidBlock;
+        if (BlockUtil.isFluid(e.getTo())) {
+            fluidBlock = e.getTo();
+        } else if (BlockUtil.isFluid(e.getFrom())) {
+            fluidBlock = e.getFrom();
+        } else {
+            log.debug("DEBUG: No block fluids were found");
+            return;
         }
+
+        Block flowedFrom = e.getBlock();
+
+        if (!generatesCobble(fluidBlock, flowedFrom)) {
+            return;
+        }
+
+        log.debug("Object is under generatesCobble influence");
+
+        // This method cannot be async since the events are relying on
+        // setCancelled()
+        IslandData island = plugin.getFastCache().getIslandData(e.getBlock());
+        if (island != null && island.getPlotOwner() != null) {
+            invokeGenerate(e, island.getIslandLevel());
+
+            return;
+        }
+
+        invokeGenerate(e, Integer.MIN_VALUE);
     }
 
     public void invokeGenerate(BlockFromToEvent e, int islandLevel) {

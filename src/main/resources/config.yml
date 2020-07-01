@@ -231,25 +231,29 @@ protection:
 
 # General section
 general:
-  # The time for teleports 
-  # Must be in integer
-  # Put 0 if you dont want to enable this
+  # The time required for the player to get teleported to their
+  #  island destination, you can set this to 0 if you want this to be
+  #  disabled.
   islandTeleportDelay: 2
   # Teleport cancel distance
-  # How far players can go to cancel
-  # Teleports
+  #  How far can a player travel until the teleportation stops
+  #  You can't disable this but you can specify a higher values of this
+  #  so that the distance that the player travels wont be cancelled.
   teleportCancelDistance: 0.2
   # Broadcast 1st time challenge completion messages to all players.
-  # Change to false if the spam becomes too much.
-  broadcastmessages: true
-  # Toggle Magic Cobblestone Generator
-  # If set to true, a cobble generator will not just generate cobblestone, but
-  # also blocks you have specified.
-  # Default is false, because it highly changes the gameplay.
+  #  Change to false if the spam becomes too much.
+  broadcastmessages: false
+  # The magic cobble stone generator
+  #  This generator relies on the island level, the higher player's island
+  #  level, the more chances that the custom ores will generate [As configured below]
+  #  [NOTICE]
+  #  You cannot generate any Obsidian if this is set to true, the reason is that the
+  #  water flow needs to check in all bidirectional blocks so that the code can create
+  #  this blocks.
   usemagiccobblegen: true
-  # This won't be considered if usemagiccobblegen is set to false.
-  # You can add, remove a block or modify its probability to be generated.
-  # You can also set different probabilities from specified minimum levels
+  # This keys wont even be bothered if "usemagiccobblegen" were set to false.
+  #  And if its not, then you can continue modifying this settings so that the
+  #  the probabilities of a block being set is used for generating custom blocks.
   magiccobblegenchances:
     # These probabilities will apply by default
     default:

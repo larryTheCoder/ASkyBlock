@@ -38,6 +38,7 @@ import com.larryTheCoder.utils.IslandAwaitStore;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import lombok.extern.log4j.Log4j2;
+import net.jcip.annotations.ThreadSafe;
 import org.sql2o.Connection;
 import org.sql2o.Query;
 import org.sql2o.data.Row;
@@ -62,7 +63,7 @@ import static com.larryTheCoder.database.TableSet.*;
 @Log4j2
 public class DatabaseManager {
 
-    public static final String DB_VERSION = "0.1.7";
+    public static final String DB_VERSION = "0.1.8";
     public static String currentCacheId;
 
     private final AbstractConfig database;
@@ -154,6 +155,7 @@ public class DatabaseManager {
                     case "0.1.6":
                         connection.createQuery("ALTER TABLE islandRelations ADD COLUMN islandAdmins TEXT DEFAULT ''").executeUpdate();
                     case "0.1.7":
+                        connection.createQuery("ALTER TABLE islandData ADD COLUMN islandLevel INTEGER DEFAULT 0").executeUpdate();
                         break;
                 }
 

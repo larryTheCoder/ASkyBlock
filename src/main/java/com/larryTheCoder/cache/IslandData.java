@@ -71,7 +71,11 @@ public class IslandData implements Cloneable {
     // Protection size
     @Setter
     private int protectionRange = 0;
+
+    @Getter
     private int levelHandicap = 0;
+    @Getter
+    private int islandLevel = 0;
 
     // CoopDatabase
     @Getter
@@ -119,6 +123,7 @@ public class IslandData implements Cloneable {
         this.plotBiome = dataObj.getString("biome");
         this.isLocked = dataObj.getInteger("locked") == 1;
         this.levelHandicap = dataObj.getInteger("levelHandicap");
+        this.islandLevel = dataObj.getInteger("islandLevel");
         this.settings = new IslandSettings(dataObj.getString("protectionData"));
     }
 
@@ -363,10 +368,6 @@ public class IslandData implements Cloneable {
         return hash;
     }
 
-    public int getLevelHandicap() {
-        return levelHandicap;
-    }
-
     /**
      * Save island data asynchronously
      */
@@ -391,6 +392,7 @@ public class IslandData implements Cloneable {
                         .addParameter("isLocked", isLocked ? 1 : 0)
                         .addParameter("protectionData", settings.getSettings())
                         .addParameter("levelHandicap", levelHandicap)
+                        .addParameter("islandLevel", islandLevel)
                         .executeUpdate();
             }
         });

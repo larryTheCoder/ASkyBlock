@@ -39,11 +39,11 @@ public enum BlockUtil {
     private static final Collection<Integer> FLUIDS = Arrays.asList(Block.STILL_WATER, Block.WATER, Block.LAVA, Block.STILL_LAVA);
 
     public static boolean isBreathable(Block block) {
-        return !block.isSolid() && isFluid(block);
+        return !block.isSolid() && !isFluid(block);
     }
 
     public static boolean isFluid(Block block) {
-        return !FLUIDS.contains(block.getId());
+        return FLUIDS.contains(block.getId());
     }
 
     public static boolean isFluid(int type) {

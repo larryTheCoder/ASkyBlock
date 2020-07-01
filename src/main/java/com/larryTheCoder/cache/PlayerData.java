@@ -57,9 +57,6 @@ public class PlayerData implements Cloneable {
     @Setter @Getter
     private int resetLeft;
 
-    @Setter @Getter
-    private int islandLevel;
-
     private final HashMap<String, Boolean> challengeList = new HashMap<>();
     private final HashMap<String, Integer> challengeListTimes = new HashMap<>();
 
@@ -78,14 +75,13 @@ public class PlayerData implements Cloneable {
         setupChallengeList();
     }
 
-    private PlayerData(String playerName, String playerXUID, String pubLocale, List<String> banList, int resetAttempts, int islandLevels, Row clData) {
+    private PlayerData(String playerName, String playerXUID, String pubLocale, List<String> banList, int resetAttempts, Row clData) {
         this.playerName = playerName;
         this.playerXUID = playerXUID;
 
         this.locale = pubLocale;
         this.banList = banList;
         this.resetLeft = resetAttempts;
-        this.islandLevel = islandLevels;
 
         if (clData == null) {
             setupChallengeList();
@@ -101,7 +97,6 @@ public class PlayerData implements Cloneable {
                 dataRow.getString("locale"),
                 Utils.stringToArray(dataRow.getString("banList"), ":"),
                 dataRow.getInteger("resetAttempts"),
-                dataRow.getInteger("islandLevels"),
                 challengeData);
     }
 
@@ -176,8 +171,8 @@ public class PlayerData implements Cloneable {
 
     @Override
     public String toString() {
-        return String.format("PlayerData(playerName=%s, playerXUID=%s, resetLeft=%s, islandLevel=%s, locale=%s)",
-                playerName, playerXUID, resetLeft, islandLevel, locale);
+        return String.format("PlayerData(playerName=%s, playerXUID=%s, resetLeft=%s, locale=%s)",
+                playerName, playerXUID, resetLeft, locale);
     }
 
     /**
@@ -192,7 +187,6 @@ public class PlayerData implements Cloneable {
                         .addParameter("locale", locale)
                         .addParameter("banList", Utils.arrayToString(banList))
                         .addParameter("resetLeft", resetLeft)
-                        .addParameter("islandLevels", islandLevel)
                         .executeUpdate();
 
                 connection.createQuery(PLAYER_UPDATE_DATA.getQuery())

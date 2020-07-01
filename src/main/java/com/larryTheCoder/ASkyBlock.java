@@ -266,7 +266,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         grid = new GridManager(this);
         inventory = new InventorySave();
 
-        Updater.getUpdate();
+        if (Settings.checkUpdate) Updater.getUpdate();
     }
 
     private void initConfig() {

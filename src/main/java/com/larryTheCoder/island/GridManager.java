@@ -92,7 +92,7 @@ public class GridManager {
             for (int z = -1; z <= 1; z++) {
                 Position pos = ground.add(x, 0, z);
                 Block block = pos.getLevelBlock();
-                if (block.isSolid() && BlockUtil.isFluid(block)) {
+                if (block.isSolid() && !BlockUtil.isFluid(block)) {
                     safeBlock++;
                 }
             }
