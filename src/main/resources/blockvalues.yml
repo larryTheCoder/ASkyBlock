@@ -23,6 +23,14 @@ maxdeaths: 10
 islandresetdeathreset: true
 # Reset deaths on team join
 teamjoindeathreset: true
+# How much points required for an island to reach an another level.
+# This method adds another block on each level, which can be explained with this mathematical equation
+#   nextLevel = totalBlockScores / (scoresPerLevel * totalLevel)
+# TODO: Custom per-level scores entry.
+scoresPerLevel: 5500
+# Maximum level that an island can get, you can set this to -1 so that the amount of level
+# will be infinite.
+levelLimitCount: -1
 
 # This section lists the limits for any particular block. Blocks over this amount
 # are not counted.

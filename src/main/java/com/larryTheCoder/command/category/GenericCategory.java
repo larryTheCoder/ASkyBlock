@@ -30,9 +30,7 @@ package com.larryTheCoder.command.category;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
-import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.island.TopTen;
@@ -124,9 +122,11 @@ public class GenericCategory extends SubCategory {
 
         switch (args[0].toLowerCase()) {
             case "test":
-                Level level = Server.getInstance().getLevelByName("SkyBlock");
+                getPlugin().getFastCache().getIslandData(p, island -> {
+                    getPlugin().getLevelCalcThread().addUpdateQueue(island);
 
-                p.teleport(Location.fromObject(new Vector3(100, 100, 300), level));
+                    p.sendMessage("Testing...");
+                });
                 break;
             case "expel":
             case "kick":

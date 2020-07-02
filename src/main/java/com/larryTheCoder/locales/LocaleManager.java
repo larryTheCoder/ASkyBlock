@@ -25,33 +25,17 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.larryTheCoder.utils;
+package com.larryTheCoder.locales;
 
-import cn.nukkit.command.CommandSender;
-import com.larryTheCoder.cache.IslandData;
-import lombok.Getter;
+import com.google.common.base.Preconditions;
 
-/**
- * Stores a data regarding the user and its sender
- */
-public class StoreMetadata {
+public class LocaleManager {
 
-    private static int DATA_COUNT = 0;
+    public static LocaleManager instance;
 
-    private final int id;
-    @Getter
-    private final IslandData islandData;
-    @Getter
-    private final CommandSender sender;
+    public LocaleManager() {
+        Preconditions.checkArgument(instance == null, "Locale manager has already been initialized.");
 
-    public StoreMetadata(IslandData p, CommandSender sender) {
-        this.islandData = p;
-        this.sender = sender;
-        this.id = StoreMetadata.DATA_COUNT++;
-    }
-
-    @Override
-    public int hashCode() {
-        return islandData.hashCode() + sender.hashCode() * id;
+        instance = this;
     }
 }

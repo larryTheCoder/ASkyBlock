@@ -38,7 +38,6 @@ import com.larryTheCoder.utils.IslandAwaitStore;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import lombok.extern.log4j.Log4j2;
-import net.jcip.annotations.ThreadSafe;
 import org.sql2o.Connection;
 import org.sql2o.Query;
 import org.sql2o.data.Row;
@@ -261,7 +260,7 @@ public class DatabaseManager {
         if (currentPoolSize < maxPool) startAsyncPool(maxPool);
     }
 
-    // TODO: Use Future<> class for better performance?
+    // TODO: Use CompletableFuture<> class for better performance?
     public abstract static class DatabaseImpl {
 
         /**

@@ -34,29 +34,24 @@ import cn.nukkit.event.block.BlockFromToEvent;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Sound;
 import cn.nukkit.level.particle.SmokeParticle;
-import cn.nukkit.math.BlockFace;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.IslandData;
-import com.larryTheCoder.utils.BlockUtil;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
-import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Stream;
 
-import static cn.nukkit.block.BlockID.*;
+import static cn.nukkit.block.BlockID.COBBLESTONE;
 
 /**
  * @author tastybento
  * @author larryTheCoder
  */
-@Log4j2
 public class LavaCheck implements Listener {
 
     private static final Map<Integer, Multiset<Block>> stats = new HashMap<>();
@@ -134,28 +129,9 @@ public class LavaCheck implements Listener {
             return;
         }
 
-        log.debug("DEBUG: BlockFromToEvent - magicCobbleStone");
-        log.debug("DEBUG: BlockTo: " + e.getTo().toString());
-        log.debug("DEBUG: BlockFrom: " + e.getFrom().toString());
-        log.debug("DEBUG: Original Block: " + e.getBlock().toString());
-
-        Block fluidBlock;
-        if (BlockUtil.isFluid(e.getTo())) {
-            fluidBlock = e.getTo();
-        } else if (BlockUtil.isFluid(e.getFrom())) {
-            fluidBlock = e.getFrom();
-        } else {
-            log.debug("DEBUG: No block fluids were found");
+        if (e.getTo().getId() != COBBLESTONE) {
             return;
         }
-
-        Block flowedFrom = e.getBlock();
-
-        if (!generatesCobble(fluidBlock, flowedFrom)) {
-            return;
-        }
-
-        log.debug("Object is under generatesCobble influence");
 
         // This method cannot be async since the events are relying on
         // setCancelled()
@@ -198,13 +174,4 @@ public class LavaCheck implements Listener {
             }
         }
     }
-
-    public boolean generatesCobble(Block block, Block toBlock) {
-        int mirrorID1 = block.getId() == WATER || block.getId() == STILL_WATER ? LAVA : WATER;
-        int mirrorID2 = block.getId() == WATER || block.getId() == STILL_WATER ? STILL_LAVA : STILL_WATER;
-        return Stream.of(BlockFace.values())
-                .anyMatch(face -> toBlock.getSide(face).getId() == mirrorID1
-                        || toBlock.getSide(face).getId() == mirrorID2);
-    }
-
 }

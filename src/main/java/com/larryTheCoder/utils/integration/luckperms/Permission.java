@@ -51,5 +51,5 @@ public abstract class Permission {
      * @param uniqueId The player unique id that needs to be checked.
      * @return {@code true} the list of permissions that the player had.
      */
-    public abstract Map<String, Boolean> getPermissions(UUID uuid);
+    public abstract Map<String, Boolean> getPermissions(UUID uniqueId);
 }

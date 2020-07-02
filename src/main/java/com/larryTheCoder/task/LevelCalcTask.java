@@ -27,10 +27,9 @@
 
 package com.larryTheCoder.task;
 
-import cn.nukkit.Player;
+import cn.nukkit.OfflinePlayer;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
-import cn.nukkit.command.CommandSender;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
 import com.google.common.collect.HashMultiset;
@@ -39,9 +38,9 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.utils.Settings;
-import com.larryTheCoder.utils.StoreMetadata;
 import com.larryTheCoder.utils.Utils;
 import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -53,19 +52,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Calculates the level of the island
  */
+@Log4j2
 public class LevelCalcTask extends Thread {
 
     private final ASkyBlock plugin;
-    private final List<String> reportLines = new ArrayList<>();
-    private final AtomicBoolean isRunning = new AtomicBoolean(true);
 
-    private final Queue<StoreMetadata> levelUpdateQueue = new ArrayDeque<>(32);
+    private final AtomicBoolean isRunning = new AtomicBoolean(true);
+    private final Queue<IslandData> levelUpdateQueue = new ArrayDeque<>(32);
 
     public LevelCalcTask(ASkyBlock plugin) {
         this.plugin = plugin;
 
         setName("SkyBlock Calculation Thread");
-        setDaemon(true);
         start();
 
         Utils.send("&7Started island level calculation thread.");
@@ -85,10 +83,9 @@ public class LevelCalcTask extends Thread {
      * their executions.
      *
      * @param islandDb The player island data that will be checked
-     * @param sender   The sender who executed this command
      */
-    public void addUpdateQueue(IslandData islandDb, CommandSender sender) {
-        levelUpdateQueue.add(new StoreMetadata(islandDb, sender));
+    public void addUpdateQueue(IslandData islandDb) {
+        levelUpdateQueue.add(islandDb);
 
         synchronized (this) {
             notify();
@@ -115,28 +112,19 @@ public class LevelCalcTask extends Thread {
      * with a wait-for-resources technique.
      */
     private void updateList() {
-        int size = Math.min(1048575, levelUpdateQueue.size());
+        IslandData pd;
+        while ((pd = levelUpdateQueue.poll()) != null) {
+            long localId = System.currentTimeMillis();
 
-        if (size == 0) {
-            return;
-        }
+            OfflinePlayer targetPlayer = Server.getInstance().lookupName(pd.getPlotOwner())
+                    .map(uuid -> new OfflinePlayer(Server.getInstance(), uuid))
+                    .orElse(new OfflinePlayer(Server.getInstance(), pd.getPlotOwner()));
 
-        int limit = Math.min(10, size); // Uh, thread
-        StoreMetadata[] copy = new StoreMetadata[limit];
-        for (int i = 0; i < limit; i++) {
-            copy[i] = levelUpdateQueue.poll();
-        }
-
-        for (StoreMetadata data : copy) {
-            IslandData pd = data.getIslandData();
-            Player targetPlayer = Server.getInstance().getPlayer(pd.getPlotOwner());
-            CommandSender sender = data.getSender();
-
-            // Get the player multiplier if it available
+            // Get the player multiplier if its available
             int levelMultiplier = 1;
-            if (targetPlayer != null) {
-                Map<String, Boolean> plPermission = plugin.getPermissionHandler().getPermissions(targetPlayer.getUniqueId());
+            Map<String, Boolean> plPermission = plugin.getPermissionHandler().getPermissions(targetPlayer.getUniqueId());
 
+            if (plPermission != null) {
                 for (Map.Entry<String, Boolean> pType : plPermission.entrySet()) {
                     String type = pType.getKey();
 
@@ -185,20 +173,21 @@ public class LevelCalcTask extends Thread {
             int finalLevelMultiplier = levelMultiplier;
 
             // I wonder why I bother trying to pass these execution into an async worker lmao
-            File log;
+            File logFile;
             PrintWriter out = null;
             List<Integer> mdLog = new ArrayList<>();
             List<Integer> noCountLog = new ArrayList<>();
             List<Integer> overflowLog = new ArrayList<>();
+            List<String> reportLines = new ArrayList<>();
 
             if (Settings.verboseCode) {
-                log = new File(plugin.getDataFolder(), "level.log");
+                logFile = new File(plugin.getDataFolder(), "level.log");
                 try {
-                    log.createNewFile();
-                    if (log.exists()) {
-                        out = new PrintWriter(new FileWriter(log, true));
+                    logFile.createNewFile();
+                    if (logFile.exists()) {
+                        out = new PrintWriter(new FileWriter(logFile, true));
                     } else {
-                        out = new PrintWriter(log);
+                        out = new PrintWriter(logFile);
                     }
                 } catch (IOException e) {
                     Utils.sendDebug("Level log (level.log) could not be opened...");
@@ -208,7 +197,7 @@ public class LevelCalcTask extends Thread {
                 Utils.sendDebug("Debugging chunk info for island " + pd.getIslandUniquePlotId());
             }
 
-            WorldSettings settings = ASkyBlock.get().getSettings(level.getName());
+            WorldSettings settings = ASkyBlock.get().getSettings(pd.getLevelName());
 
             int blockScore = 0;
 
@@ -279,12 +268,9 @@ public class LevelCalcTask extends Thread {
                 Multiset<Integer> mdCount = HashMultiset.create(mdLog);
                 Multiset<Integer> ncCount = HashMultiset.create(noCountLog);
                 Multiset<Integer> ofCount = HashMultiset.create(overflowLog);
+                reportLines.add(String.format("---------------- [%s] ----------------", localId));
                 reportLines.add("Level Log for island at " + pd.getCenter());
-                if (targetPlayer != null) {
-                    reportLines.add("Asker is " + sender.getName());
-                } else {
-                    reportLines.add("Asker is " + pd.getPlotOwner());
-                }
+                reportLines.add("Asker is " + targetPlayer.getName());
                 reportLines.add("Total block score count = " + String.format("%,d", blockScore));
                 reportLines.add("Level cost = " + Settings.levelCost);
                 reportLines.add("Level multiplier = " + levels + " (Player must be online to get a permission multiplier)");
@@ -334,7 +320,7 @@ public class LevelCalcTask extends Thread {
                     Block block = Block.get(type.getElement() >> 4, type.getElement() & 0x0f);
                     reportLines.add(block.toString() + ": " + String.format("%,d", type.getCount()) + " blocks");
                 }
-                reportLines.add("====================================");
+                reportLines.add(String.format("---------------- [%s] ----------------", localId));
 
                 if (out != null) {
                     // Write to file
@@ -344,6 +330,8 @@ public class LevelCalcTask extends Thread {
                     Utils.sendDebug("Finished writing level log.");
                     out.close();
                 }
+
+                reportLines.clear();
             }
 
             // Calculate how many points are required to get to the next level
@@ -353,7 +341,7 @@ public class LevelCalcTask extends Thread {
                 calculatePointsToNextLevel = (Settings.levelCost * (score + 2 + levelHandicap)) - ((blockScore * finalLevelMultiplier) - (deathHandicap * Settings.deathPenalty));
             }
 
-            final int pointsToNextLevel = calculatePointsToNextLevel;
+            log.debug("Score: " + score);
         }
     }
 
