@@ -199,9 +199,9 @@ public class ConfigManager {
             }
         }
 
-        // ****************** Levels blockvalues.yml ****************
-        // Get the blockvalues.yml file
-        Config levelCfg = new Config(new File(ASkyBlock.get().getDataFolder(), "blockvalues.yml"), Config.YAML);
+        // ****************** Levels blocks.yml ****************
+        // Get the blocks.yml file
+        Config levelCfg = new Config(new File(ASkyBlock.get().getDataFolder(), "blocks.yml"), Config.YAML);
 
         // Get the under water multiplier
         Settings.deathPenalty = levelCfg.getInt("deathpenalty", 0);
@@ -212,7 +212,7 @@ public class ConfigManager {
         Settings.levelCost = levelCfg.getInt("levelcost", 100);
         if (Settings.levelCost < 1) {
             Settings.levelCost = 1;
-            Utils.send("&clevelcost in blockvalues.yml cannot be less than 1. Setting to 1.");
+            Utils.send("&clevelcost in blocks.yml cannot be less than 1. Setting to 1.");
         }
 
         ConfigSection section = levelCfg.getSection("limits");
@@ -233,7 +233,7 @@ public class ConfigManager {
                     item.setDamage(data);
                     Settings.blockLimits.put(item.getFullId(), levelCfg.getInt("limits." + material, 0));
                 } catch (Exception e) {
-                    Utils.sendDebug("&eUnknown material (" + material + ") in blockvalues.yml Limits section. Skipping...");
+                    Utils.sendDebug("&eUnknown material (" + material + ") in blocks.yml Limits section. Skipping...");
                 }
             }
         }
@@ -260,11 +260,11 @@ public class ConfigManager {
 
                     Settings.blockValues.put(block.getFullId(), value);
                 } catch (Exception e) {
-                    Utils.send("&cUnknown material (" + material + ") in blockvalues.yml blocks section. Skipping...");
+                    Utils.send("&cUnknown material (" + material + ") in blocks.yml blocks section. Skipping...");
                 }
             }
         } else {
-            Utils.send("&cNo block values in blockvalues.yml! All island levels will be zero!");
+            Utils.send("&cNo block values in blocks.yml! All island levels will be zero!");
         }
 
         // Load languages

@@ -311,7 +311,7 @@ public class LevelCalcTask extends Thread {
                     reportLines.add(block.toString() + ": " + String.format("%,d", type.getCount()) + " blocks (max " + limits + explain);
                 }
                 reportLines.add("==================================");
-                reportLines.add("Blocks on island that are not in blockvalues.yml");
+                reportLines.add("Blocks on island that are not in blocks.yml");
                 reportLines.add("Total number = " + String.format("%,d", ncCount.size()));
                 entriesSortedByCount = ncCount.entrySet();
                 it = entriesSortedByCount.iterator();
@@ -334,14 +334,10 @@ public class LevelCalcTask extends Thread {
                 reportLines.clear();
             }
 
-            // Calculate how many points are required to get to the next level
-            int calculatePointsToNextLevel = (Settings.levelCost * (score + 1 + levelHandicap)) - ((blockScore * finalLevelMultiplier) - (deathHandicap * Settings.deathPenalty));
-            // Sometimes it will return 0, so calculate again to make sure it will display a good value
-            if (calculatePointsToNextLevel == 0) {
-                calculatePointsToNextLevel = (Settings.levelCost * (score + 2 + levelHandicap)) - ((blockScore * finalLevelMultiplier) - (deathHandicap * Settings.deathPenalty));
-            }
+            log.debug("RESULT THREAD: " + score);
 
-            log.debug("Score: " + score);
+            pd.setIslandLevel(score);
+            pd.saveIslandData();
         }
     }
 

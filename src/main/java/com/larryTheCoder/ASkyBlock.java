@@ -280,7 +280,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         saveResource("config.yml", true);
         saveResource("worlds.yml");
         //saveResource("quests.yml"); // TODO
-        saveResource("blockvalues.yml", true);
+        saveResource("blocks.yml");
         saveResource("schematics/island.schematic");
         saveResource("schematics/featured.schematic");
         saveResource("schematics/double.schematic");

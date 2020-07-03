@@ -29,8 +29,6 @@ package com.larryTheCoder.database;
 
 import cn.nukkit.api.API;
 import cn.nukkit.utils.TextFormat;
-import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.cache.FastCache;
 import com.larryTheCoder.database.config.AbstractConfig;
 import com.larryTheCoder.database.config.MySQLConfig;
 import com.larryTheCoder.task.TaskManager;
@@ -62,7 +60,7 @@ import static com.larryTheCoder.database.TableSet.*;
 @Log4j2
 public class DatabaseManager {
 
-    public static final String DB_VERSION = "0.1.8";
+    public static final String DB_VERSION = "0.1.9";
     public static String currentCacheId;
 
     private final AbstractConfig database;
@@ -155,6 +153,20 @@ public class DatabaseManager {
                         connection.createQuery("ALTER TABLE islandRelations ADD COLUMN islandAdmins TEXT DEFAULT ''").executeUpdate();
                     case "0.1.7":
                         connection.createQuery("ALTER TABLE islandData ADD COLUMN islandLevel INTEGER DEFAULT 0").executeUpdate();
+                    case "0.1.8":
+                        connection.createQuery("CREATE TABLE player_dg_tmp" +
+                                "(playerName VARCHAR(100) PRIMARY KEY," +
+                                "playerUUID VARCHAR(36)," +
+                                "locale TEXT NOT NULL," +
+                                "banList TEXT NOT NULL," +
+                                "resetAttempts INTEGER NOT NULL," +
+                                "lastLogin DATETIME default CURRENT_TIMESTAMP)").executeUpdate();
+                        //noinspection SqlResolve
+                        connection.createQuery("INSERT INTO player_dg_tmp(playerName, playerUUID, locale, banList, resetAttempts) select playerName, playerUUID, locale, banList, resetAttempts from player");
+                        connection.createQuery("DROP TABLE player").executeUpdate();
+                        //noinspection SqlResolve
+                        connection.createQuery("ALTER TABLE player_dg_tmp RENAME TO player").executeUpdate();
+                    case "0.1.9":
                         break;
                 }
 
@@ -235,8 +247,6 @@ public class DatabaseManager {
                         });
                     }
                     IslandAwaitStore.databaseTick(connection);
-                    FastCache cache = ASkyBlock.get().getFastCache();
-                    if (cache != null) cache.databaseTick();
 
                     long nowTick = System.currentTimeMillis() - lastTick;
 
@@ -252,7 +262,6 @@ public class DatabaseManager {
             }
         });
         asyncThread.setName(String.format("Asynchronous SkyBlock-Database Pool #%s", currentPoolSize));
-        asyncThread.setDaemon(true);
         asyncThread.start();
 
         currentPoolSize++;

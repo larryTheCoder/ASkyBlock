@@ -29,9 +29,6 @@ package com.larryTheCoder.cache;
 
 import cn.nukkit.Player;
 import cn.nukkit.level.Position;
-import cn.nukkit.utils.Config;
-import cn.nukkit.utils.ConfigSection;
-import cn.nukkit.utils.TextFormat;
 import com.google.common.base.Preconditions;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.database.DatabaseManager;
@@ -47,7 +44,6 @@ import org.sql2o.data.Table;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -64,12 +60,7 @@ public class FastCache {
     private final List<FastCacheData> dataCache = new ArrayList<>();
     private final List<String> uniqueId = new ArrayList<>();
 
-    private Config config;
-    private String cacheValidationId;
-
-    // To securely store FastCache timestamp into a .json file.
-    public final ConcurrentLinkedQueue<FastCacheData> storeSchedule = new ConcurrentLinkedQueue<>();
-    public final AtomicBoolean isRunning = new AtomicBoolean(false);
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     public FastCache(ASkyBlock plugin) {
         this.plugin = plugin;
@@ -86,48 +77,27 @@ public class FastCache {
     }
 
     private void loadFastCache() {
-        config = new Config(Utils.DIRECTORY + "cache.json", Config.JSON);
-
-        if (config.getString("cacheVerificationId").isEmpty()) {
-            config.set("cacheVerificationId", DatabaseManager.currentCacheId);
-            config.save();
-
-            cacheValidationId = DatabaseManager.currentCacheId;
-        } else {
-            cacheValidationId = config.getString("cacheVerificationId");
-
-            if (!cacheValidationId.equals(DatabaseManager.currentCacheId)) {
-                Utils.send(TextFormat.RED + "Cache metadata mismatched with database info.");
-                config.setAll(new ConfigSection());
-                config.set("cacheVerificationId", DatabaseManager.currentCacheId);
-
-                config.save();
-            }
-        }
-
         plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
             private final List<FastCacheData> dataCache = new ArrayList<>();
 
             @Override
             public void executeQuery(Connection connection) {
-                for (String userName : config.getAll().keySet()) {
-                    if (userName.equals("cacheVerificationId")) {
-                        continue;
-                    }
+                // If the table FETCH ALL players are empty, it means that the server doesn't
+                // have any players played in this game "yet"
+                Table stmt = connection.createQuery(FETCH_ALL_PLAYERS.getQuery()).executeAndFetchTable();
+                if (stmt.rows().size() == 0) return;
+
+                for (Row plData : stmt.rows()) {
+                    Date date = Date.from(Timestamp.valueOf(plData.getString("lastLogin")).toInstant());
+                    if (date.compareTo(Date.from(Instant.now())) >= Settings.loadCacheBefore) continue;
+
+                    String userName = plData.getString("playerName");
 
                     FastCacheData data = new FastCacheData(userName);
-
-                    Row plData;
                     Row clData;
 
                     // Fetch user info
-                    Table table = connection.createQuery(FETCH_PLAYER_MAIN.getQuery())
-                            .addParameter("plotOwner", userName)
-                            .executeAndFetchTable();
-
-                    plData = table.rows().get(0);
-
-                    table = connection.createQuery(FETCH_PLAYER_DATA.getQuery())
+                    Table table = connection.createQuery(FETCH_PLAYER_DATA.getQuery())
                             .addParameter("playerName", userName)
                             .executeAndFetchTable();
 
@@ -165,9 +135,7 @@ public class FastCache {
 
                 Table table = connection.createQuery(TableSet.FETCH_ALL_ISLAND_UNIQUE.getQuery()).executeAndFetchTable();
 
-                for (Row rows : table.rows()) {
-                    uniqueId.add(rows.getString("islandUniqueId"));
-                }
+                for (Row rows : table.rows()) uniqueId.add(rows.getString("islandUniqueId"));
             }
 
             @Override
@@ -178,33 +146,10 @@ public class FastCache {
                 Utils.sendDebug(String.format("Loaded %s cache data.", dataCache.size()));
 
                 ASkyBlock.get().getFastCache().addAllCacheData(dataCache);
-                storeSchedule.clear(); // Remove useless caches.
 
-                isRunning.compareAndSet(true, false);
+                isRunning.compareAndSet(false, true);
             }
         });
-    }
-
-    /**
-     * This function is to be used by Database class to save the config file without
-     * sacrificing the server TPS by running this in another thread.
-     * <p>
-     * This usage is INTERNAL ONLY, DO NOT RUN THIS IN ANY CODE.
-     */
-    public void databaseTick() {
-        if (!isRunning.get()) return;
-
-        FastCacheData consumer;
-        while ((consumer = storeSchedule.poll()) != null) {
-            ConfigSection playerSec = new ConfigSection();
-            playerSec.set("lastFetched", consumer.lastUpdatedQuery);
-            playerSec.set("islandIds", new ArrayList<>(consumer.getIslandData().keySet()));
-
-            config.set(consumer.getDataIdentifier(), playerSec);
-            config.save();
-        }
-
-        Utils.send("Ticking...");
     }
 
     public boolean containsId(String value) {
@@ -756,23 +701,14 @@ public class FastCache {
     }
 
     public void clearSavedCaches() {
-        synchronized (dataCache) {
-            dataCache.clear();
-        }
+        dataCache.clear();
+    }
 
-        synchronized (storeSchedule) {
-            storeSchedule.clear();
-
-            config.setAll(new ConfigSection());
-            config.set("cacheVerificationId", cacheValidationId);
-
-            config.save();
-        }
+    public void dumpAllCaches() {
+        Utils.send(dataCache.toString());
     }
 
     private static class FastCacheData {
-
-        private Timestamp lastUpdatedQuery;
 
         @Getter
         private Map<Integer, IslandData> islandData = new HashMap<>();
@@ -794,62 +730,47 @@ public class FastCache {
 
         public void addIslandData(IslandData newData) {
             Preconditions.checkState(!islandData.containsKey(newData.getIslandUniquePlotId()), "IslandData already exists in this cache.");
-            updateTime();
 
             islandData.put(newData.getIslandUniquePlotId(), newData);
         }
 
         void setPlayerData(PlayerData playerData) {
             Preconditions.checkState(playerData != null, "PlayerData cannot be null");
-            updateTime();
 
             this.playerData = playerData;
         }
 
         public void removeIsland(IslandData pd) {
             islandData.remove(pd.getIslandUniquePlotId());
-
-            updateTime();
         }
 
         boolean anyMatch(String pl) {
-            updateTime();
-
             return playerData == null ? ownedBy.equalsIgnoreCase(pl) : playerData.getPlayerName().equalsIgnoreCase(pl);
         }
 
         boolean anyIslandUidMatch(int islandUId) {
-            updateTime();
-
             return islandData.values().stream().anyMatch(o -> o.getIslandUniquePlotId() == islandUId);
         }
 
         boolean anyIslandMatch(int islandId) {
-            updateTime();
-
             return islandData.values().stream().anyMatch(o -> o.getHomeCountId() == islandId);
         }
 
         IslandData getIslandByUId(int homeUIdKey) {
-            updateTime();
-
             return islandData.values().stream().filter(i -> i.getIslandUniquePlotId() == homeUIdKey).findFirst().orElse(null);
         }
 
         IslandData getIslandById(int homeId) {
-            updateTime();
-
             return islandData.values().stream().filter(i -> i.getHomeCountId() == homeId).findFirst().orElse(null);
         }
 
-        void updateTime() {
-            lastUpdatedQuery = Timestamp.from(Instant.now());
-
-            ASkyBlock.get().getFastCache().storeSchedule.offer(this);
-        }
-
-        public String getDataIdentifier() {
-            return ownedBy;
+        @Override
+        public String toString() {
+            return "FastCacheData{" +
+                    "islandData=" + islandData +
+                    ", playerData=" + playerData +
+                    ", ownedBy='" + ownedBy + '\'' +
+                    '}';
         }
     }
 }

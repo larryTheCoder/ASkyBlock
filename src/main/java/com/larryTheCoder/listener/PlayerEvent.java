@@ -120,6 +120,7 @@ public class PlayerEvent implements Listener {
 
         plugin.getFastCache().getPlayerData(p, pd -> {
             if (pd != null) {
+                pd.saveData();
                 return;
             }
 
@@ -159,14 +160,6 @@ public class PlayerEvent implements Listener {
                 }
             });
         });
-
-
-        // Load messages
-        List<String> news = plugin.getMessages().getMessages(p.getName());
-
-        if (news != null && news.isEmpty()) {
-            p.sendMessage(plugin.getLocale(p).newNews.replace("[count]", Integer.toString(news.size())));
-        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)

@@ -49,13 +49,14 @@ public class GenericCategory extends SubCategory {
 
     @Override
     public List<String> getCommands() {
-        return Arrays.asList("expel", "kick", "lobby", "leave", "spawn", "locale", "protection", "settings", "top", "about", "test");
+        return Arrays.asList("expel", "kick", "lobby", "leave", "spawn", "locale", "protection", "settings", "top", "about", "test", "clear");
     }
 
     @Override
     public boolean canUse(CommandSender sender, String command) {
         switch (command.toLowerCase()) {
             case "test":
+            case "clear":
                 return sender.isOp();
             case "expel":
             case "kick":
@@ -121,12 +122,13 @@ public class GenericCategory extends SubCategory {
         Player p = Server.getInstance().getPlayer(sender.getName());
 
         switch (args[0].toLowerCase()) {
-            case "test":
-                getPlugin().getFastCache().getIslandData(p, island -> {
-                    getPlugin().getLevelCalcThread().addUpdateQueue(island);
+            case "clear":
+                getPlugin().getFastCache().clearSavedCaches();
 
-                    p.sendMessage("Testing...");
-                });
+                Utils.send("DONE");
+                break;
+            case "test":
+                getPlugin().getFastCache().dumpAllCaches();
                 break;
             case "expel":
             case "kick":

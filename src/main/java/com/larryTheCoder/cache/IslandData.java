@@ -73,8 +73,10 @@ public class IslandData implements Cloneable {
     private int protectionRange = 0;
 
     @Getter
+    @Setter
     private int levelHandicap = 0;
     @Getter
+    @Setter
     private int islandLevel = 0;
 
     // CoopDatabase
