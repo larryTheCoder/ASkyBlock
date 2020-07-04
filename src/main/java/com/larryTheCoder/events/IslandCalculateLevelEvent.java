@@ -24,35 +24,18 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.larryTheCoder.events;
 
-import cn.nukkit.Player;
-import cn.nukkit.level.Location;
+import cn.nukkit.event.Cancellable;
 import com.larryTheCoder.cache.IslandData;
-import lombok.Getter;
 
 /**
- * Fired when a player enters an island's area
- *
- * @author larryTheCoder
- * @author tastybento
+ * An island level calculation event. This event will be called before
+ * the island is being calculated, you can cancel this event if its needed.
  */
-public class IslandEnterEvent extends SkyBlockPlayerEvent {
-
-    /**
-     * Location of where the player entered the island or tried to enter
-     */
-    @Getter
-    private final Location location;
-
-    /**
-     * Called to create the event
-     *
-     * @param island The island where the player is entering to
-     * @param loc    Location of where the player entered the island or tried to enter
-     */
-    public IslandEnterEvent(Player player, IslandData island, Location loc) {
-        super(player, island);
-        this.location = loc;
+public class IslandCalculateLevelEvent extends SkyBlockEvent implements Cancellable {
+    public IslandCalculateLevelEvent(IslandData island) {
+        super(island);
     }
 }

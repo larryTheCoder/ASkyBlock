@@ -265,10 +265,6 @@ public class Utils {
         return String.format("%02dm %02ds", min, secs);
     }
 
-    public static int secondsAsMillis(int sec) {
-        return (sec * 60);
-    }
-
     /**
      * Check physical activity of the player
      *

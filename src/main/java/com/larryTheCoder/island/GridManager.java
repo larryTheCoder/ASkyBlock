@@ -35,6 +35,10 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.IslandData;
+import com.larryTheCoder.events.IslandTeleportEvent;
+import com.larryTheCoder.events.SkyBlockEvent;
+import com.larryTheCoder.task.SimpleFancyTitle;
+import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.BlockUtil;
 import com.larryTheCoder.utils.Utils;
 
@@ -260,8 +264,18 @@ public class GridManager {
                 return;
             }
 
-            plugin.getTeleportLogic().safeTeleport(player, home, false, number);
-            plugin.getIslandManager().showFancyTitle(player);
+            plugin.getFastCache().getIslandData(player.getName(), number, island -> {
+                // ????
+                IslandTeleportEvent event = null;
+                if (island != null && SkyBlockEvent.eventCancellableCall(event = new IslandTeleportEvent(player, island, home))) {
+                    return;
+                }
+
+                plugin.getTeleportLogic().safeTeleport(player, event == null ? home : event.getTeleportLocation(), false, number);
+                plugin.getLevelCalcThread().addUpdateQueue(island);
+
+                TaskManager.runTaskLater(new SimpleFancyTitle(plugin, player), 20);
+            });
         });
     }
 

@@ -37,6 +37,9 @@ import com.google.common.collect.Multiset;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.cache.settings.WorldSettings;
+import com.larryTheCoder.events.IslandCalculateFinishEvent;
+import com.larryTheCoder.events.IslandCalculateLevelEvent;
+import com.larryTheCoder.events.SkyBlockEvent;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import lombok.SneakyThrows;
@@ -85,6 +88,8 @@ public class LevelCalcTask extends Thread {
      * @param islandDb The player island data that will be checked
      */
     public void addUpdateQueue(IslandData islandDb) {
+        if (SkyBlockEvent.eventCancellableCall(new IslandCalculateLevelEvent(islandDb))) return;
+
         levelUpdateQueue.add(islandDb);
 
         synchronized (this) {
@@ -170,7 +175,6 @@ public class LevelCalcTask extends Thread {
             }
 
             int levels = levelMultiplier;
-            int finalLevelMultiplier = levelMultiplier;
 
             // I wonder why I bother trying to pass these execution into an async worker lmao
             File logFile;
@@ -334,10 +338,17 @@ public class LevelCalcTask extends Thread {
                 reportLines.clear();
             }
 
-            log.debug("RESULT THREAD: " + score);
+            // Return back to the main thread, call an event there
+            final IslandData finalIsland = pd;
+            TaskManager.runTask(() -> plugin.getFastCache().getIslandData(finalIsland.getPlotOwner(), island -> {
+                IslandCalculateFinishEvent event;
+                if (SkyBlockEvent.eventCancellableCall(event = new IslandCalculateFinishEvent(island, score, island.getIslandLevel()))) {
+                    return;
+                }
 
-            pd.setIslandLevel(score);
-            pd.saveIslandData();
+                island.setIslandLevel(event.getIslandLevel());
+                island.saveIslandData();
+            }));
         }
     }
 

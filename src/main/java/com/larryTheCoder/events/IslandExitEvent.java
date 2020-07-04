@@ -37,7 +37,7 @@ import lombok.Getter;
  * @author larryTheCoder
  * @author tastybento
  */
-public class IslandExitEvent extends SkyBlockEvent {
+public class IslandExitEvent extends SkyBlockPlayerEvent {
 
     /**
      * Location of where the player exited the island's protected area.

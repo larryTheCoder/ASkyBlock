@@ -69,10 +69,7 @@ import org.sql2o.Query;
 import org.sql2o.data.Table;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import static com.larryTheCoder.database.TableSet.FETCH_WORLDS;
 import static com.larryTheCoder.database.TableSet.WORLDS_INSERT;
@@ -136,7 +133,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         try {
             // Wohooo! Fast! Unique and Colorful!
             generateLevel();
-            getServer().getLogger().info(getPrefix() + "§7Loading ASkyBlock - Bedrock Edition (API 30)");
+            getServer().getLogger().info(getPrefix() + "§7Loading ASkyBlock - Bedrock Edition (API 31)");
 
             // Only defaults
             initIslands();

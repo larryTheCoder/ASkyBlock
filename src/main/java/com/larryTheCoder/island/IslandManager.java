@@ -44,8 +44,8 @@ import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.database.TableSet;
 import com.larryTheCoder.events.IslandCreateEvent;
+import com.larryTheCoder.events.SkyBlockEvent;
 import com.larryTheCoder.task.DeleteIslandTask;
-import com.larryTheCoder.task.SimpleFancyTitle;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.IslandAwaitStore;
 import com.larryTheCoder.utils.Settings;
@@ -83,12 +83,6 @@ public class IslandManager {
         } else {
             createIsland(pl);
         }
-    }
-
-    void showFancyTitle(Player p) {
-        // The problem solved. The task `while` are pushing the CPU far more to load makes it
-        // Glitching and corrupted half chunk data. #20 Cannot teleport to island
-        TaskManager.runTaskLater(new SimpleFancyTitle(plugin, p), 20);
     }
 
     public void kickPlayerByName(final Player pOwner, final String victimName) {
@@ -212,8 +206,7 @@ public class IslandManager {
                     TaskManager.runTask(() -> {
                         // Call an event
                         IslandCreateEvent event = new IslandCreateEvent(pl, templateId, resultData);
-                        plugin.getServer().getPluginManager().callEvent(event);
-                        if (event.isCancelled()) {
+                        if (SkyBlockEvent.eventCancellableCall(event)) {
                             // The plugin should notify why the action is cancelled.
                             return;
                         }

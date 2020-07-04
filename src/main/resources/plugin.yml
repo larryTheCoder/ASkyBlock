@@ -26,6 +26,9 @@ permissions:
     is.command:
      default: true
      description: "SkyBlock main command"
+    is.gamemode.bypass:
+     default: op
+     description: "Enables gamemode bypass to teleport into the SkyBlock world."
     # Island team chatting command
     is.command.teamChat:
      default: true

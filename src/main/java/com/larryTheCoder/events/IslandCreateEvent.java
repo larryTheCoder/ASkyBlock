@@ -36,7 +36,7 @@ import lombok.Getter;
  * @author larryTheCoder
  * @author tastybento
  */
-public class IslandCreateEvent extends SkyBlockEvent implements Cancellable {
+public class IslandCreateEvent extends SkyBlockPlayerEvent implements Cancellable {
 
     private static final HandlerList HANDLERS = new HandlerList();
 

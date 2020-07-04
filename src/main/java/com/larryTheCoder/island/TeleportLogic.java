@@ -35,7 +35,6 @@ import cn.nukkit.level.Location;
 import cn.nukkit.scheduler.TaskHandler;
 import cn.nukkit.utils.TextFormat;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
@@ -44,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Responsible for teleporting (and canceling teleporting) of players.
@@ -53,30 +53,27 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TeleportLogic implements Listener {
 
-    private static final List<String> list = Lists.newArrayList();
-    private static final Map<String, Integer> time = Maps.newHashMap();
     private static int teleportDelay;
     private final ASkyBlock plugin;
     private final Map<UUID, PendingTeleport> pendingTPs = new ConcurrentHashMap<>();
     private final double cancelDistance;
 
+    private static final List<String> movedPlayers = Lists.newArrayList();
+
     public TeleportLogic(ASkyBlock plugin) {
         this.plugin = plugin;
         teleportDelay = plugin.getConfig().getInt("general.islandTeleportDelay", 2);
         cancelDistance = plugin.getConfig().getDouble("options.island.teleportCancelDistance", 0.6);
+
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     public static boolean isPlayerMoved(String p) {
-        return list.contains(p);
-    }
-
-    public static int getPlayerTeleport(String p) {
-        return time.get(p);
+        return movedPlayers.remove(p); // Memory leak
     }
 
     public void safeTeleport(final Player player, final Location homeSweetHome, boolean force, int home) {
-        final Location targetLoc = homeSweetHome.clone().add(0.5, 0, 0.5);
+        Location targetLoc = homeSweetHome.clone().add(0.5, 0, 0.5);
         Utils.loadChunkAt(targetLoc);
 
         if (plugin.getPermissionHandler().hasPermission(player, "is.bypass.wait") || (teleportDelay == 0) || force) {
@@ -94,13 +91,11 @@ public class TeleportLogic implements Listener {
                 } else {
                     player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Teleported to your island #" + home);
                 }
-                player.teleport(targetLoc.add(0, 0.35)); // Adjust spawn hieght
+                player.teleport(targetLoc.add(0, 0.35)); // Adjust spawn heights
                 // Teleport in default gameMode
-                if (Settings.gameMode != -1) {
+                if (Settings.gameMode != -1 && plugin.getPermissionHandler().hasPermission(player, "is.gamemode.bypass"))
                     player.setGamemode(Settings.gameMode);
-                }
-            }, Utils.secondsAsMillis(teleportDelay));
-            time.put(player.getName(), Utils.secondsAsMillis(teleportDelay));
+            }, (int) TimeUnit.SECONDS.toMillis(teleportDelay));
             pendingTPs.put(player.getUniqueId(), new PendingTeleport(player.getLocation(), task));
         }
     }
@@ -141,9 +136,9 @@ public class TeleportLogic implements Listener {
                 double distance = location.distance(newLocation);
                 if (distance > cancelDistance) {
                     task.cancel();
-                    pendingTPs.remove(player.getUniqueId());
                     player.sendMessage(plugin.getPrefix() + plugin.getLocale(player).teleportCancelled);
-                    list.add(player.getName());
+                    movedPlayers.add(player.getName());
+                    pendingTPs.remove(player.getUniqueId());
                 }
             }
         }

@@ -24,35 +24,28 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.larryTheCoder.events;
 
 import cn.nukkit.Player;
+import cn.nukkit.event.Cancellable;
 import cn.nukkit.level.Location;
 import com.larryTheCoder.cache.IslandData;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
- * Fired when a player enters an island's area
- *
- * @author larryTheCoder
- * @author tastybento
+ * This event will be called when the player are attempting to teleport to the
+ * desired island location. The island can be the player's island or another island.
  */
-public class IslandEnterEvent extends SkyBlockPlayerEvent {
+public class IslandTeleportEvent extends SkyBlockPlayerEvent implements Cancellable {
 
-    /**
-     * Location of where the player entered the island or tried to enter
-     */
-    @Getter
-    private final Location location;
+    @Getter @Setter
+    private Location teleportLocation;
 
-    /**
-     * Called to create the event
-     *
-     * @param island The island where the player is entering to
-     * @param loc    Location of where the player entered the island or tried to enter
-     */
-    public IslandEnterEvent(Player player, IslandData island, Location loc) {
+    public IslandTeleportEvent(Player player, IslandData island, Location targetLocation) {
         super(player, island);
-        this.location = loc;
+
+        this.teleportLocation = targetLocation;
     }
 }

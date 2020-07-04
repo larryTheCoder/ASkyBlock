@@ -81,8 +81,12 @@ public class FastCache {
                 if (stmt.rows().size() == 0) return;
 
                 for (Row plData : stmt.rows()) {
-                    Date date = Date.from(Timestamp.valueOf(plData.getString("lastLogin")).toInstant());
-                    if (date.compareTo(Date.from(Instant.now())) >= Settings.loadCacheBefore) continue;
+                    // Just an oopsies.
+                    try {
+                        Date date = Date.from(Timestamp.valueOf(plData.getString("lastLogin")).toInstant());
+                        if (date.compareTo(Date.from(Instant.now())) >= Settings.loadCacheBefore) continue;
+                    } catch (Throwable ignored) {
+                    }
 
                     String userName = plData.getString("playerName");
 

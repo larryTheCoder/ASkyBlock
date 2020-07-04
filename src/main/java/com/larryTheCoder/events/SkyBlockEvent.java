@@ -27,6 +27,7 @@ package com.larryTheCoder.events;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.HandlerList;
 import cn.nukkit.level.Location;
@@ -34,8 +35,10 @@ import cn.nukkit.math.Vector2;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.IslandData;
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
-public class SkyBlockEvent extends Event {
+@Log4j2
+public abstract class SkyBlockEvent extends Event {
 
     @Getter
     private static final HandlerList handlers = new HandlerList();
@@ -46,15 +49,8 @@ public class SkyBlockEvent extends Event {
     @Getter
     private final IslandData island;
 
-    /**
-     * The player class who exited the island's protected area.
-     */
-    @Getter
-    private final Player player;
-
-    public SkyBlockEvent(Player player, IslandData island) {
+    public SkyBlockEvent(IslandData island) {
         this.island = island;
-        this.player = player;
     }
 
 
@@ -103,5 +99,30 @@ public class SkyBlockEvent extends Event {
         Vector2 cartesianPlane = island.getCenter();
 
         return new Location(cartesianPlane.getFloorX(), 0, cartesianPlane.getFloorY(), Server.getInstance().getLevelByName(island.getLevelName()));
+    }
+
+    /**
+     * Calls an event statically. This is function is to cut off the amount
+     * of code required just to call this event.
+     *
+     * @param event The SkyBlock event.
+     */
+    public static void eventCall(SkyBlockEvent event) {
+        log.debug("Calling an event...");
+
+        Server.getInstance().getPluginManager().callEvent(event);
+    }
+
+    /**
+     * Calls an event in which the event is an instanceof {@linkplain cn.nukkit.event.Cancellable} class.
+     * As the above, it is just a convenience tool to cut off the amount of code required to call
+     * this event.
+     *
+     * @return {@code true} if the event is cancelled.
+     */
+    public static boolean eventCancellableCall(SkyBlockEvent event) {
+        eventCall(event);
+
+        return event instanceof Cancellable && event.isCancelled();
     }
 }

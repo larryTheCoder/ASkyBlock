@@ -46,6 +46,7 @@ import com.larryTheCoder.cache.CoopData;
 import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.events.IslandEnterEvent;
 import com.larryTheCoder.events.IslandExitEvent;
+import com.larryTheCoder.events.SkyBlockEvent;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.SettingsFlag;
 import com.larryTheCoder.utils.Utils;
@@ -173,8 +174,7 @@ public class IslandListener implements Listener {
             }
 
             // Fire entry event
-            final IslandEnterEvent event = new IslandEnterEvent(p, islandTo, e.getTo());
-            plugin.getServer().getPluginManager().callEvent(event);
+            SkyBlockEvent.eventCall(new IslandEnterEvent(p, islandTo, e.getTo()));
         } else if (islandTo == null && islandFrom != null && (islandFrom.getPlotOwner() != null)) {
             // Leaving
             if (islandFrom.getIgsSettings().getIgsFlag(SettingsFlag.ENTER_EXIT_MESSAGES)) {
@@ -182,15 +182,12 @@ public class IslandListener implements Listener {
             }
 
             // Fire exit event
-            final IslandExitEvent event = new IslandExitEvent(p, islandFrom, e.getFrom());
-            plugin.getServer().getPluginManager().callEvent(event);
+            SkyBlockEvent.eventCall(new IslandExitEvent(p, islandFrom, e.getFrom()));
         } else if (islandTo != null && islandFrom != null && !islandTo.equals(islandFrom)) {
             // Fire exit event
-            final IslandExitEvent event = new IslandExitEvent(p, islandFrom, e.getFrom());
-            plugin.getServer().getPluginManager().callEvent(event);
+            SkyBlockEvent.eventCall(new IslandExitEvent(p, islandFrom, e.getFrom()));
             // Fire entry event
-            final IslandEnterEvent event2 = new IslandEnterEvent(p, islandTo, e.getTo());
-            plugin.getServer().getPluginManager().callEvent(event2);
+            SkyBlockEvent.eventCall(new IslandEnterEvent(p, islandTo, e.getTo()));
         } else if (islandTo != null && (islandTo.getPlotOwner() != null)) {
             // Lock check
             if (islandTo.isLocked()) {

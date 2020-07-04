@@ -24,35 +24,24 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.larryTheCoder.events;
 
 import cn.nukkit.Player;
-import cn.nukkit.level.Location;
 import com.larryTheCoder.cache.IslandData;
 import lombok.Getter;
 
-/**
- * Fired when a player enters an island's area
- *
- * @author larryTheCoder
- * @author tastybento
- */
-public class IslandEnterEvent extends SkyBlockPlayerEvent {
+public class SkyBlockPlayerEvent extends SkyBlockEvent {
 
     /**
-     * Location of where the player entered the island or tried to enter
+     * The player class
      */
     @Getter
-    private final Location location;
+    private final Player player;
 
-    /**
-     * Called to create the event
-     *
-     * @param island The island where the player is entering to
-     * @param loc    Location of where the player entered the island or tried to enter
-     */
-    public IslandEnterEvent(Player player, IslandData island, Location loc) {
-        super(player, island);
-        this.location = loc;
+    public SkyBlockPlayerEvent(Player player, IslandData island) {
+        super(island);
+
+        this.player = player;
     }
 }

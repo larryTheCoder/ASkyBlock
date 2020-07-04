@@ -35,7 +35,7 @@ import lombok.Setter;
 import org.sql2o.Connection;
 import org.sql2o.data.Row;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -189,7 +189,7 @@ public class PlayerData implements Cloneable {
                         .addParameter("locale", locale)
                         .addParameter("banList", Utils.arrayToString(banList))
                         .addParameter("resetLeft", resetLeft)
-                        .addParameter("lastLogin", Date.from(Instant.now()))
+                        .addParameter("lastLogin", Timestamp.from(Instant.now()).toString())
                         .executeUpdate();
 
                 connection.createQuery(PLAYER_UPDATE_DATA.getQuery())
