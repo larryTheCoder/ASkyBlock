@@ -47,6 +47,7 @@ import com.larryTheCoder.database.config.SQLiteConfig;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
 import com.larryTheCoder.island.TeleportLogic;
+import com.larryTheCoder.island.TopTen;
 import com.larryTheCoder.listener.ChatHandler;
 import com.larryTheCoder.listener.IslandListener;
 import com.larryTheCoder.listener.LavaCheck;
@@ -158,12 +159,11 @@ public class ASkyBlock extends ASkyBlockAPI {
             Utils.send("&7Saving all island framework...");
 
             saveLevel(true);
-            getFastCache().shutdownCache();
             getDatabase().shutdownDB();
             getMessages().saveMessages();
             LavaCheck.clearStats();
             getLevelCalcThread().shutdown();
-            //TopTen.topTenSave();
+            TopTen.topTenSave();
         }
 
         Utils.send("&cASkyBlock has been successfully disabled. Goodbye!");

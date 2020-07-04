@@ -44,7 +44,6 @@ import org.sql2o.data.Table;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static com.larryTheCoder.database.TableSet.*;
@@ -60,16 +59,10 @@ public class FastCache {
     private final List<FastCacheData> dataCache = new ArrayList<>();
     private final List<String> uniqueId = new ArrayList<>();
 
-    private final AtomicBoolean isRunning = new AtomicBoolean(false);
-
     public FastCache(ASkyBlock plugin) {
         this.plugin = plugin;
 
         this.loadFastCache();
-    }
-
-    public void shutdownCache() {
-        isRunning.compareAndSet(true, false);
     }
 
     private void addAllCacheData(List<FastCacheData> list) {
@@ -146,8 +139,6 @@ public class FastCache {
                 Utils.sendDebug(String.format("Loaded %s cache data.", dataCache.size()));
 
                 ASkyBlock.get().getFastCache().addAllCacheData(dataCache);
-
-                isRunning.compareAndSet(false, true);
             }
         });
     }
