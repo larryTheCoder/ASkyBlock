@@ -27,14 +27,13 @@
 
 package com.larryTheCoder.utils.integration.luckperms;
 
-import cn.nukkit.IPlayer;
+import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.permission.PermissionAttachmentInfo;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class InternalPermission extends Permission {
 
@@ -44,14 +43,12 @@ public class InternalPermission extends Permission {
     }
 
     @Override
-    public Map<String, Boolean> getPermissions(UUID uuid) {
-        IPlayer player = Server.getInstance().getOfflinePlayer(uuid);
-        if (!player.isOnline()) {
-            return null;
-        }
+    public Map<String, Boolean> getPermissions(String playerName) {
+        Player player = Server.getInstance().getPlayer(playerName);
+        if (player == null) return null;
 
         Map<String, Boolean> parsedData = new HashMap<>();
-        for (Map.Entry<String, PermissionAttachmentInfo> pType : player.getPlayer().getEffectivePermissions().entrySet()) {
+        for (Map.Entry<String, PermissionAttachmentInfo> pType : player.getEffectivePermissions().entrySet()) {
             parsedData.put(pType.getKey(), pType.getValue().getValue());
         }
 

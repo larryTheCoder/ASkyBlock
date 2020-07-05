@@ -27,7 +27,7 @@
 
 package com.larryTheCoder.task;
 
-import cn.nukkit.OfflinePlayer;
+import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.Level;
@@ -103,8 +103,11 @@ public class LevelCalcTask extends Thread {
     @SneakyThrows
     public void run() {
         while (isRunning.get()) {
-            updateList();
-
+            try {
+                updateList();
+            } catch (Throwable error) {
+                TaskManager.runTask(() -> log.throwing(error));
+            }
             synchronized (this) {
                 wait(150000);
             }
@@ -121,34 +124,29 @@ public class LevelCalcTask extends Thread {
         while ((pd = levelUpdateQueue.poll()) != null) {
             long localId = System.currentTimeMillis();
 
-            OfflinePlayer targetPlayer = Server.getInstance().lookupName(pd.getPlotOwner())
-                    .map(uuid -> new OfflinePlayer(Server.getInstance(), uuid))
-                    .orElse(new OfflinePlayer(Server.getInstance(), pd.getPlotOwner()));
-
             // Get the player multiplier if its available
             int levelMultiplier = 1;
-            Map<String, Boolean> plPermission = plugin.getPermissionHandler().getPermissions(targetPlayer.getUniqueId());
 
-            if (plPermission != null) {
-                for (Map.Entry<String, Boolean> pType : plPermission.entrySet()) {
-                    String type = pType.getKey();
+            Map<String, Boolean> plPermission = plugin.getPermissionHandler().getPermissions(pd.getPlotOwner());
 
-                    // Statement: The player has the multiplier, but the player do not have the permission
-                    if (!type.startsWith("is.multiplier.") || !pType.getValue()) {
-                        continue;
-                    }
+            for (Map.Entry<String, Boolean> pType : plPermission.entrySet()) {
+                String type = pType.getKey();
 
-                    // Then check if the player has a valid value
-                    String spl = type.substring(14);
-                    if ((!spl.isEmpty()) && Utils.isNumeric(spl)) {
-                        // Get the max value should there be more than one
-                        levelMultiplier = Math.max(levelMultiplier, Integer.parseInt(spl));
+                // Statement: The player has the multiplier, but the player do not have the permission
+                if (!type.startsWith("is.multiplier.") || !pType.getValue()) {
+                    continue;
+                }
 
-                        // Do some sanity checking
-                        if (levelMultiplier < 1) levelMultiplier = 1;
-                    } else {
-                        Utils.send("&cPlayer " + pd.getPlotOwner() + " has permission: " + type + " <-- the last part MUST be a number! Ignoring...");
-                    }
+                // Then check if the player has a valid value
+                String spl = type.substring(14);
+                if ((!spl.isEmpty()) && Utils.isNumeric(spl)) {
+                    // Get the max value should there be more than one
+                    levelMultiplier = Math.max(levelMultiplier, Integer.parseInt(spl));
+
+                    // Do some sanity checking
+                    if (levelMultiplier < 1) levelMultiplier = 1;
+                } else {
+                    Utils.send("&cPlayer " + pd.getPlotOwner() + " has permission: " + type + " <-- the last part MUST be a number! Ignoring...");
                 }
             }
 
@@ -162,7 +160,7 @@ public class LevelCalcTask extends Thread {
             Set<FullChunk> chunkSnapshot = new HashSet<>();
             for (int x = pd.getMinProtectedX(); x < (pd.getMinProtectedX() + pd.getProtectionSize() + 16); x += 16) {
                 for (int z = pd.getMinProtectedZ(); z < (pd.getMinProtectedZ() + pd.getProtectionSize() + 16); z += 16) {
-                    if (!level.getChunk(x >> 4, z >> 4).isLoaded()) {
+                    if (!level.isChunkLoaded(x >> 4, z >> 4)) {
                         level.loadChunk(x >> 4, z >> 4, true);
 
                         chunkSnapshot.add(level.getChunk(x >> 4, z >> 4));
@@ -274,7 +272,7 @@ public class LevelCalcTask extends Thread {
                 Multiset<Integer> ofCount = HashMultiset.create(overflowLog);
                 reportLines.add(String.format("---------------- [%s] ----------------", localId));
                 reportLines.add("Level Log for island at " + pd.getCenter());
-                reportLines.add("Asker is " + targetPlayer.getName());
+                reportLines.add("Asker is " + pd.getPlotOwner());
                 reportLines.add("Total block score count = " + String.format("%,d", blockScore));
                 reportLines.add("Level cost = " + Settings.levelCost);
                 reportLines.add("Level multiplier = " + levels + " (Player must be online to get a permission multiplier)");

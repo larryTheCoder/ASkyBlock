@@ -30,7 +30,6 @@ package com.larryTheCoder.utils.integration.luckperms;
 import cn.nukkit.command.CommandSender;
 
 import java.util.Map;
-import java.util.UUID;
 
 public abstract class Permission {
 
@@ -44,12 +43,13 @@ public abstract class Permission {
     public abstract boolean hasPermission(CommandSender sender, String permission);
 
     /**
-     * Gets all permissions nodes from the UUID given, this may return null if
-     * the UUID doesn't exists. This function is a blocking-thread operation
-     * and which should NEVER be called other than an async tasks or threads.
+     * Gets all permissions nodes from the player name given. This might
+     * also return {@code null} if the player were not found. This function is a
+     * blocking-thread operation and which should NEVER be called other
+     * than an async tasks or threads.
      *
-     * @param uniqueId The player unique id that needs to be checked.
+     * @param playerName The player unique name that needs to be checked.
      * @return {@code true} the list of permissions that the player had.
      */
-    public abstract Map<String, Boolean> getPermissions(UUID uniqueId);
+    public abstract Map<String, Boolean> getPermissions(String playerName);
 }

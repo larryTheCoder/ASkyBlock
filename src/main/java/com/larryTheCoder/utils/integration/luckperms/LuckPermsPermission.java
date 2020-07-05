@@ -40,7 +40,6 @@ import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -83,13 +82,13 @@ public class LuckPermsPermission extends Permission {
         return permissionData.checkPermission(permission).asBoolean();
     }
 
-    public Map<String, Boolean> getPermissions(UUID uniqueId) {
+    public Map<String, Boolean> getPermissions(String playerName) {
         UserManager userManager = luckPerms.getUserManager();
-        CompletableFuture<User> userFuture = userManager.loadUser(uniqueId);
+        CompletableFuture<User> userFuture = userManager.loadUser(userManager.lookupUniqueId(playerName).join());
 
         User user = userFuture.join();
         if (user == null) {
-            Utils.sendDebug("The UUID " + uniqueId.toString() + " were not found in LuckPermsAPI");
+            Utils.sendDebug("The player " + playerName + " were not found in LuckPermsAPI");
             return null;
         }
 

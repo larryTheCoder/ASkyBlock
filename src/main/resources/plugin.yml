@@ -1,9 +1,9 @@
 name: "ASkyBlock"
-version: "0.5.2-BETA"
+version: "0.5.2-BETA-rev2"
 author: "larryTheCoder"
 api: ["1.0.0"]
 main: com.larryTheCoder.ASkyBlock
-website: http://github.com/larryTheCoder/ASkyBlock-Nukkit
+website: http://github.com/larryTheCoder/ASkyBlock
 authors:
   - PikyCZ
   - Skull3x

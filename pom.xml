@@ -33,7 +33,7 @@
     <name>ASkyBlock</name>
     <groupId>larryTheCoder</groupId>
     <artifactId>SkyBlock</artifactId>
-    <version>v0.5.2-BETA</version>
+    <version>v0.5.2-BETA-rev2</version>
     <description>Minecraft BE SkyBlock minigame plugin for Nukkit</description>
     <inceptionYear>2016</inceptionYear>
 
@@ -91,6 +91,15 @@
             <version>1.0.1</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Place holder API -->
+        <dependency>
+            <groupId>com.creeperface.nukkit.placeholderapi</groupId>
+            <artifactId>PlaceholderAPI</artifactId>
+            <version>1.3-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>ru.nukkit.dblib</groupId>
             <artifactId>DbLib</artifactId>
