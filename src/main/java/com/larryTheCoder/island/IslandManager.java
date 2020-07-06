@@ -343,7 +343,7 @@ public class IslandManager {
                 p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorNoIslandOther);
                 return;
             }
-            if (pd.getPlotOwner() != null) {
+            if (pd.getPlotOwner() == null) {
                 p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorOfflinePlayer.replace("[player]", arg));
                 return;
             }

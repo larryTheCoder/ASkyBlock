@@ -54,6 +54,7 @@ import com.larryTheCoder.listener.LavaCheck;
 import com.larryTheCoder.listener.PlayerEvent;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.locales.LocaleInstance;
+import com.larryTheCoder.locales.LocaleManager;
 import com.larryTheCoder.schematic.SchematicHandler;
 import com.larryTheCoder.task.LevelCalcTask;
 import com.larryTheCoder.task.TaskManager;
@@ -91,8 +92,6 @@ public class ASkyBlock extends ASkyBlockAPI {
     private Config worldConfig;
 
     private boolean disabled = false;
-    // Localization Strings
-    private HashMap<String, LocaleInstance> availableLocales = new HashMap<>();
     private Properties pluginGit;
 
     /**
@@ -201,6 +200,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         getServer().getCommandMap().register("ASkyBlock", new Commands(this));
 
         PluginManager pm = getServer().getPluginManager();
+        localeManager = new LocaleManager(this);
         chatHandler = new ChatHandler(this);
         teleportLogic = new TeleportLogic(this);
         invitationHandler = new InvitationHandler(this);
@@ -387,30 +387,12 @@ public class ASkyBlock extends ASkyBlockAPI {
         return sender.isPlayer() ? getLocale((Player) sender) : getLocale("");
     }
 
-    /**
-     * Get the preferred locale for a player
-     * If the player is null, default will be used
-     *
-     * @param p Player|null
-     * @return ASlocales class
-     */
-    public LocaleInstance getLocale(Player p) {
-        return p == null ? getLocale("") : getLocale(p.getName());
+    public LocaleInstance getLocale(Player player) {
+        return getLocaleManager().getLocaleFromPlayer(player);
     }
 
-    /**
-     * Get the preferred locale for a player
-     * If the player is null, default will be used
-     *
-     * @param p Player name
-     * @return ASlocales class
-     */
-    public LocaleInstance getLocale(String p) {
-        if (p == null || p.isEmpty()) {
-            return getAvailableLocales().get(Settings.defaultLanguage);
-        }
-
-        return getAvailableLocales().getOrDefault(getFastCache().getDefaultLocale(p), getAvailableLocales().get(Settings.defaultLanguage));
+    public LocaleInstance getLocale(String playerName) {
+        return getLocaleManager().getLocaleFromPlayer(playerName);
     }
 
     /**
@@ -439,27 +421,6 @@ public class ASkyBlock extends ASkyBlockAPI {
                 Utils.send("&cUnable to save the world.");
             }
         });
-    }
-
-    /**
-     * Get all of the available locales
-     * for the plugin
-     *
-     * @return HashMap that contains String and ASlocales
-     */
-    public HashMap<String, LocaleInstance> getAvailableLocales() {
-        return availableLocales;
-    }
-
-    /**
-     * Add a locale for this server
-     * You could use this if you wanted to make it
-     * private. Which its useless
-     *
-     * @param availableLocales HashMap that contains String and ASlocales
-     */
-    public void setAvailableLocales(HashMap<String, LocaleInstance> availableLocales) {
-        this.availableLocales = availableLocales;
     }
 
     // ISLAND DATA STARTING LINE ---

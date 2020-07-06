@@ -35,6 +35,7 @@ import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.island.TopTen;
 import com.larryTheCoder.locales.LocaleInstance;
+import com.larryTheCoder.locales.LocaleManager;
 import com.larryTheCoder.updater.Updater;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
@@ -165,17 +166,18 @@ public class GenericCategory extends SubCategory {
                     break;
                 }
 
+                HashMap<Locale, LocaleInstance> registeredLocale = getPlugin().getLocaleManager().getRegisteredLocales();
                 if (!Utils.isNumeric(args[1])) {
                     displayLocales(p);
                     break;
                 } else {
                     final int index = Integer.parseInt(args[1]);
-                    if (index < 1 || index > getPlugin().getAvailableLocales().size()) {
+                    if (index < 1 || index > registeredLocale.size()) {
                         displayLocales(p);
                         break;
                     }
 
-                    LocaleInstance locale = getPlugin().getAvailableLocales()
+                    LocaleInstance locale = registeredLocale
                             .values().stream()
                             .filter(i -> i.getIndex() == index)
                             .findAny().orElse(null);
@@ -189,7 +191,7 @@ public class GenericCategory extends SubCategory {
                     // Now we update them into the list.
                     getPlugin().getFastCache().getPlayerData(p.getName(), pd -> {
                         if (pd == null) {
-                            p.sendMessage("An error occured while attempting to save your data.");
+                            p.sendMessage("An error just occurred while interpreting the command.");
                             return;
                         }
 
@@ -233,11 +235,12 @@ public class GenericCategory extends SubCategory {
     }
 
     private void displayLocales(Player player) {
+        LocaleManager localeManager = getPlugin().getLocaleManager();
         player.sendMessage(TextFormat.GREEN + "Your default locale: " + TextFormat.YELLOW + getPlugin().getLocale(player).getLocaleName());
         player.sendMessage(TextFormat.RED + "/is lang <#>");
 
         TreeMap<Integer, String> locales = new TreeMap<>();
-        for (LocaleInstance locale : getPlugin().getAvailableLocales().values()) {
+        for (LocaleInstance locale : localeManager.getRegisteredLocales().values()) {
             if (!locale.getLocaleName().equalsIgnoreCase("locale")) {
                 locales.put(locale.getIndex(), locale.getLanguageName() + " (" + locale.getCountryName() + ")");
             }

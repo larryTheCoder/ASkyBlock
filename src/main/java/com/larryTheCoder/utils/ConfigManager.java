@@ -267,24 +267,6 @@ public class ConfigManager {
             Utils.send("&cNo block values in blocks.yml! All island levels will be zero!");
         }
 
-        // Load languages
-        HashMap<String, LocaleInstance> availableLocales = new HashMap<>();
-        FileLister fl = new FileLister(ASkyBlock.get());
-        try {
-            int index = 1;
-            for (String code : fl.list()) {
-                //Utils.sendDebug("DEBUG: lang file = " + code);
-                availableLocales.put(code, new LocaleInstance(ASkyBlock.get(), code, index++));
-            }
-        } catch (IOException e1) {
-            Utils.send("&cCould not add locales!");
-        }
-        if (!availableLocales.containsKey(Settings.defaultLanguage)) {
-            Utils.send("&c'" + Settings.defaultLanguage + ".yml' not found in /locale folder. Using /locale/en_US.yml");
-            Settings.defaultLanguage = "en_US";
-            availableLocales.put(Settings.defaultLanguage, new LocaleInstance(ASkyBlock.get(), Settings.defaultLanguage, 0));
-        }
-        ASkyBlock.get().setAvailableLocales(availableLocales);
         Utils.send(TextFormat.YELLOW + "Successfully checked config.yml");
     }
 

@@ -36,6 +36,7 @@ import com.larryTheCoder.island.IslandManager;
 import com.larryTheCoder.island.TeleportLogic;
 import com.larryTheCoder.listener.ChatHandler;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
+import com.larryTheCoder.locales.LocaleManager;
 import com.larryTheCoder.schematic.SchematicHandler;
 import com.larryTheCoder.task.LevelCalcTask;
 import com.larryTheCoder.utils.integration.luckperms.Permission;
@@ -69,4 +70,6 @@ public class ASkyBlockAPI extends PluginBase {
     protected LevelCalcTask levelCalcThread;
     @Getter
     protected Permission permissionHandler;
+    @Getter
+    protected LocaleManager localeManager;
 }

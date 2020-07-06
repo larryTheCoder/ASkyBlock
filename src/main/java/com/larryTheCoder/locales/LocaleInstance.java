@@ -31,44 +31,20 @@ import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 
 /**
- * All the text strings in the game sent to players This version enables
- * different players to have different locales.
- * <p>
- * If the player are null such as Console. The 'default' will be used as main
- * language.
+ * Contains all of the translations in game.
  *
- * @author larryTheCoder
- * @author tastybento
+ * @author larryTheCoder/tastybento
  */
 public final class LocaleInstance {
 
-    private final static Set<String> TITLE_COLORS = new HashSet<>(Arrays.asList(
-            "black",
-            "dark_blue",
-            "dark_green",
-            "dark_aqua",
-            "dark_red",
-            "dark_purple",
-            "gold",
-            "gray",
-            "dark_gray",
-            "blue",
-            "green",
-            "aqua",
-            "red",
-            "light_purple",
-            "yellow",
-            "white"
-    ));
     private final ASkyBlock plugin;
     private final String localeName;
+
     private final int index;
+
     public String firstIslandFree = "§aYour first island are free!";
     public String nextIslandPrice = "§aNext time you may need $§e[price] to buy other island";
     // Help defaults
@@ -176,7 +152,7 @@ public final class LocaleInstance {
     public String deleteIslandSure = "§aAre you sure to delete your island? This is an irreversible!";
     public String deleteIslandCancelled = "§cYou just cancelled your delete island confirmation";
     // Public error
-    public String errorResponseUnknown = "§eAn error just occured. Try again later";
+    public String errorResponseUnknown = "§eAn error just occurred. Try again later";
     // Invite things
     public String newInvitation = "- §7You have an invite from [player]'s island";
     public String insInvitation = "- §7Use /is <accept/deny> to either deny or accept their invite.";
