@@ -42,16 +42,17 @@ import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.BlockUtil;
 import com.larryTheCoder.utils.Utils;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import static cn.nukkit.math.BlockFace.DOWN;
 import static cn.nukkit.math.BlockFace.UP;
 
 /**
- * @author larryTheCoder
- * @author tastybento
+ * This class is responsible to grid islands in between them, this class also
+ * handles safe-teleportation to their specified island, returns null if the island doesn't
+ * have any safe spot available.
+ *
+ * @author larryTheCoder/tastybento
  */
 public class GridManager {
 
@@ -106,63 +107,6 @@ public class GridManager {
     }
 
     /**
-     * Checks if an online player is on their island, on a team island or on a
-     * coop island
-     *
-     * @param player The target of player
-     * @return true if on valid island, false if not
-     */
-    public boolean playerIsOnIsland(final Player player) {
-        return locationIsAtHome(player, player.getLocation());
-    }
-
-    /**
-     * Checks if a location is within the home boundaries of a player.
-     *
-     * @param player The player
-     * @param loc    The geo location of
-     * @return true if the location is within home boundaries
-     */
-    private boolean locationIsAtHome(final Player player, Location loc) {
-        // Make a list of test locations and test them
-        Set<Location> islandTestLocations = new HashSet<>();
-        if (plugin.getIslandManager().checkIsland(player)) {
-            IslandData pd = plugin.getFastCache().getIslandData(player);
-            Vector2 cartesianPlane = pd.getCenter();
-
-            islandTestLocations.add(new Location(cartesianPlane.getX(), 0, cartesianPlane.getY(), plugin.getServer().getLevelByName(pd.getLevelName())));
-        }
-
-        if (islandTestLocations.isEmpty()) {
-            return false;
-        }
-
-        // Run through all the locations
-        for (Location islandTestLocation : islandTestLocations) {
-            // Must be in the same world as the locations being checked
-            // Note that getWorld can return null if a world has been deleted on the server
-            if (islandTestLocation != null && islandTestLocation.getLevel() != null && islandTestLocation.getLevel().equals(loc.getLevel())) {
-                int protectionRange = plugin.getSettings(islandTestLocation.getLevel().getName()).getProtectionRange();
-                if (plugin.getIslandManager().checkIslandAt(islandTestLocation.getLevel())) {
-                    // Get the protection range for this location if possible
-                    IslandData island = plugin.getFastCache().getIslandData(islandTestLocation);
-                    if (island != null) {
-                        // We are in a protected island area.
-                        protectionRange = island.getProtectionSize();
-                    }
-                }
-                if (loc.getFloorX() > islandTestLocation.getFloorX() - protectionRange / 2
-                        && loc.getFloorX() < islandTestLocation.getFloorX() + protectionRange / 2
-                        && loc.getFloorZ() > islandTestLocation.getFloorZ() - protectionRange / 2
-                        && loc.getFloorZ() < islandTestLocation.getFloorZ() + protectionRange / 2) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
      * Determines a safe teleport spot on player's island or the team island
      * they belong to.
      *
@@ -173,13 +117,9 @@ public class GridManager {
     public void getSafeHomeLocation(String plName, int number, Consumer<Location> targetLocation) {
         plugin.getFastCache().getIslandData(plName, number, pd -> {
             if (pd == null) {
-                Utils.sendDebug("Island data were not found");
-
                 targetLocation.accept(null);
                 return;
             }
-            Utils.sendDebug("Island data were found");
-            Utils.sendDebug(pd.toString());
 
             Location locationSafe = pd.getHome();
             if (locationSafe.getFloorX() == 0 || locationSafe.getFloorY() == 0 || locationSafe.getFloorY() == 0) {
@@ -233,8 +173,6 @@ public class GridManager {
                 }
             }
 
-            Utils.sendDebug("Unsuccessful home location, ");
-
             // Unsuccessful
             targetLocation.accept(null);
         });
@@ -279,6 +217,13 @@ public class GridManager {
         });
     }
 
+    /**
+     * Returns the island inside the protected area at the specific
+     * location, returns null if the location doesn't have any players.
+     *
+     * @param location The location that needs to be checked.
+     * @return Island data class.
+     */
     public IslandData getProtectedIslandAt(Location location) {
         IslandData island = plugin.getFastCache().getIslandData(location);
         if (island == null) {
@@ -290,5 +235,4 @@ public class GridManager {
 
         return null;
     }
-
 }

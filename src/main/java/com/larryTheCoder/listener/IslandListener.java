@@ -39,10 +39,8 @@ import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityExplodeEvent;
 import cn.nukkit.event.inventory.CraftItemEvent;
 import cn.nukkit.event.player.*;
-import cn.nukkit.level.Location;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.cache.CoopData;
 import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.events.IslandEnterEvent;
 import com.larryTheCoder.events.IslandExitEvent;
@@ -58,75 +56,14 @@ import static cn.nukkit.block.BlockID.ENDER_CHEST;
  * @author larryTheCoder
  */
 @Log4j2
-public class IslandListener implements Listener {
+public class IslandListener extends Action implements Listener {
 
     private final ASkyBlock plugin;
 
     public IslandListener(ASkyBlock plugin) {
+        super(plugin);
+
         this.plugin = plugin;
-    }
-
-    /**
-     * Determines if a location is in the island world or not or in the new
-     * nether if it is activated
-     *
-     * @param loc Location of the entity to be checked
-     * @return true if in the island world
-     */
-    private boolean notInWorld(Location loc) {
-        return !ASkyBlock.get().getLevels().contains(loc.getLevel().getName());
-    }
-
-    /**
-     * Action allowed in this location
-     *
-     * @param location The location to be checked
-     * @param flag     Kind of flag to be checked
-     * @return true if allowed
-     */
-    private boolean actionAllowed(Location location, SettingsFlag flag) {
-        IslandData island = plugin.getGrid().getProtectedIslandAt(location);
-        if (island != null && island.getIgsSettings().getIgsFlag(flag)) {
-            log.debug("DEBUG: Action is allowed by settings");
-            return true;
-        }
-        log.debug("DEBUG: Action is defined by settings");
-        return Settings.defaultWorldSettings.get(flag);
-    }
-
-    /**
-     * Checks if action is allowed for player in location for flag
-     *
-     * @param player   The player or entity
-     * @param location The location to be checked
-     * @return true if allowed
-     */
-    private boolean actionAllowed(Player player, Location location, SettingsFlag flag) {
-        if (player == null) {
-            return actionAllowed(location, flag);
-        }
-
-        // This permission bypasses protection
-        if (player.isOp() || hasPermission(player, "is.mod.bypassprotect")) {
-            return true;
-        }
-
-        IslandData island = plugin.getGrid().getProtectedIslandAt(location);
-        CoopData pd = plugin.getFastCache().getRelations(location);
-        if (island != null && (island.getIgsSettings().getIgsFlag(flag) || (pd != null && pd.isMember(player.getName())))) {
-            return true;
-        }
-
-        if (island == null || island.getPlotOwner() == null) {
-            return false;
-        }
-
-        if (island.getPlotOwner().equalsIgnoreCase(player.getName())) {
-            return true;
-        }
-
-        // Fixed
-        return Settings.defaultWorldSettings.get(flag);
     }
 
     private String getPrefix() {
@@ -409,9 +346,5 @@ public class IslandListener implements Listener {
             player.sendMessage(plugin.getLocale(player).errorNoPermission);
             event.setCancelled(true);
         }
-    }
-
-    public boolean hasPermission(Player player, String permission) {
-        return plugin.getPermissionHandler().hasPermission(player, permission);
     }
 }
