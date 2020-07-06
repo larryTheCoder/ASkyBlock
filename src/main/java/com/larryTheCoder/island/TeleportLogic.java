@@ -36,6 +36,8 @@ import cn.nukkit.scheduler.TaskHandler;
 import cn.nukkit.utils.TextFormat;
 import com.google.common.collect.Lists;
 import com.larryTheCoder.ASkyBlock;
+import com.larryTheCoder.task.SimpleFancyTitle;
+import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 
@@ -92,10 +94,12 @@ public class TeleportLogic implements Listener {
                     player.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Teleported to your island #" + home);
                 }
                 player.teleport(targetLoc.add(0, 0.35)); // Adjust spawn heights
+                TaskManager.runTaskLater(new SimpleFancyTitle(plugin, player), 20);
+
                 // Teleport in default gameMode
                 if (Settings.gameMode != -1 && plugin.getPermissionHandler().hasPermission(player, "is.gamemode.bypass"))
                     player.setGamemode(Settings.gameMode);
-            }, (int) TimeUnit.SECONDS.toMillis(teleportDelay));
+            }, teleportDelay * 20);
             pendingTPs.put(player.getUniqueId(), new PendingTeleport(player.getLocation(), task));
         }
     }

@@ -274,7 +274,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         Utils.EnsureDirectory(Utils.UPDATES_DIRECTORY);
 
         // Use common sense on every damn thing
-        saveResource("config.yml", true);
+        saveResource("config.yml");
         saveResource("worlds.yml");
         //saveResource("quests.yml"); // TODO
         saveResource("blocks.yml");

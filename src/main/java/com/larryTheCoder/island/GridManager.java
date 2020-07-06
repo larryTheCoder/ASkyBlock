@@ -211,8 +211,6 @@ public class GridManager {
 
                 plugin.getTeleportLogic().safeTeleport(player, event == null ? home : event.getTeleportLocation(), false, number);
                 plugin.getLevelCalcThread().addUpdateQueue(island);
-
-                TaskManager.runTaskLater(new SimpleFancyTitle(plugin, player), 20);
             });
         });
     }
