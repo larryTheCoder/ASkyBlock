@@ -1,7 +1,13 @@
 name: "ASkyBlock"
 version: "0.5.2-BETA-rev2"
 author: "larryTheCoder"
-api: ["1.0.0"]
+api:
+  - "1.0.6"
+  - "1.0.7"
+  - "1.0.8"
+  - "1.0.9"
+  - "1.0.10"
+  - "1.0.11"
 main: com.larryTheCoder.ASkyBlock
 website: http://github.com/larryTheCoder/ASkyBlock
 authors:
@@ -12,6 +18,7 @@ depend:
   - DbLib
 softdepend:
   - EconomyAPI
+  - LuckPerms
 description: "Advanced minecraft PE SkyBlock plugin!"
 
 permissions:
