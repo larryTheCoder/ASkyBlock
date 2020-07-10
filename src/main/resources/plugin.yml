@@ -1,5 +1,5 @@
-name: "ASkyBlock"
-version: "0.5.2-BETA-rev2"
+name: "${name}"
+version: "${version}"
 author: "larryTheCoder"
 api:
   - "1.0.6"
@@ -14,11 +14,11 @@ authors:
   - PikyCZ
   - Skull3x
   - Adam1609
-depend: 
-  - DbLib
 softdepend:
   - EconomyAPI
   - LuckPerms
+  - DbLib
+
 description: "Advanced minecraft PE SkyBlock plugin!"
 
 permissions:

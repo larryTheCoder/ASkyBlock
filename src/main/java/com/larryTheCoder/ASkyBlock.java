@@ -272,6 +272,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         Utils.EnsureDirectory(Utils.LOCALES_DIRECTORY);
         Utils.EnsureDirectory(Utils.SCHEMATIC_DIRECTORY);
         Utils.EnsureDirectory(Utils.UPDATES_DIRECTORY);
+        Utils.EnsureDirectory(Utils.LIBRARY_DIRECTORY);
 
         // Use common sense on every damn thing
         saveResource("config.yml");

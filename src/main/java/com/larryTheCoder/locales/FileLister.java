@@ -47,26 +47,38 @@ import java.util.jar.JarFile;
  */
 public final class FileLister {
 
-    private final static String FOLDER_PATH = "locale";
-    private final ASkyBlock plugin;
+    private final String folderPath;
+    private final boolean filterYML;
 
-    public FileLister(ASkyBlock plugin) {
-        this.plugin = plugin;
+    public FileLister(String folderPath) {
+        this(folderPath, true);
+    }
+
+    public FileLister(String folderPath, boolean filterYML) {
+        this.filterYML = filterYML;
+        this.folderPath = folderPath;
     }
 
     public List<String> list() throws IOException {
+        ASkyBlock plugin = ASkyBlock.get();
         List<String> result = new ArrayList<>();
 
         // Check if the locale folder exists
-        File localeDir = new File(plugin.getDataFolder(), FOLDER_PATH);
+        File localeDir = new File(plugin.getDataFolder(), folderPath);
         if (localeDir.exists()) {
             FilenameFilter ymlFilter = (File dir, String name) -> {
                 String lowercaseName = name.toLowerCase();
-                return lowercaseName.endsWith(".yml");
+                if (filterYML) {
+                    return lowercaseName.endsWith(".yml");
+                }
+
+                return true;
             };
+
             for (String fileName : Objects.requireNonNull(localeDir.list(ymlFilter))) {
                 result.add(fileName.replace(".yml", ""));
             }
+
             if (!result.isEmpty()) {
                 return result;
             }
@@ -78,7 +90,7 @@ public final class FileLister {
             Method method = PluginBase.class.getDeclaredMethod("getFile");
             method.setAccessible(true);
 
-            jarfile = (File) method.invoke(this.plugin);
+            jarfile = (File) method.invoke(ASkyBlock.get());
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             throw new IOException(e);
         }
@@ -89,7 +101,7 @@ public final class FileLister {
                 JarEntry entry = entries.nextElement();
                 String path = entry.getName();
 
-                if (!path.startsWith(FOLDER_PATH)) {
+                if (!path.startsWith(folderPath)) {
                     continue;
                 }
 

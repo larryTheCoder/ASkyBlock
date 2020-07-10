@@ -58,9 +58,21 @@ public class Utils {
     public static final String UPDATES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "updates" + File.separator;
     public static final String SCHEMATIC_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "schematics" + File.separator;
     public static final String LOCALES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "locale" + File.separator;
+    public static final String LIBRARY_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "lib" + File.separator;
     public static final String DIRECTORY = ASkyBlock.get().getDataFolder() + File.separator;
+
     private static final ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap<>();
+
     private static Long x = System.nanoTime();
+
+
+    public static void send(String msg) {
+        Server.getInstance().getLogger().info(ASkyBlock.get().getPrefix() + TextFormat.GREEN + msg.replace("&", "§"));
+    }
+
+    public static void logError(String log, Throwable error) {
+        // E2hzbLKV
+    }
 
     public static Config loadYamlFile(String file) {
         File yamlFile = new File(DIRECTORY + file);
@@ -134,22 +146,6 @@ public class Utils {
         }
 
         return hexString.toString();
-    }
-
-    public static boolean canBypassTimer(Player p, String what, int seconds) {
-        if (ASkyBlock.get().getPermissionHandler().hasPermission(p, "is.bypass.wait")) {
-            return true;
-        }
-        String key = what + "." + p.getName();
-        Long msBefore = tooSoon.get(key);
-        Long curMS = System.currentTimeMillis();
-        if (msBefore != null) {
-            Long msDelta = curMS - msBefore;
-            Long msWaitTime = 1000 * (long) seconds;
-            return msDelta < msWaitTime;
-        }
-        tooSoon.put(key, curMS);
-        return true;
     }
 
     public static String getPlayerRTime(Player p, String what, int seconds) {
@@ -248,14 +244,6 @@ public class Utils {
             pDir.mkdir();
         } catch (Throwable exc) {
             Server.getInstance().getLogger().info("§eEnsureDirectory " + dirName + ": " + exc.toString());
-        }
-    }
-
-    public static void send(String msg) {
-        try {
-            Server.getInstance().getLogger().info(ASkyBlock.get().getPrefix() + TextFormat.GREEN + msg.replace("&", "§"));
-        } catch (Throwable exc) {
-            System.out.println("ASkyBlock failed to send: " + msg);
         }
     }
 

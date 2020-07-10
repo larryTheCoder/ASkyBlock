@@ -35,6 +35,7 @@ import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.IslandAwaitStore;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+import com.larryTheCoder.utils.classpath.Autoloader;
 import lombok.extern.log4j.Log4j2;
 import org.sql2o.Connection;
 import org.sql2o.Query;
@@ -72,6 +73,8 @@ public class DatabaseManager {
     public static boolean isMysql = false;
 
     public DatabaseManager(AbstractConfig database) throws SQLException, ClassNotFoundException {
+        new Autoloader("lib");
+
         this.database = database;
         this.connection = database.openConnection().open();
 

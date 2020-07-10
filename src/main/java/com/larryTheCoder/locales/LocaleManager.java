@@ -68,7 +68,7 @@ public class LocaleManager {
 
     private void initLocale() {
         // Load languages
-        FileLister fl = new FileLister(ASkyBlock.get());
+        FileLister fl = new FileLister("locale");
         try {
             int index = 1;
             for (String code : fl.list()) addLocale(code, new LocaleInstance(plugin, code, index++), false);
