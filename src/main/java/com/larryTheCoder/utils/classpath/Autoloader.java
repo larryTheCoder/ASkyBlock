@@ -61,7 +61,7 @@ public class Autoloader {
 
     public Autoloader(String targetFolder) {
         reqLib.put("sql2o-1.6.0.jar", "https://repo1.maven.org/maven2/org/sql2o/sql2o/1.6.0/sql2o-1.6.0.jar");
-        reqLib.put("mysql-connector-java-8.0.11.jar", "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.11/mysql-connector-java-8.0.11.jar");
+        reqLib.put("mysql-connector-java-8.0.16.jar", "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.16/mysql-connector-java-8.0.16.jar");
         reqLib.put("sqlite-jdbc-3.27.2.1.jar", "https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.27.2.1.jar");
 
         this.targetFolder = targetFolder;
@@ -106,7 +106,7 @@ public class Autoloader {
             }
         });
 
-        File mysqlDriver = new File(Utils.DIRECTORY + targetFolder + File.separator + "mysql-connector-java-8.0.11.jar");
+        File mysqlDriver = new File(Utils.DIRECTORY + targetFolder + File.separator + "mysql-connector-java-8.0.16.jar");
         File sqliteDriver = new File(Utils.DIRECTORY + targetFolder + File.separator + "sqlite-jdbc-3.27.2.1.jar");
         File sql2oDriver = new File(Utils.DIRECTORY + targetFolder + File.separator + "sql2o-1.6.0.jar");
 
