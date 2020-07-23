@@ -27,12 +27,11 @@
 package com.larryTheCoder.cache;
 
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.database.DatabaseManager;
+import com.larryTheCoder.database.QueryInfo;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import lombok.Getter;
 import lombok.Setter;
-import org.sql2o.Connection;
 import org.sql2o.data.Row;
 
 import java.sql.Timestamp;
@@ -41,9 +40,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
-import static com.larryTheCoder.database.TableSet.PLAYER_UPDATE_DATA;
-import static com.larryTheCoder.database.TableSet.PLAYER_UPDATE_MAIN;
 
 /**
  * @author larryTheCoder
@@ -56,13 +52,15 @@ public class PlayerData implements Cloneable {
     @Getter
     public final String playerXUID;
 
-    @Setter @Getter
+    @Setter
+    @Getter
     private int resetLeft;
 
     private final HashMap<String, Boolean> challengeList = new HashMap<>();
     private final HashMap<String, Integer> challengeListTimes = new HashMap<>();
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private String locale;
     @Getter
     private List<String> banList;
@@ -181,23 +179,15 @@ public class PlayerData implements Cloneable {
      * Save player data asynchronously.
      */
     public void saveData() {
-        ASkyBlock.get().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
-            @Override
-            public void executeQuery(Connection connection) {
-                connection.createQuery(PLAYER_UPDATE_MAIN.getQuery())
+        ASkyBlock.get().getDatabase().processBulkUpdate(new QueryInfo("UPDATE player SET locale = :locale, banList = :banList, resetAttempts = :resetLeft, lastLogin = :lastLogin WHERE playerName = :playerName")
                         .addParameter("playerName", playerName)
                         .addParameter("locale", locale)
                         .addParameter("banList", Utils.arrayToString(banList))
                         .addParameter("resetLeft", resetLeft)
-                        .addParameter("lastLogin", Timestamp.from(Instant.now()).toString())
-                        .executeUpdate();
-
-                connection.createQuery(PLAYER_UPDATE_DATA.getQuery())
+                        .addParameter("lastLogin", Timestamp.from(Instant.now()).toString()),
+                new QueryInfo("UPDATE challenges SET challengesList = :challengesList, challengesTimes = :challengesTimes WHERE player = :playerName")
                         .addParameter("playerName", playerName)
                         .addParameter("challengesList", decodeChallengeList("cl"))
-                        .addParameter("challengesTimes", decodeChallengeList("clt"))
-                        .executeUpdate();
-            }
-        });
+                        .addParameter("challengesTimes", decodeChallengeList("clt")));
     }
 }

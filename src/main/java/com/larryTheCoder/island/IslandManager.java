@@ -41,8 +41,7 @@ import com.larryTheCoder.cache.CoopData;
 import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.cache.builder.IslandDataBuilder;
 import com.larryTheCoder.cache.settings.WorldSettings;
-import com.larryTheCoder.database.DatabaseManager;
-import com.larryTheCoder.database.TableSet;
+import com.larryTheCoder.database.QueryInfo;
 import com.larryTheCoder.events.IslandCreateEvent;
 import com.larryTheCoder.events.SkyBlockEvent;
 import com.larryTheCoder.task.DeleteIslandTask;
@@ -50,7 +49,6 @@ import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.IslandAwaitStore;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
-import org.sql2o.Connection;
 
 import java.util.List;
 
@@ -215,10 +213,7 @@ public class IslandManager {
                         IslandAwaitStore.storeAwaitData(pl.getUniqueId());
 
                         // Then apply another async query.
-                        ASkyBlock.get().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
-                            @Override
-                            public void executeQuery(Connection connection) {
-                                connection.createQuery(TableSet.ISLAND_INSERT_MAIN.getQuery())
+                        ASkyBlock.get().getDatabase().processBulkUpdate(new QueryInfo("INSERT INTO island (islandUniqueId, islandId, gridPosition, spawnPosition, islandName, gridSize, levelName, playerName) VALUES (:islandUniqueId, :islandId, :gridPos, :spawnPos, :islandName, :gridSize, :levelName, :playerName)")
                                         .addParameter("playerName", pl.getName())
                                         .addParameter("islandId", resultData.getHomeCountId())
                                         .addParameter("islandUniqueId", resultData.getIslandUniquePlotId())
@@ -226,31 +221,22 @@ public class IslandManager {
                                         .addParameter("spawnPos", Utils.getVector3Pair(resultData.getHomeCoordinates()))
                                         .addParameter("gridSize", resultData.getProtectionSize())
                                         .addParameter("levelName", resultData.getLevelName())
-                                        .addParameter("islandName", resultData.getIslandName())
-                                        .executeUpdate();
-
-                                connection.createQuery(TableSet.ISLAND_INSERT_DATA.getQuery())
-                                        .addParameter("islandUniqueId", resultData.getIslandUniquePlotId())
+                                        .addParameter("islandName", resultData.getIslandName()),
+                                new QueryInfo("INSERT INTO islandData(dataId, biome, locked, protectionData, levelHandicap) VALUES (:islandUniqueId, :plotBiome, :isLocked, :protectionData, :levelHandicap)").addParameter("islandUniqueId", resultData.getIslandUniquePlotId())
                                         .addParameter("plotBiome", resultData.getPlotBiome())
                                         .addParameter("isLocked", resultData.isLocked() ? 1 : 0)
                                         .addParameter("protectionData", resultData.getIgsSettings().getSettings())
-                                        .addParameter("levelHandicap", resultData.getLevelHandicap())
-                                        .executeUpdate();
-                            }
+                                        .addParameter("levelHandicap", resultData.getLevelHandicap()))
+                                .thenAccept(Void -> {
+                                    plugin.getFastCache().addIslandIntoDb(pl.getName(), resultData);
 
-                            @Override
-                            public void onCompletion(Exception err) {
-                                if (err != null) {
+                                    pl.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).createSuccess);
+                                    if (teleport) plugin.getGrid().homeTeleport(pl, resultData.getHomeCountId());
+                                })
+                                .exceptionally(ignored -> {
                                     pl.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).errorFailedCritical);
-                                    return;
-                                }
-
-                                plugin.getFastCache().addIslandIntoDb(pl.getName(), resultData);
-
-                                pl.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).createSuccess);
-                                if (teleport) plugin.getGrid().homeTeleport(pl, resultData.getHomeCountId());
-                            }
-                        });
+                                    return null;
+                                });
                     });
 
                     break;

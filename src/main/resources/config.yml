@@ -30,7 +30,11 @@ database:
   #  SQLITE - custom sqlite file
   #  MYSQL  - custom MySql configuration
   connection: sqlite
-  prefix: ""
+  # The amount of parallels thread required
+  # for database to execute, higher value are much better for
+  # high latency mysql connections, but it will use higher CPU usages.
+  # - Note: Default concurrent connections will always be 1 if you are using sqlite.
+  parallels-threads: 1
   SQLite:
     # SQLite file name.
     # You can pick any name or include a directory path

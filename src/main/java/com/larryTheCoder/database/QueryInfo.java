@@ -24,52 +24,37 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.larryTheCoder.database;
 
-package com.larryTheCoder;
-
-import cn.nukkit.plugin.PluginBase;
-import com.larryTheCoder.cache.FastCache;
-import com.larryTheCoder.cache.inventory.InventorySave;
-import com.larryTheCoder.database.Database;
-import com.larryTheCoder.island.GridManager;
-import com.larryTheCoder.island.IslandManager;
-import com.larryTheCoder.island.TeleportLogic;
-import com.larryTheCoder.listener.ChatHandler;
-import com.larryTheCoder.listener.invitation.InvitationHandler;
-import com.larryTheCoder.locales.LocaleManager;
-import com.larryTheCoder.schematic.SchematicHandler;
-import com.larryTheCoder.task.LevelCalcTask;
-import com.larryTheCoder.utils.integration.luckperms.Permission;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 
-public class ASkyBlockAPI extends PluginBase {
+import java.util.List;
+import java.util.Vector;
+
+public class QueryInfo {
 
     @Getter
-    protected Database database = null;
+    public final String query;
     @Getter
-    protected ChatHandler chatHandler;
-    @Getter
-    protected InvitationHandler invitationHandler;
-    @Getter
-    protected IslandManager islandManager;
-    @Getter
-    protected GridManager grid;
-    @Getter
-    protected InventorySave inventory;
-    @Getter
-    protected TeleportLogic teleportLogic;
-    @Getter
-    protected Messages messages;
-    @Getter
-    protected ServerPanel panel;
-    @Getter
-    protected FastCache fastCache;
-    @Getter
-    protected SchematicHandler schematics;
-    @Getter
-    protected LevelCalcTask levelCalcThread;
-    @Getter
-    protected Permission permissionHandler;
-    @Getter
-    protected LocaleManager localeManager;
+    public final List<Parameter> parameter = new Vector<>();
+
+    public QueryInfo(@NonNull String query) {
+        this.query = query;
+    }
+
+    public QueryInfo addParameter(@NonNull String data, Object object) {
+        parameter.add(Parameter.builder().paramName(data).value(object).build());
+
+        return this;
+    }
+
+    @Builder
+    public static class Parameter {
+        @Getter @NonNull
+        public String paramName;
+        @Getter
+        public Object value;
+    }
 }

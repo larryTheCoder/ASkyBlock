@@ -120,7 +120,7 @@ public class LocaleManager {
         if (playerName == null) return fallbackLocale;
 
         Locale locale = Arrays.stream(Locale.getAvailableLocales())
-                .filter(lc -> lc.toString().equalsIgnoreCase(playerName))
+                .filter(lc -> lc.toString().equalsIgnoreCase(plugin.getFastCache().getDefaultLocale(playerName)))
                 .findFirst().orElse(null);
 
         return locales.getOrDefault(locale, fallbackLocale);

@@ -40,10 +40,12 @@ import com.larryTheCoder.cache.FastCache;
 import com.larryTheCoder.cache.inventory.InventorySave;
 import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.command.Commands;
-import com.larryTheCoder.database.DatabaseManager;
 import com.larryTheCoder.database.config.AbstractConfig;
 import com.larryTheCoder.database.config.MySQLConfig;
 import com.larryTheCoder.database.config.SQLiteConfig;
+import com.larryTheCoder.database.Database;
+import com.larryTheCoder.database.QueryDb;
+import com.larryTheCoder.database.QueryInfo;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
 import com.larryTheCoder.island.TeleportLogic;
@@ -62,18 +64,14 @@ import com.larryTheCoder.updater.Updater;
 import com.larryTheCoder.utils.ConfigManager;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+import com.larryTheCoder.utils.classpath.Autoloader;
 import com.larryTheCoder.utils.integration.economy.Economy;
 import com.larryTheCoder.utils.integration.luckperms.InternalPermission;
 import com.larryTheCoder.utils.integration.luckperms.LuckPermsPermission;
 import lombok.Getter;
-import org.sql2o.Query;
-import org.sql2o.data.Table;
 
 import java.io.File;
 import java.util.*;
-
-import static com.larryTheCoder.database.TableSet.FETCH_WORLDS;
-import static com.larryTheCoder.database.TableSet.WORLDS_INSERT;
 
 /**
  * @author larryTheCoder
@@ -155,7 +153,7 @@ public class ASkyBlock extends ASkyBlockAPI {
             Utils.send("&7Saving all island framework...");
 
             saveLevel(true);
-            getDatabase().shutdownDB();
+            getDatabase().shutdown();
             getMessages().saveMessages();
             LavaCheck.clearStats();
             getLevelCalcThread().shutdown();
@@ -174,6 +172,7 @@ public class ASkyBlock extends ASkyBlockAPI {
         if (disabled) {
             return false;
         }
+        int parallelThreads = cfg.getInt("database.parallels-threads", 1);
         String connectionType = cfg.getString("database.connection");
         AbstractConfig dbConfig;
 
@@ -184,7 +183,8 @@ public class ASkyBlock extends ASkyBlockAPI {
         }
 
         try {
-            database = new DatabaseManager(dbConfig);
+            new Autoloader("lib");
+            database = new Database(dbConfig, parallelThreads);
 
             return true;
         } catch (Throwable e) {
@@ -305,59 +305,57 @@ public class ASkyBlock extends ASkyBlockAPI {
     }
 
     private void generateLevel() {
-        database.pushQuery((connection) -> {
-            HashMap<Integer, String> levels = new HashMap<>();
-            try (Query query = connection.createQuery(FETCH_WORLDS.getQuery())) {
-                Table table = query.executeAndFetchTable();
+        database.fetchData(new QueryInfo("SELECT * FROM worldList"))
+                .thenAccept(result -> {
+                    Map<Integer, String> levels = new HashMap<>();
 
-                table.rows().forEach(i -> levels.put(i.getInteger("levelId"), i.getString("worldName")));
-            }
+                    result.rows().forEach(i -> levels.put(i.getInteger("levelId"), i.getString("worldName")));
 
-            if (!levels.containsValue("SkyBlock")) {
-                levels.put(1, "SkyBlock");
-                Utils.levelProvidedId.add(1);
-            }
+                    if (!levels.containsValue("SkyBlock")) {
+                        levels.put(1, "SkyBlock");
+                        Utils.levelProvidedId.add(1);
+                    }
 
-            ArrayList<WorldSettings> settings = new ArrayList<>();
-            for (Map.Entry<Integer, String> values : levels.entrySet()) {
-                String levelName = values.getValue();
+                    ArrayList<WorldSettings> settings = new ArrayList<>();
+                    for (Map.Entry<Integer, String> values : levels.entrySet()) {
+                        String levelName = values.getValue();
 
-                String levelSafeName = levelName.replace(" ", "_");
+                        String levelSafeName = levelName.replace(" ", "_");
 
-                Utils.loadLevelSeed(levelName);
+                        Utils.loadLevelSeed(levelName);
 
-                Level level = getServer().getLevelByName(levelName);
-                WorldSettings worldSettings;
-                if (worldConfig.isSection(levelSafeName)) {
-                    ConfigSection section = worldConfig.getSection(levelSafeName);
-                    worldSettings = WorldSettings.builder()
-                            .setPermission(section.getString("permission"))
-                            .setPlotMax(section.getInt("maxHome"))
-                            .setPlotSize(section.getInt("plotSize"))
-                            .setPlotRange(section.getInt("protectionRange"))
-                            .isStopTime(section.getBoolean("stopTime"))
-                            .useDefaultChest(section.getBoolean("useDefaultChest"))
-                            .setSeaLevel(section.getInt("seaLevel"))
-                            .setLevel(level)
-                            .setSignSettings(section.getList("signConfig"))
-                            .setLevelId(values.getKey())
-                            .build();
+                        Level level = getServer().getLevelByName(levelName);
+                        WorldSettings worldSettings;
+                        if (worldConfig.isSection(levelSafeName)) {
+                            ConfigSection section = worldConfig.getSection(levelSafeName);
+                            worldSettings = WorldSettings.builder()
+                                    .setPermission(section.getString("permission"))
+                                    .setPlotMax(section.getInt("maxHome"))
+                                    .setPlotSize(section.getInt("plotSize"))
+                                    .setPlotRange(section.getInt("protectionRange"))
+                                    .isStopTime(section.getBoolean("stopTime"))
+                                    .useDefaultChest(section.getBoolean("useDefaultChest"))
+                                    .setSeaLevel(section.getInt("seaLevel"))
+                                    .setLevel(level)
+                                    .setSignSettings(section.getList("signConfig"))
+                                    .setLevelId(values.getKey())
+                                    .build();
 
-                    worldSettings.verifyWorldSettings();
-                } else {
-                    worldSettings = new WorldSettings(level);
+                            worldSettings.verifyWorldSettings();
+                        } else {
+                            worldSettings = new WorldSettings(level);
 
-                    worldSettings.saveConfig(cfg);
-                }
+                            worldSettings.saveConfig(cfg);
+                        }
 
-                settings.add(worldSettings);
-                loadedLevel.add(levelName);
-                Utils.levelProvidedId.add(values.getKey());
-            }
-            level.addAll(settings);
+                        settings.add(worldSettings);
+                        loadedLevel.add(levelName);
+                        Utils.levelProvidedId.add(values.getKey());
+                    }
+                    level.addAll(settings);
 
-            saveLevel(false);
-        });
+                    saveLevel(false);
+                });
     }
 
     /**
@@ -406,22 +404,16 @@ public class ASkyBlock extends ASkyBlockAPI {
             return;
         }
 
-        if (showEnd) Utils.send("&eSaving worlds...");
+        if (showEnd) Utils.send("&eSaving island worlds data...");
 
-        database.pushQuery((connection) -> {
-            try (Query queue = connection.createQuery(WORLDS_INSERT.getQuery())) {
-                for (WorldSettings settings : this.level) {
-                    queue.addParameter("levelName", settings.getLevel().getName());
-                    queue.addParameter("levelId", settings.getLevelId());
+        List<QueryInfo> info = new ArrayList<>();
+        for (WorldSettings settings : level) {
+            info.add(new QueryInfo(QueryDb.getInstance().saveWorldData)
+                    .addParameter("levelName", settings.getLevel().getName())
+                    .addParameter("levelId", settings.getLevelId()));
+        }
 
-                    queue.executeUpdate();
-                }
-            } catch (Exception err) {
-                err.printStackTrace();
-
-                Utils.send("&cUnable to save the world.");
-            }
-        });
+        database.processBulkUpdate(info.toArray(new QueryInfo[0]));
     }
 
     // ISLAND DATA STARTING LINE ---

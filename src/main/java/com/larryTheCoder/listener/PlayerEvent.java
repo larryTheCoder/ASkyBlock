@@ -38,16 +38,13 @@ import cn.nukkit.event.player.PlayerRespawnEvent;
 import cn.nukkit.level.Location;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.PlayerData;
-import com.larryTheCoder.database.DatabaseManager;
+import com.larryTheCoder.database.QueryDb;
+import com.larryTheCoder.database.QueryInfo;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
-import org.sql2o.Connection;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.larryTheCoder.database.TableSet.PLAYER_INSERT_DATA;
-import static com.larryTheCoder.database.TableSet.PLAYER_INSERT_MAIN;
 
 /**
  * Events that associate to player
@@ -126,39 +123,26 @@ public class PlayerEvent implements Listener {
 
             Utils.send(p.getName() + "&a data doesn't exists. Creating new ones");
 
-            plugin.getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
-                @Override
-                public void executeQuery(Connection connection) {
-                    connection.createQuery(PLAYER_INSERT_MAIN.getQuery())
+            PlayerData dummy = new PlayerData();
+
+            QueryDb queries = QueryDb.getInstance();
+            plugin.getDatabase().processBulkUpdate(new QueryInfo(queries.insertPlayerData)
                             .addParameter("playerName", p.getName())
                             .addParameter("playerUUID", p.getUniqueId().toString())
                             .addParameter("locale", p.getLoginChainData().getLanguageCode())
                             .addParameter("resetLeft", Settings.islandReset)
-                            .addParameter("banList", "")
-                            .executeUpdate();
-
-                    PlayerData dummy = new PlayerData();
-
-                    connection.createQuery(PLAYER_INSERT_DATA.getQuery())
+                            .addParameter("banList", ""),
+                    new QueryInfo(queries.insertChallengeData)
                             .addParameter("playerName", p.getName())
                             .addParameter("challengesList", dummy.decodeChallengeList("cl"))
-                            .addParameter("challengesTimes", dummy.decodeChallengeList("clt"))
-                            .executeUpdate();
-                }
+                            .addParameter("challengesTimes", dummy.decodeChallengeList("clt")))
+                    .thenAccept(Void -> {
+                        List<String> news = plugin.getMessages().getMessages(p.getName());
 
-                @Override
-                public void onCompletion(Exception ex) {
-                    if (ex != null) {
-                        return;
-                    }
-
-                    List<String> news = plugin.getMessages().getMessages(p.getName());
-
-                    if (news != null && news.isEmpty()) {
-                        p.sendMessage(plugin.getLocale(p).newNews.replace("[count]", Integer.toString(news.size())));
-                    }
-                }
-            });
+                        if (news != null && news.isEmpty()) {
+                            p.sendMessage(plugin.getLocale(p).newNews.replace("[count]", Integer.toString(news.size())));
+                        }
+                    });
         });
     }
 

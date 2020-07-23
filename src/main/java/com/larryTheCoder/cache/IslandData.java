@@ -34,12 +34,10 @@ import cn.nukkit.math.Vector3;
 import com.google.common.base.Preconditions;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.settings.IslandSettings;
-import com.larryTheCoder.database.DatabaseManager;
-import com.larryTheCoder.database.TableSet;
+import com.larryTheCoder.database.QueryInfo;
 import com.larryTheCoder.utils.Utils;
 import lombok.Getter;
 import lombok.Setter;
-import org.sql2o.Connection;
 import org.sql2o.data.Row;
 
 import java.util.Objects;
@@ -372,10 +370,7 @@ public class IslandData implements Cloneable {
      * Save island data asynchronously
      */
     public void saveIslandData() {
-        ASkyBlock.get().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
-            @Override
-            public void executeQuery(Connection connection) {
-                connection.createQuery(TableSet.ISLAND_UPDATE_MAIN.getQuery())
+        ASkyBlock.get().getDatabase().processBulkUpdate(new QueryInfo("UPDATE island SET islandId = :islandId, gridPosition = :gridPos, spawnPosition = :spawnPos, gridSize = :gridSize, levelName = :levelName, playerName = :plotOwner, islandName = :islandName WHERE islandUniqueId = :islandUniqueId")
                         .addParameter("islandId", homeCountId)
                         .addParameter("islandUniqueId", islandUniquePlotId)
                         .addParameter("gridPos", Utils.getVector2Pair(gridCoordinates))
@@ -383,18 +378,13 @@ public class IslandData implements Cloneable {
                         .addParameter("gridSize", protectionRange)
                         .addParameter("levelName", levelName)
                         .addParameter("plotOwner", plotOwner)
-                        .addParameter("islandName", islandName)
-                        .executeUpdate();
-
-                connection.createQuery(TableSet.ISLAND_UPDATE_DATA.getQuery())
+                        .addParameter("islandName", islandName),
+                new QueryInfo("UPDATE islandData SET biome = :plotBiome, locked = :isLocked, protectionData = :protectionData, levelHandicap = :levelHandicap, islandLevel = :islandLevel WHERE dataId = :islandUniqueId")
                         .addParameter("islandUniqueId", islandUniquePlotId)
                         .addParameter("plotBiome", plotBiome)
                         .addParameter("isLocked", isLocked ? 1 : 0)
                         .addParameter("protectionData", settings.getSettings())
                         .addParameter("levelHandicap", levelHandicap)
-                        .addParameter("islandLevel", islandLevel)
-                        .executeUpdate();
-            }
-        });
+                        .addParameter("islandLevel", islandLevel));
     }
 }

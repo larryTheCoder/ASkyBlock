@@ -29,11 +29,9 @@ package com.larryTheCoder.cache;
 
 import cn.nukkit.Player;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.database.DatabaseManager;
-import com.larryTheCoder.database.TableSet;
+import com.larryTheCoder.database.QueryInfo;
 import com.larryTheCoder.utils.Utils;
 import lombok.Getter;
-import org.sql2o.Connection;
 import org.sql2o.data.Row;
 
 import java.util.List;
@@ -132,18 +130,13 @@ public class CoopData {
     }
 
     private void updateData() {
-        ASkyBlock.get().getDatabase().pushQuery(new DatabaseManager.DatabaseImpl() {
-            @Override
-            public void executeQuery(Connection connection) {
-                connection.createQuery(TableSet.ISLAND_UPDATE_RELATIONS.getQuery())
-                        .addParameter("islandUniqueId", islandUniqueId)
-                        .addParameter("leaderName", leaderName)
-                        .addParameter("teamName", teamName)
-                        .addParameter("admins", Utils.arrayToString(admins))
-                        .addParameter("members", Utils.arrayToString(members))
-                        .executeUpdate();
-            }
-        });
+        ASkyBlock.get().getDatabase().executeUpdate(new QueryInfo("UPDATE islandRelations SET islandLeader = :teamName, islandLeader = :leaderName, islandMembers = :members WHERE defaultIsland = :islandUniqueId")
+                .addParameter("islandUniqueId", islandUniqueId)
+                .addParameter("leaderName", leaderName)
+                .addParameter("teamName", teamName)
+                .addParameter("admins", Utils.arrayToString(admins))
+                .addParameter("members", Utils.arrayToString(members))
+        );
     }
 
     @Override
