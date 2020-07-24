@@ -302,6 +302,6 @@ public class Database {
         workerTask.shutdown();
         workerTask.awaitTermination(150000, TimeUnit.SECONDS);
 
-        log.info("Database operations are now disabled.");
+        log.info(ASkyBlock.get().getPrefix() + TextFormat.RED + "Database operations are now disabled.");
     }
 }

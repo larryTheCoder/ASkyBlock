@@ -113,7 +113,6 @@ public class PlayerEvent implements Listener {
     public void onPlayerJoin(PlayerJoinEvent ex) {
         // load player inventory if exists
         Player p = ex.getPlayer();
-        plugin.getInventory().loadPlayerInventory(p);
 
         plugin.getFastCache().getPlayerData(p, pd -> {
             if (pd != null) {

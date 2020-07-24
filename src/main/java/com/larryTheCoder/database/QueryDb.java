@@ -66,7 +66,6 @@ public class QueryDb {
         Preconditions.checkArgument(instance == null, "Query database has already been initiated");
         instance = this;
 
-        // TODO: Finish mysql
         if (isMysql) {
             metadata = "CREATE TABLE IF NOT EXISTS cacheMetadata(" +
                     "dbVersion VARCHAR(32) NOT NULL," +
@@ -129,7 +128,6 @@ public class QueryDb {
             insertPlayerData = "INSERT IGNORE INTO player(playerName, playerUUID, locale, banList, resetAttempts) VALUES (:playerName, :playerUUID, :locale, :banList, :resetLeft)";
             insertChallengeData = "INSERT IGNORE INTO challenges(player, challengesList, challengesTimes) VALUES (:playerName, :challengesList, :challengesTimes)";
         } else {
-            log.info("Using sqlite...");
             metadata = "CREATE TABLE IF NOT EXISTS cacheMetadata(" +
                     "dbVersion TEXT NOT NULL," +
                     "firstInit DATETIME DEFAULT CURRENT_TIMESTAMP," +

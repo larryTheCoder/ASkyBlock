@@ -138,7 +138,6 @@ public class OperatorCategory extends SubCategory {
                     break;
                 }
                 getPlugin().getFastCache().clearSavedCaches();
-                getPlugin().getInventory().clearSavedInventory();
                 sender.sendMessage(TextFormat.RED + "Cleared memory usage.");
                 sender.sendMessage(TextFormat.RED + "Warning: Player data may be lost during this cleanup");
                 break;

@@ -29,7 +29,6 @@ package com.larryTheCoder;
 
 import cn.nukkit.plugin.PluginBase;
 import com.larryTheCoder.cache.FastCache;
-import com.larryTheCoder.cache.inventory.InventorySave;
 import com.larryTheCoder.database.Database;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
@@ -54,8 +53,6 @@ public class ASkyBlockAPI extends PluginBase {
     protected IslandManager islandManager;
     @Getter
     protected GridManager grid;
-    @Getter
-    protected InventorySave inventory;
     @Getter
     protected TeleportLogic teleportLogic;
     @Getter

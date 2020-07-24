@@ -32,7 +32,7 @@ database:
   connection: sqlite
   # The amount of parallels thread required
   # for database to execute, higher value are much better for
-  # high latency mysql connections, but it will use higher CPU usages.
+  # high latency mysql connections, but it will use more CPU usage.
   # - Note: Default concurrent connections will always be 1 if you are using sqlite.
   parallels-threads: 1
   SQLite:

@@ -37,7 +37,6 @@ import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.cache.FastCache;
-import com.larryTheCoder.cache.inventory.InventorySave;
 import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.command.Commands;
 import com.larryTheCoder.database.config.AbstractConfig;
@@ -113,6 +112,8 @@ public class ASkyBlock extends ASkyBlockAPI {
         Generator.addGenerator(SkyBlockGenerator.class, "island", SkyBlockGenerator.TYPE_SKYBLOCK);
         // Register TaskManager
         TaskManager.IMP = new TaskManager();
+        // Register autoloader
+        new Autoloader("lib");
 
         // Then we initialize database.
         disabled = !initDatabase();
@@ -183,7 +184,6 @@ public class ASkyBlock extends ASkyBlockAPI {
         }
 
         try {
-            new Autoloader("lib");
             database = new Database(dbConfig, parallelThreads);
 
             return true;
@@ -261,7 +261,6 @@ public class ASkyBlock extends ASkyBlockAPI {
 
         islandManager = new IslandManager(this);
         grid = new GridManager(this);
-        inventory = new InventorySave();
 
         if (Settings.checkUpdate) Updater.getUpdate();
     }

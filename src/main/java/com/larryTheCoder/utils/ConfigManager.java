@@ -125,7 +125,6 @@ public class ConfigManager {
             // Nothing in the chest
             Settings.chestItems = new Item[0];
         }
-        Settings.saveInventory = cfg.getBoolean("island.saveInventory");
         Settings.loadCacheBefore = cfg.getInt("island.cache-load-before", 30);
         // Challenges
         Settings.broadcastMessages = cfg.getBoolean("general.broadcastmessages", true);

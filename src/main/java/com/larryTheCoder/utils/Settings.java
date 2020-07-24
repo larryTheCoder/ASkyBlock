@@ -56,7 +56,6 @@ public class Settings {
     public static Item[] chestItems = new Item[0];
     public static boolean broadcastMessages;
     public static boolean teamChat;
-    public static boolean saveInventory;
     public static int resetTime;
     public static String defaultLanguage;
     public static int loadCacheBefore = 30;

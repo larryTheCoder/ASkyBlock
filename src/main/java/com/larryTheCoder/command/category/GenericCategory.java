@@ -125,11 +125,8 @@ public class GenericCategory extends SubCategory {
         switch (args[0].toLowerCase()) {
             case "clear":
                 getPlugin().getFastCache().clearSavedCaches();
-
-                Utils.send("DONE");
                 break;
             case "test":
-                getPlugin().getFastCache().dumpAllCaches();
                 break;
             case "expel":
             case "kick":
@@ -156,7 +153,7 @@ public class GenericCategory extends SubCategory {
                 }
 
                 if (!p.isOp() && p.getGamemode() != 0) p.setGamemode(0);
-                if (Settings.saveInventory) getPlugin().getInventory().loadPlayerInventory(p);
+                //if (Settings.saveInventory) getPlugin().getInventory().loadPlayerInventory(p);
 
                 p.teleport(Location.fromObject(getPlugin().getServer().getDefaultLevel().getSafeSpawn()));
                 break;
