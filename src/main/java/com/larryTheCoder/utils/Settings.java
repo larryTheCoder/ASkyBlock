@@ -50,7 +50,6 @@ public class Settings {
     public static int deathPenalty;
     public static boolean sumTeamDeaths;
     public static final ArrayList<String> bannedCommands = new ArrayList<>();
-    public static int islandReset = 3;
     public static int gameMode;
     public static int memberTimeOut;
     public static Item[] chestItems = new Item[0];

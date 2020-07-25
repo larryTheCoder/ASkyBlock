@@ -61,6 +61,7 @@ import com.larryTheCoder.task.LevelCalcTask;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.updater.Updater;
 import com.larryTheCoder.utils.ConfigManager;
+import com.larryTheCoder.utils.IslandAwaitStore;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
 import com.larryTheCoder.utils.classpath.Autoloader;
@@ -213,6 +214,8 @@ public class ASkyBlock extends ASkyBlockAPI {
         levelCalcThread = new LevelCalcTask(this);
         loadPermissionNodes();
         //TopTen.topTenLoad();
+
+        IslandAwaitStore.init();
 
         pm.registerEvents(chatHandler, this);
         pm.registerEvents(new IslandListener(this), this);

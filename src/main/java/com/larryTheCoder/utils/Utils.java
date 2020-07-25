@@ -47,6 +47,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utils functions
@@ -148,15 +149,11 @@ public class Utils {
         return hexString.toString();
     }
 
-    public static String getPlayerRTime(Player p, String what, int seconds) {
-        String key = what + "." + p.getName();
-        Long msBefore = tooSoon.get(key);
-        Long curMS = System.currentTimeMillis();
-        Long msDelta = curMS - msBefore;
-        Long msWaitTime = 1000 * (long) seconds;
-        return Utils.convertTimer(msWaitTime - msDelta);
+    public static String timeToString(long millis) {
+        return String.format("%02dh %02dm %02ds", TimeUnit.MILLISECONDS.toHours(millis),
+                TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
     }
-
     /**
      * Loads the chunk in the certain area
      *

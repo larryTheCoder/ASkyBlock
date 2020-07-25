@@ -35,12 +35,9 @@ import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.listener.LavaCheck;
-import com.larryTheCoder.locales.LocaleInstance;
-import com.larryTheCoder.locales.FileLister;
 import com.larryTheCoder.utils.integration.economy.EconomyAPI;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -79,7 +76,6 @@ public class ConfigManager {
                 }
             }
         }
-        Settings.islandReset = cfg.getInt("island.reset", 0);
         Settings.gameMode = cfg.getInt("island.gameMode", 0);
         Settings.memberTimeOut = cfg.getInt("island.timeOut", 0);
         //Chest Items

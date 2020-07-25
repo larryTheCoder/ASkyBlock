@@ -77,7 +77,7 @@ public class Database {
                 ForkJoinPool.defaultForkJoinWorkerThreadFactory,
                 null, true);
 
-        // Sql2o credentials. TODO: Add SSL support (MITM attack)
+        // Sql2o credentials.
         sql2oConn = database.openConnection();
 
         try (java.sql.Connection con = sql2oConn.getConnectionSource().getConnection()) {

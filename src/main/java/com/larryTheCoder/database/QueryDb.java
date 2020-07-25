@@ -61,6 +61,7 @@ public class QueryDb {
     public final String saveWorldData;
     public final String insertPlayerData;
     public final String insertChallengeData;
+    public final String awaitStore;
 
     public QueryDb(boolean isMysql) {
         Preconditions.checkArgument(instance == null, "Query database has already been initiated");
@@ -73,7 +74,7 @@ public class QueryDb {
                     "cacheUniqueId VARCHAR(32) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPRESSED";
 
             islandLimitCount = "CREATE TABLE IF NOT EXISTS lastExecution(" +
-                    "playerUniqueId VARCHAR(64) NOT NULL," +
+                    "playerUniqueId VARCHAR(64) PRIMARY KEY NOT NULL," +
                     "lastQueried BIGINT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPRESSED";
 
             islandRelations = "CREATE TABLE IF NOT EXISTS islandRelations(" +
@@ -127,6 +128,7 @@ public class QueryDb {
             saveWorldData = "INSERT IGNORE INTO worldList (worldName, levelId) VALUES (:levelName, :levelId)";
             insertPlayerData = "INSERT IGNORE INTO player(playerName, playerUUID, locale, banList, resetAttempts) VALUES (:playerName, :playerUUID, :locale, :banList, :resetLeft)";
             insertChallengeData = "INSERT IGNORE INTO challenges(player, challengesList, challengesTimes) VALUES (:playerName, :challengesList, :challengesTimes)";
+            awaitStore = "INSERT INTO lastExecution(playerUniqueId, lastQueried) VALUES (:plUniqueId, :timestamp) ON DUPLICATE KEY UPDATE lastQueried = :timestamp";
         } else {
             metadata = "CREATE TABLE IF NOT EXISTS cacheMetadata(" +
                     "dbVersion TEXT NOT NULL," +
@@ -134,7 +136,7 @@ public class QueryDb {
                     "cacheUniqueId TEXT NOT NULL)";
 
             islandLimitCount = "CREATE TABLE IF NOT EXISTS lastExecution(" +
-                    "playerUniqueId VARCHAR(64) NOT NULL," +
+                    "playerUniqueId VARCHAR(64) PRIMARY KEY NOT NULL," +
                     "lastQueried BIGINT NOT NULL)";
 
             islandRelations = "CREATE TABLE IF NOT EXISTS islandRelations(" +
@@ -188,6 +190,7 @@ public class QueryDb {
             saveWorldData = "INSERT OR IGNORE INTO worldList (worldName, levelId) VALUES (:levelName, :levelId)";
             insertPlayerData = "INSERT OR IGNORE INTO player(playerName, playerUUID, locale, banList, resetAttempts) VALUES (:playerName, :playerUUID, :locale, :banList, :resetLeft)";
             insertChallengeData = "INSERT OR IGNORE INTO challenges(player, challengesList, challengesTimes) VALUES (:playerName, :challengesList, :challengesTimes)";
+            awaitStore = "INSERT OR REPLACE INTO lastExecution(playerUniqueId, lastQueried) VALUES (:plUniqueId, :timestamp)";
         }
     }
 }

@@ -49,6 +49,7 @@ import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.IslandAwaitStore;
 import com.larryTheCoder.utils.Settings;
 import com.larryTheCoder.utils.Utils;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
 
@@ -58,6 +59,7 @@ import java.util.List;
  *
  * @author larryTheCoder
  */
+@Log4j2
 public class IslandManager {
 
     private final ASkyBlock plugin;
@@ -171,6 +173,12 @@ public class IslandManager {
         // Make sure the search didn't interrupt other processes.
         TaskManager.runTaskAsync(() -> {
             List<IslandData> islands = plugin.getFastCache().getIslandsFrom(pl.getName());
+            long totalIsland = islands.stream().filter(island -> island.getLevelName().equalsIgnoreCase(world.getName())).count();
+
+            if (totalIsland >= settings.getMaximumIsland()) {
+                pl.sendMessage(plugin.getPrefix() + TextFormat.RED + "You have reached maximum islands in this world.");
+                return;
+            }
 
             for (int i = 0; i < Integer.MAX_VALUE; ++i) {
                 int width = i * settings.getIslandDistance() * 2;
@@ -200,6 +208,7 @@ public class IslandManager {
                             .setPlotBiome("Plains")
                             .setIslandName(home).build();
 
+                    log.debug("Result cache id {}", generatedData);
                     // Then we call a task to run them in the main thread.
                     TaskManager.runTask(() -> {
                         // Call an event
@@ -210,7 +219,7 @@ public class IslandManager {
                         }
                         plugin.getSchematics().pasteSchematic(pl, locIsland, templateId, biome);
 
-                        IslandAwaitStore.storeAwaitData(pl.getUniqueId());
+                        IslandAwaitStore.storeAwaitData(pl.getName());
 
                         // Then apply another async query.
                         ASkyBlock.get().getDatabase().processBulkUpdate(new QueryInfo("INSERT INTO island (islandUniqueId, islandId, gridPosition, spawnPosition, islandName, gridSize, levelName, playerName) VALUES (:islandUniqueId, :islandId, :gridPos, :spawnPos, :islandName, :gridSize, :levelName, :playerName)")
@@ -231,9 +240,13 @@ public class IslandManager {
                                     plugin.getFastCache().addIslandIntoDb(pl.getName(), resultData);
 
                                     pl.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).createSuccess);
-                                    if (teleport) plugin.getGrid().homeTeleport(pl, resultData.getHomeCountId());
+                                    if (teleport) {
+                                        TaskManager.runTask(() -> plugin.getGrid().homeTeleport(pl, resultData.getHomeCountId()));
+                                    }
                                 })
-                                .exceptionally(ignored -> {
+                                .exceptionally(err -> {
+                                    log.throwing(err);
+
                                     pl.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).errorFailedCritical);
                                     return null;
                                 });
@@ -278,8 +291,11 @@ public class IslandManager {
             return;
         }
 
-        if (!IslandAwaitStore.canBypassAwait(p)) {
-            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorTooSoon.replace("[secs]", Utils.getPlayerRTime(p, p.getName() + pd.getIslandUniquePlotId(), 0)).replace("[cmds]", "delete"));
+        long reset;
+        if ((reset = IslandAwaitStore.canBypassAwait(p)) > 0) {
+            p.sendMessage(plugin.getPrefix() + plugin.getLocale(p).errorTooSoon
+                    .replace("[secs]", Utils.timeToString(reset))
+                    .replace("[cmd]", "delete"));
             return;
         }
 

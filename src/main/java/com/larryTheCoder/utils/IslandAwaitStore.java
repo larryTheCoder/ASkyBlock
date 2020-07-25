@@ -29,17 +29,12 @@ package com.larryTheCoder.utils;
 
 import cn.nukkit.Player;
 import com.larryTheCoder.ASkyBlock;
-import com.larryTheCoder.task.TaskManager;
-import org.sql2o.Connection;
-import org.sql2o.Sql2oException;
+import com.larryTheCoder.database.QueryDb;
+import com.larryTheCoder.database.QueryInfo;
 import org.sql2o.data.Table;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -48,10 +43,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class IslandAwaitStore {
 
-    public static final Map<UUID, Long> playerLimit = new HashMap<>();
-
-    public static final Map<UUID, Long> saveQueue = new ConcurrentHashMap<>();
-    public static final Queue<UUID> deleteQueue = new ConcurrentLinkedQueue<>();
+    public static final Map<String, Long> playerLimit = new HashMap<>();
 
     /**
      * Stores a temporary await data key into a hash mapping data.
@@ -59,69 +51,43 @@ public class IslandAwaitStore {
      *
      * @param player The player unique id.
      */
-    public static void storeAwaitData(UUID player) {
-        if (playerLimit.containsKey(player)) return;
+    public static void storeAwaitData(String playerName) {
+        if (playerLimit.containsKey(playerName)) return;
 
-        long currentTime = System.currentTimeMillis();
-        playerLimit.put(player, currentTime);
-        saveQueue.put(player, currentTime);
+        long currentTime;
+        playerLimit.put(playerName, currentTime = System.currentTimeMillis());
+
+        ASkyBlock.get().getDatabase().executeUpdate(new QueryInfo(QueryDb.getInstance().awaitStore)
+                .addParameter("plUniqueId", playerName)
+                .addParameter("timestamp", currentTime));
     }
 
     /**
      * Checks if the player can bypass the await timer.
      *
      * @param player The player class itself.
-     * @return {@code true} if the player can bypass the await limit.
+     * @return The time that player needs in order to bypass
      */
-    public static boolean canBypassAwait(Player player) {
-        UUID uuid = player.getUniqueId();
-        if (ASkyBlock.get().getPermissionHandler().hasPermission(player, "is.timer.bypass")) return true;
-        if (!playerLimit.containsKey(uuid)) return true;
+    public static long canBypassAwait(Player player) {
+        String plName = player.getName();
+        if (ASkyBlock.get().getPermissionHandler().hasPermission(player, "is.timer.bypass")) return -1;
+        if (!playerLimit.containsKey(plName)) return -1;
 
-        if ((System.currentTimeMillis() - playerLimit.get(uuid)) >= TimeUnit.MINUTES.toMillis(Settings.resetTime)) {
-            deleteQueue.add(uuid);
-            return true;
+        long totalTime = TimeUnit.MINUTES.toMillis(Settings.resetTime) - (System.currentTimeMillis() - playerLimit.get(plName));
+        if (totalTime <= 0) {
+            ASkyBlock.get().getDatabase().executeUpdate(new QueryInfo("DELETE FROM lastExecution WHERE playerUniqueId = :plName").addParameter("plName", plName));
+            return -1;
         }
 
-        return false;
+        return totalTime;
     }
 
     /**
      * Initializes the IslandAwaitStore class.
-     *
-     * @param connection The connection to the sql2o database.
      */
-    public static void init(Connection connection) {
-        Table table = connection.createQuery("SELECT * FROM lastExecution").executeAndFetchTable();
+    public static void init() {
+        Table table = ASkyBlock.get().getDatabase().fetchData(new QueryInfo("SELECT * FROM lastExecution")).join();
 
-        table.rows().forEach(row -> playerLimit.put(UUID.fromString(row.getString("playerUniqueId")), row.getLong("lastQueried")));
-    }
-
-    /**
-     * Stores IslandAwaitStore data into the database.
-     *
-     * @param connection The connection to the sql2o database.
-     */
-    public static void databaseTick(Connection connection) {
-        try {
-            if (!saveQueue.isEmpty()) {
-                saveQueue.forEach((uuid, timestamp) -> connection.createQuery("INSERT INTO lastExecution(playerUniqueId, lastQueried) VALUES (:plUniqueId, :timestamp)")
-                        .addParameter("plUniqueId", uuid.toString())
-                        .addParameter("timestamp", timestamp)
-                        .executeUpdate());
-
-                saveQueue.clear();
-            }
-
-            if (!deleteQueue.isEmpty()) {
-                deleteQueue.forEach(uuid -> connection.createQuery("DELETE FROM lastExecution WHERE playerUniqueId = :plUniqueId")
-                        .addParameter("plUniqueId", uuid.toString())
-                        .executeUpdate());
-
-                deleteQueue.clear();
-            }
-        } catch (Sql2oException err) {
-            TaskManager.runTask(err::printStackTrace);
-        }
+        table.rows().forEach(row -> playerLimit.put(row.getString("playerUniqueId"), row.getLong("lastQueried")));
     }
 }

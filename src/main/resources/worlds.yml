@@ -12,7 +12,7 @@ SkyBlock:
   # This is your island Permission
   permission: "is.create"
   # Maximum island in this world
-  maxHome: 10
+  maxHome: 2
   # This is your island plot size
   plotSize: 200
   # Same in the config.

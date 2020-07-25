@@ -129,7 +129,7 @@ public class PlayerEvent implements Listener {
                             .addParameter("playerName", p.getName())
                             .addParameter("playerUUID", p.getUniqueId().toString())
                             .addParameter("locale", p.getLoginChainData().getLanguageCode())
-                            .addParameter("resetLeft", Settings.islandReset)
+                            .addParameter("resetLeft", 0)
                             .addParameter("banList", ""),
                     new QueryInfo(queries.insertChallengeData)
                             .addParameter("playerName", p.getName())

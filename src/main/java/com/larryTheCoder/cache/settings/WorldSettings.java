@@ -26,6 +26,7 @@
  */
 package com.larryTheCoder.cache.settings;
 
+import cn.nukkit.level.GameRule;
 import cn.nukkit.level.Level;
 import cn.nukkit.utils.Config;
 import com.larryTheCoder.cache.builder.WorldSettingsBuilder;
@@ -38,10 +39,10 @@ import lombok.Getter;
 public class WorldSettings {
 
     @Getter
-    private int levelId;
+    private final int levelId;
 
     @Getter
-    private Level level;
+    private final Level level;
     @Getter
     private String permission = "is.create";
     @Getter
@@ -84,6 +85,8 @@ public class WorldSettings {
         if (isStopTime()) {
             level.setTime(1600);
             level.stopTime();
+
+            level.getGameRules().setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
         }
 
         if (protectionRange % 2 != 0) {
