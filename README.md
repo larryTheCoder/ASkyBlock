@@ -21,8 +21,8 @@ Good question sir, let me explain, first, this plugin relies on Java and Cloudbu
 which **brings an incredible amount of performance** against PocketMine-MP. 
 
 Second, the amount of **features implemented in this plugin is far greater than any of the plugins available**
-out there. Safe island teleportation, Island level calculations that is ran under asynchronous task and
-multithreaded alike database operations (Further discussions required to ensure the database performance capability).
+out there. Safe island teleportation, Island level calculations that is ran under asynchronous task, which are
+using `ForkJoinPool` as its interpreter.
 
 Third, it is easy to use this plugin, all islands created automatically and players will setup their island
 with forms. Technically, all the operations for the plugin handled by forms. **Interface made easy**, another
@@ -34,10 +34,10 @@ will be set to default. Fallbacks also supported if you want to use default isla
 
 Installation
 -------------
-For proper installation, **you must install DbLib** into your server.
-It is a utility plugin that provides database classpath and utilities.
+Builds from v0.5.2-BETA-rev7 and above has an autoloader method that reflects database binaries into the plugin.
+However, internet access are requred in order to work properly so please turn your internet on while the plugin downloads the file :)
 
-- DbLib: https://cloudburstmc.org/resources/dblib.12
+But if you still want to use DbLib, feel free to put it under your plugins folder.
 
 #### Downloading
 To download this plugin, you can either choose to download from [JenkinsCI](https://jenkins.potatohome.xyz/job/ASkyBlock) or from our verified [Cloudburst Plugins](https://cloudburstmc.org/resources/askyblock.79/) section.
@@ -50,7 +50,7 @@ I have integrated a few plugins as requested by several players. You can install
 
 - EconomyAPI: https://cloudburstmc.org/resources/categories/economy.6
 - LuckPerms v5.x: https://cloudburstmc.org/resources/luckperms.51
-- ZChat: https://cloudburstmc.org/resources/zchat.282
+- PlaceHolderAPI [TODO]: https://cloudburstmc.org/resources/placeholderapi.104/
 
 Features
 -------------
@@ -60,13 +60,14 @@ Features
 * Supports many types of island in `.schematic` format.
 * Supports more than 1 world in this plugin.
 * No more 1 island in 1 world, every island shared distinctly.
-* Supports Mysql* and Sqlite databases, cleaner and readable database.
+* Supports both Mysql* and Sqlite databases, cleaner and readable database.
 * Island Settings, now you can configure what is needed for your island.
 * Magic cobblestone generator, yes we have that too here.
 * Per world configuration, you can configure your world settings in `world.yml`
 * Island block calculations, scoring is now available. 
+* Per world home limitation, works faster than expected.
 
-*Mysql operations may not be working for now.
+*Mysql are still in BETA, open an issue if you found any bugs.
 
 Note
 ----
