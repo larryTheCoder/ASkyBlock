@@ -236,19 +236,18 @@ public class IslandManager {
                                         .addParameter("isLocked", resultData.isLocked() ? 1 : 0)
                                         .addParameter("protectionData", resultData.getIgsSettings().getSettings())
                                         .addParameter("levelHandicap", resultData.getLevelHandicap()))
-                                .thenAccept(Void -> {
+                                .whenComplete((Void, error) -> {
+                                    if (error != null) {
+                                        log.throwing(error);
+                                        return;
+                                    }
+
                                     plugin.getFastCache().addIslandIntoDb(pl.getName(), resultData);
 
                                     pl.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).createSuccess);
                                     if (teleport) {
                                         TaskManager.runTask(() -> plugin.getGrid().homeTeleport(pl, resultData.getHomeCountId()));
                                     }
-                                })
-                                .exceptionally(err -> {
-                                    log.throwing(err);
-
-                                    pl.sendMessage(plugin.getPrefix() + plugin.getLocale(pl).errorFailedCritical);
-                                    return null;
                                 });
                     });
 

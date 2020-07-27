@@ -68,7 +68,11 @@ public class FastCache {
         // See how better this is if it would be this way?
         plugin.getDatabase().fetchBulkData(
                 new QueryInfo("SELECT * FROM player"),
-                new QueryInfo("SELECT islandUniqueId FROM island")).thenAccept(result -> {
+                new QueryInfo("SELECT islandUniqueId FROM island")).whenComplete((result, error) -> {
+            if (error != null) {
+                log.throwing(error);
+                return;
+            }
             Table stmt = result.get(0);
             Table islandUnique = result.get(1);
             if (stmt.rows().size() == 0) return;
@@ -118,9 +122,6 @@ public class FastCache {
             }
 
             for (Row rows : islandUnique.rows()) uniqueId.add(rows.getString("islandUniqueId"));
-        }).exceptionally(error -> {
-            log.throwing(error);
-            return null;
         });
     }
 
@@ -307,7 +308,11 @@ public class FastCache {
         FastCacheData result = dataCache.stream().filter(i -> i.anyIslandUidMatch(id)).findFirst().orElse(null);
         if (result == null) {
             plugin.getDatabase().fetchData(new QueryInfo("SELECT * FROM island WHERE islandUniqueId = :islandId")
-                    .addParameter("islandId", id)).thenAccept(res -> {
+                    .addParameter("islandId", id)).whenComplete((res, error) -> {
+                if (error != null) {
+                    log.throwing(error);
+                    return;
+                }
                 List<IslandData> islandList = parseData(res.rows());
 
                 putIslandUnspecified(islandList);
@@ -316,11 +321,6 @@ public class FastCache {
 
                 IslandData pd = data == null ? null : data.getIslandById(id);
                 resultOutput.accept(pd);
-            }).exceptionally(error -> {
-                log.throwing(error);
-
-                resultOutput.accept(null);
-                return null;
             });
             return;
         }
@@ -337,23 +337,18 @@ public class FastCache {
         if (result == null) {
             plugin.getDatabase().fetchData(new QueryInfo("SELECT * FROM island WHERE playerName = :pName AND islandId = :islandId")
                     .addParameter("pName", playerName)
-                    .addParameter("islandId", homeNum)).thenAccept(res -> {
+                    .addParameter("islandId", homeNum)).whenComplete((res, error) -> {
+                if (error != null) {
+                    log.throwing(error);
+                    return;
+                }
+
                 List<IslandData> islandList = parseData(res.rows());
 
                 saveIntoDb(playerName, islandList);
 
                 FastCacheData data = dataCache.stream().filter(i -> i.anyMatch(playerName) && i.anyIslandMatch(homeNum)).findFirst().orElse(null);
                 resultOutput.accept(data != null ? data.getIslandById(homeNum) : null);
-            }).exceptionally(error -> {
-                log.throwing(error);
-
-                resultOutput.accept(null);
-                return null;
-            }).exceptionally(error -> {
-                log.throwing(error);
-
-                resultOutput.accept(null);
-                return null;
             });
             return;
         }
@@ -369,17 +364,16 @@ public class FastCache {
         FastCacheData result = dataCache.stream().filter(i -> i.anyMatch(plName)).findFirst().orElse(null);
         if (result == null) {
             plugin.getDatabase().fetchData(new QueryInfo("SELECT * FROM island WHERE playerName = :pName")
-                    .addParameter("pName", plName)).thenAccept(res -> {
+                    .addParameter("pName", plName)).whenComplete((res, error) -> {
+                if (error != null) {
+                    log.throwing(error);
+                    return;
+                }
                 List<IslandData> islandList = parseData(res.rows());
 
                 putIslandUnspecified(islandList);
 
                 resultOutput.accept(islandList);
-            }).exceptionally(error -> {
-                log.throwing(error);
-
-                resultOutput.accept(null);
-                return null;
             });
 
             return;
@@ -411,7 +405,12 @@ public class FastCache {
         if (result == null || result.getPlayerData() == null) {
             plugin.getDatabase().fetchBulkData(
                     new QueryInfo("SELECT * FROM player WHERE playerName = :plotOwner").addParameter("plotOwner", player),
-                    new QueryInfo("SELECT * FROM challenges WHERE player = :playerName").addParameter("playerName", player)).thenAccept(data -> {
+                    new QueryInfo("SELECT * FROM challenges WHERE player = :playerName").addParameter("playerName", player)).whenComplete((data, error) -> {
+                if (error != null) {
+                    log.throwing(error);
+                    return;
+                }
+
                 // It would be obvious that the player data is not available.
                 if (data.get(0) == null) {
                     resultOutput.accept(null);
@@ -423,11 +422,6 @@ public class FastCache {
 
                 resultOutput.accept(playerData);
                 saveIntoDb(playerData);
-            }).exceptionally(error -> {
-                log.throwing(error);
-
-                resultOutput.accept(null);
-                return null;
             });
 
             return;
@@ -503,10 +497,14 @@ public class FastCache {
 
         plugin.getDatabase().processBulkUpdate(
                 new QueryInfo("DELETE FROM islandData WHERE (dataId = :islandUniqueId)").addParameter("islandUniqueId", islandData.getIslandUniquePlotId()),
-                new QueryInfo("DELETE FROM island WHERE (islandUniqueId = :islandUniqueId)").addParameter("islandUniqueId", islandData.getIslandUniquePlotId())).thenAccept(Void -> object.removeIsland(islandData))
-                .exceptionally(error -> {
-                    log.throwing(error);
-                    return null;
+                new QueryInfo("DELETE FROM island WHERE (islandUniqueId = :islandUniqueId)").addParameter("islandUniqueId", islandData.getIslandUniquePlotId()))
+                .whenComplete((Void, error) -> {
+                    if (error != null) {
+                        log.throwing(error);
+                        return;
+                    }
+
+                    object.removeIsland(islandData);
                 });
     }
 
