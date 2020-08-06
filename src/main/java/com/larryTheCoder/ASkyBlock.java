@@ -308,7 +308,7 @@ public class ASkyBlock extends ASkyBlockAPI {
 
     private void generateLevel() {
         database.fetchData(new QueryInfo("SELECT * FROM worldList"))
-                .thenAccept(result -> {
+                .whenComplete((result, error) -> {
                     Map<Integer, String> levels = new HashMap<>();
 
                     result.rows().forEach(i -> levels.put(i.getInteger("levelId"), i.getString("worldName")));

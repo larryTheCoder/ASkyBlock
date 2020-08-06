@@ -29,15 +29,20 @@ package com.larryTheCoder.listener;
 import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockLava;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.item.EntityPrimedTNT;
+import cn.nukkit.entity.mob.EntityMob;
+import cn.nukkit.entity.passive.EntityAnimal;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.block.BlockPlaceEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
+import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityExplodeEvent;
 import cn.nukkit.event.inventory.CraftItemEvent;
+import cn.nukkit.event.inventory.InventoryPickupItemEvent;
 import cn.nukkit.event.player.*;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
@@ -139,26 +144,6 @@ public class IslandListener extends Action implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onBucketUseEvent(PlayerBucketFillEvent e) {
-        if (onBucketEvent(e.getPlayer(), e.getBlockClicked())) e.setCancelled();
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onBucketEmpty(PlayerBucketEmptyEvent e) {
-        if (onBucketEvent(e.getPlayer(), e.getBlockClicked())) e.setCancelled();
-    }
-
-    private boolean onBucketEvent(Player player, Block blockClicked) {
-        if (notInWorld(player)) return false;
-        if (actionAllowed(player, blockClicked.getLocation(), SettingsFlag.BUCKET)) {
-            if (blockClicked instanceof BlockLava && actionAllowed(player, blockClicked.getLocation(), SettingsFlag.COLLECT_LAVA)) {
-                return false;
-            } else return !actionAllowed(player, blockClicked.getLocation(), SettingsFlag.COLLECT_WATER);
-        }
-        return true;
-    }
-
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerExecuteCommand(PlayerCommandPreprocessEvent event) {
         log.debug("DEBUG: " + event.getEventName());
@@ -173,10 +158,35 @@ public class IslandListener extends Action implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.LOW)
+    public void onPlayerHitEvent(EntityDamageEvent e) {
+        Entity target = e.getEntity();
+
+        if (notInWorld(target)) return;
+        if (e instanceof EntityDamageByEntityEvent) {
+            EntityDamageByEntityEvent damage = (EntityDamageByEntityEvent) e;
+            Entity cause = damage.getDamager();
+
+            // Identifier for player mobs attack.
+            if (!(cause instanceof Player)) {
+                if (cause instanceof EntityAnimal) {
+                    if (actionAllowed(target.getLocation(), SettingsFlag.HURT_MOBS)) return;
+                } else if (cause instanceof EntityMob) {
+                    if (actionAllowed(target.getLocation(), SettingsFlag.HURT_MONSTERS)) return;
+                }
+            } else {
+                if (actionAllowed(target.getLocation(), SettingsFlag.PVP)) return;
+            }
+
+            e.setCancelled();
+        }
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerDropItem(PlayerDropItemEvent e) {
         log.debug("DEBUG: " + e.getEventName());
         log.debug("DEBUG: Item is " + e.getItem().toString());
+
         Player p = e.getPlayer();
         if (notInWorld(p)) {
             log.debug("Event is not in world");
@@ -196,7 +206,37 @@ public class IslandListener extends Action implements Listener {
             return;
         }
 
-        // Do not send any message, it may spam
+        log.debug("Action not allowed: Drop item");
+        e.setCancelled();
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerPickupItem(InventoryPickupItemEvent e) {
+        log.debug("DEBUG: " + e.getEventName());
+        log.debug("DEBUG: Item is " + e.getItem().toString());
+
+        Player p = (Player) e.getInventory().getHolder();
+        if (notInWorld(p)) {
+            log.debug("Event is not in world");
+            return;
+        }
+        if (p.isOp() || hasPermission(p, "is.mod.bypassprotect")) {
+            return;
+        }
+
+        // Too bad that the item is not a vector3
+        if (plugin.getIslandManager().locationIsOnIsland(p, e.getItem())) {
+            log.debug("Action is allowed: Player on island");
+            // You can do anything on your island
+            return;
+        }
+
+        if (actionAllowed(e.getItem().getLocation(), SettingsFlag.VISITOR_ITEM_PICKUP)) {
+            log.debug("Action is allowed: Item pickup is allowed");
+            return;
+        }
+
+        log.debug("Action not allowed: Pickup item");
         e.setCancelled();
     }
 
@@ -231,27 +271,27 @@ public class IslandListener extends Action implements Listener {
                     // No need stupid checks. Just cancel them
                     p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                     e.setCancelled();
-                    log.debug("Action is blocked");
+                    log.debug("Action is blocked PHYSICAL");
                     return;
                 }
                 break;
             case LEFT_CLICK_BLOCK:
                 // Player is interacting with an item. Check if it allowed
-                if (!Utils.isItemAllowed(p, e.getItem())) {
+                if (!Utils.isItemAllowed(p, e.getItem(), e.getBlock())) {
                     // No need stupid checks. Just cancel them
                     p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                     e.setCancelled();
-                    log.debug("Action is blocked");
+                    log.debug("Action is blocked LEFT_CLICK_BLOCK");
                     return;
                 }
                 break;
             case RIGHT_CLICK_BLOCK:
                 // Player is clicking on something. Check if it allowed
-                if (!Utils.isInventoryAllowed(p, e.getBlock())) {
+                if (!Utils.isInventoryAllowed(p, e.getItem(), e.getBlock())) {
                     // No need stupid checks. Just cancel them
                     p.sendMessage(getPrefix() + plugin.getLocale(e.getPlayer()).islandProtected);
                     e.setCancelled();
-                    log.debug("Action is blocked");
+                    log.debug("Action is blocked RIGHT_CLICK_BLOCK");
                     return;
                 }
                 break;

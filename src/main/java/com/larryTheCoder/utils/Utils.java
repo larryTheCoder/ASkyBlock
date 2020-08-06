@@ -40,20 +40,21 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.SkyBlockGenerator;
 import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.cache.settings.IslandSettings;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Utils functions
+ * Utilities functions, used by internal codes.
  *
  * @author larryTheCoder
  */
+@Log4j2
 public class Utils {
 
     public static final String UPDATES_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "updates" + File.separator;
@@ -62,17 +63,10 @@ public class Utils {
     public static final String LIBRARY_DIRECTORY = "plugins" + File.separator + "ASkyBlock" + File.separator + "lib" + File.separator;
     public static final String DIRECTORY = ASkyBlock.get().getDataFolder() + File.separator;
 
-    private static final ConcurrentHashMap<String, Long> tooSoon = new ConcurrentHashMap<>();
-
     private static Long x = System.nanoTime();
 
-
     public static void send(String msg) {
-        Server.getInstance().getLogger().info(ASkyBlock.get().getPrefix() + TextFormat.GREEN + msg.replace("&", "§"));
-    }
-
-    public static void logError(String log, Throwable error) {
-        // E2hzbLKV
+        log.info(ASkyBlock.get().getPrefix() + TextFormat.GREEN + msg.replace("&", "§"));
     }
 
     public static Config loadYamlFile(String file) {
@@ -154,6 +148,7 @@ public class Utils {
                 TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
                 TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
     }
+
     /**
      * Loads the chunk in the certain area
      *
@@ -244,12 +239,6 @@ public class Utils {
         }
     }
 
-    private static String convertTimer(long ms) {
-        int secs = (int) (ms / 1000 % 60);
-        int min = (int) (ms / 1000 / 60 % 60);
-        return String.format("%02dm %02ds", min, secs);
-    }
-
     /**
      * Check physical activity of the player
      *
@@ -337,7 +326,7 @@ public class Utils {
      * @param type The player's item that uses to interact
      * @return true if the interacting is allowed
      */
-    public static boolean isItemAllowed(Player p, Item type) {
+    public static boolean isItemAllowed(Player p, Item type, Block target) {
         // User is placing a block, let the other event
         // Do its task, avoiding too much data gathering
         if (type.canBePlaced()) {
@@ -349,24 +338,23 @@ public class Utils {
         IslandSettings data = pd == null ? new IslandSettings("") : pd.getIgsSettings();
 
         if (type instanceof ItemEgg) {
-            //Utils.sendDebug"User is interacting with chicken egg");
             return data.getIgsFlag(SettingsFlag.EGGS);
         } else if (type instanceof ItemSpawnEgg) {
-            //Utils.sendDebug"User is interacting with spawn egg");
             return data.getIgsFlag(SettingsFlag.SPAWN_EGGS);
-        } else if (type instanceof ItemShears) {
-            // FIXME: This should check if the player is shearing the sheep, not shearing the wood
-            //return data.getIgsFlag(SettingsFlag.SHEARING);
-            //Utils.sendDebug"Using shears, not yet implemented for interaction");
         } else if (type instanceof ItemFlintSteel) {
-            //Utils.sendDebug"User is interacting with flint and steel");
             return data.getIgsFlag(SettingsFlag.FIRE);
+        }else if (type instanceof ItemBucket && target instanceof BlockWater) {
+            Utils.sendDebug("DEBUG: Interacting with water object.");
+            return data.getIgsFlag(SettingsFlag.BUCKET) && data.getIgsFlag(SettingsFlag.COLLECT_WATER);
+        } else if (type instanceof ItemBucket && target instanceof BlockLava) {
+            Utils.sendDebug("DEBUG: Interacting with lava object.");
+            return data.getIgsFlag(SettingsFlag.BUCKET) && data.getIgsFlag(SettingsFlag.COLLECT_LAVA);
         }
 
         return false;
     }
 
-    public static boolean isInventoryAllowed(Player p, Block type) {
+    public static boolean isInventoryAllowed(Player p, Item item, Block type) {
         // Classic
         if (type.getId() == 0) {
             return true;
@@ -412,6 +400,12 @@ public class Utils {
         } else if (type instanceof BlockDoor || type instanceof BlockTrapdoor) {
             sendDebug("DEBUG: Type of check is noteblock / jukeblock");
             return data.getIgsFlag(SettingsFlag.DOOR);
+        }else if (item instanceof ItemBucket && (item.getDamage() == 8 || type instanceof BlockWater)) {
+            Utils.sendDebug("DEBUG: Placing water object.");
+            return data.getIgsFlag(SettingsFlag.BUCKET) && data.getIgsFlag(SettingsFlag.COLLECT_WATER);
+        } else if (item instanceof ItemBucket && (item.getDamage() == 10|| type instanceof BlockLava)) {
+            Utils.sendDebug("DEBUG: Interacting with lava object.");
+            return data.getIgsFlag(SettingsFlag.BUCKET) && data.getIgsFlag(SettingsFlag.COLLECT_LAVA);
         }
 
         return false;

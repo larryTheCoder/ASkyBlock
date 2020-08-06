@@ -39,6 +39,7 @@ import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.form.window.FormWindowModal;
 import cn.nukkit.form.window.FormWindowSimple;
 import cn.nukkit.level.biome.EnumBiome;
+import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.cache.settings.IslandSettings;
 import com.larryTheCoder.locales.LocaleInstance;
@@ -225,6 +226,8 @@ public class ServerPanel implements Listener {
                 }
 
                 pd.saveIslandData();
+
+                p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Successfully updated your island settings.");
                 break;
             case FIRST_TIME_DELETE:
                 // Check if the player closed this form
@@ -293,6 +296,8 @@ public class ServerPanel implements Listener {
                 }
 
                 pd3.saveIslandData();
+
+                p.sendMessage(plugin.getPrefix() + TextFormat.GREEN + "Successfully updated your island protection settings.");
                 break;
         }
     }

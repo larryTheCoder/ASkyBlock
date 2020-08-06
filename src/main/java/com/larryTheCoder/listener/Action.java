@@ -72,9 +72,9 @@ public abstract class Action {
      */
     protected boolean actionAllowed(Location location, SettingsFlag flag) {
         IslandData island = plugin.getGrid().getProtectedIslandAt(location);
-        if (island != null && island.getIgsSettings().getIgsFlag(flag)) {
-            log.debug("DEBUG: Action is allowed by settings");
-            return true;
+        if (island != null) {
+            log.debug("DEBUG: Action is determined by settings");
+            return island.getIgsSettings().getIgsFlag(flag);
         }
         log.debug("DEBUG: Action is defined by settings");
         return Settings.defaultWorldSettings.get(flag);
@@ -88,9 +88,7 @@ public abstract class Action {
      * @return true if allowed
      */
     protected boolean actionAllowed(Player player, Location location, SettingsFlag flag) {
-        if (player == null) {
-            return actionAllowed(location, flag);
-        }
+        if (player == null) return actionAllowed(location, flag);
 
         // This permission bypasses protection
         if (player.isOp() || hasPermission(player, "is.mod.bypassprotect")) {
@@ -103,15 +101,9 @@ public abstract class Action {
             return true;
         }
 
-        if (island == null || island.getPlotOwner() == null) {
-            return false;
-        }
+        if (island == null || island.getPlotOwner() == null) return false;
+        if (island.getPlotOwner().equalsIgnoreCase(player.getName())) return true;
 
-        if (island.getPlotOwner().equalsIgnoreCase(player.getName())) {
-            return true;
-        }
-
-        // Fixed
         return Settings.defaultWorldSettings.get(flag);
     }
 

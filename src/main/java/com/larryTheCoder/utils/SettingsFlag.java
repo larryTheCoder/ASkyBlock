@@ -26,6 +26,8 @@
  */
 package com.larryTheCoder.utils;
 
+import lombok.Getter;
+
 /**
  * @author tastybento
  */
@@ -83,12 +85,12 @@ public enum SettingsFlag {
      * Can collect lava
      * [Added]
      */
-    COLLECT_LAVA("Collect lava", 11),
+    COLLECT_LAVA("Collect/Fill lava", 11),
     /**
      * Can collect water
      * [Added]
      */
-    COLLECT_WATER("Collect water", 12),
+    COLLECT_WATER("Collect/Fill water", 12),
     /**
      * Can open chests or hoppers or dispensers
      * [Added]
@@ -157,11 +159,13 @@ public enum SettingsFlag {
      */
     GATE("Use gates", 26),
     /**
-     * Can hurt friendly mobs, e.g. cows
+     * Can hurt friendly mobs, e.g. cows.
+     * [Added]
      */
     HURT_MOBS("Hurt mobs", 27),
     /**
-     * Can hurt monsters
+     * Can hurt monsters.
+     * [Added]
      */
     HURT_MONSTERS("Hurt monsters", 28),
     /**
@@ -192,7 +196,8 @@ public enum SettingsFlag {
      */
     PRESSURE_PLATE("Activate pressure plates", 34),
     /**
-     * Can do PVP in the overworld
+     * Allows PvP inside the island compound
+     * [Added]
      */
     PVP("Allow PVP", 35),
     /**
@@ -214,19 +219,16 @@ public enum SettingsFlag {
      */
     VISITOR_ITEM_DROP("Visitor drop item", 39),
     /**
-     * Visitors can pick up items
+     * Visitors can pick up items.
+     * [Added]
      */
     VISITOR_ITEM_PICKUP("Visitor pickup item", 40);
 
-    private int id;
-    private String name;
+    @Getter
+    private final int id;
+    @Getter
+    private final String name;
 
-    /**
-     * Create a value for the enum
-     *
-     * @param name The name for the enum
-     * @param id   The id for the enum
-     */
     SettingsFlag(String name, int id) {
         this.name = name;
         this.id = id;
@@ -243,13 +245,5 @@ public enum SettingsFlag {
 
     public static SettingsFlag getFlag(String name) {
         return getFlag(Integer.parseInt(name));
-    }
-
-    public int getId() {
-        return this.id;
-    }
-
-    public String getName() {
-        return name;
     }
 }

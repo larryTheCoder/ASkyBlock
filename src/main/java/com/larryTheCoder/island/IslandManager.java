@@ -281,6 +281,9 @@ public class IslandManager {
      */
     public int generateIslandKey(int x, int z, String level) {
         WorldSettings settings = plugin.getSettings(level);
+        if (settings == null)
+            throw new RuntimeException("A player is attempting to generate a non-island issued world named " + level);
+
         return (x / settings.getIslandDistance() + z / settings.getIslandDistance() * Integer.MAX_VALUE) + settings.getLevelId();
     }
 
@@ -374,11 +377,13 @@ public class IslandManager {
         Location local = new Location(loc.x, loc.y, loc.z, player.getLevel());
         // Get the player's island from the grid if it exists
         IslandData island = plugin.getFastCache().getIslandData(local);
-        CoopData pd = plugin.getFastCache().getRelations(local);
+        CoopData co = plugin.getFastCache().getRelations(local);
 
-        // On an island in the grid
-        // In a protected zone but is on the list of acceptable players
-        // Otherwise return false
-        return island != null && (island.onIsland(local) && ((pd == null || pd.getMembers().contains(player.getName())) || island.getPlotOwner().equalsIgnoreCase(player.getName())));
+        // On an island grid, if its the owner and is inside a list of acceptable players, return true,
+        // otherwise false.
+        return island != null &&
+                island.onIsland(local) &&
+                (island.getPlotOwner().equalsIgnoreCase(player.getName()) ||
+                (co != null && co.getMembers().contains(player.getName())));
     }
 }
