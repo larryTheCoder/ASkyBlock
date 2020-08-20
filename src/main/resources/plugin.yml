@@ -18,6 +18,7 @@ softdepend:
   - EconomyAPI
   - LuckPerms
   - DbLib
+  - MobPlugin
 
 description: "Advanced minecraft PE SkyBlock plugin!"
 

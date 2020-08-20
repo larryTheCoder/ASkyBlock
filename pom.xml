@@ -107,6 +107,13 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>foo.bar</groupId>
+            <artifactId>mobplugin</artifactId>
+            <version>1.15.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/MobPlugin-1.15.0.jar</systemPath>
+        </dependency>
+        <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20160810</version>
@@ -200,6 +207,17 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <filters>
+                                <filter>
+                                    <artifact>foo.bar:mobplugin:jar:1.15.0</artifact>
+                                    <excludes>
+                                        <exclude>*</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
                     </execution>
                 </executions>
 

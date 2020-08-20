@@ -39,12 +39,12 @@ import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.cache.FastCache;
 import com.larryTheCoder.cache.settings.WorldSettings;
 import com.larryTheCoder.command.Commands;
-import com.larryTheCoder.database.config.AbstractConfig;
-import com.larryTheCoder.database.config.MySQLConfig;
-import com.larryTheCoder.database.config.SQLiteConfig;
 import com.larryTheCoder.database.Database;
 import com.larryTheCoder.database.QueryDb;
 import com.larryTheCoder.database.QueryInfo;
+import com.larryTheCoder.database.config.AbstractConfig;
+import com.larryTheCoder.database.config.MySQLConfig;
+import com.larryTheCoder.database.config.SQLiteConfig;
 import com.larryTheCoder.island.GridManager;
 import com.larryTheCoder.island.IslandManager;
 import com.larryTheCoder.island.TeleportLogic;
@@ -54,6 +54,7 @@ import com.larryTheCoder.listener.IslandListener;
 import com.larryTheCoder.listener.LavaCheck;
 import com.larryTheCoder.listener.PlayerEvent;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
+import com.larryTheCoder.listener.nms.MobPluginListener;
 import com.larryTheCoder.locales.LocaleInstance;
 import com.larryTheCoder.locales.LocaleManager;
 import com.larryTheCoder.schematic.SchematicHandler;
@@ -221,6 +222,9 @@ public class ASkyBlock extends ASkyBlockAPI {
         pm.registerEvents(new IslandListener(this), this);
         pm.registerEvents(new LavaCheck(this), this);
         pm.registerEvents(new PlayerEvent(this), this);
+        if (getServer().getPluginManager().getPlugin("MobPlugin") != null) {
+            pm.registerEvents(new MobPluginListener(this), this);
+        }
     }
 
     private void loadPermissionNodes() {

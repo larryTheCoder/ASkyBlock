@@ -27,8 +27,6 @@
 package com.larryTheCoder.listener;
 
 import cn.nukkit.Player;
-import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockLava;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.item.EntityPrimedTNT;
 import cn.nukkit.entity.mob.EntityMob;
@@ -43,7 +41,10 @@ import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityExplodeEvent;
 import cn.nukkit.event.inventory.CraftItemEvent;
 import cn.nukkit.event.inventory.InventoryPickupItemEvent;
-import cn.nukkit.event.player.*;
+import cn.nukkit.event.player.PlayerCommandPreprocessEvent;
+import cn.nukkit.event.player.PlayerDropItemEvent;
+import cn.nukkit.event.player.PlayerInteractEvent;
+import cn.nukkit.event.player.PlayerMoveEvent;
 import cn.nukkit.utils.TextFormat;
 import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.IslandData;
@@ -158,20 +159,17 @@ public class IslandListener extends Action implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onPlayerHitEvent(EntityDamageEvent e) {
         Entity target = e.getEntity();
 
         if (notInWorld(target)) return;
         if (e instanceof EntityDamageByEntityEvent) {
-            EntityDamageByEntityEvent damage = (EntityDamageByEntityEvent) e;
-            Entity cause = damage.getDamager();
-
             // Identifier for player mobs attack.
-            if (!(cause instanceof Player)) {
-                if (cause instanceof EntityAnimal) {
+            if (!(target instanceof Player)) {
+                if (target instanceof EntityAnimal) {
                     if (actionAllowed(target.getLocation(), SettingsFlag.HURT_MOBS)) return;
-                } else if (cause instanceof EntityMob) {
+                } else if (target instanceof EntityMob) {
                     if (actionAllowed(target.getLocation(), SettingsFlag.HURT_MONSTERS)) return;
                 }
             } else {
