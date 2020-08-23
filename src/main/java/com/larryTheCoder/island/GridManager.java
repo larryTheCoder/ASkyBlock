@@ -37,6 +37,7 @@ import com.larryTheCoder.ASkyBlock;
 import com.larryTheCoder.cache.IslandData;
 import com.larryTheCoder.events.IslandTeleportEvent;
 import com.larryTheCoder.events.SkyBlockEvent;
+import com.larryTheCoder.task.LevelCalcTask;
 import com.larryTheCoder.task.SimpleFancyTitle;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.utils.BlockUtil;
@@ -210,7 +211,7 @@ public class GridManager {
                 }
 
                 plugin.getTeleportLogic().safeTeleport(player, event == null ? home : event.getTeleportLocation(), false, number);
-                plugin.getLevelCalcThread().addUpdateQueue(island);
+                new LevelCalcTask(island);
             });
         });
     }

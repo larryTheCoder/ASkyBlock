@@ -37,7 +37,6 @@ import com.larryTheCoder.listener.ChatHandler;
 import com.larryTheCoder.listener.invitation.InvitationHandler;
 import com.larryTheCoder.locales.LocaleManager;
 import com.larryTheCoder.schematic.SchematicHandler;
-import com.larryTheCoder.task.LevelCalcTask;
 import com.larryTheCoder.utils.integration.luckperms.Permission;
 import lombok.Getter;
 
@@ -63,8 +62,6 @@ public class ASkyBlockAPI extends PluginBase {
     protected FastCache fastCache;
     @Getter
     protected SchematicHandler schematics;
-    @Getter
-    protected LevelCalcTask levelCalcThread;
     @Getter
     protected Permission permissionHandler;
     @Getter

@@ -58,7 +58,6 @@ import com.larryTheCoder.listener.nms.MobPluginListener;
 import com.larryTheCoder.locales.LocaleInstance;
 import com.larryTheCoder.locales.LocaleManager;
 import com.larryTheCoder.schematic.SchematicHandler;
-import com.larryTheCoder.task.LevelCalcTask;
 import com.larryTheCoder.task.TaskManager;
 import com.larryTheCoder.updater.Updater;
 import com.larryTheCoder.utils.ConfigManager;
@@ -159,7 +158,6 @@ public class ASkyBlock extends ASkyBlockAPI {
             getDatabase().shutdown();
             getMessages().saveMessages();
             LavaCheck.clearStats();
-            getLevelCalcThread().shutdown();
             TopTen.topTenSave();
         }
 
@@ -212,7 +210,6 @@ public class ASkyBlock extends ASkyBlockAPI {
         // This should be loaded first
         messages = new Messages(this);
         messages.loadMessages();
-        levelCalcThread = new LevelCalcTask(this);
         loadPermissionNodes();
         //TopTen.topTenLoad();
 
