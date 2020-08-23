@@ -159,15 +159,7 @@ public class LevelCalcTask extends Thread {
             Set<FullChunk> chunkSnapshot = new HashSet<>();
             for (int x = pd.getMinProtectedX(); x < (pd.getMinProtectedX() + pd.getProtectionSize() + 16); x += 16) {
                 for (int z = pd.getMinProtectedZ(); z < (pd.getMinProtectedZ() + pd.getProtectionSize() + 16); z += 16) {
-                    if (!level.isChunkLoaded(x >> 4, z >> 4)) {
-                        level.loadChunk(x >> 4, z >> 4, true);
-
-                        chunkSnapshot.add(level.getChunk(x >> 4, z >> 4));
-
-                        level.unloadChunk(x >> 4, z >> 4);
-                    } else {
-                        chunkSnapshot.add(level.getChunk(x >> 4, z >> 4));
-                    }
+                    chunkSnapshot.add(level.getChunk(x >> 4, z >> 4, true));
                 }
             }
 
