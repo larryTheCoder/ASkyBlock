@@ -115,7 +115,7 @@ public class GridManager {
      * @param number         Starting home location e.g., 1
      * @param targetLocation Location of a safe teleport spot or null if one cannot be found
      */
-    public void getSafeHomeLocation(String plName, int number, Consumer<Location> targetLocation) {
+    public void getSafeHomeLocation(String plName, int number, Consumer<Location> targetLocation/*action after found the safe location*/) {
         plugin.getFastCache().getIslandData(plName, number, pd -> {
             if (pd == null) {
                 targetLocation.accept(null);
@@ -166,6 +166,20 @@ public class GridManager {
                     for (int dz = center.getFloorY() - 25; dz <= center.getFloorY() + 25; dz++) {
                         Position pos = locPlusOne.setComponents(dx, dy, dz);
                         if (isSafeLocation(pos) && checkSurrounding(pos)) {
+                            pd.setHomeLocation(pos);
+                            targetLocation.accept(pos.getLocation());
+                            return;
+                        }
+                    }
+                }
+            }
+
+            //if still can't find safe spawn,except the test of surround
+            for (int dy = 0; dy <= 128; dy++) {
+                for (int dx = center.getFloorX() - 25; dx <= center.getFloorX() + 25; dx++) {
+                    for (int dz = center.getFloorY() - 25; dz <= center.getFloorY() + 25; dz++) {
+                        Position pos = locPlusOne.setComponents(dx, dy, dz);
+                        if (isSafeLocation(pos)) {
                             pd.setHomeLocation(pos);
                             targetLocation.accept(pos.getLocation());
                             return;
